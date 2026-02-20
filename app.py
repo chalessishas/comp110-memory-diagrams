@@ -13,9 +13,9 @@ client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 def translate():
     data = request.json
     text = data.get('text', '')
-    
+    targetLang = data.get('targetLang', '英文')
     # 构造 Prompt
-    prompt = f"请将以下内容翻译成英文，只输出结果：{text}"
+    prompt = f"请自动识别以下文字的语言，然后翻译成{targetLang}，只输出翻译结果：{text}"
     
     response = client.messages.create(
         model="claude-sonnet-4-6",
