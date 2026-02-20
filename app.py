@@ -33,7 +33,7 @@ def transcribe():
     audio_file = request.files['audio']
     transcript = openai_client.audio.transcriptions.create(
         model="whisper-1",
-        file=(audio_file.filename, audio_file.read(), audio_file.mimetype)
+        file=("audio.webm", audio_file.read(), "audio/webm")
     )
     return jsonify({"result": transcript.text})
 
