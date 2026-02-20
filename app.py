@@ -1,13 +1,14 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import anthropic
+import os
+from openai import OpenAI
 
 app = Flask(__name__)
 CORS(app)
 
-# 配置 Claude
-import os
 client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.route('/translate', methods=['POST'])
 def translate():
@@ -26,6 +27,15 @@ def translate():
     )
     
     return jsonify({"result": response.content[0].text})
+
+@app.route('/transcribe', methods=['POST'])
+def transcribe():
+    audio_file = request.files['audio']
+    transcript = openai_client.audio.transcriptions.create(
+        model="whisper-1",
+        file=audio_file
+    )
+    return jsonify({"result": transcript.text})
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5001))
