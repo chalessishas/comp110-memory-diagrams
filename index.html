@@ -106,37 +106,51 @@
                 btn.disabled = false;
             }
         }
-        let recognition;
+        let mediaRecorder;
+        let audioChunks = [];
         let recording = false;
 
-        function toggleRecord() {
-            if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-                alert("你的浏览器不支持语音识别，请用 Chrome");
-                return;
-            }
+        async function toggleRecord() {
+            const btn = document.getElementById('recordBtn');
             if (recording) {
-                recognition.stop();
+                mediaRecorder.stop();
                 return;
             }
-            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'zh-CN';
-            recognition.interimResults = false;
-            recognition.onstart = function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                mediaRecorder.onstop = async () => {
+                    stream.getTracks().forEach(t => t.stop());
+                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                    const formData = new FormData();
+                    formData.append('audio', blob, 'recording.webm');
+                    btn.innerText = "⏳ 识别中...";
+                    btn.disabled = true;
+                    try {
+                        const res = await fetch('https://t-dbdd-production-1dd4.up.railway.app/transcribe', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await res.json();
+                        document.getElementById('inputText').value = data.result;
+                    } catch {
+                        alert("转录失败，请重试");
+                    } finally {
+                        btn.innerText = "🎤 开始录音";
+                        btn.classList.remove('recording');
+                        btn.disabled = false;
+                        recording = false;
+                    }
+                };
+                mediaRecorder.start();
                 recording = true;
-                const btn = document.getElementById('recordBtn');
-                btn.innerText = "🔴 录音中...";
+                btn.innerText = "🔴 录音中（点击停止）";
                 btn.classList.add('recording');
-            };
-            recognition.onresult = function(event) {
-                document.getElementById('inputText').value = event.results[0][0].transcript;
-            };
-            recognition.onend = function() {
-                recording = false;
-                const btn = document.getElementById('recordBtn');
-                btn.innerText = "🎤 开始录音";
-                btn.classList.remove('recording');
-            };
-            recognition.start();
+            } catch {
+                alert("无法访问麦克风，请检查权限");
+            }
         }
 
         document.querySelector('.lang-switch').addEventListener('click', function(e) {
