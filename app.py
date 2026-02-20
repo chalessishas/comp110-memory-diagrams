@@ -126,19 +126,34 @@ def transcribe():
         return error_response("No audio file provided.")
 
     audio_file = request.files["audio"]
+    filename = audio_file.filename or "audio.webm"
     audio_bytes = audio_file.read()
 
     if len(audio_bytes) == 0:
         return error_response("Audio file is empty.")
+    if len(audio_bytes) < 500:
+        # Very short segments likely contain no speech
+        return jsonify({"result": ""})
     if len(audio_bytes) > MAX_AUDIO_BYTES:
         return error_response("Audio file too large (max 25 MB).")
+
+    # Detect mime type from filename extension
+    ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else "webm"
+    mime_map = {
+        "webm": "audio/webm",
+        "mp4": "audio/mp4",
+        "m4a": "audio/mp4",
+        "ogg": "audio/ogg",
+        "wav": "audio/wav",
+    }
+    mime_type = mime_map.get(ext, "audio/webm")
 
     try:
         transcript = openai_client.audio.transcriptions.create(
             model=WHISPER_MODEL,
-            file=("audio.webm", audio_bytes, "audio/webm"),
+            file=(filename, audio_bytes, mime_type),
         )
-        log.info("Transcription OK — %d bytes", len(audio_bytes))
+        log.info("Transcription OK — %d bytes (%s)", len(audio_bytes), ext)
         return jsonify({"result": transcript.text})
 
     except Exception as e:

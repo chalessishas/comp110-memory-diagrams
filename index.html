@@ -284,6 +284,23 @@
             animation: pulse 1.2s infinite;
         }
 
+        .mic-btn.recording::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #e74c3c;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(231,76,60,0.2); }
             50% { box-shadow: 0 0 0 8px rgba(231,76,60,0); }
@@ -565,9 +582,12 @@
 
         // ─── State ───
         let currentLang = 'en';
-        let recording = false;
-        let mediaRecorder = null;
-        let audioChunks = [];
+        let listening = false;
+        let micStream = null;
+        let currentRecorder = null;
+        let segmentTimer = null;
+        let pendingRequests = 0;
+        const SEGMENT_MS = 4000; // send audio every 4 seconds
 
         // ─── Init ───
         function init() {
@@ -667,52 +687,153 @@
             });
         }
 
-        // ─── Voice Recording ───
+        // ─── Real-time Voice Transcription ───
+        // Works on ALL browsers via MediaRecorder + Whisper
+        // Records in segments, sends each to backend, appends results live
+
         async function toggleRecord() {
+            if (listening) {
+                stopListening();
+            } else {
+                startListening();
+            }
+        }
+
+        async function startListening() {
             const btn = document.getElementById('micBtn');
             const t = UI_STRINGS[currentLang];
 
-            if (recording) {
-                mediaRecorder.stop();
+            try {
+                micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch {
+                showToast(t.micError);
                 return;
             }
 
+            listening = true;
+            btn.textContent = t.micStop;
+            btn.classList.add('recording');
+
+            // Start the first recording segment
+            startSegment();
+
+            // Every SEGMENT_MS, cycle the recorder: stop current → send → start new
+            segmentTimer = setInterval(() => {
+                if (listening) cycleRecorder();
+            }, SEGMENT_MS);
+        }
+
+        function startSegment() {
+            if (!micStream || !listening) return;
+
+            // Pick a supported mime type
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus'
+                           : MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm'
+                           : MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4'
+                           : '';
+
+            const options = mimeType ? { mimeType } : {};
+            const recorder = new MediaRecorder(micStream, options);
+            const chunks = [];
+
+            recorder.ondataavailable = e => {
+                if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = () => {
+                if (chunks.length === 0) return;
+                const ext = (recorder.mimeType || '').includes('mp4') ? 'mp4' : 'webm';
+                const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
+
+                // Only send if blob is big enough (skip silence/too-short)
+                if (blob.size > 1000) {
+                    sendSegmentToWhisper(blob, ext);
+                }
+            };
+
+            recorder.start();
+            currentRecorder = recorder;
+        }
+
+        function cycleRecorder() {
+            // Stop current recorder (triggers onstop → sends to Whisper)
+            if (currentRecorder && currentRecorder.state === 'recording') {
+                currentRecorder.stop();
+            }
+            // Immediately start a new segment so there's no gap
+            startSegment();
+        }
+
+        function stopListening() {
+            listening = false;
+            const btn = document.getElementById('micBtn');
+            const t = UI_STRINGS[currentLang];
+
+            // Clear the cycle timer
+            if (segmentTimer) {
+                clearInterval(segmentTimer);
+                segmentTimer = null;
+            }
+
+            // Stop current recorder (sends final segment)
+            if (currentRecorder && currentRecorder.state === 'recording') {
+                currentRecorder.stop();
+            }
+            currentRecorder = null;
+
+            // Release microphone
+            if (micStream) {
+                micStream.getTracks().forEach(t => t.stop());
+                micStream = null;
+            }
+
+            btn.textContent = t.micStart;
+            btn.classList.remove('recording');
+        }
+
+        async function sendSegmentToWhisper(blob, ext) {
+            pendingRequests++;
+            updateMicStatus();
+
+            const formData = new FormData();
+            formData.append('audio', blob, `segment.${ext}`);
+
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                mediaRecorder = new MediaRecorder(stream);
-                audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                mediaRecorder.onstop = async () => {
-                    stream.getTracks().forEach(t => t.stop());
-                    const blob = new Blob(audioChunks, { type: 'audio/webm' });
-                    const formData = new FormData();
-                    formData.append('audio', blob, 'recording.webm');
+                const res = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const text = (data.result || '').trim();
 
-                    btn.textContent = t.recognizing;
-                    btn.disabled = true;
-
-                    try {
-                        const res = await fetch(`${API_BASE}/transcribe`, { method: 'POST', body: formData });
-                        if (!res.ok) throw new Error();
-                        const data = await res.json();
-                        document.getElementById('inputText').value = data.result || '';
-                        updateCharCount();
-                    } catch {
-                        showToast(t.transcribeError);
-                    } finally {
-                        btn.textContent = t.micStart;
-                        btn.classList.remove('recording');
-                        btn.disabled = false;
-                        recording = false;
+                if (text) {
+                    const textarea = document.getElementById('inputText');
+                    // Append with a space separator
+                    if (textarea.value && !textarea.value.endsWith(' ') && !textarea.value.endsWith('\n')) {
+                        textarea.value += ' ';
                     }
-                };
+                    textarea.value += text;
+                    updateCharCount();
 
-                mediaRecorder.start();
-                recording = true;
-                btn.textContent = t.micStop;
-                btn.classList.add('recording');
+                    // Auto-scroll textarea to bottom
+                    textarea.scrollTop = textarea.scrollHeight;
+                }
             } catch {
-                showToast(t.micError);
+                // Silently ignore individual segment failures to not interrupt the flow
+                console.warn('Segment transcription failed');
+            } finally {
+                pendingRequests--;
+                updateMicStatus();
+            }
+        }
+
+        function updateMicStatus() {
+            const btn = document.getElementById('micBtn');
+            if (!listening && pendingRequests > 0) {
+                btn.textContent = '⏳';
+                btn.disabled = true;
+            } else if (!listening && pendingRequests === 0) {
+                const t = UI_STRINGS[currentLang];
+                btn.textContent = t.micStart;
+                btn.disabled = false;
             }
         }
 
