@@ -467,7 +467,7 @@
                     </button>
                 </div>
 
-                <button class="translate-btn" id="translateBtn" onclick="translate()">
+                <button class="translate-btn" id="translateBtn" onclick="doTranslate()">
                     <span id="translateLabel">Translate</span>
                 </button>
             </div>
@@ -576,7 +576,7 @@
             buildLangSelect();
             setUI(currentLang);
             document.getElementById('inputText').addEventListener('keydown', e => {
-                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') translate();
+                if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') doTranslate();
             });
         }
 
@@ -622,7 +622,7 @@
         }
 
         // ─── Translate ───
-        async function translate() {
+        async function doTranslate() {
             const text = document.getElementById('inputText').value.trim();
             const t = UI_STRINGS[currentLang];
             if (!text) return showToast(t.emptyWarn);
