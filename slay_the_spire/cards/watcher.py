@@ -12,7 +12,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 6 damage.",
     base_damage=6, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 6}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -20,7 +20,7 @@ make_card(
     target=CardTarget.SELF,
     description="Gain 5 Block.",
     base_block=5, upgrade_block=3,
-    effects=[{"action": "block", "amount": 5}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -30,7 +30,7 @@ make_card(
     base_damage=9, upgrade_damage=0,
     upgrade_cost=1,
     effects=[
-        {"action": "damage", "amount": 9},
+        {"action": "damage"},
         {"action": "enter_stance", "stance": "Wrath"},
     ],
     upgrade_description="Deal 9 damage. Enter Wrath.",
@@ -42,7 +42,7 @@ make_card(
     description="Gain 8 Block. Enter Calm.",
     base_block=8, upgrade_block=4,
     effects=[
-        {"action": "block", "amount": 8},
+        {"action": "block"},
         {"action": "enter_stance", "stance": "Calm"},
     ],
 )
@@ -66,7 +66,7 @@ make_card(
     target=CardTarget.ALL_ENEMIES,
     description="Deal 5 damage to ALL enemies.",
     base_damage=5, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 5}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -76,7 +76,7 @@ make_card(
     base_damage=8, upgrade_damage=2,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "custom", "func": "crush_joints_vulnerable"},
     ],
 )
@@ -88,7 +88,7 @@ make_card(
     base_damage=7, upgrade_damage=2,
     base_magic=2, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "scry", "amount": 2},
         {"action": "draw", "amount": 1},
     ],
@@ -100,7 +100,7 @@ make_card(
     description="Deal 9 damage. Exit your Stance.",
     base_damage=9, upgrade_damage=5,
     effects=[
-        {"action": "damage", "amount": 9},
+        {"action": "damage"},
         {"action": "exit_stance"},
     ],
 )
@@ -111,7 +111,7 @@ make_card(
     description="Deal 4 damage. Whenever you change Stances, return this from the discard pile to your hand.",
     base_damage=4, upgrade_damage=2,
     effects=[
-        {"action": "damage", "amount": 4},
+        {"action": "damage"},
         {"action": "custom", "func": "flurry_on_stance_change"},
     ],
 )
@@ -123,7 +123,7 @@ make_card(
     base_damage=4, upgrade_damage=2,
     retain=True,
     effects=[
-        {"action": "damage", "amount": 4, "times": 2},
+        {"action": "damage", "times": 2},
     ],
 )
 
@@ -133,7 +133,7 @@ make_card(
     description="Deal 7 damage. If the last card played was an Attack, gain 1 Energy.",
     base_damage=7, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "custom", "func": "follow_up_energy"},
     ],
 )
@@ -145,7 +145,7 @@ make_card(
     base_block=3, upgrade_block=1,
     base_magic=9, upgrade_magic=5,
     effects=[
-        {"action": "block", "amount": 3},
+        {"action": "block"},
         {"action": "custom", "func": "halt_wrath_block"},
     ],
 )
@@ -159,8 +159,8 @@ make_card(
     base_magic=1, upgrade_magic=1,
     effects=[
         {"action": "scry", "amount": 1},
-        {"action": "block", "amount": 2},
-        {"action": "damage", "amount": 3},
+        {"action": "block"},
+        {"action": "damage"},
     ],
 )
 
@@ -171,7 +171,7 @@ make_card(
     base_damage=8, upgrade_damage=2,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "custom", "func": "sash_whip_weak"},
     ],
 )
@@ -182,7 +182,7 @@ make_card(
     description="Deal 10 damage. Shuffle a Through Violence into your draw pile.",
     base_damage=10, upgrade_damage=5,
     effects=[
-        {"action": "damage", "amount": 10},
+        {"action": "damage"},
         {"action": "add_card", "card_id": "through_violence", "to": "draw_pile", "count": 1},
     ],
 )
@@ -209,7 +209,7 @@ make_card(
     description="Gain 7 Block. Exit your Stance.",
     base_block=7, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 7},
+        {"action": "block"},
         {"action": "exit_stance"},
     ],
 )
@@ -231,7 +231,7 @@ make_card(
     description="Gain 6 Block. Shuffle an Insight into your draw pile.",
     base_block=6, upgrade_block=4,
     effects=[
-        {"action": "block", "amount": 6},
+        {"action": "block"},
         {"action": "add_card", "card_id": "insight", "to": "draw_pile", "count": 1},
     ],
 )
@@ -254,7 +254,7 @@ make_card(
     base_magic=2, upgrade_magic=1,
     retain=True,
     effects=[
-        {"action": "block", "amount": 5},
+        {"action": "block"},
         {"action": "custom", "func": "perseverance_retain_buff"},
     ],
 )
@@ -266,7 +266,7 @@ make_card(
     base_block=12, upgrade_block=4,
     retain=True,
     effects=[
-        {"action": "block", "amount": 12},
+        {"action": "block"},
     ],
 )
 
@@ -277,7 +277,7 @@ make_card(
     base_block=7, upgrade_block=2,
     base_magic=3, upgrade_magic=2,
     effects=[
-        {"action": "block", "amount": 7},
+        {"action": "block"},
         {"action": "scry", "amount": 3},
     ],
 )
@@ -303,7 +303,7 @@ make_card(
     base_magic=2, upgrade_magic=3,
     effects=[
         {"action": "apply_effect", "effect": "Mantra", "stacks": 2, "target": "self"},
-        {"action": "block", "amount": 4},
+        {"action": "block"},
     ],
 )
 
@@ -328,7 +328,7 @@ make_card(
     description="Deal 6 damage. Add a Smite to your hand.",
     base_damage=6, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 6},
+        {"action": "damage"},
         {"action": "add_card", "card_id": "smite", "to": "hand", "count": 1},
     ],
 )
@@ -339,7 +339,7 @@ make_card(
     description="Deal 12 damage to ALL enemies. End your turn.",
     base_damage=12, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 12},
+        {"action": "damage"},
         {"action": "custom", "func": "conclude_end_turn"},
     ],
 )
@@ -350,7 +350,7 @@ make_card(
     description="Deal 8 damage. If the enemy intends to Attack, enter Calm.",
     base_damage=8, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "custom", "func": "fear_no_evil_calm"},
     ],
 )
@@ -372,7 +372,7 @@ make_card(
     base_damage=20, upgrade_damage=6,
     retain=True,
     effects=[
-        {"action": "damage", "amount": 20},
+        {"action": "damage"},
         {"action": "custom", "func": "sands_of_time_retain_reduce"},
     ],
 )
@@ -395,7 +395,7 @@ make_card(
     base_magic=2, upgrade_magic=1,
     exhaust=True,
     effects=[
-        {"action": "damage", "amount": 5},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "TalkToTheHand", "stacks": 2, "target": "enemy"},
     ],
 )
@@ -406,7 +406,7 @@ make_card(
     description="Deal 3 damage 3 times. Enter Wrath. Shuffle this card into your draw pile.",
     base_damage=3, upgrade_damage=0,
     effects=[
-        {"action": "damage", "amount": 3, "times": 3},
+        {"action": "damage", "times": 3},
         {"action": "enter_stance", "stance": "Wrath"},
         {"action": "custom", "func": "tantrum_shuffle_back"},
     ],
@@ -429,7 +429,7 @@ make_card(
     description="Deal 4 damage. Whenever you Scry, return this from the discard pile to your hand.",
     base_damage=4, upgrade_damage=2,
     effects=[
-        {"action": "damage", "amount": 4},
+        {"action": "damage"},
         {"action": "custom", "func": "weave_on_scry"},
     ],
 )
@@ -440,7 +440,7 @@ make_card(
     description="Deal 15 damage. Draw 2 cards.",
     base_damage=15, upgrade_damage=5,
     effects=[
-        {"action": "damage", "amount": 15},
+        {"action": "damage"},
         {"action": "draw", "amount": 2},
     ],
 )
@@ -453,7 +453,7 @@ make_card(
     base_magic=4, upgrade_magic=1,
     retain=True,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "custom", "func": "windmill_strike_retain_buff"},
     ],
 )
@@ -477,7 +477,7 @@ make_card(
     description="Gain 4 Block. Add a Safety to your hand.",
     base_block=4, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 4},
+        {"action": "block"},
         {"action": "add_card", "card_id": "safety", "to": "hand", "count": 1},
     ],
 )
@@ -523,7 +523,7 @@ make_card(
     description="Gain 6 Block. If you have any Mantra, draw 2 cards.",
     base_block=6, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 6},
+        {"action": "block"},
         {"action": "custom", "func": "sanctity_draw_if_mantra"},
     ],
 )
@@ -534,7 +534,7 @@ make_card(
     description="Gain 8 Block. The next Attack you play costs 0.",
     base_block=8, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 8},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "FreeAttackPower", "stacks": 1, "target": "self"},
     ],
 )
@@ -712,7 +712,7 @@ make_card(
     base_damage=20, upgrade_damage=10,
     retain=True,
     effects=[
-        {"action": "damage", "amount": 20},
+        {"action": "damage"},
     ],
 )
 
@@ -857,7 +857,7 @@ make_card(
     base_damage=12, upgrade_damage=4,
     retain=True,
     exhaust=True,
-    effects=[{"action": "damage", "amount": 12}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -867,7 +867,7 @@ make_card(
     base_block=12, upgrade_block=2,
     retain=True,
     exhaust=True,
-    effects=[{"action": "block", "amount": 12}],
+    effects=[{"action": "block"}],
 )
 
 make_card(

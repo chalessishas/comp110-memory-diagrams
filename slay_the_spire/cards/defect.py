@@ -28,7 +28,7 @@ make_card(
     description="Deal 6 damage.",
     base_damage=6, upgrade_damage=3,
     upgrade_description="Deal 9 damage.",
-    effects=[{"action": "damage", "amount": 6, "times": 1}],
+    effects=[{"action": "damage", "times": 1}],
 )
 
 make_card(
@@ -37,7 +37,7 @@ make_card(
     description="Gain 5 Block.",
     base_block=5, upgrade_block=3,
     upgrade_description="Gain 8 Block.",
-    effects=[{"action": "block", "amount": 5}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -70,7 +70,7 @@ make_card(
     base_damage=7, upgrade_damage=3,
     upgrade_description="Deal 10 damage. Channel 1 Lightning orb.",
     effects=[
-        {"action": "damage", "amount": 7, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "channel_orb", "orb": "Lightning"},
     ],
 )
@@ -81,7 +81,7 @@ make_card(
     description="Deal 4 damage for each channeled orb.",
     base_damage=4, upgrade_damage=2,
     upgrade_description="Deal 6 damage for each channeled orb.",
-    effects=[{"action": "damage", "amount": 4, "times": 0, "per_orb": True}],
+    effects=[{"action": "damage", "times": 0, "per_orb": True}],
 )
 
 make_card(
@@ -92,7 +92,7 @@ make_card(
     base_magic=1, upgrade_magic=1,
     upgrade_description="Deal 4 damage. Apply 2 Vulnerable.",
     effects=[
-        {"action": "damage", "amount": 3, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "Vulnerable", "stacks": 1, "target": "enemy"},
     ],
 )
@@ -104,7 +104,7 @@ make_card(
     base_damage=6, upgrade_damage=3,
     upgrade_description="Deal 9 damage. Channel 1 Frost orb.",
     effects=[
-        {"action": "damage", "amount": 6, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "channel_orb", "orb": "Frost"},
     ],
 )
@@ -116,7 +116,7 @@ make_card(
     base_damage=7, upgrade_damage=3,
     upgrade_description="Deal 10 damage. Draw 1 card for each unique orb type channeled.",
     effects=[
-        {"action": "damage", "amount": 7, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "draw_per_unique_orb"},
     ],
 )
@@ -129,7 +129,7 @@ make_card(
     base_magic=1, upgrade_magic=1,
     upgrade_description="Deal 4 damage. If the enemy intends to attack, apply 2 Weak.",
     effects=[
-        {"action": "damage", "amount": 3, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "Weak", "stacks": 1, "target": "enemy",
          "condition": "enemy_attacking"},
     ],
@@ -142,7 +142,7 @@ make_card(
     base_damage=9, upgrade_damage=3,
     upgrade_description="Deal 12 damage. The next card you play this turn is placed on top of your draw pile.",
     effects=[
-        {"action": "damage", "amount": 9, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "Rebound", "stacks": 1, "target": "self"},
     ],
 )
@@ -154,7 +154,7 @@ make_card(
     base_damage=15, upgrade_damage=5,
     upgrade_description="Deal 20 damage. Costs 1 less this combat each time it is played.",
     effects=[
-        {"action": "damage", "amount": 15, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "reduce_cost_permanently", "amount": 1},
     ],
 )
@@ -166,7 +166,7 @@ make_card(
     base_damage=6, upgrade_damage=3,
     upgrade_description="Deal 9 damage to ALL enemies. Draw 1 card.",
     effects=[
-        {"action": "damage", "amount": 6, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -183,7 +183,7 @@ make_card(
     base_block=7, upgrade_block=3,
     upgrade_description="Gain 10 Block. Next turn gain 1 Energy.",
     effects=[
-        {"action": "block", "amount": 7},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "Energized", "stacks": 1, "target": "self"},
     ],
 )
@@ -217,7 +217,7 @@ make_card(
     base_block=3, upgrade_block=2,
     upgrade_description="Gain 5 Block. Put a card from your discard pile on top of your draw pile.",
     effects=[
-        {"action": "block", "amount": 3},
+        {"action": "block"},
         {"action": "custom", "func": "retrieve_from_discard"},
     ],
 )
@@ -228,7 +228,7 @@ make_card(
     description="Gain 9 Block.",
     base_block=9, upgrade_block=3,
     upgrade_description="Gain 12 Block.",
-    effects=[{"action": "block", "amount": 9}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -259,7 +259,7 @@ make_card(
     base_block=6, upgrade_block=2,
     upgrade_description="Gain 8 Block. This card's Block is reduced by 1 this combat each time it is played.",
     effects=[
-        {"action": "block", "amount": 6},
+        {"action": "block"},
         {"action": "custom", "func": "reduce_block_permanent", "amount": 1},
     ],
 )
@@ -297,7 +297,7 @@ make_card(
     base_damage=3, upgrade_damage=2,
     upgrade_description="Deal 5 damage. Increase the damage of ALL Claw cards by 2 this combat.",
     effects=[
-        {"action": "damage", "amount": 3, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "claw_bonus", "amount": 2},
     ],
 )
@@ -309,7 +309,7 @@ make_card(
     base_damage=10, upgrade_damage=4,
     upgrade_description="Deal 14 damage to ALL enemies. Channel 1 Dark orb.",
     effects=[
-        {"action": "damage", "amount": 10, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "channel_orb", "orb": "Dark"},
     ],
 )
@@ -322,7 +322,7 @@ make_card(
     base_magic=3, upgrade_magic=1,
     upgrade_description="Deal 6 damage. If you have played fewer than 4 cards this turn, draw 1 card.",
     effects=[
-        {"action": "damage", "amount": 5, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "draw", "amount": 1, "condition": "cards_played_less_than", "threshold": 3},
     ],
 )
@@ -335,7 +335,7 @@ make_card(
     base_magic=1, upgrade_magic=1,
     upgrade_description="Deal 14 damage. Apply 2 Lock-On.",
     effects=[
-        {"action": "damage", "amount": 12, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "LockOn", "stacks": 1, "target": "enemy"},
     ],
 )
@@ -348,7 +348,7 @@ make_card(
     upgrade_description="Remove all Block from an enemy. Deal 14 damage.",
     effects=[
         {"action": "custom", "func": "remove_enemy_block"},
-        {"action": "damage", "amount": 10, "times": 1},
+        {"action": "damage", "times": 1},
     ],
 )
 
@@ -358,7 +358,7 @@ make_card(
     description="Deal 7 damage twice to a random enemy.",
     base_damage=7, upgrade_damage=2,
     upgrade_description="Deal 9 damage twice to a random enemy.",
-    effects=[{"action": "damage", "amount": 7, "times": 2, "random_target": True}],
+    effects=[{"action": "damage", "times": 2, "random_target": True}],
 )
 
 make_card(
@@ -369,7 +369,7 @@ make_card(
     base_magic=4, upgrade_magic=1,
     upgrade_description="Deal 10 damage. Draw 5 cards. Discard all drawn cards that cost more than 0.",
     effects=[
-        {"action": "damage", "amount": 7, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "draw_and_discard_nonzero", "amount": 4},
     ],
 )
@@ -381,7 +381,7 @@ make_card(
     base_damage=24, upgrade_damage=8,
     upgrade_description="Deal 32 damage. If this kills the enemy, gain 3 Energy.",
     effects=[
-        {"action": "damage", "amount": 24, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "energy_on_kill", "amount": 3},
     ],
 )
@@ -406,7 +406,7 @@ make_card(
     description="If you have no Block, gain 11 Block.",
     base_block=11, upgrade_block=4,
     upgrade_description="If you have no Block, gain 15 Block.",
-    effects=[{"action": "block", "amount": 11, "condition": "no_block"}],
+    effects=[{"action": "block", "condition": "no_block"}],
 )
 
 make_card(
@@ -417,7 +417,7 @@ make_card(
     base_block=10, upgrade_block=3,
     exhaust=True,
     upgrade_description="Innate. Gain 13 Block. Exhaust.",
-    effects=[{"action": "block", "amount": 10}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -457,7 +457,7 @@ make_card(
     base_block=13, upgrade_block=3,
     upgrade_description="Gain 16 Block. Retain your hand this turn.",
     effects=[
-        {"action": "block", "amount": 13},
+        {"action": "block"},
         {"action": "custom", "func": "retain_hand"},
     ],
 )
@@ -470,7 +470,7 @@ make_card(
     upgrade_description="Costs 1 less for each Power you have in play. Gain 16 Block.",
     effects=[
         {"action": "custom", "func": "cost_reduction_per_power"},
-        {"action": "block", "amount": 12},
+        {"action": "block"},
     ],
 )
 
@@ -492,7 +492,7 @@ make_card(
     base_magic=2, upgrade_magic=1,
     upgrade_description="Gain 1 Block. Permanently increase this card's Block by 3. Exhaust.",
     effects=[
-        {"action": "block", "amount": 1},
+        {"action": "block"},
         {"action": "custom", "func": "permanent_block_increase", "amount": 2},
     ],
 )
@@ -504,7 +504,7 @@ make_card(
     base_block=7, upgrade_block=3,
     upgrade_description="Gain 10 Block. Channel 2 Frost orbs.",
     effects=[
-        {"action": "block", "amount": 7},
+        {"action": "block"},
         {"action": "channel_orb", "orb": "Frost"},
         {"action": "channel_orb", "orb": "Frost"},
     ],
@@ -671,7 +671,7 @@ make_card(
     base_damage=10, upgrade_damage=4,
     upgrade_description="Deal 14 damage. Put all cost 0 cards from your discard pile into your hand.",
     effects=[
-        {"action": "damage", "amount": 10, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "custom", "func": "retrieve_zero_cost_from_discard"},
     ],
 )
@@ -684,7 +684,7 @@ make_card(
     base_damage=11, upgrade_damage=4,
     upgrade_description="Deal 15 damage. Gain 1 Artifact. Exhaust.",
     effects=[
-        {"action": "damage", "amount": 11, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "Artifact", "stacks": 1, "target": "self"},
     ],
 )
@@ -696,7 +696,7 @@ make_card(
     base_damage=26, upgrade_damage=8,
     upgrade_description="Deal 34 damage to ALL enemies. Lose 3 Focus.",
     effects=[
-        {"action": "damage", "amount": 26, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "apply_effect", "effect": "Focus", "stacks": -3, "target": "self"},
     ],
 )
@@ -708,7 +708,7 @@ make_card(
     base_damage=24, upgrade_damage=6,
     upgrade_description="Deal 30 damage. Channel 3 Plasma orbs.",
     effects=[
-        {"action": "damage", "amount": 24, "times": 1},
+        {"action": "damage", "times": 1},
         {"action": "channel_orb", "orb": "Plasma"},
         {"action": "channel_orb", "orb": "Plasma"},
         {"action": "channel_orb", "orb": "Plasma"},

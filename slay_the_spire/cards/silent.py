@@ -13,7 +13,7 @@ make_card(
     description="Deal 4 damage. Exhaust.",
     base_damage=4, upgrade_damage=2,
     exhaust=True,
-    effects=[{"action": "damage", "amount": 4}],
+    effects=[{"action": "damage"}],
 )
 
 # =============================================================================
@@ -25,7 +25,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 6 damage.",
     base_damage=6, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 6}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -33,7 +33,7 @@ make_card(
     target=CardTarget.SELF,
     description="Gain 5 Block.",
     base_block=5, upgrade_block=3,
-    effects=[{"action": "block", "amount": 5}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -42,7 +42,7 @@ make_card(
     description="Gain 8 Block. Discard 1 card.",
     base_block=8, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 8},
+        {"action": "block"},
         {"action": "discard", "amount": 1},
     ],
 )
@@ -54,7 +54,7 @@ make_card(
     base_damage=3, upgrade_damage=1,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 3},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Weak", "stacks": 1, "target": "enemy"},
     ],
 )
@@ -69,7 +69,7 @@ make_card(
     description="Deal 7 damage. If the enemy is Poisoned, deal 7 damage again.",
     base_damage=7, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "custom", "func": "bane_double_if_poisoned"},
     ],
 )
@@ -80,7 +80,7 @@ make_card(
     description="Deal 4 damage to ALL enemies twice.",
     base_damage=4, upgrade_damage=2,
     effects=[
-        {"action": "damage", "amount": 4, "times": 2},
+        {"action": "damage", "times": 2},
     ],
 )
 
@@ -90,7 +90,7 @@ make_card(
     description="Deal 9 damage. Draw 1 card. Discard 1 card.",
     base_damage=9, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 9},
+        {"action": "damage"},
         {"action": "draw", "amount": 1},
         {"action": "discard", "amount": 1},
     ],
@@ -102,7 +102,7 @@ make_card(
     description="Deal 8 damage. Next turn gain 1 Energy.",
     base_damage=8, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Energized", "stacks": 1, "target": "self"},
     ],
 )
@@ -114,7 +114,7 @@ make_card(
     base_damage=6, upgrade_damage=2,
     base_magic=3, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 6},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Poison", "stacks": 3, "target": "enemy"},
     ],
 )
@@ -125,7 +125,7 @@ make_card(
     description="Deal 8 damage. Draw 1 card.",
     base_damage=8, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -135,7 +135,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 6 damage.",
     base_damage=6, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 6}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -144,7 +144,7 @@ make_card(
     description="Deal 12 damage. If you have discarded a card this turn, gain 2 Energy.",
     base_damage=12, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 12},
+        {"action": "damage"},
         {"action": "custom", "func": "sneaky_strike_refund"},
     ],
 )
@@ -156,7 +156,7 @@ make_card(
     base_damage=7, upgrade_damage=2,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Weak", "stacks": 1, "target": "enemy"},
     ],
 )
@@ -182,7 +182,7 @@ make_card(
     description="Gain 5 Block. Draw 2 cards.",
     base_block=5, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 5},
+        {"action": "block"},
         {"action": "draw", "amount": 2},
     ],
 )
@@ -204,7 +204,7 @@ make_card(
     base_block=6, upgrade_block=0,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "block", "amount": 6},
+        {"action": "block"},
         {"action": "add_card", "card_id": "shiv", "to": "hand", "count": 1},
     ],
 )
@@ -224,7 +224,7 @@ make_card(
     target=CardTarget.SELF,
     description="Gain 4 Block.",
     base_block=4, upgrade_block=3,
-    effects=[{"action": "block", "amount": 4}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -233,7 +233,7 @@ make_card(
     description="Gain 4 Block. Next turn, gain 4 Block.",
     base_block=4, upgrade_block=2,
     effects=[
-        {"action": "block", "amount": 4},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "NextTurnBlock", "stacks": 4, "target": "self"},
     ],
 )
@@ -280,7 +280,7 @@ make_card(
     description="Deal 10 damage to ALL enemies. Discard 1 card at random.",
     base_damage=10, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 10},
+        {"action": "damage"},
         {"action": "custom", "func": "random_discard"},
     ],
 )
@@ -292,7 +292,7 @@ make_card(
     base_damage=12, upgrade_damage=0,
     base_magic=3, upgrade_magic=2,
     effects=[
-        {"action": "damage", "amount": 12},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Choke", "stacks": 3, "target": "enemy"},
     ],
 )
@@ -304,8 +304,8 @@ make_card(
     base_damage=10, upgrade_damage=3,
     base_block=10, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 10},
-        {"action": "damage", "amount": 10},
+        {"action": "block"},
+        {"action": "damage"},
     ],
 )
 
@@ -316,7 +316,7 @@ make_card(
     base_damage=13, upgrade_damage=4,
     exhaust=True,
     effects=[
-        {"action": "damage", "amount": 13},
+        {"action": "damage"},
     ],
 )
 
@@ -327,7 +327,7 @@ make_card(
     base_damage=4, upgrade_damage=2,
     exhaust=True,
     effects=[
-        {"action": "damage", "amount": 4},
+        {"action": "damage"},
         {"action": "custom", "func": "endless_agony_on_draw"},
     ],
 )
@@ -338,7 +338,7 @@ make_card(
     description="Costs 1 less Energy for each card discarded this turn. Deal 7 damage 3 times.",
     base_damage=7, upgrade_damage=2,
     effects=[
-        {"action": "damage", "amount": 7, "times": 3},
+        {"action": "damage", "times": 3},
     ],
 )
 
@@ -369,7 +369,7 @@ make_card(
     base_damage=15, upgrade_damage=5,
     base_magic=2, upgrade_magic=0,
     effects=[
-        {"action": "damage", "amount": 15},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "DrawCard", "stacks": 2, "target": "self"},
     ],
 )
@@ -380,7 +380,7 @@ make_card(
     description="Deal 3 damage 5 times.",
     base_damage=3, upgrade_damage=1,
     effects=[
-        {"action": "damage", "amount": 3, "times": 5},
+        {"action": "damage", "times": 5},
     ],
 )
 
@@ -404,7 +404,7 @@ make_card(
     description="Gain 5 Block. Block is not removed at the start of your next turn.",
     base_block=5, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 5},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "Blur", "stacks": 1, "target": "self"},
     ],
 )
@@ -507,7 +507,7 @@ make_card(
     base_magic=2, upgrade_magic=1,
     effects=[
         {"action": "apply_effect", "effect": "Weak", "stacks": 2, "target": "enemy"},
-        {"action": "block", "amount": 11},
+        {"action": "block"},
     ],
 )
 
@@ -656,7 +656,7 @@ make_card(
     description="Deal 8 damage twice. Decrease this card's damage by 2 this combat.",
     base_damage=8, upgrade_damage=4,
     effects=[
-        {"action": "damage", "amount": 8, "times": 2},
+        {"action": "damage", "times": 2},
         {"action": "custom", "func": "glass_knife_reduce"},
     ],
 )
@@ -677,7 +677,7 @@ make_card(
     description="Deal 32 damage. Remove all your Poison from the target.",
     base_damage=32, upgrade_damage=0,
     effects=[
-        {"action": "damage", "amount": 32},
+        {"action": "damage"},
         {"action": "custom", "func": "unloaded_remove_poison"},
     ],
 )

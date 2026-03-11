@@ -12,7 +12,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 6 damage.",
     base_damage=6, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 6}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -20,7 +20,7 @@ make_card(
     target=CardTarget.SELF,
     description="Gain 5 Block.",
     base_block=5, upgrade_block=3,
-    effects=[{"action": "block", "amount": 5}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -30,7 +30,7 @@ make_card(
     base_damage=8, upgrade_damage=2,
     base_magic=2, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 8},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Vulnerable", "stacks": 2, "target": "enemy"},
     ],
 )
@@ -45,7 +45,7 @@ make_card(
     description="Deal 6 damage. Add a copy of this card to your discard pile.",
     base_damage=6, upgrade_damage=2,
     effects=[
-        {"action": "damage", "amount": 6},
+        {"action": "damage"},
         {"action": "add_card", "card_id": "anger", "to": "discard", "count": 1},
     ],
 )
@@ -63,7 +63,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Can only be played if every card in your hand is an Attack. Deal 14 damage.",
     base_damage=14, upgrade_damage=4,
-    effects=[{"action": "damage", "amount": 14}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -71,7 +71,7 @@ make_card(
     target=CardTarget.ALL_ENEMIES,
     description="Deal 8 damage to ALL enemies.",
     base_damage=8, upgrade_damage=3,
-    effects=[{"action": "damage", "amount": 8, "target": "all_enemies"}],
+    effects=[{"action": "damage", "target": "all_enemies"}],
 )
 
 make_card(
@@ -81,7 +81,7 @@ make_card(
     base_damage=12, upgrade_damage=2,
     base_magic=2, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 12},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Weak", "stacks": 2, "target": "enemy"},
     ],
 )
@@ -92,7 +92,7 @@ make_card(
     description="Deal 9 damage. Put a card from your discard pile on top of your draw pile.",
     base_damage=9, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 9},
+        {"action": "damage"},
         {"action": "custom", "func": "headbutt"},
     ],
 )
@@ -113,8 +113,8 @@ make_card(
     base_damage=5, upgrade_damage=2,
     base_block=5, upgrade_block=2,
     effects=[
-        {"action": "block", "amount": 5},
-        {"action": "damage", "amount": 5},
+        {"action": "block"},
+        {"action": "damage"},
     ],
 )
 
@@ -134,7 +134,7 @@ make_card(
     base_damage=9, upgrade_damage=1,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 9},
+        {"action": "damage"},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -145,7 +145,7 @@ make_card(
     description="Deal 3 damage to a random enemy 3 times.",
     base_damage=3,
     base_magic=3, upgrade_magic=1,
-    effects=[{"action": "damage", "amount": 3, "times": 3, "target": "random"}],
+    effects=[{"action": "damage", "times": 3, "target": "random"}],
 )
 
 make_card(
@@ -154,7 +154,7 @@ make_card(
     description="Deal 4 damage and apply 1 Vulnerable to ALL enemies.",
     base_damage=4, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 4, "target": "all_enemies"},
+        {"action": "damage", "target": "all_enemies"},
         {"action": "apply_effect", "effect": "Vulnerable", "stacks": 1, "target": "all_enemies"},
     ],
 )
@@ -164,7 +164,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 5 damage twice.",
     base_damage=5, upgrade_damage=2,
-    effects=[{"action": "damage", "amount": 5, "times": 2}],
+    effects=[{"action": "damage", "times": 2}],
 )
 
 make_card(
@@ -173,7 +173,7 @@ make_card(
     description="Deal 12 damage. Shuffle a Wound into your draw pile.",
     base_damage=12, upgrade_damage=5,
     effects=[
-        {"action": "damage", "amount": 12},
+        {"action": "damage"},
         {"action": "add_card", "card_id": "wound", "to": "draw", "count": 1},
     ],
 )
@@ -189,7 +189,7 @@ make_card(
     base_block=5,
     upgrade_description="Gain 5 Block. Upgrade ALL cards in your hand for the rest of combat.",
     effects=[
-        {"action": "block", "amount": 5},
+        {"action": "block"},
         {"action": "custom", "func": "armaments"},
     ],
 )
@@ -210,7 +210,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Costs 1 less Energy for each time you lose HP in combat. Deal 18 damage.",
     base_damage=18, upgrade_damage=4,
-    effects=[{"action": "damage", "amount": 18}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -261,7 +261,7 @@ make_card(
     base_block=15, upgrade_block=5,
     effects=[
         {"action": "add_card", "card_id": "wound", "to": "hand", "count": 2},
-        {"action": "block", "amount": 15},
+        {"action": "block"},
     ],
 )
 
@@ -271,7 +271,7 @@ make_card(
     description="Gain 8 Block. Draw 1 card.",
     base_block=8, upgrade_block=3,
     effects=[
-        {"action": "block", "amount": 8},
+        {"action": "block"},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -283,7 +283,7 @@ make_card(
     base_block=7, upgrade_block=2,
     upgrade_description="Gain 9 Block. Exhaust a card from your hand.",
     effects=[
-        {"action": "block", "amount": 7},
+        {"action": "block"},
         {"action": "custom", "func": "true_grit"},
     ],
 )
@@ -310,7 +310,7 @@ make_card(
     description="Ethereal. Deal 20 damage.",
     base_damage=20, upgrade_damage=8,
     ethereal=True,
-    effects=[{"action": "damage", "amount": 20}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -319,7 +319,7 @@ make_card(
     description="Deal 5 damage. If the enemy is Vulnerable, gain 1 Energy and draw 1 card.",
     base_damage=5, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 5},
+        {"action": "damage"},
         {"action": "custom", "func": "dropkick"},
     ],
 )
@@ -331,7 +331,7 @@ make_card(
     base_damage=15, upgrade_damage=5,
     effects=[
         {"action": "lose_hp", "amount": 2},
-        {"action": "damage", "amount": 15},
+        {"action": "damage"},
     ],
 )
 
@@ -342,7 +342,7 @@ make_card(
     base_damage=2,
     base_magic=4, upgrade_magic=1,
     exhaust=True,
-    effects=[{"action": "damage", "amount": 2, "times": 4}],
+    effects=[{"action": "damage", "times": 4}],
 )
 
 make_card(
@@ -360,7 +360,7 @@ make_card(
     description="Deal 7 damage. Shuffle a Dazed into your draw pile.",
     base_damage=7, upgrade_damage=3,
     effects=[
-        {"action": "damage", "amount": 7},
+        {"action": "damage"},
         {"action": "add_card", "card_id": "dazed", "to": "draw", "count": 1},
     ],
 )
@@ -380,7 +380,7 @@ make_card(
     base_damage=16, upgrade_damage=6,
     effects=[
         {"action": "custom", "func": "sever_soul"},
-        {"action": "damage", "amount": 16},
+        {"action": "damage"},
     ],
 )
 
@@ -391,7 +391,7 @@ make_card(
     base_damage=13,
     base_magic=1, upgrade_magic=1,
     effects=[
-        {"action": "damage", "amount": 13},
+        {"action": "damage"},
         {"action": "apply_effect", "effect": "Weak", "stacks": 1, "target": "enemy"},
         {"action": "apply_effect", "effect": "Vulnerable", "stacks": 1, "target": "enemy"},
     ],
@@ -455,7 +455,7 @@ make_card(
     base_block=12, upgrade_block=4,
     base_magic=4, upgrade_magic=2,
     effects=[
-        {"action": "block", "amount": 12},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "Flame Barrier", "stacks": 4, "target": "self"},
     ],
 )
@@ -466,7 +466,7 @@ make_card(
     description="Ethereal. Gain 10 Block.",
     base_block=10, upgrade_block=3,
     ethereal=True,
-    effects=[{"action": "block", "amount": 10}],
+    effects=[{"action": "block"}],
 )
 
 make_card(
@@ -502,7 +502,7 @@ make_card(
     base_block=5, upgrade_block=3,
     base_magic=2, upgrade_magic=1,
     effects=[
-        {"action": "block", "amount": 5},
+        {"action": "block"},
         {"action": "custom", "func": "sentinel"},
     ],
 )
@@ -630,7 +630,7 @@ make_card(
     target=CardTarget.ENEMY,
     description="Deal 32 damage.",
     base_damage=32, upgrade_damage=10,
-    effects=[{"action": "damage", "amount": 32}],
+    effects=[{"action": "damage"}],
 )
 
 make_card(
@@ -658,7 +658,7 @@ make_card(
     description="Deal 21 damage to ALL enemies. Add a Burn into your discard pile.",
     base_damage=21, upgrade_damage=7,
     effects=[
-        {"action": "damage", "amount": 21, "target": "all_enemies"},
+        {"action": "damage", "target": "all_enemies"},
         {"action": "add_card", "card_id": "burn", "to": "discard", "count": 1},
     ],
 )
@@ -702,7 +702,7 @@ make_card(
     description="Gain 30 Block. Exhaust.",
     base_block=30, upgrade_block=10,
     exhaust=True,
-    effects=[{"action": "block", "amount": 30}],
+    effects=[{"action": "block"}],
 )
 
 make_card(

@@ -71,7 +71,7 @@ make_card(
     base_damage=8, upgrade_damage=4,
     innate=True, exhaust=True,
     upgrade_description="Deal 12 damage to ALL enemies. Innate. Exhaust.",
-    effects=[{"action": "damage", "amount": 8, "target": "all_enemies"}],
+    effects=[{"action": "damage", "target": "all_enemies"}],
 )
 
 # Enlightenment: Reduce the cost of all cards in your hand to 1 for this turn.
@@ -91,7 +91,7 @@ make_card(
     base_block=2, upgrade_block=2,
     upgrade_description="Gain 4 Block. Draw 1 card.",
     effects=[
-        {"action": "block", "amount": 2},
+        {"action": "block"},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -104,7 +104,7 @@ make_card(
     base_damage=3, upgrade_damage=3,
     upgrade_description="Deal 6 damage. Draw 1 card.",
     effects=[
-        {"action": "damage", "amount": 3},
+        {"action": "damage"},
         {"action": "draw", "amount": 1},
     ],
 )
@@ -125,7 +125,7 @@ make_card(
     description="Gain 6 Block.",
     base_block=6, upgrade_block=3,
     upgrade_description="Gain 9 Block.",
-    effects=[{"action": "block", "amount": 6}],
+    effects=[{"action": "block"}],
 )
 
 # Impatience: If you have no Attacks in your hand, draw 2 cards.
@@ -190,7 +190,7 @@ make_card(
     exhaust=True,
     upgrade_description="Gain 40 Block. You cannot gain Block from cards for 2 turns. Exhaust.",
     effects=[
-        {"action": "block", "amount": 30},
+        {"action": "block"},
         {"action": "apply_effect", "effect": "No Block", "stacks": 2, "target": "self"},
     ],
 )
@@ -213,7 +213,7 @@ make_card(
     description="Deal 7 damage.",
     base_damage=7, upgrade_damage=3,
     upgrade_description="Deal 10 damage.",
-    effects=[{"action": "damage", "amount": 7}],
+    effects=[{"action": "damage"}],
 )
 
 # Trip: Apply 2 Vulnerable to an enemy.
@@ -261,7 +261,7 @@ make_card(
     base_magic=20, upgrade_magic=5,
     upgrade_description="Deal 25 damage. If Fatal, gain 25 Gold.",
     effects=[
-        {"action": "damage", "amount": 20},
+        {"action": "damage"},
         {"action": "custom", "func": "hand_of_greed_gold"},
     ],
 )
