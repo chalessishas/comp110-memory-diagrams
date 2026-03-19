@@ -17,9 +17,11 @@ export function score(text) {
   const tokens = (text.match(/[a-zA-Z']+/g) || []).map(w => w.toLowerCase())
   if (tokens.length === 0) return { value: 0, details: 'No words found' }
 
-  // Type-token ratio
+  // Type-token ratio — for short essays (100-200 words), TTR is naturally higher
+  // Map: ≤0.4→0.2, 0.5→0.5, 0.6→0.7, 0.7→0.85, ≥0.8→1.0
   const unique = new Set(tokens)
-  const ttr = unique.size / tokens.length
+  const rawTtr = unique.size / tokens.length
+  const ttrScore = Math.min(1, Math.max(0.2, (rawTtr - 0.3) * 1.6))
 
   // Sentence length variance
   const sentences = text.split(/[.!?]+/).map(s => s.trim()).filter(s => s.length > 0)
@@ -29,8 +31,8 @@ export function score(text) {
     const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length
     const variance = lengths.reduce((sum, l) => sum + (l - mean) ** 2, 0) / lengths.length
     const stddev = Math.sqrt(variance)
-    // stddev 0→0, 5→0.5, 10+→1.0
-    varianceScore = Math.min(1, stddev / 10)
+    // stddev 0→0.2, 3→0.5, 6→0.8, 8+→1.0 (more lenient for short essays)
+    varianceScore = Math.min(1, 0.2 + stddev / 10)
   }
 
   // Repetition penalty: content words >4 chars used ≥3 times
@@ -41,9 +43,10 @@ export function score(text) {
     }
   })
   const repeatedWords = Object.values(freq).filter(count => count >= 3).length
-  const repetitionPenalty = Math.min(0.4, repeatedWords * 0.05)
+  const repetitionPenalty = Math.min(0.3, repeatedWords * 0.05)
 
-  const value = Math.max(0, Math.min(1, ttr * 0.4 + varianceScore * 0.4 - repetitionPenalty))
+  const ttr = rawTtr // keep raw for display
+  const value = Math.max(0, Math.min(1, ttrScore * 0.4 + varianceScore * 0.4 + 0.2 - repetitionPenalty))
 
   return {
     value,

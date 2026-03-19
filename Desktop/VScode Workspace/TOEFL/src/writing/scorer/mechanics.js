@@ -4,6 +4,12 @@ export function score(text) {
   const tokens = text.match(/[a-zA-Z']+/g) || []
   const errors = []
 
+  // Words to skip in spell check (email format words, titles, common proper nouns)
+  const skipWords = new Set([
+    'dear', 'hello', 'sincerely', 'regards', 'hi', 'hey',
+    'mr', 'mrs', 'ms', 'dr', 'prof', 'sir', 'madam',
+  ])
+
   // Spelling: check each token against validWords
   tokens.forEach(token => {
     // Skip: < 3 chars, all caps (acronyms), contains numbers
@@ -11,9 +17,32 @@ export function score(text) {
     if (token === token.toUpperCase()) return
     if (/\d/.test(token)) return
 
+    // Skip capitalized words (likely proper nouns: names, places)
+    if (token[0] === token[0].toUpperCase() && token.slice(1) === token.slice(1).toLowerCase()) return
+
     const lower = token.toLowerCase().replace(/^'+|'+$/g, '') // strip leading/trailing apostrophes
     if (lower.length < 3) return
-    if (!validWords.has(lower)) {
+    if (skipWords.has(lower)) return
+    if (validWords.has(lower)) return
+
+    // Before flagging as misspelled, check if a base form exists in validWords
+    // This handles common suffixes: -ed, -ing, -s, -es, -er, -est, -ly, -tion, -ment, -ness
+    const baseChecks = [
+      lower.replace(/ed$/, ''), lower.replace(/ed$/, 'e'),
+      lower.replace(/ing$/, ''), lower.replace(/ing$/, 'e'), lower.replace(/ting$/, 't'),
+      lower.replace(/s$/, ''), lower.replace(/es$/, ''), lower.replace(/ies$/, 'y'),
+      lower.replace(/er$/, ''), lower.replace(/er$/, 'e'),
+      lower.replace(/est$/, ''), lower.replace(/est$/, 'e'),
+      lower.replace(/ly$/, ''), lower.replace(/ly$/, 'le'),
+      lower.replace(/tion$/, 't'), lower.replace(/tion$/, 'te'),
+      lower.replace(/ment$/, ''), lower.replace(/ness$/, ''),
+      lower.replace(/able$/, ''), lower.replace(/able$/, 'e'),
+      lower.replace(/ful$/, ''), lower.replace(/less$/, ''),
+      lower.replace(/ous$/, ''), lower.replace(/ive$/, ''), lower.replace(/ive$/, 'e'),
+      lower.replace(/al$/, ''), lower.replace(/ally$/, ''),
+    ]
+    const hasBase = baseChecks.some(base => base.length >= 3 && validWords.has(base))
+    if (!hasBase) {
       errors.push(`Possible misspelling: "${token}"`)
     }
   })

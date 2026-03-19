@@ -18,10 +18,30 @@ export function score(text) {
     }
   })
 
-  // Comma splice detection: ", I/he/she/they/we/it" without conjunction before
-  const commaSplicePattern = /,\s+(I|he|she|they|we|it)\s+\w+/gi
-  const splices = text.match(commaSplicePattern) || []
-  splices.forEach(m => errors.push(`Possible comma splice: "${m.trim()}"`))
+  // Comma splice detection: ", I/he/she/they/we/it [verb]" patterns
+  // Exclude: after conjunctions, discourse markers, and subordinating conjunctions
+  const safeWords = new Set([
+    'however', 'moreover', 'furthermore', 'additionally', 'nevertheless',
+    'therefore', 'consequently', 'meanwhile', 'otherwise', 'instead',
+    'unfortunately', 'fortunately', 'similarly', 'alternatively',
+    'specifically', 'honestly', 'personally', 'apparently', 'obviously',
+    'clearly', 'indeed', 'certainly', 'naturally', 'surprisingly',
+    'interestingly', 'importantly', 'ideally', 'typically', 'generally',
+    'and', 'but', 'so', 'or', 'nor', 'yet', 'for',
+    'if', 'when', 'while', 'because', 'since', 'although', 'though',
+    'unless', 'until', 'after', 'before', 'where', 'whereas',
+  ])
+  const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
+  let csMatch
+  while ((csMatch = commaSpliceRegex.exec(text)) !== null) {
+    const pos = csMatch.index
+    const before = text.substring(Math.max(0, pos - 40), pos).toLowerCase()
+    const lastWordMatch = before.match(/(\w+)\s*$/)
+    const lastWord = lastWordMatch ? lastWordMatch[1] : ''
+    if (!safeWords.has(lastWord)) {
+      errors.push(`Possible comma splice: "${csMatch[0].trim()}"`)
+    }
+  }
 
   // Double negatives
   const doubleNegPatterns = [
