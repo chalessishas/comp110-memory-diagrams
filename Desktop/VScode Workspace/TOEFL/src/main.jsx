@@ -5,6 +5,7 @@ import './index.css'
 import Reading from './pages/Reading.jsx'
 import Home from './pages/Home.jsx'
 import Writing from './pages/Writing.jsx'
+import BuildSentence from './writing/BuildSentence.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<Home />} />
         <Route path="/reading" element={<Reading />} />
         <Route path="/writing" element={<Writing />} />
+        <Route path="/writing/build-sentence" element={<BuildSentence />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
