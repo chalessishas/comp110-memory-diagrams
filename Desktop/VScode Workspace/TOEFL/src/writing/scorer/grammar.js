@@ -18,8 +18,8 @@ export function score(text) {
     }
   })
 
-  // Comma splice detection: ", I/he/she/they/we/it [verb]" patterns
-  // Exclude: after conjunctions, discourse markers, and subordinating conjunctions
+  // Comma splice detection: ", I/he/she/they/we/it [verb]" on the SAME LINE only
+  // Skip matches that cross paragraph/line boundaries
   const safeWords = new Set([
     'however', 'moreover', 'furthermore', 'additionally', 'nevertheless',
     'therefore', 'consequently', 'meanwhile', 'otherwise', 'instead',
@@ -30,18 +30,32 @@ export function score(text) {
     'and', 'but', 'so', 'or', 'nor', 'yet', 'for',
     'if', 'when', 'while', 'because', 'since', 'although', 'though',
     'unless', 'until', 'after', 'before', 'where', 'whereas',
+    'forward', 'overall', 'finally', 'personally', 'frankly',
   ])
-  const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
-  let csMatch
-  while ((csMatch = commaSpliceRegex.exec(text)) !== null) {
-    const pos = csMatch.index
-    const before = text.substring(Math.max(0, pos - 40), pos).toLowerCase()
-    const lastWordMatch = before.match(/(\w+)\s*$/)
-    const lastWord = lastWordMatch ? lastWordMatch[1] : ''
-    if (!safeWords.has(lastWord)) {
-      errors.push(`Possible comma splice: "${csMatch[0].trim()}"`)
+  // Phrasal discourse markers that end with a comma before a pronoun
+  const safePhrases = [
+    'moving forward', 'looking ahead', 'in addition', 'on the other hand',
+    'in contrast', 'as a result', 'in conclusion', 'to summarize',
+    'in summary', 'for example', 'in particular', 'in fact',
+    'of course', 'after all', 'at the same time', 'on the whole',
+    'in general', 'to be honest', 'to be fair', 'in my opinion',
+    'in other words', 'that said', 'having said that',
+  ]
+  const lines = text.split('\n')
+  lines.forEach(line => {
+    const commaSpliceRegex = /,\s+(I|he|she|they|we|it)\s+\w+/gi
+    let csMatch
+    while ((csMatch = commaSpliceRegex.exec(line)) !== null) {
+      const pos = csMatch.index
+      const before = line.substring(Math.max(0, pos - 50), pos).toLowerCase()
+      const lastWordMatch = before.match(/(\w+)\s*$/)
+      const lastWord = lastWordMatch ? lastWordMatch[1] : ''
+      const hasPhrase = safePhrases.some(p => before.includes(p))
+      if (!safeWords.has(lastWord) && !hasPhrase) {
+        errors.push(`Possible comma splice: "${csMatch[0].trim()}"`)
+      }
     }
-  }
+  })
 
   // Double negatives
   const doubleNegPatterns = [

@@ -1,4 +1,5 @@
 import { validWords } from './wordlist.js'
+import { getEnglishWords } from './english-words.js'
 
 export function score(text) {
   const tokens = text.match(/[a-zA-Z']+/g) || []
@@ -23,28 +24,12 @@ export function score(text) {
     const lower = token.toLowerCase().replace(/^'+|'+$/g, '') // strip leading/trailing apostrophes
     if (lower.length < 3) return
     if (skipWords.has(lower)) return
+    // Primary check: 275k word English dictionary (lazy loaded on first score)
+    if (getEnglishWords().has(lower)) return
+    // Fallback: our curated TOEFL wordlist
     if (validWords.has(lower)) return
 
-    // Before flagging as misspelled, check if a base form exists in validWords
-    // This handles common suffixes: -ed, -ing, -s, -es, -er, -est, -ly, -tion, -ment, -ness
-    const baseChecks = [
-      lower.replace(/ed$/, ''), lower.replace(/ed$/, 'e'),
-      lower.replace(/ing$/, ''), lower.replace(/ing$/, 'e'), lower.replace(/ting$/, 't'),
-      lower.replace(/s$/, ''), lower.replace(/es$/, ''), lower.replace(/ies$/, 'y'),
-      lower.replace(/er$/, ''), lower.replace(/er$/, 'e'),
-      lower.replace(/est$/, ''), lower.replace(/est$/, 'e'),
-      lower.replace(/ly$/, ''), lower.replace(/ly$/, 'le'),
-      lower.replace(/tion$/, 't'), lower.replace(/tion$/, 'te'),
-      lower.replace(/ment$/, ''), lower.replace(/ness$/, ''),
-      lower.replace(/able$/, ''), lower.replace(/able$/, 'e'),
-      lower.replace(/ful$/, ''), lower.replace(/less$/, ''),
-      lower.replace(/ous$/, ''), lower.replace(/ive$/, ''), lower.replace(/ive$/, 'e'),
-      lower.replace(/al$/, ''), lower.replace(/ally$/, ''),
-    ]
-    const hasBase = baseChecks.some(base => base.length >= 3 && validWords.has(base))
-    if (!hasBase) {
-      errors.push(`Possible misspelling: "${token}"`)
-    }
+    errors.push(`Possible misspelling: "${token}"`)
   })
 
   // Capitalization: first word of each sentence should be capitalized
