@@ -1,0 +1,169 @@
+/* ═══ Confirm Modal ═══ */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.confirm-dialog {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 380px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: fadeUp 0.3s ease-out;
+}
+
+.confirm-dialog h3 {
+  font-family: 'Instrument Serif', Georgia, serif;
+  font-size: 22px;
+  color: #2D2A26;
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.confirm-dialog p {
+  font-size: 14px;
+  color: #8A8477;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.confirm-actions button {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel {
+  color: #6B6560;
+  background: white;
+  border: 1.5px solid #E2DDD5;
+}
+.btn-cancel:hover { border-color: #D4A574; }
+
+.btn-confirm {
+  color: white;
+  background: linear-gradient(135deg, #D4A574 0%, #C4956A 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(212, 165, 116, 0.25);
+}
+.btn-confirm:hover { transform: translateY(-1px); }
+
+/* ═══ Pause indicator ═══ */
+.pause-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: #b87333;
+  background: rgba(191, 131, 72, 0.08);
+  border: 1px solid rgba(191, 131, 72, 0.2);
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ═══ Timer button ═══ */
+.timer-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ═══ Keyboard hint ═══ */
+.kbd-hint {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: #ADA899;
+  padding: 0 28px 12px;
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 20px;
+  padding: 0 5px;
+  background: #f0ece6;
+  border: 1px solid #e2ddd5;
+  border-radius: 4px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: #8A8477;
+  margin: 0 2px;
+}
+
+/* ═══ Mobile responsive ═══ */
+@media (max-width: 768px) {
+  .test-layout {
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  .test-layout > .passage-panel,
+  .test-layout > .question-panel {
+    width: 100% !important;
+    border-right: none !important;
+  }
+
+  .passage-panel {
+    max-height: 40vh;
+    border-bottom: 1px solid #EDE8E0;
+  }
+
+  .question-panel {
+    min-height: 60vh;
+  }
+
+  .kbd-hint {
+    display: none !important;
+  }
+
+  .landing-types {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .passage-panel .passage-content {
+    padding: 16px !important;
+  }
+
+  .question-panel .question-content {
+    padding: 20px 16px !important;
+  }
+}
