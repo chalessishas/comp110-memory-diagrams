@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import './writing.css'
 import Timer from '../shared/Timer.jsx'
 import { emailPrompts } from './data/emailData.js'
+import { scoreWriting } from './scorer/index.js'
+import WritingResult from './WritingResult.jsx'
 
 const STORAGE_KEY = 'toefl-writing-email'
 const TOTAL_TIME = 420 // 7 minutes
@@ -37,6 +39,7 @@ const WriteEmail = () => {
   const [timer, setTimer] = useState(savedData.current?.timer ?? TOTAL_TIME)
   const [paused, setPaused] = useState(false)
   const [showResult, setShowResult] = useState(false)
+  const [scoreResult, setScoreResult] = useState(null)
 
   const prompt = emailPrompts[promptIdx]
   const wordCount = countWords(body)
@@ -55,6 +58,9 @@ const WriteEmail = () => {
 
   const handleSubmit = () => {
     clearProg()
+    const fullText = `Dear ${prompt.recipient},\n\n${body}\n\nBest regards,\n[Your Name]`
+    const result = scoreWriting(fullText, 'email')
+    setScoreResult(result)
     setShowResult(true)
   }
 
@@ -66,6 +72,7 @@ const WriteEmail = () => {
     setTimer(TOTAL_TIME)
     setPaused(false)
     setShowResult(false)
+    setScoreResult(null)
     savedData.current = null
   }
 
@@ -152,117 +159,16 @@ const WriteEmail = () => {
 
   // ─── RESULT ───
   if (showResult) {
-    const fullEmail = `Dear ${prompt.recipient},\n\n${body}\n\nBest regards,\n[Your Name]`
-    const fullSample = `Dear ${prompt.recipient},\n\n${prompt.sampleResponse}\n\nBest regards,\n[Your Name]`
-
     return (
-      <div style={{
-        minHeight: '100vh', background: '#FAFAF8',
-        fontFamily: "'DM Sans', sans-serif",
-      }}>
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '40px 24px 80px' }}>
-          {/* Score ring (placeholder) */}
-          <div style={{ textAlign: 'center', marginBottom: 40, animation: 'fadeUp 0.6s ease-out' }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%',
-              background: 'conic-gradient(#D4A574 0deg, #EDE8E0 0deg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              margin: '0 auto 24px',
-              border: '3px solid #EDE8E0',
-            }}>
-              <div style={{
-                width: 96, height: 96, borderRadius: '50%', background: '#FAFAF8',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{
-                  fontFamily: "'Instrument Serif', Georgia, serif",
-                  fontSize: 36, color: '#ADA899', lineHeight: 1,
-                }}>—</span>
-                <span style={{ fontSize: 11, color: '#ADA899', marginTop: 2 }}>pending</span>
-              </div>
-            </div>
-
-            <h2 style={{
-              fontFamily: "'Instrument Serif', Georgia, serif",
-              fontSize: 28, color: '#2D2A26', marginBottom: 8, fontWeight: 400,
-            }}>
-              Email Submitted
-            </h2>
-            <p style={{ fontSize: 14, color: '#8A8477' }}>
-              Automated scoring coming soon · {wordCount} words written
-            </p>
-          </div>
-
-          {/* Your response */}
-          <div style={{
-            background: 'white', borderRadius: 14, border: '1.5px solid #EDE8E0',
-            padding: 28, marginBottom: 20, animation: 'fadeUp 0.5s ease-out 0.1s both',
-          }}>
-            <p style={{
-              fontSize: 11, fontWeight: 600, color: '#ADA899',
-              textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
-            }}>
-              Your Response
-            </p>
-            {subject && (
-              <p style={{ fontSize: 13, color: '#6B6560', marginBottom: 12 }}>
-                <span style={{ fontWeight: 600, color: '#ADA899' }}>Subject: </span>{subject}
-              </p>
-            )}
-            <pre style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#2D2A26',
-              lineHeight: 1.8, whiteSpace: 'pre-wrap', margin: 0,
-            }}>
-              {fullEmail}
-            </pre>
-          </div>
-
-          {/* Sample response */}
-          <div style={{
-            background: 'rgba(90,154,110,0.04)', borderRadius: 14,
-            border: '1.5px solid rgba(90,154,110,0.2)',
-            padding: 28, marginBottom: 32, animation: 'fadeUp 0.5s ease-out 0.2s both',
-          }}>
-            <p style={{
-              fontSize: 11, fontWeight: 600, color: '#5a9a6e',
-              textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 16,
-            }}>
-              Sample Response (Score: {prompt.sampleScore}/5)
-            </p>
-            <pre style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: '#2D2A26',
-              lineHeight: 1.8, whiteSpace: 'pre-wrap', margin: 0,
-            }}>
-              {fullSample}
-            </pre>
-          </div>
-
-          {/* Actions */}
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={handleRetry}
-              style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: 'white', background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
-                border: 'none', borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(212,165,116,0.25)',
-              }}
-            >
-              Try Again
-            </button>
-            <button
-              onClick={() => navigate('/writing')}
-              style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#6B6560', background: 'white',
-                border: '1.5px solid #E2DDD5', borderRadius: 10, padding: '12px 24px', cursor: 'pointer',
-              }}
-            >
-              Back to Writing
-            </button>
-          </div>
-        </div>
-      </div>
+      <WritingResult
+        score={scoreResult}
+        userText={body}
+        sampleResponse={prompt.sampleResponse}
+        sampleScore={prompt.sampleScore}
+        taskType="email"
+        onRetry={handleRetry}
+        onBack={() => navigate('/writing')}
+      />
     )
   }
 
