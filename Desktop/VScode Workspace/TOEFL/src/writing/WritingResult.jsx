@@ -16,6 +16,13 @@ const getTitle = (overall) => {
   return 'Keep Practicing'
 }
 
+const getGrade = (value) => {
+  if (value >= 0.8) return { label: 'Excellent', color: '#5a9a6e', bg: 'rgba(90, 154, 110, 0.08)' }
+  if (value >= 0.6) return { label: 'Good', color: '#4a7fa5', bg: 'rgba(74, 127, 165, 0.08)' }
+  if (value >= 0.4) return { label: 'Fair', color: '#b87333', bg: 'rgba(184, 115, 51, 0.08)' }
+  return { label: 'Weak', color: '#b06060', bg: 'rgba(176, 96, 96, 0.08)' }
+}
+
 const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType, onRetry, onBack }) => {
   const pct = Math.round((score.overall / 5) * 100)
   const title = getTitle(score.overall)
@@ -75,7 +82,8 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
           </p>
 
           {Object.entries(score.breakdown).map(([key, dim]) => {
-            const pctVal = Math.round((dim.score || 0) * 100)
+            const rawScore = dim.score || 0
+            const grade = getGrade(rawScore)
             const errors = dim.errors || []
             return (
               <div key={key} style={{ marginBottom: errors.length > 0 ? 16 : 12 }}>
@@ -88,13 +96,18 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
                   <div className="score-bar-track" style={{ flex: 1 }}>
                     <div
                       className="score-bar-fill"
-                      style={{ width: `${pctVal}%` }}
+                      style={{
+                        width: `${Math.round(rawScore * 100)}%`,
+                        background: grade.color,
+                      }}
                     />
                   </div>
                   <span style={{
-                    fontSize: 12, color: '#8A8477', width: 36, textAlign: 'right', flexShrink: 0,
+                    fontSize: 11, fontWeight: 600, color: grade.color,
+                    background: grade.bg, padding: '3px 10px', borderRadius: 6,
+                    flexShrink: 0, textAlign: 'center', minWidth: 70,
                   }}>
-                    {pctVal}%
+                    {grade.label}
                   </span>
                 </div>
                 {errors.slice(0, 2).map((err, i) => (
