@@ -411,7 +411,7 @@ export default function WritingCenter() {
   }
 
   function handleLabYourTurn(coldText: string, topic: string) {
-    setDocument("");
+    setDocument(`<p>${coldText}</p>`);
     setTopic(topic);
     setAnnotations([]);
     setStepCards([]);
