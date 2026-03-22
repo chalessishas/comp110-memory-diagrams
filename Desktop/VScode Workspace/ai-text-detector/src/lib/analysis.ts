@@ -91,6 +91,8 @@ export interface AnalysisResult {
   wordCount: number;
   scoringEligible: boolean;
   classification?: ClassificationResult;
+  aiSimilarityTags: AISimilarityTag[];
+  aiVocabMatches: AIVocabMatch[];
 }
 
 // --- Processing ---
@@ -349,14 +351,19 @@ export function computeFeatureScores(
   burstiness: BurstinessData,
   vocabulary: VocabData
 ): { featureScores: FeatureScore[]; overallScore: number } {
+  // Calibration data (2026-03-22, 100 samples via llama3.2:1b):
+  // PPL: human=23.1±8.8, ai=16.2±12.0 — heavy overlap, weak signal alone
+  // Top10: human=72.6±4.5, ai=79.2±8.5 — moderate separation
+  // Entropy: human=2.95±0.38, ai=2.41±0.66 — moderate separation
+  // Note: llama3.2:1b is too small for high-quality perplexity — 7B+ would help
   const features: FeatureScore[] = [
     {
       name: "Perplexity",
       score: 1 - clamp((Math.log(Math.max(1, ppl)) - 1.0) / 2.7, 0, 1),
       weight: 0.3,
       raw: ppl,
-      humanRef: "20-50",
-      aiRef: "3-8",
+      humanRef: "20-30",
+      aiRef: "10-18",
     },
     {
       name: "Token Rank (GLTR)",
@@ -364,15 +371,15 @@ export function computeFeatureScores(
       weight: 0.25,
       raw: gltr.top10,
       humanRef: "<75% top-10",
-      aiRef: ">90% top-10",
+      aiRef: ">80% top-10",
     },
     {
       name: "Entropy",
       score: 1 - clamp((entropy.mean - 1.0) / 2.5, 0, 1),
       weight: 0.25,
       raw: entropy.mean,
-      humanRef: "2.5-3.5",
-      aiRef: "1.0-2.0",
+      humanRef: "2.7-3.3",
+      aiRef: "1.7-2.5",
     },
     {
       name: "Burstiness",
@@ -395,4 +402,186 @@ export function computeFeatureScores(
   const overallScore =
     features.reduce((sum, f) => sum + f.score * f.weight, 0) * 100;
   return { featureScores: features, overallScore };
+}
+
+// --- AI similarity tags (GPTZero-style "Why is this text AI like?") ---
+
+export interface AISimilarityTag {
+  label: string;
+  description: string;
+}
+
+export function computeAISimilarityTags(
+  ppl: number,
+  gltr: GLTRData,
+  entropy: EntropyData,
+  burstiness: BurstinessData,
+  vocabulary: VocabData,
+  sentences: SentenceData[]
+): AISimilarityTag[] {
+  const tags: AISimilarityTag[] = [];
+
+  if (ppl < 12)
+    tags.push({
+      label: "Predictable Text",
+      description:
+        "Low perplexity indicates the text follows highly predictable patterns typical of language model output.",
+    });
+
+  if (gltr.top10 > 85)
+    tags.push({
+      label: "Formulaic Word Choice",
+      description:
+        "Most tokens are the model's top predictions, suggesting words were chosen for probability rather than nuance.",
+    });
+
+  if (entropy.mean < 2.0)
+    tags.push({
+      label: "Low Uncertainty",
+      description:
+        "Consistently low entropy means the model was rarely surprised — the text lacks the unpredictability of human writing.",
+    });
+
+  if (entropy.std < 0.8)
+    tags.push({
+      label: "Flat Entropy Profile",
+      description:
+        "Entropy barely varies across the text, producing a monotone information density unlike human writing's natural peaks and valleys.",
+    });
+
+  if (burstiness.lengthCV < 0.25)
+    tags.push({
+      label: "Uniform Rhythm",
+      description:
+        "Sentences are nearly the same length, creating a mechanical rhythm. Human writing naturally varies between short and long sentences.",
+    });
+
+  if (burstiness.complexityCV < 0.08)
+    tags.push({
+      label: "Consistent Complexity",
+      description:
+        "Word complexity is uniform across sentences. Human writers mix simple and complex vocabulary more freely.",
+    });
+
+  if (vocabulary.ttr < 0.72 && vocabulary.totalWords > 100)
+    tags.push({
+      label: "Repetitive Vocabulary",
+      description:
+        "Low type-token ratio indicates the same words are reused frequently, a common pattern in AI-generated text.",
+    });
+
+  if (sentences.length > 3) {
+    const avgWords = sentences.reduce((s, sent) => s + sent.wordCount, 0) / sentences.length;
+    if (avgWords > 20 && avgWords < 28 && burstiness.lengthCV < 0.3)
+      tags.push({
+        label: "Template-like Structure",
+        description:
+          "Sentences cluster around a narrow word count range with similar structure, suggesting template-driven generation.",
+      });
+  }
+
+  return tags;
+}
+
+// --- AI vocab detection ---
+
+const AI_VOCAB: string[] = [
+  "delve", "delves", "delving",
+  "furthermore", "moreover", "additionally",
+  "utilize", "utilizes", "utilizing", "utilization",
+  "multifaceted", "holistic", "paradigm", "synergy",
+  "leverage", "leverages", "leveraging",
+  "comprehensive", "robust", "streamline",
+  "facilitate", "facilitates", "facilitating",
+  "paramount", "pivotal", "crucial",
+  "encompass", "encompasses", "encompassing",
+  "intricate", "intricacies",
+  "underscore", "underscores", "underscoring",
+  "landscape", "tapestry", "realm",
+  "noteworthy", "notably",
+  "it is important to note",
+  "it is worth noting",
+  "in conclusion",
+  "in today's rapidly",
+  "plays a crucial role",
+  "shed light on",
+  "paves the way",
+];
+
+export interface AIVocabMatch {
+  word: string;
+  startIndex: number;
+  endIndex: number;
+}
+
+export function detectAIVocab(text: string): AIVocabMatch[] {
+  const lower = text.toLowerCase();
+  const matches: AIVocabMatch[] = [];
+
+  for (const term of AI_VOCAB) {
+    let searchFrom = 0;
+    while (searchFrom < lower.length) {
+      const idx = lower.indexOf(term, searchFrom);
+      if (idx === -1) break;
+      const before = idx > 0 ? lower[idx - 1] : " ";
+      const after = idx + term.length < lower.length ? lower[idx + term.length] : " ";
+      if (/\W/.test(before) && /\W/.test(after)) {
+        matches.push({
+          word: text.slice(idx, idx + term.length),
+          startIndex: idx,
+          endIndex: idx + term.length,
+        });
+      }
+      searchFrom = idx + term.length;
+    }
+  }
+
+  matches.sort((a, b) => a.startIndex - b.startIndex);
+  return matches;
+}
+
+// --- Sentence explain (template-based) ---
+
+export function explainSentenceScore(
+  sent: SentenceScoreData
+): string[] {
+  const reasons: string[] = [];
+
+  if (sent.aiScore > 70) {
+    if (sent.perplexity < 8)
+      reasons.push(
+        "Very low perplexity — the language model found this sentence highly predictable."
+      );
+    if (sent.perplexity < 15 && sent.perplexity >= 8)
+      reasons.push(
+        "Low perplexity suggests this sentence follows common AI generation patterns."
+      );
+    if (sent.wordCount > 25)
+      reasons.push(
+        "Long, complex sentence structure is more typical of AI-generated prose."
+      );
+    if (reasons.length === 0)
+      reasons.push(
+        "Multiple statistical features align with AI-generated text patterns."
+      );
+  } else if (sent.aiScore <= 30) {
+    if (sent.perplexity > 30)
+      reasons.push(
+        "High perplexity — the language model found this sentence surprising and unpredictable."
+      );
+    if (sent.wordCount < 12)
+      reasons.push(
+        "Short, punchy sentence — AI tends to generate longer, more uniform sentences."
+      );
+    if (reasons.length === 0)
+      reasons.push(
+        "This sentence's statistical profile is consistent with human writing patterns."
+      );
+  } else {
+    reasons.push(
+      "This sentence shows a mix of human and AI-like characteristics."
+    );
+  }
+
+  return reasons;
 }
