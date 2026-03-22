@@ -49,14 +49,28 @@
 
 ### [2026-03-21 04:00] — 50M 语料库构建完成
 
-- **做了什么**：Colab A100 构建 50M 句子语料库（C4/Wikipedia/CC-News/CNN-DailyMail/Gutenberg），FAISS IVF+PQ 索引。chunk-streaming 构建（不用 memmap）。SentenceStore 字节偏移索引（400MB 内存 vs 8GB）。
-- **踩过的坑**：
-  1. memmap 写 Google Drive FUSE → FileNotFoundError（异步上传未完成）
-  2. Colab 磁盘满：DriveFS lost_and_found 缓存 144GB
-  3. faiss-gpu 安装后需重启 runtime
-  4. C4 backfill 无限循环防护
-- **当前状态**：`corpus/sentences.faiss` (2.7GB) + `sentences.jsonl` (6.2GB) 已部署。
-- **下一步**：不需要再动。
+- **做了什么**：Colab A100 构建 50M 句子语料库，FAISS IVF+PQ 索引。chunk-streaming 构建（不用 memmap）。SentenceStore 字节偏移索引（400MB 内存 vs 8GB）。
+- **数据源配置**：C4 30% (28M) / Wikipedia 20% (2.8M，不够 10M 目标，C4 backfill 补) / CC-News 20% (5.3M, 排除 2019+ 防 AI 污染) / CNN-DailyMail 15% (5.7M) / Gutenberg 15% (7.5M)。全部 pre-2019 无 AI 污染。
+- **构建脚本**：`scripts/build_corpus_colab.py`。CRC32 双哈希去重。每 1M 句子一个 chunk（.npy + .jsonl）。崩溃恢复靠 hash 集重建。
+- **humanizer 内存优化**：`SentenceStore` 类（humanizer.py:35-83），用 numpy 偏移数组替代 Python list。首次启动扫描 JSONL 建偏移索引缓存为 `.offsets.npy`（~381MB），后续秒加载。单文件句柄不是线程安全——当前单线程 HTTP server 无影响。
+- **踩过的坑**（13 个，按时间顺序）：
+  1. `torch.cuda.get_device_properties(0).total_mem` → 改 `.total_memory`
+  2. faiss pip install 被注释 → 改 `subprocess.check_call` 自动安装
+  3. CUDA 12.8 需要 `faiss-gpu-cu12`（不是 `faiss-gpu`）
+  4. BookCorpus `trust_remote_code` 废弃 → 换 C4
+  5. BookCorpus `Dataset scripts no longer supported` → 同上
+  6. PubMed 嵌套字典取值脆弱 → 换 CNN/DailyMail
+  7. 30M→50M 后 `np.concatenate` 72GB 峰值 → 改 memmap（后又改为 chunk-streaming）
+  8. 崩溃恢复 `skip_remaining` 逻辑 bug → 删 skip 逻辑，纯靠 hash 去重
+  9. MD5 hash 性能 → 改 CRC32 双哈希
+  10. memmap 训练采样随机 I/O 极慢 → `np.sort()` 排序后顺序读
+  11. C4 backfill 无限循环 → `backfill_failures` 计数器，3 次后终止
+  12. Colab 断连丢 chunk → 改挂载 Google Drive
+  13. memmap 写 Drive FUSE → FileNotFoundError → 改 chunk-streaming（不用 memmap）
+  14. Colab 磁盘满 → DriveFS lost_and_found 缓存 144GB，手动清理
+  15. faiss-gpu 安装后 `get_num_gpus()=0` → 需重启 runtime（C 扩展缓存）
+- **当前状态**：`corpus/sentences.faiss` (2.7GB) + `sentences.jsonl` (6.2GB) 已部署。humanizer.py 加载正常（50M 条目，381MB 偏移索引）。
+- **下一步**：不需要再动。如需重建：Colab 脚本在 Google Drive `/content/drive/MyDrive/corpus_build/` 有原始数据。
 
 ---
 
