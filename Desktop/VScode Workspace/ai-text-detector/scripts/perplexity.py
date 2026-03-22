@@ -197,6 +197,47 @@ def _compute_llama(model, text):
     return {"tokens": results}
 
 
+def compute_perplexity_score(tokens):
+    """Compute aggregate stats from token data, run LR classifier for AI probability."""
+    if not tokens:
+        return None
+    logprobs = [t["logprob"] for t in tokens]
+    ranks = [t["rank"] for t in tokens]
+    entropies = [t["entropy"] for t in tokens]
+
+    ppl = math.exp(-sum(logprobs) / len(logprobs))
+    log_ppl = math.log(max(ppl, 1e-5))
+    top10 = sum(1 for r in ranks if r <= 10) / len(ranks) * 100
+    top1 = sum(1 for r in ranks if r == 1) / len(ranks) * 100
+    mean_ent = sum(entropies) / len(entropies)
+    ent_std = float(np.std(entropies))
+
+    result = {
+        "perplexity": round(ppl, 2),
+        "top10_pct": round(top10, 1),
+        "top1_pct": round(top1, 1),
+        "mean_entropy": round(mean_ent, 2),
+        "entropy_std": round(ent_std, 2),
+    }
+
+    # LR classifier trained on qwen3.5:4b features (models/perplexity_lr.pkl)
+    lr_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "models", "perplexity_lr.pkl")
+    if os.path.exists(lr_path):
+        try:
+            import pickle
+            with open(lr_path, "rb") as f:
+                lr_data = pickle.load(f)
+            lr_model = lr_data["model"]
+            features = np.array([[log_ppl, top10, mean_ent, top1, ent_std]])
+            prob = lr_model.predict_proba(features)[0]
+            result["lr_ai_probability"] = round(float(prob[1]) * 100, 1)
+            result["lr_prediction"] = "ai" if prob[1] > 0.5 else "human"
+        except Exception:
+            pass
+
+    return result
+
+
 class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
@@ -211,7 +252,9 @@ class Handler(BaseHTTPRequestHandler):
                     result = compute_features(self.server.model_tuple, text)
                 else:
                     result = {"tokens": []}
-                # Add DeBERTa classification if available
+                # Aggregate perplexity stats + LR AI probability
+                result["perplexity_stats"] = compute_perplexity_score(result.get("tokens", []))
+                # DeBERTa 4-class classification
                 clf_tok = self.server.classifier_tokenizer
                 clf_mod = self.server.classifier_model
                 if clf_tok and clf_mod:
