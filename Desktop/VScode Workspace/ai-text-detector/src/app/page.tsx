@@ -231,7 +231,7 @@ export default function LandingPage() {
           {/* Headline */}
           <h1
             className="text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.1] tracking-tight text-[var(--foreground)]"
-            style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+            style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
           >
             See through
             <br />
@@ -281,7 +281,7 @@ export default function LandingPage() {
             </p>
             <h2
               className="text-3xl tracking-tight text-[var(--foreground)]"
-              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
             >
               Detect. Rewrite. Learn.
             </h2>
@@ -334,7 +334,7 @@ export default function LandingPage() {
 
                 <h3
                   className="text-lg mt-3 mb-3 text-[var(--foreground)] tracking-tight"
-                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                  style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
                 >
                   {tool.title}
                 </h3>
@@ -367,7 +367,7 @@ export default function LandingPage() {
             </p>
             <h2
               className="text-3xl tracking-tight text-[var(--background)]"
-              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
             >
               Five signals. One verdict.
             </h2>
@@ -465,7 +465,7 @@ export default function LandingPage() {
               <div key={s.label} className="text-center">
                 <div
                   className="text-4xl font-light text-[var(--foreground)] tracking-tight"
-                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                  style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
                 >
                   <AnimatedNumber value={s.value} suffix={s.suffix} />
                 </div>
@@ -484,7 +484,7 @@ export default function LandingPage() {
           <div className="text-center mb-14">
             <h2
               className="text-3xl tracking-tight text-[var(--foreground)]"
-              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+              style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
             >
               Not another black box
             </h2>
@@ -515,7 +515,7 @@ export default function LandingPage() {
               >
                 <h3
                   className="text-base text-[var(--foreground)] tracking-tight mb-2"
-                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                  style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
                 >
                   {p.title}
                 </h3>
@@ -533,7 +533,7 @@ export default function LandingPage() {
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <h2
             className="text-3xl tracking-tight text-[var(--foreground)]"
-            style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+            style={{ fontWeight: 300, letterSpacing: "-0.03em" }}
           >
             Ready to see through the text?
           </h2>
