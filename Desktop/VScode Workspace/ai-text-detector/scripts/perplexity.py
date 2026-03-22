@@ -50,7 +50,12 @@ def load_classifier():
 
 
 def classify_text(tokenizer, model, text):
-    """Run DeBERTa 4-class inference, return label + probabilities."""
+    """Run DeBERTa inference, return binary human/AI prediction.
+
+    Model is 4-class internally but we collapse to binary:
+      Human side = P(human) + P(human_polished)
+      AI side    = P(ai) + P(ai_polished)
+    """
     import torch
 
     inputs = tokenizer(text, truncation=True, max_length=512, return_tensors="pt")
@@ -61,12 +66,17 @@ def classify_text(tokenizer, model, text):
         logits = model(**inputs).logits
 
     probs = torch.softmax(logits, dim=-1).cpu().numpy()[0]
-    label = int(np.argmax(probs))
+    ai_score = float(probs[1] + probs[2]) * 100  # P(ai) + P(ai_polished)
+    human_score = float(probs[0] + probs[3]) * 100  # P(human) + P(human_polished)
+    prediction = "ai" if ai_score > 50 else "human"
+
     return {
-        "label": label,
-        "label_name": LABEL_NAMES[label],
-        "probabilities": {name: round(float(probs[i]), 4) for i, name in enumerate(LABEL_NAMES)},
-        "ai_score": round(float(probs[1] + probs[2]) * 100, 1),
+        "prediction": prediction,
+        "ai_score": round(ai_score, 1),
+        "human_score": round(human_score, 1),
+        "confidence": round(max(ai_score, human_score), 1),
+        # Keep 4-class detail available for future use
+        "_4class": {name: round(float(probs[i]), 4) for i, name in enumerate(LABEL_NAMES)},
     }
 
 
@@ -254,11 +264,20 @@ class Handler(BaseHTTPRequestHandler):
                     result = {"tokens": []}
                 # Aggregate perplexity stats + LR AI probability
                 result["perplexity_stats"] = compute_perplexity_score(result.get("tokens", []))
-                # DeBERTa 4-class classification
+                # DeBERTa binary classification
                 clf_tok = self.server.classifier_tokenizer
                 clf_mod = self.server.classifier_model
                 if clf_tok and clf_mod:
                     result["classification"] = classify_text(clf_tok, clf_mod, text)
+                # Fused score: DeBERTa + Perplexity LR
+                deb_ai = result.get("classification", {}).get("ai_score", 50)
+                lr_ai = (result.get("perplexity_stats") or {}).get("lr_ai_probability", 50)
+                fused = deb_ai * 0.6 + lr_ai * 0.4
+                result["fused"] = {
+                    "ai_score": round(fused, 1),
+                    "prediction": "ai" if fused > 50 else "human",
+                    "confidence": round(max(fused, 100 - fused), 1),
+                }
             except Exception as e:
                 result = {"error": str(e)}
 
