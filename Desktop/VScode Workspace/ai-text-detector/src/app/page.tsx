@@ -1,403 +1,582 @@
+"use client";
+
 import Link from "next/link";
-import { getAllPosts, type PostMeta } from "@/lib/posts";
+import { useEffect, useRef, useState } from "react";
 
-function NavBar() {
+// ── X-Ray Scanner Animation ──
+
+const SAMPLE_TEXT =
+  "The rapid advancement of artificial intelligence has fundamentally transformed the way modern organizations approach complex problem-solving and decision-making processes across virtually every industry sector.";
+
+const WORD_SCORES = [
+  0.9, 0.85, 0.7, 0.3, 0.95, 0.92, 0.88, 0.4, 0.93, 0.85, 0.2, 0.91, 0.87,
+  0.95, 0.6, 0.89, 0.93, 0.88, 0.3, 0.91, 0.85, 0.92, 0.45, 0.88, 0.93,
+  0.91, 0.87, 0.55, 0.92, 0.89,
+];
+
+function scoreToColor(score: number, revealed: boolean): string {
+  if (!revealed) return "inherit";
+  if (score > 0.8) return "#c96442";
+  if (score > 0.6) return "#d4956b";
+  return "#5a8a6a";
+}
+
+function HeroScanner() {
+  const [scanPos, setScanPos] = useState(-1);
+  const [revealed, setRevealed] = useState<boolean[]>([]);
+  const words = SAMPLE_TEXT.split(" ");
+
+  useEffect(() => {
+    setRevealed(new Array(words.length).fill(false));
+    const timer = setTimeout(() => {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i >= words.length) {
+          clearInterval(interval);
+          return;
+        }
+        setScanPos(i);
+        setRevealed((prev) => {
+          const next = [...prev];
+          next[i] = true;
+          return next;
+        });
+        i++;
+      }, 120);
+      return () => clearInterval(interval);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [words.length]);
+
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[var(--card-border)]">
-      <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-[var(--accent)] flex items-center justify-center">
-            <span className="text-white text-xs font-bold">X</span>
-          </div>
-          <span className="text-sm font-semibold text-[var(--foreground)]">
-            AI Text X-Ray
+    <div className="relative max-w-2xl mx-auto">
+      {/* Scan frame */}
+      <div className="relative bg-white/60 backdrop-blur-sm border border-[var(--card-border)] rounded-2xl p-8 overflow-hidden">
+        {/* Scan line */}
+        {scanPos >= 0 && scanPos < words.length && (
+          <div
+            className="absolute top-0 bottom-0 w-[2px] bg-[var(--accent)] opacity-60 z-10 transition-all duration-100"
+            style={{
+              left: `${((scanPos + 1) / words.length) * 100}%`,
+              boxShadow: "0 0 20px 4px rgba(201, 100, 66, 0.3)",
+            }}
+          />
+        )}
+
+        {/* Corner brackets */}
+        <div className="absolute top-3 left-3 w-5 h-5 border-t-2 border-l-2 border-[var(--accent)]/40 rounded-tl" />
+        <div className="absolute top-3 right-3 w-5 h-5 border-t-2 border-r-2 border-[var(--accent)]/40 rounded-tr" />
+        <div className="absolute bottom-3 left-3 w-5 h-5 border-b-2 border-l-2 border-[var(--accent)]/40 rounded-bl" />
+        <div className="absolute bottom-3 right-3 w-5 h-5 border-b-2 border-r-2 border-[var(--accent)]/40 rounded-br" />
+
+        {/* Label */}
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+          <span
+            className="text-[10px] tracking-[0.2em] uppercase text-[var(--muted)]"
+            style={{ fontFamily: "var(--font-geist-mono)" }}
+          >
+            Scanning for AI patterns
           </span>
-        </Link>
-        <div className="flex items-center gap-1">
-          <Link
-            href="/app"
-            className="px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors rounded-lg"
-          >
-            AI Detector
-          </Link>
-          <Link
-            href="/app"
-            className="px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors rounded-lg"
-          >
-            Humanizer
-          </Link>
-          <Link
-            href="/app"
-            className="px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors rounded-lg"
-          >
-            Writing Center
-          </Link>
-          <Link
-            href="/blog"
-            className="px-3 py-1.5 text-xs font-medium text-[var(--muted)] hover:text-[var(--foreground)] transition-colors rounded-lg"
-          >
-            Blog
-          </Link>
-          <Link
-            href="/app"
-            className="ml-2 px-4 py-1.5 text-xs font-medium bg-[var(--accent)] text-white rounded-lg hover:bg-[#b5583a] transition-colors"
-          >
-            Get Started
-          </Link>
         </div>
-      </div>
-    </nav>
-  );
-}
 
-function Hero() {
-  return (
-    <section className="py-24 px-6">
-      <div className="max-w-3xl mx-auto text-center space-y-6">
-        <h1 className="text-4xl font-bold text-[var(--foreground)] tracking-tight leading-tight">
-          Detect AI text. Humanize it.
-          <br />
-          <span className="text-[var(--accent)]">Learn to write better.</span>
-        </h1>
-        <p className="text-lg text-[var(--muted)] max-w-xl mx-auto leading-relaxed">
-          AI Text X-Ray goes beyond a simple score — it shows you{" "}
-          <em>exactly why</em> text looks AI-generated, helps you rewrite it,
-          and teaches you to write with authentic voice.
-        </p>
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <Link
-            href="/app"
-            className="px-6 py-2.5 bg-[var(--accent)] text-white text-sm font-medium rounded-xl hover:bg-[#b5583a] transition-colors shadow-sm"
-          >
-            Try it free →
-          </Link>
-          <a
-            href="#how-it-works"
-            className="px-6 py-2.5 text-sm font-medium text-[var(--foreground)] border border-[var(--card-border)] rounded-xl hover:border-[var(--accent)]/40 transition-colors"
-          >
-            How it works
-          </a>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ToolCards() {
-  const tools = [
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
-      ),
-      title: "AI Detector",
-      description:
-        "Paste any text and see a detailed breakdown — perplexity curves, GLTR token ranks, entropy patterns, sentence-level scoring. Not just a number, but the evidence behind it.",
-      color: "text-blue-600 bg-blue-50 border-blue-200",
-      cta: "Detect text",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 20h9" />
-          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-        </svg>
-      ),
-      title: "Humanizer",
-      description:
-        "Transform AI-generated text using a 50-million sentence human corpus. 11 replacement strategies — from full sentence swaps to subtle phrase adjustments. Choose the method that fits.",
-      color: "text-emerald-600 bg-emerald-50 border-emerald-200",
-      cta: "Humanize text",
-    },
-    {
-      icon: (
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <polyline points="14 2 14 8 20 8" />
-          <line x1="16" y1="13" x2="8" y2="13" />
-          <line x1="16" y1="17" x2="8" y2="17" />
-        </svg>
-      ),
-      title: "Writing Center",
-      description:
-        "Your AI writing coach. Get guided through brainstorming, outlining, drafting, and revising — with feedback based on the 6+1 Traits framework used by writing teachers worldwide.",
-      color: "text-purple-600 bg-purple-50 border-purple-200",
-      cta: "Start writing",
-    },
-  ];
-
-  return (
-    <section className="py-16 px-6">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-xl font-semibold text-[var(--foreground)] text-center mb-10">
-          Three tools, one platform
-        </h2>
-        <div className="grid md:grid-cols-3 gap-5">
-          {tools.map((tool) => (
-            <Link
-              key={tool.title}
-              href="/app"
-              className="bg-[var(--card)] border border-[var(--card-border)] rounded-2xl p-6 hover:border-[var(--accent)]/40 hover:shadow-md transition-all group"
-            >
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center border ${tool.color} mb-4`}
+        {/* Text with word-level coloring */}
+        <p className="text-base leading-relaxed" style={{ fontFamily: "var(--font-geist-sans)" }}>
+          {words.map((word, i) => (
+            <span key={i}>
+              <span
+                className="transition-colors duration-300"
+                style={{
+                  color: scoreToColor(WORD_SCORES[i] ?? 0.5, revealed[i] ?? false),
+                  fontWeight: revealed[i] && (WORD_SCORES[i] ?? 0) > 0.8 ? 500 : 400,
+                }}
               >
-                {tool.icon}
-              </div>
-              <h3 className="text-base font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
-                {tool.title}
-              </h3>
-              <p className="text-sm text-[var(--muted)] mt-2 leading-relaxed">
-                {tool.description}
-              </p>
-              <span className="inline-block mt-4 text-xs font-medium text-[var(--accent)] group-hover:underline">
-                {tool.cta} →
+                {word}
               </span>
-            </Link>
+              {i < words.length - 1 ? " " : ""}
+            </span>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  const signals = [
-    { name: "Perplexity", ai: "3-8", human: "20-50", description: "How predictable is each word?" },
-    { name: "GLTR Rank", ai: ">90% top-10", human: "<75% top-10", description: "Does the model's top prediction always match?" },
-    { name: "Entropy", ai: "1.0-2.0", human: "2.5-3.5", description: "How uncertain is the model at each position?" },
-    { name: "Burstiness", ai: "0.10-0.20", human: "0.35-0.65", description: "Do sentence lengths vary?" },
-    { name: "Vocabulary", ai: "0.65-0.80 TTR", human: "0.75-0.90 TTR", description: "How rich is the word choice?" },
-  ];
-
-  return (
-    <section id="how-it-works" className="py-16 px-6 bg-[var(--card)]">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-[var(--foreground)] text-center mb-3">
-          How detection works
-        </h2>
-        <p className="text-sm text-[var(--muted)] text-center mb-10 max-w-lg mx-auto">
-          We analyze 5 independent signals. Any single one can be fooled — but
-          defeating all 5 simultaneously is extremely difficult.
         </p>
-        <div className="space-y-3">
-          {signals.map((s) => (
-            <div
-              key={s.name}
-              className="flex items-center gap-4 bg-[var(--background)] rounded-xl p-4 border border-[var(--card-border)]"
-            >
-              <div className="w-28 shrink-0">
-                <div className="text-sm font-semibold text-[var(--foreground)]">
-                  {s.name}
-                </div>
-                <div className="text-[10px] text-[var(--muted)] mt-0.5">
-                  {s.description}
-                </div>
-              </div>
-              <div className="flex-1 flex items-center gap-3">
-                <div className="flex-1 bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-center">
-                  <div className="text-[10px] text-red-400 font-medium">AI</div>
-                  <div className="text-xs text-red-600 font-semibold mt-0.5">
-                    {s.ai}
-                  </div>
-                </div>
-                <div className="text-[var(--muted)] text-xs">vs</div>
-                <div className="flex-1 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 text-center">
-                  <div className="text-[10px] text-emerald-400 font-medium">
-                    Human
-                  </div>
-                  <div className="text-xs text-emerald-600 font-semibold mt-0.5">
-                    {s.human}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
-function Stats() {
-  const stats = [
-    { value: "50M", label: "Human sentences in corpus" },
-    { value: "5", label: "Independent detection signals" },
-    { value: "11", label: "Humanization strategies" },
-    { value: "7", label: "Writing trait dimensions" },
-  ];
-
-  return (
-    <section className="py-16 px-6">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-[var(--foreground)] text-center mb-10">
-          Built on real data
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-5 text-center"
-            >
-              <div className="text-2xl font-bold text-[var(--accent)]">
-                {s.value}
-              </div>
-              <div className="text-xs text-[var(--muted)] mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function WhatMakesUsDifferent() {
-  const points = [
-    {
-      title: "We show our work",
-      description:
-        "Other detectors give you a number. We give you interactive charts showing exactly which sentences triggered detection and why. You see the evidence.",
-    },
-    {
-      title: "Corpus-based humanization",
-      description:
-        "We don't paraphrase with AI (that's detectable too). We match your text against 50 million real human sentences and swap in genuine human writing.",
-    },
-    {
-      title: "Writing education, not just detection",
-      description:
-        "Our Writing Center teaches the 6+1 Traits framework used by educators worldwide. We don't just tell you what's wrong — we help you get better.",
-    },
-    {
-      title: "Free and transparent",
-      description:
-        "No hidden algorithms. No paywall for basic features. We believe in open, explainable AI analysis.",
-    },
-  ];
-
-  return (
-    <section className="py-16 px-6 bg-[var(--card)]">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-xl font-semibold text-[var(--foreground)] text-center mb-10">
-          What makes us different
-        </h2>
-        <div className="grid md:grid-cols-2 gap-5">
-          {points.map((p) => (
-            <div
-              key={p.title}
-              className="bg-[var(--background)] rounded-xl p-5 border border-[var(--card-border)]"
-            >
-              <h3 className="text-sm font-semibold text-[var(--foreground)]">
-                {p.title}
-              </h3>
-              <p className="text-xs text-[var(--muted)] mt-2 leading-relaxed">
-                {p.description}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function BlogPreview({ posts }: { posts: PostMeta[] }) {
-  if (posts.length === 0) return null;
-
-  return (
-    <section className="py-16 px-6">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-xl font-semibold text-[var(--foreground)]">
-            From the blog
-          </h2>
-          <Link
-            href="/blog"
-            className="text-xs text-[var(--accent)] hover:underline font-medium"
-          >
-            View all →
-          </Link>
-        </div>
-        <div className="grid md:grid-cols-3 gap-4">
-          {posts.slice(0, 3).map((post) => (
-            <Link
-              key={post.slug}
-              href={`/blog/${post.slug}`}
-              className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-5 hover:border-[var(--accent)]/40 transition-colors group"
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <time className="text-[10px] text-[var(--muted)]">
-                  {post.date}
-                </time>
-                {post.tags.slice(0, 1).map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--accent-light)] text-[var(--accent)] font-medium"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <h3 className="text-sm font-semibold text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors leading-snug">
-                {post.title}
-              </h3>
-              {post.summary && (
-                <p className="text-xs text-[var(--muted)] mt-2 leading-relaxed line-clamp-3">
-                  {post.summary}
-                </p>
-              )}
-            </Link>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Footer() {
-  return (
-    <footer className="py-10 px-6 border-t border-[var(--card-border)]">
-      <div className="max-w-4xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded bg-[var(--accent)] flex items-center justify-center">
-            <span className="text-white text-[8px] font-bold">X</span>
+        {/* Legend */}
+        <div className="flex items-center gap-4 mt-5 pt-4 border-t border-[var(--card-border)]">
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-1.5 rounded-full bg-[#c96442]" />
+            <span className="text-[10px] text-[var(--muted)]">High AI probability</span>
           </div>
-          <span className="text-xs text-[var(--muted)]">AI Text X-Ray</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-1.5 rounded-full bg-[#d4956b]" />
+            <span className="text-[10px] text-[var(--muted)]">Moderate</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-3 h-1.5 rounded-full bg-[#5a8a6a]" />
+            <span className="text-[10px] text-[var(--muted)]">Likely human</span>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
+      </div>
+    </div>
+  );
+}
+
+// ── Animated counter ──
+
+function AnimatedNumber({ value, suffix = "" }: { value: number; suffix?: string }) {
+  const [display, setDisplay] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          let start = 0;
+          const step = value / 40;
+          const interval = setInterval(() => {
+            start += step;
+            if (start >= value) {
+              setDisplay(value);
+              clearInterval(interval);
+            } else {
+              setDisplay(Math.floor(start));
+            }
+          }, 30);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [value]);
+
+  return (
+    <span ref={ref}>
+      {display}
+      {suffix}
+    </span>
+  );
+}
+
+// ── Main Page ──
+
+export default function LandingPage() {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handler = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-[var(--background)] overflow-x-hidden">
+      {/* ── Nav ── */}
+      <nav
+        className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
+        style={{
+          backgroundColor: scrollY > 20 ? "rgba(249, 245, 239, 0.85)" : "transparent",
+          backdropFilter: scrollY > 20 ? "blur(12px)" : "none",
+          borderBottom: scrollY > 20 ? "1px solid var(--card-border)" : "1px solid transparent",
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-[var(--foreground)] flex items-center justify-center group-hover:bg-[var(--accent)] transition-colors">
+              <span className="text-white text-xs font-bold tracking-tight">X</span>
+            </div>
+            <span className="text-sm font-medium text-[var(--foreground)]">
+              AI Text X-Ray
+            </span>
+          </Link>
+          <div className="flex items-center gap-6">
+            <a
+              href="#tools"
+              className="text-[13px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors hidden sm:block"
+            >
+              Tools
+            </a>
+            <a
+              href="#how-it-works"
+              className="text-[13px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors hidden sm:block"
+            >
+              How it works
+            </a>
+            <Link
+              href="/blog"
+              className="text-[13px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors hidden sm:block"
+            >
+              Blog
+            </Link>
+            <Link
+              href="/app"
+              className="px-5 py-2 text-[13px] font-medium bg-[var(--foreground)] text-[var(--background)] rounded-full hover:opacity-90 transition-opacity"
+            >
+              Open App
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* ── Hero ── */}
+      <section className="pt-36 pb-20 px-6">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
+          {/* Tagline */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[var(--accent)]/8 border border-[var(--accent)]/15">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+            <span className="text-[11px] font-medium text-[var(--accent)] tracking-wide">
+              Free &amp; open — no signup required
+            </span>
+          </div>
+
+          {/* Headline */}
+          <h1
+            className="text-[clamp(2.5rem,6vw,4.5rem)] leading-[1.1] tracking-tight text-[var(--foreground)]"
+            style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+          >
+            See through
+            <br />
+            AI-generated text
+          </h1>
+
+          {/* Subheadline */}
+          <p className="text-lg text-[var(--muted)] max-w-lg mx-auto leading-relaxed">
+            Five scientific signals. Word-level precision.
+            <br />
+            Not just a score — the <em>evidence</em> behind it.
+          </p>
+
+          {/* CTAs */}
+          <div className="flex items-center justify-center gap-4 pt-2">
+            <Link
+              href="/app"
+              className="group px-7 py-3 bg-[var(--foreground)] text-[var(--background)] text-sm font-medium rounded-full hover:opacity-90 transition-all inline-flex items-center gap-2"
+            >
+              Try it now
+              <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+            </Link>
+            <a
+              href="#how-it-works"
+              className="px-7 py-3 text-sm font-medium text-[var(--foreground)] rounded-full border border-[var(--card-border)] hover:border-[var(--foreground)]/30 transition-colors"
+            >
+              See how it works
+            </a>
+          </div>
+        </div>
+
+        {/* Scanner demo */}
+        <div className="mt-16 max-w-4xl mx-auto">
+          <HeroScanner />
+        </div>
+      </section>
+
+      {/* ── Tools ── */}
+      <section id="tools" className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <p
+              className="text-[11px] tracking-[0.25em] uppercase text-[var(--accent)] font-medium mb-3"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              Three tools
+            </p>
+            <h2
+              className="text-3xl tracking-tight text-[var(--foreground)]"
+              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+            >
+              Detect. Rewrite. Learn.
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              {
+                num: "01",
+                title: "AI Detector",
+                description:
+                  "Paste text. See perplexity curves, GLTR rank distribution, entropy patterns, and sentence-level scores. Every result is explainable.",
+                accent: "#3b82f6",
+                href: "/app",
+              },
+              {
+                num: "02",
+                title: "Humanizer",
+                description:
+                  "50 million real human sentences. 11 replacement strategies. From full sentence swaps to subtle phrase adjustments. You choose the approach.",
+                accent: "#22c55e",
+                href: "/app",
+              },
+              {
+                num: "03",
+                title: "Writing Center",
+                description:
+                  "An AI writing coach that guides you through brainstorming, drafting, and revising. Feedback based on the 6+1 Traits framework.",
+                accent: "#a855f7",
+                href: "/app",
+              },
+            ].map((tool) => (
+              <Link
+                key={tool.num}
+                href={tool.href}
+                className="group relative bg-white rounded-2xl border border-[var(--card-border)] p-7 hover:shadow-lg hover:shadow-black/[0.03] transition-all duration-300 overflow-hidden"
+              >
+                {/* Top accent line */}
+                <div
+                  className="absolute top-0 left-0 right-0 h-[2px] opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ backgroundColor: tool.accent }}
+                />
+
+                <span
+                  className="text-[11px] font-medium tracking-wider"
+                  style={{ color: tool.accent, fontFamily: "var(--font-geist-mono)" }}
+                >
+                  {tool.num}
+                </span>
+
+                <h3
+                  className="text-lg mt-3 mb-3 text-[var(--foreground)] tracking-tight"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  {tool.title}
+                </h3>
+
+                <p className="text-[13px] text-[var(--muted)] leading-relaxed">
+                  {tool.description}
+                </p>
+
+                <span
+                  className="inline-block mt-5 text-[12px] font-medium opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300"
+                  style={{ color: tool.accent }}
+                >
+                  Open tool →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── How It Works ── */}
+      <section id="how-it-works" className="py-24 px-6 bg-[var(--foreground)]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <p
+              className="text-[11px] tracking-[0.25em] uppercase text-[var(--accent)] font-medium mb-3"
+              style={{ fontFamily: "var(--font-geist-mono)" }}
+            >
+              The science
+            </p>
+            <h2
+              className="text-3xl tracking-tight text-[var(--background)]"
+              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+            >
+              Five signals. One verdict.
+            </h2>
+            <p className="text-sm text-[var(--background)]/50 mt-3 max-w-md mx-auto">
+              Any single signal can be fooled. Defeating all five simultaneously is
+              a different problem entirely.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {[
+              {
+                name: "Perplexity",
+                ai: "3–8",
+                human: "20–50",
+                desc: "How surprised is the model by each word?",
+              },
+              {
+                name: "Token Rank",
+                ai: ">90% top-10",
+                human: "<75% top-10",
+                desc: "Does the model's top prediction always match?",
+              },
+              {
+                name: "Entropy",
+                ai: "Low (1.0–2.0)",
+                human: "High (2.5–3.5)",
+                desc: "How uncertain is the model at each position?",
+              },
+              {
+                name: "Burstiness",
+                ai: "0.10–0.20",
+                human: "0.35–0.65",
+                desc: "Do sentence lengths vary?",
+              },
+              {
+                name: "Vocabulary",
+                ai: "Narrow",
+                human: "Diverse",
+                desc: "How rich is the word choice?",
+              },
+            ].map((s, i) => (
+              <div
+                key={s.name}
+                className="flex items-center gap-5 bg-white/[0.05] border border-white/[0.08] rounded-xl px-6 py-4 backdrop-blur-sm"
+              >
+                <span
+                  className="text-[10px] text-[var(--accent)] font-medium w-5"
+                  style={{ fontFamily: "var(--font-geist-mono)" }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="w-28 shrink-0">
+                  <div className="text-sm font-medium text-[var(--background)]">
+                    {s.name}
+                  </div>
+                  <div className="text-[10px] text-[var(--background)]/40 mt-0.5">
+                    {s.desc}
+                  </div>
+                </div>
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="flex-1 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2.5 text-center">
+                    <div className="text-[9px] text-red-400/70 font-medium uppercase tracking-wider">
+                      AI
+                    </div>
+                    <div className="text-xs text-red-400 font-semibold mt-0.5">
+                      {s.ai}
+                    </div>
+                  </div>
+                  <div className="flex-1 bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-3 py-2.5 text-center">
+                    <div className="text-[9px] text-emerald-400/70 font-medium uppercase tracking-wider">
+                      Human
+                    </div>
+                    <div className="text-xs text-emerald-400 font-semibold mt-0.5">
+                      {s.human}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Numbers ── */}
+      <section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              { value: 50, suffix: "M", label: "Human sentences in corpus" },
+              { value: 5, suffix: "", label: "Detection signals" },
+              { value: 11, suffix: "", label: "Humanization strategies" },
+              { value: 7, suffix: "", label: "Writing trait dimensions" },
+            ].map((s) => (
+              <div key={s.label} className="text-center">
+                <div
+                  className="text-4xl font-light text-[var(--foreground)] tracking-tight"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  <AnimatedNumber value={s.value} suffix={s.suffix} />
+                </div>
+                <div className="text-[11px] text-[var(--muted)] mt-2 leading-snug">
+                  {s.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── What makes us different ── */}
+      <section className="py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <h2
+              className="text-3xl tracking-tight text-[var(--foreground)]"
+              style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+            >
+              Not another black box
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              {
+                title: "We show the evidence",
+                body: "Other detectors give a percentage. We give interactive charts — perplexity curves, token rank heatmaps, entropy plots. You see exactly which sentences triggered detection.",
+              },
+              {
+                title: "Corpus, not paraphrase",
+                body: "Our humanizer doesn't use AI to rewrite AI text (that's detectable too). We match against 50 million real human sentences from pre-2019 sources. Zero AI contamination.",
+              },
+              {
+                title: "Education, not evasion",
+                body: "The Writing Center teaches the 6+1 Traits framework. We help you understand what makes writing human — varied sentence length, specific detail, authentic voice.",
+              },
+              {
+                title: "Free and transparent",
+                body: "No hidden algorithms. No paywall for core features. We believe AI detection should be explainable, accessible, and honest about its limitations.",
+              },
+            ].map((p) => (
+              <div
+                key={p.title}
+                className="bg-white rounded-2xl border border-[var(--card-border)] p-7 hover:shadow-lg hover:shadow-black/[0.02] transition-shadow duration-300"
+              >
+                <h3
+                  className="text-base text-[var(--foreground)] tracking-tight mb-2"
+                  style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+                >
+                  {p.title}
+                </h3>
+                <p className="text-[13px] text-[var(--muted)] leading-relaxed">
+                  {p.body}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA ── */}
+      <section className="py-24 px-6">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <h2
+            className="text-3xl tracking-tight text-[var(--foreground)]"
+            style={{ fontFamily: "var(--font-display), Georgia, serif" }}
+          >
+            Ready to see through the text?
+          </h2>
+          <p className="text-sm text-[var(--muted)]">
+            No signup. No paywall. Just paste and analyze.
+          </p>
           <Link
             href="/app"
-            className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+            className="group inline-flex items-center gap-2 px-8 py-3.5 bg-[var(--foreground)] text-[var(--background)] text-sm font-medium rounded-full hover:opacity-90 transition-all"
           >
-            Tools
-          </Link>
-          <Link
-            href="/blog"
-            className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
-          >
-            Blog
+            Open AI Text X-Ray
+            <span className="group-hover:translate-x-0.5 transition-transform">→</span>
           </Link>
         </div>
-      </div>
-    </footer>
-  );
-}
+      </section>
 
-export default function Home() {
-  const posts = getAllPosts();
-
-  return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <NavBar />
-      <Hero />
-      <ToolCards />
-      <HowItWorks />
-      <Stats />
-      <WhatMakesUsDifferent />
-      <BlogPreview posts={posts} />
-      <Footer />
+      {/* ── Footer ── */}
+      <footer className="py-10 px-6 border-t border-[var(--card-border)]">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-5 h-5 rounded bg-[var(--foreground)] flex items-center justify-center">
+              <span className="text-[var(--background)] text-[8px] font-bold">X</span>
+            </div>
+            <span className="text-[11px] text-[var(--muted)]">
+              AI Text X-Ray
+            </span>
+          </div>
+          <div className="flex items-center gap-5">
+            <Link
+              href="/app"
+              className="text-[11px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+            >
+              App
+            </Link>
+            <Link
+              href="/blog"
+              className="text-[11px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+            >
+              Blog
+            </Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
