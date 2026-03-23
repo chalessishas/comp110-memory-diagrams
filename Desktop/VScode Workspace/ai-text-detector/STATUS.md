@@ -1,10 +1,103 @@
 # AI Text X-Ray — 项目状态
 
-> 最后更新: 2026-03-21 23:30
+> 最后更新: 2026-03-23 10:36
 
 ---
 
 ## 最近更新（新的在上面）
+
+### [2026-03-23 10:36] — DeBERTa 98.5% + 双系统检测 API 就绪
+
+- **做了什么**：
+  1. **DeBERTa 训练管线修复**：发现 3 个 bug 并修复
+     - `load_best_model_at_end=True` + DeBERTa gamma/beta 命名不匹配 → 静默损坏模型权重（根因）
+     - 按 VRAM 自动选 batch_size（A100-80GB=64, 40GB=32, T4=16）
+     - 训练完成后同一 cell 自动保存 + 验证
+  2. **数据集重建**（70,000 条）：
+     - human 文本：从 C4 语料库连续窗口采样（修复随机拼接导致的不连贯问题）
+     - human_polished：40% 本地 spaCy+WordNet 同义词替换（QuillBot 风格）+ 60% DeepSeek API
+     - ai / ai_polished：保留原有
+  3. **DeBERTa 4-epoch 训练**：Colab A100-40GB, bf16, batch=32, ~1hr
+     - 130 样本测试准确率: **98.5%**（128/130）
+     - 数据集 human/AI 各 50/50 满分，语料库 human 28/30
+  4. **Perplexity 升级**：llama3.2:1b → MLX qwen3.5:4b（信号分离度 3.3x）
+     - 5 特征 Logistic Regression: 90% 准确率，补 DeBERTa 正式文本盲区
+  5. **API 三层信号**：DeBERTa 二分类 + Perplexity LR + 融合分数
+  6. **DeBERTa 简化为二分类**：human vs AI，4-class 保留但暂不暴露
+
+- **踩过的坑**：
+  1. DeBERTa-v3 `legacy=True` 导致 LayerNorm 用 gamma/beta 命名，checkpoint reload 时 key 不匹配
+  2. `torch.cuda.get_device_properties(0).total_memory`（不是 `total_mem`）
+  3. `classifier.weight.std() ≈ 0.02` 不能判断"未训练" — DeBERTa 学习在 backbone 不在 head
+  4. Colab Find/Replace 对已执行 cell 不生效 — 本地改完重新上传
+  5. MLX qwen3.5:4b 长文本推理极慢（~4min/3000字）— 生产环境需要截断或优化
+  6. `mx → numpy` 转换需要 `.astype(mx.float32)` 避免 PEP 3118 buffer 格式错误
+
+- **当前状态**：可用
+  - 检测 API: `python3.13 scripts/perplexity.py` (port 5001)
+  - 返回: `classification` (DeBERTa) + `perplexity_stats` (LR) + `fused` (融合) + `tokens` (可视化)
+
+### [2026-03-22 10:00] — CoPA Humanizer 原型 + 校准检测器
+
+- **做了什么**：
+  1. **深度调研**：AI detector/humanizer 生态全景（论文 15+，产品 10+，基准 3 个）
+  2. **CoPA 实现**：基于 EMNLP 2025 论文实现对比式解码 humanizer
+     - v1 (`copa_mlx.py`): 基础实现，qwen3.5:4b via MLX
+     - v1 参数扫描 (`copa_sweep.py`): 5λ × 3α × 3T = 45 组参数
+     - v2 (`copa_proof.py`): 修复 5 个关键问题后的版本
+  3. **校准检测器** (`calibrate_detector.py`): 用 dataset.jsonl 训练 logistic regression，校准 perplexity 检测器阈值（进行中）
+
+- **架构决策**：
+  - **MLX 而非 llama-cpp-python**：llama.cpp 不认识 `qwen3_5` 架构，MLX 0.31.1 支持。Python 3.13 (/opt/anaconda3) 运行 MLX，Python 3.9 跑不了
+  - **CoPA 而非 LoRA 微调**：CoPA 无需训练，直接在解码时用双 prompt 对比。论文报告 87.88% 检测器逃逸率。选它因为：(1) 零训练成本 (2) 能适应检测器更新 (3) 硬件约束下可行
+  - **Best-of-N 而非逐 token 精确控制**：用户最初提出"按人类 perplexity 分布生成"，但逐 token 控制不现实（perplexity 是上下文依赖的）。改为生成 20 候选用复合评分选最优
+  - **Logistic Regression 校准**：5 特征（PPL/ENT/ENT_STD/BURST/GLTR）→ LR 分类器。可解释性比 XGBoost/SVM 好，系数直接指导 CoPA 调参
+
+- **踩过的坑**：
+  1. **llama-cpp-python 不支持 qwen3.5**：`unknown model architecture: 'qwen35'`，PyPI 和 GitHub main 都是 v0.3.16，底层 C 代码未更新
+  2. **MLX vocab size 不匹配**：tokenizer.vocab_size=248044 但模型 embedding=248320，英文掩码维度不对。修复：用 `model(dummy).shape[-1]` 获取真实维度
+  3. **Python 3.9 装不了 mlx-lm 0.31.1**：需要 mlx>=0.30.4，但 Python 3.9 上 PyPI 最高 0.29.3。必须用 Python 3.13
+  4. **v1 输出 43/45 以 "Honestly" 开头**：单一 prompt 模板导致模式锁定。v2 用 5 个随机模板修复
+  5. **qwen3.5 输出中文**：高 λ + 高 T 时模型掉入 CJK token 空间。v2 加英文词表掩码（blocked 99052/248320 = 39.9%）
+  6. **GPU Timeout**：全精度 qwen3.5:4b 在 16GB M4 上 OOM。改用 4-bit 量化版
+
+- **CoPA v2 实验结果**（3 篇测试文本，每篇 20 候选）：
+
+  | 文本 | 原始 PPL | 最佳 CoPA PPL | 原始 GLTR | 最佳 CoPA GLTR | 语义保持 |
+  |------|---------|--------------|----------|---------------|---------|
+  | academic | 4.3 | 35.8 | 95% | 66% | 0.673 |
+  | blog | 3.8 | 28.2 | 92% | 71% | 0.706 |
+  | technical | 3.9 | 35.4 | 98% | 64% | 0.679 |
+
+  最佳参数：λ=0.5, α=1e-5, T=1.1。三篇文本的 top-1 候选全部四项指标落入人类范围 [PEBG]。
+
+- **当前状态**：CoPA 原型可用，校准检测器正在跑
+- **下一步**：
+  1. 校准结果出来后验证 CoPA 输出是否能骗过校准后的检测器
+  2. 如果通过 → 集成到产品（humanizer.py 新增 CoPA 方法）
+  3. 如果不通过 → 分析哪个特征暴露了，针对性调 CoPA 参数
+  4. DeBERTa 重训完成后用它做最终验证
+
+- **已知局限（必须诚实记录）**：
+  1. **自评偏差**：所有指标用 qwen3.5 自己算，不等于外部检测器的判断
+  2. **语义保持 0.67-0.71**：改写后保留约 70% 语义，可能不够精确改写场景
+  3. **速度**：20 候选 ~3 分钟，生产环境需减到 3-5 候选（~20s）
+  4. **emoji 泄漏**：部分 prompt 模板导致输出含 emoji/markdown 符号
+  5. **首词多样性不足**：academic 55% 以 "AI" 开头，仍有模式可被检测
+
+### [2026-03-22 09:00] — Humanizer 方向性讨论 + 技术研究
+
+- **做了什么**：与用户讨论 humanizer 产品方向和技术路线
+- **用户核心理念**：
+  - AI 是帮助高效传达想法的工具，不是替代思考
+  - 用 AI 写 code 被推崇，写 essay 被抵触 — 这是双标
+  - 远期愿景：个性化 translator（采集用户表达习惯，生成匹配个人风格的文本）
+  - Humanizer 的输出不是最终产品，是"统计模具"——用人类文本的 perplexity 分布作为 seed，让 LLM 在这个约束下保持原文语义
+- **技术研究结论**：
+  - 现有 humanizer 全部做表面文章（同义词替换、句式变换），GPTZero 已能识别
+  - DIPPER (11B) 是学术 SOTA 但太大；CoPA (EMNLP 2025) 无需训练、用对比解码
+  - GradEscape 用 139M 模型超过 11B DIPPER — 模型大小不是决定因素
+  - 理论极限：Sadasivan et al. 证明充分好的语言模型输出不可靠检测
 
 ### [2026-03-21 23:30] — Landing Page 重做 + 字体修复
 
@@ -97,10 +190,12 @@ DeBERTa 分类器尚未可用。训练管线已修复，等待数据集重建后
 |------|------|------|
 | 前端 UI | ✅ 可用 | 检测/改写/写作三面板，GPTZero 风格可视化已加 |
 | Python 检测后端 | ✅ 代码就绪 | llama.cpp token 分析 + DeBERTa 推理，等模型权重 |
-| Python 改写后端 | ✅ 可用 | 7 种 FAISS 语义改写方法 |
+| Python 改写后端（FAISS） | ✅ 可用 | 7 种语义改写方法，语义保持差但可做统计模具 |
+| **CoPA Humanizer** | **🔧 原型** | **对比式解码，四项指标进入人类范围，待外部验证** |
+| **校准检测器** | **🔧 进行中** | **LR 分类器，用 dataset.jsonl 校准 PPL/ENT/BURST/GLTR 阈值** |
 | 50M 句子语料库 | ✅ 完成 | FAISS IVF+PQ 索引 2.6GB |
-| 70K 训练数据集 | ❌ 需重建 | human + human_polished 不连贯，需重新生成 |
-| DeBERTa 分类器 | ❌ 不可用 | 本地 models/detector/ 存的是 base 权重 |
+| 70K 训练数据集 | ❌ 重建中 | human + human_polished 不连贯，另一个 AI 在重新生成 |
+| DeBERTa 分类器 | ❌ 重训中 | 等数据集重建完成后 Colab 重训 |
 | Colab 训练 notebook | ✅ 已修复 | gamma/beta bug + 自动保存 + 验证 |
 | 部署 | ❌ 无 | 无 Docker/Vercel 配置 |
 
@@ -127,6 +222,10 @@ python3 scripts/humanizer.py        # 改写后端 → localhost:5002
 
 | 日期 | 决策 | 原因 |
 |------|------|------|
+| 2026-03-22 | CoPA 对比解码做 humanizer | 无需训练，用双 prompt 对比在解码时去 AI 指纹。论文报告 87.88% 逃逸率 |
+| 2026-03-22 | MLX 替代 llama-cpp-python | llama.cpp 不支持 qwen3_5 架构，MLX 0.31.1 原生支持 |
+| 2026-03-22 | Best-of-N 选择而非逐 token 控制 | perplexity 是上下文依赖的，无法逐 token 精确控制。生成 N 个候选用复合评分选最优更实际 |
+| 2026-03-22 | LR 校准检测器 | DeBERTa 在重训，用 LR 在 5 维特征上做临时检测器。可解释性好，系数直接指导 CoPA 调参 |
 | 2026-03-21 | 关闭 load_best_model_at_end | DeBERTa-v3 gamma/beta 命名 bug 导致 checkpoint 加载静默损坏模型 |
 | 2026-03-21 | human 文本改用连续窗口采样 | 随机拼接导致模型学习"连贯性"而非"AI 特征" |
 | 2026-03-21 | 训练后同 cell 自动保存 + 验证 | 防止 cell-6 重跑覆盖训练结果 |
