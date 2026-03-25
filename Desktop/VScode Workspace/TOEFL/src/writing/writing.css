@@ -4,18 +4,18 @@
   font-size: 14px;
   font-weight: 500;
   padding: 10px 18px;
-  border-radius: 10px;
-  border: 1.5px solid #E2DDD5;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
   background: white;
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
 }
-.word-chip:hover { border-color: #D4A574; }
+.word-chip:hover { border-color: #00695c; }
 .word-chip.used {
   opacity: 0.3;
   cursor: default;
-  border-color: #E2DDD5;
+  border-color: #ccc;
 }
 
 /* Answer slots */
@@ -23,45 +23,49 @@
   min-width: 60px;
   min-height: 44px;
   padding: 10px 14px;
-  border-radius: 10px;
-  border: 2px dashed #E2DDD5;
-  background: rgba(212, 165, 116, 0.03);
+  border-radius: 8px;
+  border: 2px dashed #ccc;
+  background: rgba(0, 105, 92, 0.02);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   font-weight: 500;
-  color: #2D2A26;
+  color: #1a1a1a;
   transition: all 0.2s ease;
 }
 .answer-slot.filled {
-  border: 1.5px solid #D4A574;
-  background: rgba(212, 165, 116, 0.06);
+  border: 1.5px solid #00695c;
+  background: rgba(0, 105, 92, 0.04);
   cursor: pointer;
 }
 .answer-slot.filled:hover {
-  background: rgba(212, 165, 116, 0.12);
+  background: rgba(0, 105, 92, 0.08);
 }
 .answer-slot.empty {
-  color: #ADA899;
+  color: #aaa;
 }
 
 /* Email layout */
 .email-layout { display: flex; height: 100vh; }
-.email-prompt-panel { width: 40%; border-right: 1px solid #EDE8E0; background: white; display: flex; flex-direction: column; }
-.email-editor-panel { width: 60%; display: flex; flex-direction: column; background: #FAFAF8; }
+.email-prompt-panel { width: 40%; border-right: 1px solid #ddd; background: white; display: flex; flex-direction: column; }
+.email-editor-panel { width: 60%; display: flex; flex-direction: column; background: #f5f5f5; }
 
 /* Discussion layout */
-.discussion-layout { min-height: 100vh; background: #FAFAF8; display: flex; flex-direction: column; }
+.discussion-layout { min-height: 100vh; background: #f5f5f5; display: flex; flex-direction: column; }
 
 /* Writing result bars */
-.score-bar-track { height: 8px; border-radius: 4px; background: #EDE8E0; overflow: hidden; }
-.score-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(135deg, #D4A574 0%, #C4956A 100%); transition: width 0.6s ease-out; }
+.score-bar-track { height: 8px; border-radius: 4px; background: #e0e0e0; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 4px; background: #00695c; transition: width 0.6s ease-out; }
 
 /* Writing responsive */
 @media (max-width: 768px) {
   .email-layout { flex-direction: column; height: auto; min-height: 100vh; }
   .email-prompt-panel, .email-editor-panel { width: 100%; border-right: none; }
-  .email-prompt-panel { max-height: 35vh; overflow-y: auto; border-bottom: 1px solid #EDE8E0; }
+  .email-prompt-panel { max-height: 35vh; overflow-y: auto; border-bottom: 1px solid #ddd; }
+  .email-editor-panel textarea { min-height: 200px; }
+
+  .discussion-layout .student-cards { flex-direction: column; }
+  .discussion-layout textarea { min-height: 180px; }
 }

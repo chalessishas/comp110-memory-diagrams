@@ -29,7 +29,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
   return (
     <div style={{
-      minHeight: '100vh', background: '#FAFAF8',
+      minHeight: '100vh', background: '#f5f5f5',
       fontFamily: "'DM Sans', sans-serif",
     }}>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '48px 24px 80px' }}>
@@ -38,23 +38,23 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
         <div style={{ textAlign: 'center', marginBottom: 40, animation: 'fadeUp 0.6s ease-out' }}>
           <div style={{
             width: 140, height: 140, borderRadius: '50%',
-            background: `conic-gradient(#D4A574 ${pct * 3.6}deg, #EDE8E0 0deg)`,
+            background: `conic-gradient(#00695c ${pct * 3.6}deg, #ddd 0deg)`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 20px',
           }}>
             <div style={{
-              width: 116, height: 116, borderRadius: '50%', background: '#FAFAF8',
+              width: 116, height: 116, borderRadius: '50%', background: '#f5f5f5',
               display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             }}>
               <span style={{
                 fontFamily: "'Instrument Serif', Georgia, serif",
-                fontSize: 44, color: '#2D2A26', lineHeight: 1,
+                fontSize: 44, color: '#1a1a1a', lineHeight: 1,
               }}>
                 {score.overall}
               </span>
               <span style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 12, color: '#ADA899', marginTop: 2,
+                fontSize: 12, color: '#aaa', marginTop: 2,
               }}>
                 /5
               </span>
@@ -63,7 +63,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
           <h2 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 28, color: '#2D2A26', fontWeight: 400, marginBottom: 0,
+            fontSize: 28, color: '#1a1a1a', fontWeight: 400, marginBottom: 0,
           }}>
             {title}
           </h2>
@@ -71,12 +71,12 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
 
         {/* Dimension Bars */}
         <div style={{
-          background: 'white', borderRadius: 14, border: '1px solid #EDE8E0',
+          background: 'white', borderRadius: 14, border: '1px solid #ddd',
           padding: '24px 28px', marginBottom: 20,
           animation: 'fadeUp 0.5s ease-out 0.1s both',
         }}>
           <p style={{
-            fontSize: 16, fontWeight: 700, color: '#2D2A26', marginBottom: 20,
+            fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 20,
           }}>
             Score Breakdown
           </p>
@@ -89,7 +89,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
               <div key={key} style={{ marginBottom: errors.length > 0 ? 16 : 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{
-                    fontSize: 13, color: '#6B6560', width: 100, flexShrink: 0,
+                    fontSize: 13, color: '#555', width: 100, flexShrink: 0,
                   }}>
                     {DIMENSION_LABELS[key] || key}
                   </span>
@@ -128,19 +128,19 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             marginBottom: 20, animation: 'fadeUp 0.5s ease-out 0.15s both',
           }}>
             <p style={{
-              fontSize: 16, fontWeight: 700, color: '#2D2A26', marginBottom: 12,
+              fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
             }}>
               Suggestions for Improvement
             </p>
             {score.suggestions.map((tip, i) => (
               <div key={i} style={{
-                background: 'rgba(212,165,116,0.04)',
-                border: '1px solid rgba(212,165,116,0.15)',
+                background: 'rgba(0,105,92,0.03)',
+                border: '1px solid rgba(0,105,92,0.12)',
                 borderRadius: 10, padding: '14px 16px',
                 marginBottom: 8,
               }}>
                 <p style={{
-                  fontSize: 13, color: '#6B5D4D', margin: 0, lineHeight: 1.6,
+                  fontSize: 13, color: '#004d40', margin: 0, lineHeight: 1.6,
                 }}>
                   {tip}
                 </p>
@@ -152,24 +152,24 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
         {/* Response Comparison */}
         <div style={{ marginBottom: 32, animation: 'fadeUp 0.5s ease-out 0.2s both' }}>
           <p style={{
-            fontSize: 16, fontWeight: 700, color: '#2D2A26', marginBottom: 12,
+            fontSize: 16, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
           }}>
             Response Comparison
           </p>
           <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
             <div style={{
               flex: '1 1 280px', background: 'white', borderRadius: 12,
-              border: '1px solid #EDE8E0', padding: 20,
+              border: '1px solid #ddd', padding: 20,
             }}>
               <p style={{
-                fontSize: 11, fontWeight: 600, color: '#ADA899',
+                fontSize: 11, fontWeight: 600, color: '#aaa',
                 textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 14,
               }}>
                 Your Response
               </p>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13,
-                color: '#2D2A26', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
+                color: '#1a1a1a', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
               }}>
                 {userText}
               </p>
@@ -186,7 +186,7 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
               </p>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 13,
-                color: '#2D2A26', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
+                color: '#1a1a1a', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0,
               }}>
                 {sampleResponse}
               </p>
@@ -200,9 +200,9 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             onClick={onRetry}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-              color: 'white', background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+              color: 'white', background: '#00695c',
               border: 'none', borderRadius: 10, padding: '12px 28px', cursor: 'pointer',
-              boxShadow: '0 4px 16px rgba(212,165,116,0.25)',
+              boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
             }}
           >
             Try Again
@@ -211,8 +211,8 @@ const WritingResult = ({ score, userText, sampleResponse, sampleScore, taskType,
             onClick={onBack}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-              color: '#6B6560', background: 'white',
-              border: '1.5px solid #E2DDD5', borderRadius: 10, padding: '12px 28px', cursor: 'pointer',
+              color: '#555', background: 'white',
+              border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 28px', cursor: 'pointer',
             }}
           >
             Back to Writing

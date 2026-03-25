@@ -34,6 +34,8 @@ const AcademicDiscussion = () => {
 
   const [started, setStarted] = useState(!!savedData.current)
   const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? 0)
+
+  useEffect(() => { document.title = 'Academic Discussion — TOEFL Practice' }, [])
   const [response, setResponse] = useState(savedData.current?.response ?? '')
   const [timer, setTimer] = useState(savedData.current?.timer ?? TOTAL_TIME)
   const [paused, setPaused] = useState(false)
@@ -72,6 +74,7 @@ const AcademicDiscussion = () => {
     savedData.current = null
   }
 
+  const [showConfirm, setShowConfirm] = useState(false)
   const wordCountColor = wordCount >= 120 ? '#5a9a6e' : '#b87333'
 
   // ─── LANDING ───
@@ -79,7 +82,7 @@ const AcademicDiscussion = () => {
     const hasResume = !!savedData.current
     return (
       <div style={{
-        minHeight: '100vh', background: '#FAFAF8',
+        minHeight: '100vh', background: '#f5f5f5',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -90,10 +93,10 @@ const AcademicDiscussion = () => {
           {/* Icon */}
           <div style={{
             width: 56, height: 56, borderRadius: 16,
-            background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+            background: '#00695c',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 32px',
-            boxShadow: '0 4px 16px rgba(212,165,116,0.3)',
+            boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
           }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
@@ -102,18 +105,18 @@ const AcademicDiscussion = () => {
 
           <h1 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 42, fontWeight: 400, color: '#2D2A26',
+            fontSize: 42, fontWeight: 400, color: '#1a1a1a',
             letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12,
           }}>
             Academic Discussion
           </h1>
           <p style={{
-            fontSize: 15, color: '#8A8477', lineHeight: 1.7, marginBottom: 12, fontWeight: 300,
+            fontSize: 15, color: '#888', lineHeight: 1.7, marginBottom: 12, fontWeight: 300,
           }}>
             1 prompt · 10 minutes · 120+ words
           </p>
           <p style={{
-            fontSize: 13, color: '#ADA899', lineHeight: 1.7, marginBottom: 40,
+            fontSize: 13, color: '#aaa', lineHeight: 1.7, marginBottom: 40,
           }}>
             Read the professor's question and two student responses, then contribute your own perspective to the discussion.
           </p>
@@ -123,8 +126,8 @@ const AcademicDiscussion = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#6B6560', background: 'white',
-                border: '1.5px solid #E2DDD5', borderRadius: 10, padding: '12px 24px',
+                color: '#555', background: 'white',
+                border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px',
                 cursor: 'pointer',
               }}
             >
@@ -135,9 +138,9 @@ const AcademicDiscussion = () => {
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
                 color: 'white',
-                background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+                background: '#00695c',
                 border: 'none', borderRadius: 10, padding: '12px 32px', cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(212,165,116,0.25)',
+                boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
               }}
             >
               {hasResume ? 'Resume' : 'Start Practice'}
@@ -147,6 +150,23 @@ const AcademicDiscussion = () => {
       </div>
     )
   }
+
+  // ─── CONFIRM MODAL ───
+  const ConfirmModal = () => (
+    <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
+      <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
+        <h3>Submit Response?</h3>
+        <p>
+          Word count: {wordCount} (target: 120+)
+          {wordCount < 60 && <><br />Your response is quite short. Consider expanding your argument.</>}
+        </p>
+        <div className="confirm-actions">
+          <button className="btn-cancel" onClick={() => setShowConfirm(false)}>Continue Writing</button>
+          <button className="btn-confirm" onClick={() => { setShowConfirm(false); handleSubmit() }}>Submit</button>
+        </div>
+      </div>
+    </div>
+  )
 
   // ─── RESULT ───
   if (showResult) {
@@ -166,11 +186,12 @@ const AcademicDiscussion = () => {
   // ─── TEST INTERFACE ───
   return (
     <div className="discussion-layout">
+      {showConfirm && <ConfirmModal />}
       {/* Sticky header */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 10,
         padding: '14px 20px',
-        borderBottom: '1px solid #EDE8E0',
+        borderBottom: '1px solid #ddd',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: 'white', flexShrink: 0,
       }}>
@@ -183,7 +204,7 @@ const AcademicDiscussion = () => {
         />
         <span style={{
           fontFamily: "'DM Sans', sans-serif",
-          fontSize: 13, fontWeight: 500, color: '#8A8477',
+          fontSize: 13, fontWeight: 500, color: '#888',
         }}>
           Academic Discussion
         </span>
@@ -194,8 +215,8 @@ const AcademicDiscussion = () => {
 
         {/* Professor card */}
         <div style={{
-          background: 'rgba(212,165,116,0.04)',
-          borderLeft: '3px solid #D4A574',
+          background: 'rgba(0,105,92,0.03)',
+          borderLeft: '3px solid #00695c',
           borderRadius: 12,
           padding: '20px 24px',
           marginBottom: 24,
@@ -203,7 +224,7 @@ const AcademicDiscussion = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
             <div style={{
               width: 42, height: 42, borderRadius: '50%',
-              background: '#D4A574',
+              background: '#00695c',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0,
             }}>
@@ -216,7 +237,7 @@ const AcademicDiscussion = () => {
             </div>
             <span style={{
               fontFamily: "'DM Sans', sans-serif",
-              fontSize: 14, fontWeight: 700, color: '#2D2A26',
+              fontSize: 14, fontWeight: 700, color: '#1a1a1a',
             }}>
               {prompt.professor.name}
             </span>
@@ -235,34 +256,34 @@ const AcademicDiscussion = () => {
             <div key={student.name} style={{
               flex: 1, minWidth: 250,
               background: 'white',
-              border: '1px solid #EDE8E0',
+              border: '1px solid #ddd',
               borderRadius: 12,
               padding: '16px 20px',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: '50%',
-                  background: i === 0 ? '#E8D5C4' : '#C4D5E8',
+                  background: i === 0 ? '#e0f2f1' : '#b2dfdb',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
                   <span style={{
                     fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 14, fontWeight: 700, color: '#2D2A26',
+                    fontSize: 14, fontWeight: 700, color: '#1a1a1a',
                   }}>
                     {student.name.charAt(0)}
                   </span>
                 </div>
                 <span style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  fontSize: 13, fontWeight: 700, color: '#2D2A26',
+                  fontSize: 13, fontWeight: 700, color: '#1a1a1a',
                 }}>
                   {student.name}
                 </span>
               </div>
               <p style={{
                 fontFamily: "'DM Sans', sans-serif",
-                fontSize: 13, lineHeight: 1.7, color: '#6B6560', margin: 0,
+                fontSize: 13, lineHeight: 1.7, color: '#555', margin: 0,
               }}>
                 {student.opinion}
               </p>
@@ -271,13 +292,13 @@ const AcademicDiscussion = () => {
         </div>
 
         {/* Divider */}
-        <div style={{ borderTop: '1px solid #EDE8E0', margin: '24px 0' }} />
+        <div style={{ borderTop: '1px solid #ddd', margin: '24px 0' }} />
 
         {/* Your response */}
         <div>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, fontWeight: 700, color: '#2D2A26', marginBottom: 12,
+            fontSize: 14, fontWeight: 700, color: '#1a1a1a', marginBottom: 12,
           }}>
             Your Response
           </p>
@@ -287,10 +308,10 @@ const AcademicDiscussion = () => {
             placeholder="Write your response here..."
             style={{
               width: '100%', minHeight: 200,
-              border: '1.5px solid #E2DDD5', borderRadius: 12,
+              border: '1.5px solid #ccc', borderRadius: 12,
               padding: 16, resize: 'vertical',
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, lineHeight: 1.8,
-              color: '#2D2A26', background: 'white',
+              color: '#1a1a1a', background: 'white',
               outline: 'none', boxSizing: 'border-box',
             }}
           />
@@ -306,13 +327,13 @@ const AcademicDiscussion = () => {
               Words: {wordCount} / 120+
             </span>
             <button
-              onClick={handleSubmit}
+              onClick={() => setShowConfirm(true)}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
                 color: 'white',
-                background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+                background: '#00695c',
                 border: 'none', borderRadius: 10, padding: '10px 28px', cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(212,165,116,0.25)',
+                boxShadow: '0 4px 12px rgba(0,105,92,0.2)',
               }}
             >
               Submit

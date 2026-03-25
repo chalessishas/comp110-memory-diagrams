@@ -34,12 +34,15 @@ const WriteEmail = () => {
 
   const [started, setStarted] = useState(!!savedData.current)
   const [promptIdx, setPromptIdx] = useState(savedData.current?.promptIdx ?? 0)
+
+  useEffect(() => { document.title = 'Write an Email — TOEFL Practice' }, [])
   const [subject, setSubject] = useState(savedData.current?.subject ?? '')
   const [body, setBody] = useState(savedData.current?.body ?? '')
   const [timer, setTimer] = useState(savedData.current?.timer ?? TOTAL_TIME)
   const [paused, setPaused] = useState(false)
   const [showResult, setShowResult] = useState(false)
   const [scoreResult, setScoreResult] = useState(null)
+  const [showConfirm, setShowConfirm] = useState(false)
 
   const prompt = emailPrompts[promptIdx]
   const wordCount = countWords(body)
@@ -87,7 +90,7 @@ const WriteEmail = () => {
     const hasResume = !!savedData.current
     return (
       <div style={{
-        minHeight: '100vh', background: '#FAFAF8',
+        minHeight: '100vh', background: '#f5f5f5',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: "'DM Sans', sans-serif",
       }}>
@@ -98,10 +101,10 @@ const WriteEmail = () => {
           {/* Icon */}
           <div style={{
             width: 56, height: 56, borderRadius: 16,
-            background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+            background: '#00695c',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             margin: '0 auto 32px',
-            boxShadow: '0 4px 16px rgba(212,165,116,0.3)',
+            boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
           }}>
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="4" width="20" height="16" rx="2"/>
@@ -111,18 +114,18 @@ const WriteEmail = () => {
 
           <h1 style={{
             fontFamily: "'Instrument Serif', Georgia, serif",
-            fontSize: 42, fontWeight: 400, color: '#2D2A26',
+            fontSize: 42, fontWeight: 400, color: '#1a1a1a',
             letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: 12,
           }}>
             Write an Email
           </h1>
           <p style={{
-            fontSize: 15, color: '#8A8477', lineHeight: 1.7, marginBottom: 12, fontWeight: 300,
+            fontSize: 15, color: '#888', lineHeight: 1.7, marginBottom: 12, fontWeight: 300,
           }}>
             1 prompt · 7 minutes · 130–140 words
           </p>
           <p style={{
-            fontSize: 13, color: '#ADA899', lineHeight: 1.7, marginBottom: 40,
+            fontSize: 13, color: '#aaa', lineHeight: 1.7, marginBottom: 40,
           }}>
             Read the situation and goals, then write a professional email that addresses all three points.
           </p>
@@ -132,8 +135,8 @@ const WriteEmail = () => {
               onClick={() => navigate('/writing')}
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                color: '#6B6560', background: 'white',
-                border: '1.5px solid #E2DDD5', borderRadius: 10, padding: '12px 24px',
+                color: '#555', background: 'white',
+                border: '1.5px solid #ccc', borderRadius: 10, padding: '12px 24px',
                 cursor: 'pointer',
               }}
             >
@@ -144,9 +147,9 @@ const WriteEmail = () => {
               style={{
                 fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
                 color: 'white',
-                background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+                background: '#00695c',
                 border: 'none', borderRadius: 10, padding: '12px 32px', cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(212,165,116,0.25)',
+                boxShadow: '0 4px 16px rgba(0,105,92,0.2)',
               }}
             >
               {hasResume ? 'Resume' : 'Start Practice'}
@@ -156,6 +159,23 @@ const WriteEmail = () => {
       </div>
     )
   }
+
+  // ─── CONFIRM MODAL ───
+  const ConfirmModal = () => (
+    <div className="confirm-overlay" onClick={() => setShowConfirm(false)}>
+      <div className="confirm-dialog" onClick={e => e.stopPropagation()}>
+        <h3>Submit Email?</h3>
+        <p>
+          Word count: {wordCount} (target: 130–140)
+          {wordCount < 80 && <><br />Your response is quite short. Consider adding more detail.</>}
+        </p>
+        <div className="confirm-actions">
+          <button className="btn-cancel" onClick={() => setShowConfirm(false)}>Continue Writing</button>
+          <button className="btn-confirm" onClick={() => { setShowConfirm(false); handleSubmit() }}>Submit</button>
+        </div>
+      </div>
+    </div>
+  )
 
   // ─── RESULT ───
   if (showResult) {
@@ -175,12 +195,13 @@ const WriteEmail = () => {
   // ─── TEST INTERFACE ───
   return (
     <div className="email-layout">
+      {showConfirm && <ConfirmModal />}
       {/* Left: Prompt panel */}
       <div className="email-prompt-panel">
         {/* Panel header */}
         <div style={{
           padding: '14px 20px',
-          borderBottom: '1px solid #EDE8E0',
+          borderBottom: '1px solid #ddd',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
@@ -193,7 +214,7 @@ const WriteEmail = () => {
           />
           <span style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13, fontWeight: 500, color: '#8A8477',
+            fontSize: 13, fontWeight: 500, color: '#888',
           }}>
             Write an Email
           </span>
@@ -203,7 +224,7 @@ const WriteEmail = () => {
         <div style={{ padding: '24px 20px', overflowY: 'auto', flex: 1 }}>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 11, fontWeight: 600, color: '#ADA899',
+            fontSize: 11, fontWeight: 600, color: '#aaa',
             textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10,
           }}>
             Situation
@@ -217,7 +238,7 @@ const WriteEmail = () => {
 
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 11, fontWeight: 600, color: '#ADA899',
+            fontSize: 11, fontWeight: 600, color: '#aaa',
             textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12,
           }}>
             In Your Email:
@@ -231,7 +252,7 @@ const WriteEmail = () => {
               }}>
                 <span style={{
                   width: 8, height: 8, borderRadius: '50%',
-                  background: '#D4A574', flexShrink: 0, marginTop: 7,
+                  background: '#00695c', flexShrink: 0, marginTop: 7,
                 }} />
                 {goal}
               </li>
@@ -245,13 +266,13 @@ const WriteEmail = () => {
         {/* Subject line */}
         <div style={{
           padding: '16px 24px',
-          borderBottom: '1px solid #EDE8E0',
+          borderBottom: '1px solid #ddd',
           display: 'flex', alignItems: 'center', gap: 12,
           flexShrink: 0,
         }}>
           <label style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13, fontWeight: 600, color: '#ADA899',
+            fontSize: 13, fontWeight: 600, color: '#aaa',
             whiteSpace: 'nowrap', flexShrink: 0,
           }}>
             Subject:
@@ -263,8 +284,8 @@ const WriteEmail = () => {
             placeholder="Enter email subject..."
             style={{
               flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-              color: '#2D2A26', background: 'transparent',
-              border: 'none', borderBottom: '1.5px solid #E2DDD5',
+              color: '#1a1a1a', background: 'transparent',
+              border: 'none', borderBottom: '1.5px solid #ccc',
               outline: 'none', padding: '4px 0',
             }}
           />
@@ -277,7 +298,7 @@ const WriteEmail = () => {
         }}>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#2D2A26', fontStyle: 'italic',
+            fontSize: 14, color: '#1a1a1a', fontStyle: 'italic',
             margin: 0,
           }}>
             Dear {prompt.recipient},
@@ -291,8 +312,8 @@ const WriteEmail = () => {
           placeholder="Write your email here..."
           style={{
             flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-            color: '#2D2A26', lineHeight: 1.8, background: 'transparent',
-            border: 'none', borderBottom: '1.5px solid #EDE8E0',
+            color: '#1a1a1a', lineHeight: 1.8, background: 'transparent',
+            border: 'none', borderBottom: '1.5px solid #ddd',
             outline: 'none', resize: 'none',
             padding: '12px 24px',
           }}
@@ -305,14 +326,14 @@ const WriteEmail = () => {
         }}>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#2D2A26', fontStyle: 'italic',
+            fontSize: 14, color: '#1a1a1a', fontStyle: 'italic',
             margin: 0, marginBottom: 4,
           }}>
             Best regards,
           </p>
           <p style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: 14, color: '#ADA899', fontStyle: 'italic',
+            fontSize: 14, color: '#aaa', fontStyle: 'italic',
             margin: 0,
           }}>
             [Your Name]
@@ -322,7 +343,7 @@ const WriteEmail = () => {
         {/* Word count + submit */}
         <div style={{
           padding: '14px 24px',
-          borderTop: '1px solid #EDE8E0',
+          borderTop: '1px solid #ddd',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           flexShrink: 0,
         }}>
@@ -334,13 +355,13 @@ const WriteEmail = () => {
             Words: {wordCount} / 130–140
           </span>
           <button
-            onClick={handleSubmit}
+            onClick={() => setShowConfirm(true)}
             style={{
               fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
               color: 'white',
-              background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
+              background: '#00695c',
               border: 'none', borderRadius: 10, padding: '10px 28px', cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(212,165,116,0.25)',
+              boxShadow: '0 4px 12px rgba(0,105,92,0.2)',
             }}
           >
             Submit

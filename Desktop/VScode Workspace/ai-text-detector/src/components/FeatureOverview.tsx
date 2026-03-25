@@ -55,22 +55,94 @@ function FeatureCard({ feature }: { feature: FeatureScore }) {
 }
 
 export default function FeatureOverview({ result }: Props) {
+  const isAI = result.overallScore > 50;
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-2xl p-6 border border-[var(--card-border)] shadow-sm">
-        <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">
-          Feature Breakdown
-        </h3>
-        <p className="text-xs text-[var(--muted)] mb-4">
-          Each feature normalized 0-1 (0 = human-like, 1 = AI-like), weighted
-          for overall score.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {result.featureScores.map((f) => (
-            <FeatureCard key={f.name} feature={f} />
-          ))}
+      {/* AI Similarity Tags */}
+      {result.aiSimilarityTags.length > 0 && (
+        <div className={`bg-white rounded-2xl p-6 border shadow-sm ${isAI ? "border-red-100" : "border-emerald-100"}`}>
+          <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">
+            {isAI ? "Why this text looks AI-generated" : "Analysis details"}
+          </h3>
+          <p className="text-xs text-[var(--muted)] mb-4">
+            {isAI
+              ? "Patterns detected that are characteristic of AI-generated text."
+              : "Some patterns were flagged, but overall the text appears human-written."}
+          </p>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {result.aiSimilarityTags.map((tag) => (
+              <span
+                key={tag.label}
+                className="text-[11px] px-2.5 py-1 rounded-full bg-red-50 text-red-700 border border-red-200 font-medium"
+              >
+                {tag.label}
+              </span>
+            ))}
+          </div>
+          <div className="space-y-2">
+            {result.aiSimilarityTags.map((tag) => (
+              <div key={tag.label} className="bg-[var(--background)] rounded-lg p-3">
+                <span className="text-xs font-semibold text-[var(--foreground)]">
+                  {tag.label}
+                </span>
+                <p className="text-[11px] text-[var(--muted)] mt-0.5 leading-relaxed">
+                  {tag.description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* AI Vocab */}
+      {result.aiVocabMatches.length > 0 && (
+        <div className="bg-white rounded-2xl p-6 border border-amber-100 shadow-sm">
+          <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">
+            AI Vocabulary Detected
+          </h3>
+          <p className="text-xs text-[var(--muted)] mb-3">
+            Words and phrases that appear frequently in AI-generated text.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[...new Set(result.aiVocabMatches.map((m) => m.word.toLowerCase()))].map(
+              (word) => {
+                const count = result.aiVocabMatches.filter(
+                  (m) => m.word.toLowerCase() === word
+                ).length;
+                return (
+                  <span
+                    key={word}
+                    className="text-[11px] px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 font-medium"
+                  >
+                    {word}
+                    {count > 1 && (
+                      <span className="ml-1 text-amber-500">×{count}</span>
+                    )}
+                  </span>
+                );
+              }
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Feature Breakdown (only when token data available) */}
+      {result.featureScores.length > 0 && (
+        <div className="bg-white rounded-2xl p-6 border border-[var(--card-border)] shadow-sm">
+          <h3 className="text-sm font-semibold text-[var(--foreground)] mb-1">
+            Feature Breakdown
+          </h3>
+          <p className="text-xs text-[var(--muted)] mb-4">
+            Each feature normalized 0-1 (0 = human-like, 1 = AI-like), weighted
+            for overall score.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {result.featureScores.map((f) => (
+              <FeatureCard key={f.name} feature={f} />
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-2xl p-5 border border-[var(--card-border)] shadow-sm">

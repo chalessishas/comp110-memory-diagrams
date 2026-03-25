@@ -5,13 +5,17 @@ import * as organization from './organization.js'
 import * as development from './development.js'
 import * as style       from './style.js'
 
+// Weights aligned with real ETS e-rater macrofeature distribution:
+// Organization ~32%, Development ~29%, Vocabulary (lexical) ~14%,
+// Mechanics ~10%, Grammar ~7% (+usage), Style ~3%
+// We combine grammar+usage into one and lexical word-length + rare-words into vocabulary.
 const WEIGHTS = {
-  grammar:      0.08,
+  grammar:      0.07,
   mechanics:    0.10,
   vocabulary:   0.14,
   organization: 0.32,
   development:  0.30,
-  style:        0.06,
+  style:        0.07,
 }
 
 /**

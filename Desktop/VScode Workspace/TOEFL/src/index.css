@@ -2,17 +2,28 @@
 html { height: 100%; }
 body {
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
-  background: #FAFAF8;
-  color: #2D2A26;
+  background: #f5f5f5;
+  color: #1a1a1a;
   min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 #root { min-height: 100vh; }
-::selection { background: #D4A574; color: white; }
-::-webkit-scrollbar { width: 5px; }
+::selection { background: #00695c; color: white; }
+
+button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: 2px solid #00695c;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+button:focus:not(:focus-visible) { outline: none; }
+
+::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #d4c5b0; border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: #00897b; }
+
+.fadeUp { animation: fadeUp 0.8s ease-out; }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }

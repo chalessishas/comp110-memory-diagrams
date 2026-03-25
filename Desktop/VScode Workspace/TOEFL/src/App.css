@@ -2,7 +2,7 @@
 .confirm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.35);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -13,26 +13,26 @@
 
 .confirm-dialog {
   background: white;
-  border-radius: 16px;
+  border-radius: 14px;
   padding: 32px;
   max-width: 380px;
   width: 90%;
   text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
   animation: fadeUp 0.3s ease-out;
 }
 
 .confirm-dialog h3 {
-  font-family: 'Instrument Serif', Georgia, serif;
+  font-family: 'Georgia', serif;
   font-size: 22px;
-  color: #2D2A26;
+  color: #1a1a1a;
   margin-bottom: 8px;
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .confirm-dialog p {
   font-size: 14px;
-  color: #8A8477;
+  color: #888;
   margin-bottom: 24px;
   line-height: 1.6;
 }
@@ -46,27 +46,27 @@
 .confirm-actions button {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 10px 24px;
-  border-radius: 10px;
+  border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .btn-cancel {
-  color: #6B6560;
+  color: #555;
   background: white;
-  border: 1.5px solid #E2DDD5;
+  border: 1.5px solid #ddd;
 }
-.btn-cancel:hover { border-color: #D4A574; }
+.btn-cancel:hover { border-color: #00695c; color: #00695c; }
 
 .btn-confirm {
   color: white;
-  background: linear-gradient(135deg, #D4A574 0%, #C4956A 100%);
+  background: #00695c;
   border: none;
-  box-shadow: 0 4px 16px rgba(212, 165, 116, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 105, 92, 0.25);
 }
-.btn-confirm:hover { transform: translateY(-1px); }
+.btn-confirm:hover { background: #004d40; }
 
 /* ═══ Pause indicator ═══ */
 .pause-badge {
@@ -74,9 +74,9 @@
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: #b87333;
-  background: rgba(191, 131, 72, 0.08);
-  border: 1px solid rgba(191, 131, 72, 0.2);
+  color: #00695c;
+  background: rgba(0, 105, 92, 0.06);
+  border: 1px solid rgba(0, 105, 92, 0.2);
   padding: 2px 8px;
   border-radius: 6px;
   margin-left: 8px;
@@ -104,7 +104,7 @@
   align-items: center;
   gap: 16px;
   font-size: 11px;
-  color: #ADA899;
+  color: #aaa;
   padding: 0 28px 12px;
 }
 
@@ -115,13 +115,13 @@
   min-width: 22px;
   height: 20px;
   padding: 0 5px;
-  background: #f0ece6;
-  border: 1px solid #e2ddd5;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
   border-radius: 4px;
   font-family: 'DM Sans', sans-serif;
   font-size: 10px;
   font-weight: 600;
-  color: #8A8477;
+  color: #888;
   margin: 0 2px;
 }
 
@@ -141,7 +141,7 @@
 
   .passage-panel {
     max-height: 40vh;
-    border-bottom: 1px solid #EDE8E0;
+    border-bottom: 1px solid #ddd;
   }
 
   .question-panel {
@@ -150,11 +150,6 @@
 
   .kbd-hint {
     display: none !important;
-  }
-
-  .landing-types {
-    flex-wrap: wrap !important;
-    gap: 12px !important;
   }
 }
 

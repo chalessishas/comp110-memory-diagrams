@@ -1,97 +1,91 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { colors, fonts } from './shared/theme';
 
-/**
- * Complete the Words — fill in missing letters in a paragraph.
- *
- * Props:
- *   section: { paragraph: Array<{ text } | { blank, prefix, answer }> }
- *   onComplete: (results: { correct, total }) => void
- */
 const CompleteWords = ({ section, onComplete }) => {
   const blanks = section.paragraph.filter(seg => seg.blank !== undefined);
   const [inputs, setInputs] = useState(() => blanks.map(() => ''));
+  const [activeBlank, setActiveBlank] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const inputRefs = useRef([]);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    if (inputRefs.current[0]) inputRefs.current[0].focus();
-  }, []);
+    if (activeBlank !== null && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [activeBlank]);
 
-  const handleChange = (idx, value) => {
+  const handleBlankClick = (idx) => {
+    if (submitted) return;
+    setActiveBlank(idx);
+  };
+
+  const handleChange = (value) => {
+    if (activeBlank === null) return;
     const next = [...inputs];
-    next[idx] = value;
+    next[activeBlank] = value;
     setInputs(next);
   };
 
-  const handleKeyDown = (idx, e) => {
-    if (e.key === 'Tab' || e.key === 'Enter') {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Tab') {
       e.preventDefault();
-      const nextIdx = e.shiftKey ? idx - 1 : idx + 1;
-      if (nextIdx >= 0 && nextIdx < blanks.length) {
-        inputRefs.current[nextIdx]?.focus();
+      const next = e.shiftKey
+        ? Math.max(0, (activeBlank ?? 0) - 1)
+        : Math.min(blanks.length - 1, (activeBlank ?? 0) + 1);
+      setActiveBlank(next);
+    } else if (e.key === 'Enter') {
+      if (activeBlank < blanks.length - 1) {
+        setActiveBlank(activeBlank + 1);
       }
     }
   };
 
   const handleSubmit = () => {
     setSubmitted(true);
-    const correct = blanks.filter((b, i) => {
-      const full = inputs[i].toLowerCase().trim();
-      const expected = b.blank.toLowerCase().trim();
-      return full === expected;
-    }).length;
-    if (onComplete) onComplete({ correct, total: blanks.length });
+    setActiveBlank(null);
   };
 
   const allFilled = inputs.every(v => v.length > 0);
 
+  const getScore = () => {
+    return blanks.filter((b, i) =>
+      inputs[i].toLowerCase().trim() === b.blank.toLowerCase().trim()
+    ).length;
+  };
+
   let blankIdx = 0;
 
   return (
-    <div style={{
-      minHeight: '100vh', background: '#FAFAF8',
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      fontFamily: "'DM Sans', sans-serif",
-    }}>
-      {/* Header */}
+    <div style={{ minHeight: '100%', background: 'white' }}>
+      {/* Instruction title — red underline like real TOEFL */}
       <div style={{
-        width: '100%', padding: '18px 28px',
-        borderBottom: '1px solid #EDE8E0', background: 'white',
-        display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: 9,
-          background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round">
-            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-          </svg>
-        </div>
-        <div>
-          <h2 style={{ fontSize: 13, fontWeight: 600, color: '#2D2A26' }}>Complete the Words</h2>
-          <p style={{ fontSize: 11, color: '#ADA899', marginTop: 1 }}>{section.title}</p>
-        </div>
-      </div>
-
-      {/* Instructions */}
-      <div style={{
-        maxWidth: 720, width: '100%', padding: '32px 24px 16px',
+        borderBottom: '3px solid #c62828',
+        padding: '28px 60px 18px',
       }}>
         <h1 style={{
-          fontFamily: "'Instrument Serif', Georgia, serif",
-          fontSize: 24, fontWeight: 400, color: '#2D2A26',
-          textAlign: 'center', marginBottom: 32,
+          fontFamily: "'Georgia', 'Times New Roman', serif",
+          fontSize: 28,
+          fontWeight: 700,
+          color: '#1a1a1a',
+          margin: 0,
+          textAlign: 'center',
         }}>
           Fill in the missing letters in the paragraph.
         </h1>
+      </div>
 
-        {/* Paragraph with blanks */}
+      {/* Paragraph with inline gray blocks */}
+      <div style={{
+        maxWidth: 1100,
+        margin: '0 auto',
+        padding: '50px 60px 40px',
+      }}>
         <div style={{
-          background: 'white', borderRadius: 14,
-          border: '1px solid #EDE8E0', padding: '28px 32px',
-          fontSize: 15, lineHeight: 2.4, color: '#4A4640',
+          fontSize: 19,
+          lineHeight: 2.6,
+          color: '#1a1a1a',
+          fontFamily: "'Georgia', 'Times New Roman', serif",
+          letterSpacing: '0.01em',
         }}>
           {section.paragraph.map((seg, i) => {
             if (seg.text !== undefined) {
@@ -99,127 +93,184 @@ const CompleteWords = ({ section, onComplete }) => {
             }
 
             const idx = blankIdx++;
-            const isCorrect = submitted && inputs[idx].toLowerCase().trim() === seg.blank.toLowerCase().trim();
+            const isActive = activeBlank === idx;
+            const userInput = inputs[idx];
+            const isCorrect = submitted && userInput.toLowerCase().trim() === seg.blank.toLowerCase().trim();
             const isWrong = submitted && !isCorrect;
+
+            if (submitted) {
+              return (
+                <span key={i} style={{ whiteSpace: 'nowrap' }}>
+                  <span>{seg.prefix}</span>
+                  <span style={{
+                    display: 'inline-block',
+                    borderBottom: `2.5px solid ${isCorrect ? '#2e7d32' : '#c62828'}`,
+                    background: isCorrect ? 'rgba(46,125,50,0.06)' : 'rgba(198,40,40,0.06)',
+                    padding: '1px 4px',
+                    borderRadius: 2,
+                    color: isCorrect ? '#2e7d32' : '#c62828',
+                    fontWeight: 600,
+                    minWidth: seg.blank.length * 10,
+                  }}>
+                    {userInput || '___'}
+                    {isWrong && (
+                      <span style={{
+                        color: '#2e7d32', fontSize: 15, marginLeft: 6,
+                        fontWeight: 400,
+                      }}> → {seg.blank}</span>
+                    )}
+                  </span>
+                </span>
+              );
+            }
 
             return (
               <span key={i} style={{ whiteSpace: 'nowrap' }}>
-                <span style={{ color: '#8A8477', fontWeight: 500 }}>{seg.prefix}</span>
-                {submitted ? (
-                  <span style={{
+                <span>{seg.prefix}</span>
+                <span
+                  onClick={() => handleBlankClick(idx)}
+                  style={{
                     display: 'inline-block',
-                    borderBottom: `2px solid ${isCorrect ? '#5a9a6e' : '#b06060'}`,
-                    padding: '0 4px',
-                    minWidth: 40,
-                    color: isCorrect ? '#5a9a6e' : '#b06060',
+                    minWidth: Math.max(seg.blank.length * 11, 45),
+                    padding: '2px 5px',
+                    background: isActive ? '#c8c8c8' : '#d5d5d5',
+                    borderRadius: 2,
+                    cursor: 'pointer',
+                    border: isActive ? '2px solid #00695c' : '1px solid #b0b0b0',
+                    boxShadow: isActive ? '0 0 0 1px #00695c' : 'none',
+                    transition: 'all 0.12s ease',
+                    fontSize: 19,
+                    color: userInput ? '#1a1a1a' : 'transparent',
                     fontWeight: 500,
-                    background: isCorrect ? 'rgba(90,154,110,0.06)' : 'rgba(176,96,96,0.06)',
-                    borderRadius: 4,
-                  }}>
-                    {inputs[idx] || '___'}
-                    {isWrong && (
-                      <span style={{ color: '#5a9a6e', marginLeft: 6, fontSize: 12 }}>
-                        ({seg.blank})
-                      </span>
-                    )}
-                  </span>
-                ) : (
-                  <input
-                    ref={el => inputRefs.current[idx] = el}
-                    type="text"
-                    value={inputs[idx]}
-                    onChange={e => handleChange(idx, e.target.value)}
-                    onKeyDown={e => handleKeyDown(idx, e)}
-                    placeholder={seg.blank.replace(/./g, '_')}
-                    style={{
-                      border: 'none',
-                      borderBottom: '2px solid #D4A574',
-                      background: 'rgba(212,165,116,0.04)',
-                      outline: 'none',
-                      fontSize: 15,
-                      fontFamily: 'inherit',
-                      color: '#2D2A26',
-                      padding: '2px 4px',
-                      width: Math.max(seg.blank.length * 10, 40),
-                      borderRadius: 0,
-                      transition: 'border-color 0.2s',
-                    }}
-                    onFocus={e => e.target.style.borderColor = '#C4956A'}
-                    onBlur={e => e.target.style.borderColor = '#D4A574'}
-                  />
-                )}
+                    lineHeight: 1.4,
+                    fontFamily: "'Georgia', 'Times New Roman', serif",
+                  }}
+                >
+                  {userInput || '\u00A0'.repeat(Math.max(seg.blank.length, 3))}
+                </span>
               </span>
             );
           })}
         </div>
 
-        {/* Score summary after submit */}
+        {/* Hidden input for keyboard capture */}
+        {activeBlank !== null && !submitted && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={inputs[activeBlank] || ''}
+            onChange={e => handleChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => {}}
+            aria-label={`Fill blank ${activeBlank + 1} of ${blanks.length}`}
+            style={{
+              position: 'fixed',
+              left: -9999,
+              top: -9999,
+              opacity: 0,
+            }}
+            autoFocus
+          />
+        )}
+      </div>
+
+      {/* Bottom area */}
+      <div style={{
+        maxWidth: 1100,
+        margin: '0 auto',
+        padding: '0 60px 50px',
+      }}>
+        {/* Score after submit */}
         {submitted && (
           <div style={{
-            marginTop: 20, padding: '16px 20px', borderRadius: 10,
-            background: 'rgba(212,165,116,0.06)',
-            border: '1px solid rgba(212,165,116,0.15)',
+            padding: '16px 24px',
+            borderRadius: 8,
+            background: 'rgba(0,105,92,0.05)',
+            border: '1.5px solid rgba(0,105,92,0.2)',
             textAlign: 'center',
+            marginBottom: 24,
             animation: 'fadeUp 0.3s ease-out',
           }}>
-            <span style={{ fontSize: 14, color: '#6B5D4D' }}>
-              {blanks.filter((b, i) => inputs[i].toLowerCase().trim() === b.blank.toLowerCase().trim()).length}
-              {' / '}
-              {blanks.length} correct
+            <span style={{
+              fontSize: 17, color: '#00695c', fontWeight: 700,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>
+              {getScore()} / {blanks.length} correct
             </span>
           </div>
         )}
 
-        {/* Submit / Continue / keyboard hint */}
-        <div style={{
-          marginTop: 24, display: 'flex', justifyContent: 'center',
-          gap: 12, flexWrap: 'wrap',
-        }}>
+        {/* Actions */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
           {!submitted ? (
-            <>
-              <button
-                onClick={handleSubmit}
-                disabled={!allFilled}
-                style={{
-                  fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                  color: 'white',
-                  background: allFilled
-                    ? 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)'
-                    : '#D4CFC5',
-                  border: 'none', borderRadius: 10,
-                  padding: '12px 36px', cursor: allFilled ? 'pointer' : 'default',
-                  boxShadow: allFilled ? '0 4px 16px rgba(212,165,116,0.25)' : 'none',
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                Check Answers
-              </button>
-              <p style={{ width: '100%', textAlign: 'center', fontSize: 11, color: '#ADA899', marginTop: 4 }}>
-                Press <span style={{
-                  display: 'inline-block', padding: '1px 6px', background: '#f0ece6',
-                  border: '1px solid #e2ddd5', borderRadius: 4, fontSize: 10, fontWeight: 600,
-                }}>Tab</span> to jump between blanks
-              </p>
-            </>
-          ) : onComplete && (
             <button
-              onClick={() => {
-                const correct = blanks.filter((b, i) => inputs[i].toLowerCase().trim() === b.blank.toLowerCase().trim()).length;
-                onComplete({ correct, total: blanks.length });
-              }}
+              onClick={handleSubmit}
+              disabled={!allFilled}
               style={{
-                fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 15,
+                fontWeight: 700,
                 color: 'white',
-                background: 'linear-gradient(135deg, #D4A574 0%, #C4956A 100%)',
-                border: 'none', borderRadius: 10,
-                padding: '12px 36px', cursor: 'pointer',
-                boxShadow: '0 4px 16px rgba(212,165,116,0.25)',
+                background: allFilled ? '#00695c' : '#bbb',
+                border: 'none',
+                borderRadius: 6,
+                padding: '12px 40px',
+                cursor: allFilled ? 'pointer' : 'default',
+                transition: 'all 0.2s ease',
+                letterSpacing: '0.02em',
               }}
             >
-              Continue
+              Check Answers
+            </button>
+          ) : onComplete && (
+            <button
+              onClick={() => onComplete({ correct: getScore(), total: blanks.length })}
+              style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 15,
+                fontWeight: 700,
+                color: 'white',
+                background: '#00695c',
+                border: 'none',
+                borderRadius: 6,
+                padding: '12px 40px',
+                cursor: 'pointer',
+                letterSpacing: '0.02em',
+              }}
+            >
+              Continue →
             </button>
           )}
         </div>
+
+        {/* Keyboard hint */}
+        {!submitted && activeBlank !== null && (
+          <p style={{
+            textAlign: 'center',
+            fontSize: 13,
+            color: '#999',
+            marginTop: 16,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Click gray blocks to type · <kbd style={{
+              padding: '2px 6px', background: '#f0f0f0',
+              border: '1px solid #ddd', borderRadius: 3, fontSize: 11,
+              fontFamily: "'DM Sans', sans-serif",
+            }}>Tab</kbd> to jump between blanks
+          </p>
+        )}
+
+        {!submitted && activeBlank === null && (
+          <p style={{
+            textAlign: 'center',
+            fontSize: 14,
+            color: '#999',
+            marginTop: 24,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            Click on the gray blocks above to fill in the missing letters.
+          </p>
+        )}
       </div>
     </div>
   );

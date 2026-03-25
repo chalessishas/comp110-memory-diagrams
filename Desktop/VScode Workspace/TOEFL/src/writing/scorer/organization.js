@@ -24,8 +24,9 @@ export function score(text, taskType = 'general') {
   // Discourse marker density score
   const uniqueMarkers = countUniqueMarkers(text)
   const markerDensity = uniqueMarkers / sentenceCount
-  // 0 markers → 0, 0.3+/sentence → 1.0
-  const markerScore = Math.min(1, markerDensity / 0.3)
+  // Real e-rater: markers per sentence, but more lenient for short texts
+  // 0.15+/sentence → 1.0 (was 0.3 — too aggressive for emails)
+  const markerScore = Math.min(1, markerDensity / 0.15)
 
   // Paragraph count score
   const paragraphs = text.split(/\n+/).map(p => p.trim()).filter(p => p.length > 0)
@@ -39,8 +40,8 @@ export function score(text, taskType = 'general') {
   const lower = text.toLowerCase()
 
   if (taskType === 'email') {
-    const hasGreeting = /\b(dear|hello|hi|greetings)\b/i.test(text)
-    const hasClosing = /\b(regards|sincerely|thank|best|yours|cheers|warm)\b/i.test(text)
+    const hasGreeting = /\b(dear|hello|hi|greetings|good morning|good afternoon|good evening|to whom it may concern)\b/i.test(text)
+    const hasClosing = /\b(regards|sincerely|thank|best|yours|cheers|warm|respectfully|cordially)\b/i.test(text)
     taskSpecific = (hasGreeting ? 0.5 : 0) + (hasClosing ? 0.5 : 0)
   } else if (taskType === 'discussion') {
     const hasEngagement =

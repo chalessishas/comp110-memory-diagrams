@@ -69,10 +69,20 @@ export interface FeatureScore {
 }
 
 export interface ClassificationResult {
-  label: number;
   label_name: string;
   probabilities: Record<string, number>;
   ai_score: number;
+}
+
+export interface FusedResult {
+  ai_score: number;
+  prediction: string;
+  confidence: number;
+  word_count: number;
+  threshold: number;
+  signal_source: string;
+  ppl_ai_signal: boolean;
+  ppl_human_signal: boolean;
 }
 
 export interface AnalysisResult {
@@ -91,6 +101,8 @@ export interface AnalysisResult {
   wordCount: number;
   scoringEligible: boolean;
   classification?: ClassificationResult;
+  fused?: FusedResult;
+  hasTokenData: boolean;
   aiSimilarityTags: AISimilarityTag[];
   aiVocabMatches: AIVocabMatch[];
 }

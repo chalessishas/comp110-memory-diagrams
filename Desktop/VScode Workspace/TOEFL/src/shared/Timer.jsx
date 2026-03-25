@@ -1,38 +1,34 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import '../App.css'
 
-export default function Timer({ totalTime, onTimeUp, paused, onTogglePause, onTick }) {
-  const [timer, setTimer] = useState(totalTime)
+export default function Timer({ totalTime, paused, onTogglePause, onTick, onTimeUp }) {
   const onTickRef = useRef(onTick)
   const onTimeUpRef = useRef(onTimeUp)
+  const timerRef = useRef(totalTime)
 
   useEffect(() => { onTickRef.current = onTick }, [onTick])
   useEffect(() => { onTimeUpRef.current = onTimeUp }, [onTimeUp])
+  // Keep internal ref in sync with parent's timer value
+  useEffect(() => { timerRef.current = totalTime }, [totalTime])
 
   useEffect(() => {
-    if (paused) return
-    if (timer <= 0) {
-      onTimeUpRef.current?.()
-      return
-    }
+    if (paused || totalTime <= 0) return
     const id = setInterval(() => {
-      setTimer(prev => {
-        const next = prev - 1
-        onTickRef.current?.(next)
-        if (next <= 0) {
-          clearInterval(id)
-          onTimeUpRef.current?.()
-        }
-        return next
-      })
+      const next = timerRef.current - 1
+      timerRef.current = next
+      onTickRef.current?.(next)
+      if (next <= 0) {
+        clearInterval(id)
+        onTimeUpRef.current?.()
+      }
     }, 1000)
     return () => clearInterval(id)
-  }, [paused, timer])
+  }, [paused, totalTime <= 0])
 
-  const minutes = Math.floor(timer / 60)
-  const seconds = timer % 60
+  const minutes = Math.floor(totalTime / 60)
+  const seconds = totalTime % 60
   const display = `${minutes}:${String(seconds).padStart(2, '0')}`
-  const isLow = timer < 120
+  const isLow = totalTime < 120
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

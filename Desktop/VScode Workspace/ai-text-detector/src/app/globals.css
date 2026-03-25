@@ -34,3 +34,21 @@ body {
   background: #d4cfc7;
   border-radius: 3px;
 }
+
+/* Annotation focus pulse */
+@keyframes pulse-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(251, 191, 36, 0); }
+}
+.animate-pulse-ring {
+  animation: pulse-ring 0.5s ease-in-out;
+}
+
+/* Editor annotation pulse on click from panel */
+@keyframes annotation-pulse-bg {
+  0%, 100% { background-color: transparent; }
+  25%, 75% { background-color: rgba(251, 191, 36, 0.3); }
+}
+.annotation-pulse {
+  animation: annotation-pulse-bg 1.5s ease-in-out;
+}

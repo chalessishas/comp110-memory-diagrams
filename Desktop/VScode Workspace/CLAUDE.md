@@ -47,35 +47,31 @@
 2. 指出潜在风险和边界情况
 3. 如果改动影响其他模块，说明影响范围
 
-## 交接文档（必须遵守）
+## 交接文档
 
-每次有实质性进展（完成一个功能、修复重要 bug、架构变更）后，必须更新 `STATUS.md`：
+STATUS.md 格式和规则见全局 CLAUDE.md 的「文档三层架构」。不要在这里重复定义。
 
-### STATUS.md 格式
-```markdown
-# 项目状态
+## Research 规则
 
-## 最近更新（新的在上面）
+### 执行前必须调研
+涉及技术方案选择或架构决策时，先搜索相关论文/技术文章/产品案例。不要凭记忆回答——记忆可能是幻觉。纯执行层面（改 bug、写已确定方案的代码）不需要。
 
-### [YYYY-MM-DD HH:MM] — 标题
-- **做了什么**：具体描述
-- **架构决策**：为什么这样做，不这样做的理由
-- **踩过的坑**：遇到了什么问题，怎么解决的
-- **当前状态**：可用/部分可用/有 bug
-- **下一步**：接手后应该做什么
+### 研究参考区
+所有调研结果存入 `docs/research/`，按主题分文件。每篇论文记录：来源 URL、核心发现（1-3 句）、对项目的价值、局限性。
 
-## 技术架构概要
-（保持更新）
+### 分析必须多角度
+用户说"可行性"不代表只分析可行性。每次分析至少覆盖：技术可行性、成本/资源需求、产品视角、风险和替代方案、时间线。
 
-## 已知问题
-（累积列表）
+## Python 环境
+- Python 3.9 (`/usr/bin/python3`): llama-cpp-python, basic scripts
+- Python 3.13 (`/opt/anaconda3/bin/python3.13`): MLX, mlx-lm, new models (qwen3.5+)
+- Always specify full path when running MLX scripts
 
-## 环境/密钥
-（不写明文，只写在哪里找）
-```
+## Projects
 
-### 规则
-- 每条更新必须有时间戳
-- 新的更新写在最上面
-- 踩过的坑必须写清楚（防止下一个人重复踩）
-- 不写空话，每句都要有信息量
+| Project | Path | What |
+|---------|------|------|
+| ai-text-detector | `ai-text-detector/` | AI 检测 + Humanizer + Writing Center |
+| TOEFL | `TOEFL/` | 托福备考练习（React, 纯前端） |
+| Signal-Map | `Signal-Map/` | 校园活动地图 hdmap.live（Next.js + Supabase） |
+| chronicle | `chronicle/` | 无限画布知识管理（Next.js + Supabase + Canvas 2D） |

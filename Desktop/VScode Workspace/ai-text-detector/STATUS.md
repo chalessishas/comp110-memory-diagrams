@@ -1,10 +1,109 @@
 # AI Text X-Ray — 项目状态
 
-> 最后更新: 2026-03-23 10:36
+> 最后更新: 2026-03-24 17:08
 
 ---
 
 ## 最近更新（新的在上面）
+
+### [2026-03-24 17:08] — LR v2: 16 特征 + StandardScaler (80.7%)
+
+- **做了什么**：扩展 LR 分类器从 5 基础特征到 16 特征（+10 DivEye + 1 SpecDetect），用 MLX qwen3.5:4b 在 500 balanced 样本上训练
+- **结果对比**：
+  - Model A (5 basic): 78.0%
+  - Model B (16 full, no scale): 79.3% (+1.3pp)
+  - Model C (16 full + StandardScaler): **80.7%** (+2.7pp) -- 生产模型
+  - Model D (5 basic + scaler): 78.0% (scaling 对基础特征无帮助)
+- **最强特征**：s_std（surprisal 标准差，系数 -5.84，higher = human），spec_energy（+2.76，higher = AI），d2_var（+1.91，higher = AI）
+- **架构**：Pipeline(StandardScaler + LogisticRegression) 保存为 models/perplexity_lr_v2.pkl，perplexity.py 优先加载 v2 回退到 v1
+- **新文件**：scripts/train_lr_v2.py（支持特征缓存 + --recompute + LR_N_SAMPLE 环境变量）
+- **下一步**：在 2000+ 样本上重训以获得更稳定结果（当前 test set 仅 150 条）
+
+### [2026-03-24 16:37] — PPL+DeBERTa Ensemble: OOD 80% (突破)
+
+- **做了什么**：
+  1. **GPTZero 竞品分析**：API 调用 + 网页版 Playwright 自动化测试。发现 API (Basic Scan) 和网页版 (Advanced Scan 7组件) 结果完全不同——anti_detect_v2 文本 API 判 Human 98%，网页版判 AI 100%
+  2. **数据集 v3 构建**：83,021 条（arXiv 5K + student essays 5K + HC3 5K + 原有 68K）。学科分类树 50 学科 322 子学科 341 topics
+  3. **RunPod RTX 4090 训练**：2 epochs, batch=16, 28 分钟完成。eval accuracy 99.90%——但发现 DeBERTa-v3 `legacy=True` + `trainer.save_model()` 有 classifier 权重丢失 bug（safetensors 转换问题）。花了 3 小时 debug
+  4. **诚实 OOD Benchmark**：10 条跨域文本（code doc, legal, medical, recipe, twitter + stackoverflow, review, academic, diary, tech report）
+     - DeBERTa v1: **40%**（0/5 AI recall, 4/5 human precision）
+     - GPTZero API: **50%**（3/5 AI recall, 但 4/5 human 误判）
+  5. **PPL+DeBERTa Ensemble**：简单 3 条规则
+     - PPL < 12 + Top10% > 85% → AI（perplexity 说了算）
+     - PPL > 20 + Top10% < 78% → Human（perplexity 说了算）
+     - 中间地带 → DeBERTa 说了算
+     - **结果：80% OOD accuracy——比 DeBERTa 翻倍，比 GPTZero API 高 60%**
+  6. **Ensemble 集成到 perplexity.py 检测 API**
+
+- **踩过的坑**：
+  - DeBERTa-v3 trainer.save_model() 丢失 classifier 权重（已记录到 experience.md）
+  - RunPod RTX 5090 镜像拉取超时（10分钟+），换 RTX 4090 解决
+  - 单模型 eval accuracy 不等于 OOD generalization——98.5% 域内 = 40% 域外
+  - GPTZero API (Basic) 假阳性严重——把大量 human 文本判为 AI
+
+- **当前状态**：
+  - **Ensemble (PPL+DeBERTa)**: 80% OOD accuracy, 已集成到 API
+  - DeBERTa v1: 98.5% 域内, 40% 域外
+  - LR v2 (16 features + DivEye): 训练失败（MLX 超时），待重试
+  - RunPod: 两个 Pod 已停止（$0.01/hr idle each）
+
+- **下一步**：
+  1. 用更大的 OOD 测试集（30+ 文本）验证 ensemble
+  2. 修复两个失败 case（AI-twitter anti-detect, Human-review false positive）
+  3. 加入 Binoculars 零样本信号作为第三层
+  4. 用 llama3.2:1b 重新校准 LR（当前 LR 是用 qwen3.5:4b 特征训练的，和 llama 不匹配）
+
+## 最近更新（新的在上面）
+
+### [2026-03-24 00:15] — 夜间自治：盲区诊断 → 数据增强 → 本地微调 → 91.3%
+
+- **做了什么**（22:45 - 00:15 夜间自治循环）：
+  1. **系统性盲区测试**：8 种文体 AI 文本，DeBERTa v1 只检出 2/8
+  2. **颠覆性发现**：DeBERTa 学的是模型指纹(model memorization)，不是 AI 通用模式
+  3. **RAID #1 对比**：下载 desklib 模型（RAID 排行榜第一），测试只有 36% 准确率——证明所有有监督检测器都有此问题
+  4. **深度调研 8 篇论文**：DEFACTIFY、DivEye、SpecDetect(AAAI 2026)、DetectRL、DetectAnyLLM 等
+  5. **数据增强**：DeepSeek 生成 83 条（14 新文体）+ RAID 提取 398 条（8 domains），合并 67,268 条训练数据
+  6. **DivEye + SpecDetect 实现**：零样本辅助信号加入 perplexity.py
+  7. **本地 M4 增量微调**：1,050 新数据 × 2 epochs × 12 分钟 → **49.8% → 91.3%（+41.4%）**
+  8. **Fused score 改进**：PPL 低值覆盖规则
+
+- **新增文件**：
+  - `scripts/augment_dataset.py` — 数据增强（DeepSeek + RAID）
+  - `scripts/prepare_training_data.py` — 数据合并 + noising
+  - `scripts/finetune_local.py` — Apple M4 本地微调
+  - `scripts/test_desklib.py` — 竞品对比
+  - `models/detector_v2/` — 增量微调后模型
+  - `docs/detector-improvement-plan.md` — 完整改进计划
+
+- **踩过的坑**：
+  - MPS OOM with batch=4 → batch=1 + max_len=256
+  - gradient_checkpointing 和 DeBERTa-v3 不兼容
+  - RAID 10M+ 条流式扫描极慢
+  - SpecDetect DFT energy 在 llama3.2:1b 上方向不一致
+
+- **当前状态**：detector_v2 在新域数据上 91.3%，但有假阳性问题（短口语文本）。v1 + v2 ensemble 待优化
+
+### [2026-03-23 23:28] — DeBERTa 盲区诊断 + 数据增强启动（被上方更新取代）
+
+- **架构决策**：
+  - DeBERTa 重训策略三管齐下：数据扩充 + RAID 合并 + Data Noising
+  - 训练方案参照 DEFACTIFY（sequential fine-tune + 60:40 ensemble）
+  - DivEye 作为 LR 辅助信号，不替代 DeBERTa
+
+- **踩过的坑**：
+  - Playwright + Chrome 冲突（Chrome 运行时 Playwright 无法启动）→ kill Chrome 后发现 claude.ai session 已过期
+  - Python 3.9 不支持 `str | None` type hint → 改为无注解函数签名
+  - RAID 数据集 10M+ 条，流式扫描前 500K 全是 abstracts domain，需要遍历更多才能找到其他 domain
+
+- **当前状态**：数据增强进行中
+  - DeepSeek 生成：~46/700 条（后台运行）
+  - RAID 提取：扫描中
+  - 改进计划文档：已完成
+
+- **下一步**：
+  1. 等数据生成完 → 合并 + noising
+  2. 上传 Colab 重训 DeBERTa
+  3. 跨域/跨模型测试验证改进
 
 ### [2026-03-23 10:36] — DeBERTa 98.5% + 双系统检测 API 就绪
 
