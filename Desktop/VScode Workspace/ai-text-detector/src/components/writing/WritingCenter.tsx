@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type {
   Genre,
   ChatMessage,
@@ -25,9 +25,16 @@ import {
   incrementGenreExperience,
 } from "@/lib/writing/storage";
 import { selectStaticTip } from "@/lib/writing/daily-tips";
+import type { BlockInstance, BlockType, BlockCategory } from "@/lib/writing/blocks";
+import { getBlockDef, createBlockInstance, PHASE_TRANSITION_PROMPTS } from "@/lib/writing/blocks";
+import { apiCall } from "@/lib/writing/api";
 import Editor, { type EditorHandle } from "./Editor";
 import ChatPanel from "./ChatPanel";
 import LabPanel from "./LabPanel";
+import Workbench from "./Workbench";
+import BlockChat from "./BlockChat";
+import ChecklistPanel from "./ChecklistPanel";
+import AutoExecutor from "./AutoExecutor";
 
 // ── Constants ──
 
@@ -42,8 +49,13 @@ const GENRE_LABELS: Record<Genre, string> = {
 type LayoutPreset = "side" | "top" | "full";
 type Tab = "chat" | "dashboard" | "lab";
 
-// Phase state machine: welcome → conversation → writing
-type Phase = "welcome" | "conversation" | "writing";
+// Phase state machine:
+//   workbench → block-chat (for chat-mode blocks)
+//   workbench → writing    (for editor/lab/analyze blocks)
+//   workbench → checklist  (for checklist-mode blocks)
+type Phase = "workbench" | "block-chat" | "writing" | "checklist";
+
+const BOARD_STORAGE_KEY = "writing-center-board";
 
 function countWords(html: string): number {
   const text = html.replace(/<[^>]*>/g, " ").trim();
@@ -58,62 +70,37 @@ function latestTraitScores(
   return last?.traitScores ?? null;
 }
 
-async function apiCall<T>(body: Record<string, unknown>): Promise<T> {
-  const res = await fetch("/api/writing-assist", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error(err.error || `HTTP ${res.status}`);
+
+// ── Board persistence ──
+
+function loadBoard(): BlockInstance[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(BOARD_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
   }
-  return res.json();
 }
 
-// ── Starter cards for Welcome screen ──
-
-interface StarterCard {
-  icon: string;
-  title: string;
-  description: string;
-  action: "essay" | "creative" | "article" | "academic" | "business" | "lab" | "exercise";
+function saveBoardToStorage(board: BlockInstance[]) {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(BOARD_STORAGE_KEY, JSON.stringify(board));
+  } catch {}
 }
-
-const STARTER_CARDS: StarterCard[] = [
-  {
-    icon: "✍️",
-    title: "Write an essay",
-    description: "I'll guide you step by step with structure and feedback",
-    action: "essay",
-  },
-  {
-    icon: "🎨",
-    title: "Try creative writing",
-    description: "Explore narrative, character, and voice with AI coaching",
-    action: "creative",
-  },
-  {
-    icon: "📰",
-    title: "Draft an article",
-    description: "Learn the 5W+H structure with real-time suggestions",
-    action: "article",
-  },
-  {
-    icon: "🔬",
-    title: "Explore the Writing Lab",
-    description: "See why AI text feels 'cold' — and learn to write with warmth",
-    action: "lab",
-  },
-];
 
 // ── Main Component ──
 
 export default function WritingCenter() {
-  // Phase controls what the user sees
-  const [phase, setPhase] = useState<Phase>("welcome");
+  // Phase & block navigation
+  const [phase, setPhase] = useState<Phase>("workbench");
+  const [executionMode, setExecutionMode] = useState<"manual" | "auto">("manual");
+  const [language, setLanguage] = useState<"en" | "zh">("en");
+  const [board, setBoard] = useState<BlockInstance[]>(() => loadBoard());
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
 
-  // Core state
+  // Core writing state (shared across blocks)
   const [genre, setGenre] = useState<Genre>("essay");
   const [topic, setTopic] = useState("");
   const [document, setDocument] = useState("");
@@ -152,6 +139,9 @@ export default function WritingCenter() {
   const [previousConventionsSuppressed, setPreviousConventionsSuppressed] =
     useState(false);
 
+  // Phase-transition micro-reflection (Yancey model)
+  const [reflectionPrompt, setReflectionPrompt] = useState<string | null>(null);
+
   // Layout drag
   const [splitRatio, setSplitRatio] = useState(0.5);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -159,9 +149,14 @@ export default function WritingCenter() {
   const editorRef = useRef<EditorHandle>(null);
   const sessionWordsRef = useRef(0);
 
+  // ── Derived state ──
+
+  const activeBlock = board.find((b) => b.id === activeBlockId) ?? null;
+  const activeBlockDef = activeBlock ? getBlockDef(activeBlock.type) : null;
+
   // ── Lifecycle ──
 
-  // Check if user has a saved draft → skip welcome
+  // Check if user has a saved draft → jump to editor with board context
   useEffect(() => {
     const saved = loadState();
     if (saved.draft.document && saved.draft.document.trim()) {
@@ -170,7 +165,13 @@ export default function WritingCenter() {
       setTopic(saved.draft.topic);
       if (saved.draft.messages.length) setMessages(saved.draft.messages);
       if (saved.draft.annotations.length) setAnnotations(saved.draft.annotations);
-      setPhase("writing"); // Resume where they left off
+      // If board has a draft block, activate it; otherwise just go to editor
+      const draftBlock = board.find((b) => b.type === "draft");
+      if (draftBlock) {
+        setActiveBlockId(draftBlock.id);
+        updateBlockStatus(draftBlock.id, "active");
+      }
+      setPhase("writing");
     }
     if (saved.profile) setProfile(saved.profile);
   }, []);
@@ -222,35 +223,21 @@ export default function WritingCenter() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase, genre, topic]);
 
-  // 60s idle detection (only in writing phase)
-  useEffect(() => {
-    if (phase !== "writing" || !document.trim()) return;
-    const timer = setTimeout(() => {
-      const idleMsg: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "assistant",
-        content:
-          "I notice you've paused — need help with anything? Feel free to ask about your writing.",
-        timestamp: Date.now(),
-      };
-      setMessages((prev) => [...prev, idleMsg]);
-    }, 60000);
-    return () => clearTimeout(timer);
-  }, [phase, document]);
+  // Memoize word count (used in render + streak tracking)
+  const wordCount = useMemo(() => countWords(document), [document]);
 
   // Word tracking for streak
   useEffect(() => {
-    const wc = countWords(document);
-    const delta = wc - sessionWordsRef.current;
-    if (delta > 0) sessionWordsRef.current = wc;
+    const delta = wordCount - sessionWordsRef.current;
+    if (delta > 0) sessionWordsRef.current = wordCount;
     if (sessionWordsRef.current >= 50) {
       setProfile((prev) => markDayActive(prev));
     }
-  }, [document]);
+  }, [wordCount]);
 
-  // Auto-save (only when there's content)
+  // Auto-save writing state
   useEffect(() => {
-    if (phase === "welcome") return;
+    if (phase === "workbench") return;
     const timer = setTimeout(() => {
       saveState({
         draft: { genre, topic, document, messages, annotations, lastSaved: Date.now() },
@@ -260,6 +247,12 @@ export default function WritingCenter() {
     return () => clearTimeout(timer);
   }, [phase, document, messages, annotations, genre, topic, profile]);
 
+  // Save board (debounced to collapse rapid mutations)
+  useEffect(() => {
+    const timer = setTimeout(() => saveBoardToStorage(board), 300);
+    return () => clearTimeout(timer);
+  }, [board]);
+
   // Clear error
   useEffect(() => {
     if (!error) return;
@@ -267,44 +260,99 @@ export default function WritingCenter() {
     return () => clearTimeout(timer);
   }, [error]);
 
-  // ── Handlers ──
+  // ── Board handlers ──
 
-  function handleStarterCard(card: StarterCard) {
-    if (card.action === "lab") {
-      setActiveTab("lab");
-      setPhase("writing");
-      return;
-    }
-    if (card.action === "exercise" && dailyTip?.exercisePrompt) {
-      setTopic(dailyTip.exercisePrompt.slice(0, 60));
-      setGenre("essay");
-      setPhase("conversation");
-      startConversation("essay", dailyTip.exercisePrompt.slice(0, 60));
-      return;
-    }
-    setGenre(card.action as Genre);
-    setPhase("conversation");
+  function updateBlockStatus(blockId: string, status: BlockInstance["status"]) {
+    setBoard((prev) =>
+      prev.map((b) => (b.id === blockId ? { ...b, status } : b))
+    );
   }
 
-  async function startConversation(g: Genre, t?: string) {
-    const greeting: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: t
-        ? `Great! Let's write about "${t}". What's the main point you want to make?`
-        : `What would you like to write about? Give me a topic or idea, and I'll help you get started.`,
-      timestamp: Date.now(),
-    };
-    setMessages([greeting]);
+  function handleBlockClick(block: BlockInstance) {
+    const def = getBlockDef(block.type);
+
+    // Check for phase-transition micro-reflection
+    if (activeBlock) {
+      const prevCategory = getBlockDef(activeBlock.type).category;
+      const nextCategory = def.category;
+      if (prevCategory !== nextCategory) {
+        const key = `${prevCategory}->${nextCategory}` as `${BlockCategory}->${BlockCategory}`;
+        const prompt = PHASE_TRANSITION_PROMPTS[key];
+        if (prompt) setReflectionPrompt(prompt);
+      }
+    }
+
+    setActiveBlockId(block.id);
+    updateBlockStatus(block.id, "active");
+
+    switch (def.mode) {
+      case "chat":
+        setPhase("block-chat");
+        break;
+      case "checklist":
+        setPhase("checklist");
+        break;
+      case "editor":
+        setPhase("writing");
+        break;
+      case "lab":
+        setActiveTab("lab");
+        setPhase("writing");
+        break;
+    }
   }
 
-  // When user enters conversation phase without a topic
-  useEffect(() => {
-    if (phase === "conversation" && messages.length === 0) {
-      startConversation(genre);
+  function handleStartWriting() {
+    // Start with the first undone block
+    const first = board.find((b) => b.status !== "done") ?? board[0];
+    if (first) {
+      handleBlockClick(first);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
+  }
+
+  function handleAutoStart() {
+    if (!topic.trim()) {
+      setError("Please enter a topic before starting auto mode.");
+      return;
+    }
+    if (genre !== "academic") setGenre("academic");
+    setExecutionMode("auto");
+  }
+
+  function handleAutoExit() {
+    setExecutionMode("manual");
+  }
+
+  function handleBlockDone(blockId: string, output?: string) {
+    setBoard((prev) => {
+      const updated = prev.map((b) =>
+        b.id === blockId ? { ...b, status: "done" as const, output: output ?? b.output } : b
+      );
+      // Auto-advance to next undone block, or return to workbench
+      const currentIdx = updated.findIndex((b) => b.id === blockId);
+      const next = updated.find((b, i) => i > currentIdx && b.status !== "done");
+      if (next) {
+        // Schedule navigation outside the updater to avoid nested setState
+        queueMicrotask(() => handleBlockClick(next));
+      } else {
+        queueMicrotask(() => {
+          setActiveBlockId(null);
+          setPhase("workbench");
+        });
+      }
+      return updated;
+    });
+  }
+
+  function handleBackToBoard() {
+    if (activeBlockId) {
+      updateBlockStatus(activeBlockId, board.find(b => b.id === activeBlockId)?.output ? "done" : "todo");
+    }
+    setActiveBlockId(null);
+    setPhase("workbench");
+  }
+
+  // ── Writing phase handlers ──
 
   async function handleSendMessage(text: string) {
     const userMsg: ChatMessage = {
@@ -316,8 +364,7 @@ export default function WritingCenter() {
     setMessages((prev) => [...prev, userMsg]);
     setLoading(true);
 
-    // In conversation phase: if user provides a topic, extract it and offer to start writing
-    if (phase === "conversation" && !topic && messages.length <= 2) {
+    if (!topic && messages.length <= 2) {
       setTopic(text.slice(0, 80));
     }
 
@@ -339,19 +386,6 @@ export default function WritingCenter() {
         timestamp: Date.now(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
-
-      // After 2 exchanges in conversation phase, suggest moving to writing
-      if (phase === "conversation" && allMessages.filter(m => m.role === "user").length >= 2) {
-        const transitionMsg: ChatMessage = {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: "Ready to start writing? Click the button below to open the editor, or keep chatting if you'd like to think more.",
-          timestamp: Date.now(),
-        };
-        setTimeout(() => {
-          setMessages((prev) => [...prev, transitionMsg]);
-        }, 1500);
-      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to get response";
       setError(msg);
@@ -448,8 +482,16 @@ export default function WritingCenter() {
   function handleTipTryIt(exercisePrompt: string) {
     setTopic(exercisePrompt.slice(0, 60));
     setGenre("essay");
-    setPhase("writing");
     setShowDailyTip(false);
+    const existing = board.find((b) => b.type === "draft");
+    if (existing) {
+      handleBlockClick(existing);
+    } else {
+      const newBlock = createBlockInstance("draft");
+      setBoard((prev) => [...prev, newBlock]);
+      setActiveBlockId(newBlock.id);
+      setPhase("writing");
+    }
   }
 
   function handleTipDisable() {
@@ -477,11 +519,6 @@ export default function WritingCenter() {
     setStepCards([]);
     setHasIncrementedThisSession(false);
     setActiveTab("chat");
-    setPhase("writing");
-  }
-
-  function handleStartWriting() {
-    setPhase("writing");
   }
 
   // Drag handlers
@@ -525,205 +562,83 @@ export default function WritingCenter() {
     setSplitRatio(0.5);
   }
 
-  const wordCount = countWords(document);
-
   // ── Render ──
 
-  // Phase 1: Welcome screen
-  if (phase === "welcome") {
+  // Auto-execution mode — completely separate render path
+  if (executionMode === "auto") {
     return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="max-w-2xl w-full space-y-8">
-            {/* Header */}
-            <div className="text-center space-y-3">
-              <h2 className="text-2xl font-semibold text-[var(--foreground)]">
-                Writing Center
-              </h2>
-              <p className="text-[var(--muted)] text-sm max-w-md mx-auto">
-                Your AI writing coach. I'll guide you through planning, drafting,
-                and revising — one step at a time.
-              </p>
-            </div>
-
-            {/* Daily tip (compact, above cards) */}
-            {showDailyTip && dailyTip && (
-              <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-4 flex items-start gap-3">
-                <span className="text-lg">💡</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-[var(--foreground)] leading-relaxed">
-                    {dailyTip.tip}
-                  </p>
-                  {dailyTip.exercisePrompt && (
-                    <button
-                      onClick={() => handleTipTryIt(dailyTip.exercisePrompt!)}
-                      className="mt-2 text-xs text-[var(--accent)] hover:underline font-medium"
-                    >
-                      Try this exercise →
-                    </button>
-                  )}
-                </div>
-                <button
-                  onClick={() => setShowDailyTip(false)}
-                  className="text-[var(--muted)] hover:text-[var(--foreground)] text-xs"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-
-            {/* Starter cards */}
-            <div className="grid grid-cols-2 gap-3">
-              {STARTER_CARDS.map((card) => (
-                <button
-                  key={card.action}
-                  onClick={() => handleStarterCard(card)}
-                  className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl p-5 text-left hover:border-[var(--accent)]/40 hover:shadow-sm transition-all group"
-                >
-                  <span className="text-2xl block mb-3">{card.icon}</span>
-                  <div className="text-sm font-medium text-[var(--foreground)] group-hover:text-[var(--accent)] transition-colors">
-                    {card.title}
-                  </div>
-                  <div className="text-xs text-[var(--muted)] mt-1 leading-relaxed">
-                    {card.description}
-                  </div>
-                </button>
-              ))}
-            </div>
-
-            {/* Or just start typing */}
-            <div className="text-center">
-              <button
-                onClick={() => setPhase("conversation")}
-                className="text-xs text-[var(--muted)] hover:text-[var(--accent)] transition-colors"
-              >
-                Or just tell me what you want to write →
-              </button>
-            </div>
-
-            {/* Streak */}
-            {profile.streak.current > 0 && (
-              <div className="text-center text-xs text-[var(--muted)]">
-                🔥 {profile.streak.current}-day writing streak
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <AutoExecutor
+        board={board}
+        genre={genre}
+        topic={topic}
+        language={language}
+        onExit={handleAutoExit}
+      />
     );
   }
 
-  // Phase 2: Conversation (AI chat only, no editor)
-  if (phase === "conversation") {
+  // Phase: Workbench (block selection & arrangement)
+  if (phase === "workbench") {
     return (
-      <div className="flex flex-col h-full">
-        {/* Minimal header */}
-        <div className="h-10 bg-[var(--card)] border-b border-[var(--card-border)] flex items-center px-4 shrink-0">
-          <button
-            onClick={() => {
-              setPhase("welcome");
-              setMessages([]);
-              setTopic("");
-            }}
-            className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mr-3"
-          >
-            ← Back
-          </button>
-          <span className="text-xs font-medium text-[var(--foreground)]">
-            {GENRE_LABELS[genre]}
-          </span>
-          {topic && (
-            <>
-              <span className="text-xs text-[var(--muted)] mx-2">·</span>
-              <span className="text-xs text-[var(--muted)] truncate">{topic}</span>
-            </>
-          )}
-        </div>
-
-        {/* Chat area */}
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-2xl mx-auto p-6 space-y-4">
-            {messages.map((msg) => (
-              <div
-                key={msg.id}
-                className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div
-                  className={`max-w-[80%] rounded-xl px-4 py-3 text-sm leading-relaxed ${
-                    msg.role === "user"
-                      ? "bg-[var(--accent)] text-white"
-                      : "bg-[var(--card)] border border-[var(--card-border)] text-[var(--foreground)]"
-                  }`}
-                >
-                  {msg.content}
-                </div>
-              </div>
-            ))}
-            {loading && (
-              <div className="flex justify-start">
-                <div className="bg-[var(--card)] border border-[var(--card-border)] rounded-xl px-4 py-3">
-                  <span className="flex gap-1">
-                    <span className="w-2 h-2 bg-[var(--muted)] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 bg-[var(--muted)] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 bg-[var(--muted)] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Bottom: input + "Start writing" button */}
-        <div className="border-t border-[var(--card-border)] bg-[var(--card)] p-4 shrink-0">
-          <div className="max-w-2xl mx-auto space-y-3">
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Tell me more about what you want to write..."
-                className="flex-1 bg-[var(--background)] border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm text-[var(--foreground)] placeholder:text-[#c4bfb7] focus:outline-none focus:ring-1 focus:ring-[var(--accent)]/30"
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    const input = e.currentTarget;
-                    if (input.value.trim()) {
-                      handleSendMessage(input.value.trim());
-                      input.value = "";
-                    }
-                  }
-                }}
-                disabled={loading}
-              />
-              <button
-                onClick={() => {
-                  const input = globalThis.document.querySelector<HTMLInputElement>(
-                    "input[placeholder*='Tell me more']"
-                  );
-                  if (input?.value.trim()) {
-                    handleSendMessage(input.value.trim());
-                    input.value = "";
-                  }
-                }}
-                disabled={loading}
-                className="bg-[var(--accent)] hover:bg-[#b5583a] disabled:bg-[#d4cfc7] text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
-              >
-                Send
-              </button>
-            </div>
-            {messages.length >= 2 && (
-              <button
-                onClick={handleStartWriting}
-                className="w-full bg-[var(--foreground)] hover:bg-[var(--foreground)]/90 text-white text-sm font-medium py-2.5 rounded-lg transition-all"
-              >
-                Open editor — start writing ✍️
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <Workbench
+        board={board}
+        onBoardChange={setBoard}
+        onBlockClick={handleBlockClick}
+        onStartWriting={handleStartWriting}
+        onAutoStart={handleAutoStart}
+        language={language}
+        onLanguageChange={setLanguage}
+        streak={profile.streak.current}
+      />
     );
   }
 
-  // Phase 3: Full writing environment
+  // Micro-reflection banner (shown during phase transitions)
+  const reflectionBanner = reflectionPrompt ? (
+    <div className="bg-amber-50 border-b border-amber-200 px-4 py-3 flex items-center gap-3 shrink-0">
+      <span className="text-amber-700 text-xs leading-relaxed flex-1">{reflectionPrompt}</span>
+      <button
+        onClick={() => setReflectionPrompt(null)}
+        className="text-amber-500 hover:text-amber-700 text-xs font-medium px-2 py-1 rounded shrink-0"
+      >
+        Got it
+      </button>
+    </div>
+  ) : null;
+
+  // Phase: Block chat (Socratic chat for a specific block)
+  if (phase === "block-chat" && activeBlock) {
+    return (
+      <>
+        {reflectionBanner}
+        <BlockChat
+          block={activeBlock}
+          sharedContext={{ topic, document, genre }}
+          onDone={(output) => handleBlockDone(activeBlock.id, output)}
+          onBack={handleBackToBoard}
+        />
+      </>
+    );
+  }
+
+  // Phase: Checklist (self-review, peer-review, submit-ready)
+  if (phase === "checklist" && activeBlock) {
+    return (
+      <>
+        {reflectionBanner}
+        <ChecklistPanel
+          block={activeBlock}
+          document={document}
+          profile={profile}
+          onDone={(output) => handleBlockDone(activeBlock.id, output)}
+          onBack={handleBackToBoard}
+        />
+      </>
+    );
+  }
+
+  // Phase: Writing (editor + analysis + lab)
+  // This is the full writing environment, now with block navigation
   const gridStyle: React.CSSProperties =
     layoutPreset === "full"
       ? {}
@@ -739,6 +654,9 @@ export default function WritingCenter() {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Micro-reflection banner */}
+      {reflectionBanner}
+
       {/* Error banner */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 flex items-center gap-2 shrink-0">
@@ -752,23 +670,70 @@ export default function WritingCenter() {
         </div>
       )}
 
+      {/* Block navigation bar (shows when board has blocks) */}
+      {board.length > 0 && (
+        <div className="h-9 bg-[var(--card)] border-b border-[var(--card-border)] flex items-center px-3 gap-1 shrink-0 overflow-x-auto">
+          <button
+            onClick={handleBackToBoard}
+            className="text-[10px] text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mr-2 shrink-0"
+          >
+            ← Board
+          </button>
+          {board.map((block, idx) => {
+            const def = getBlockDef(block.type);
+            const isActive = block.id === activeBlockId;
+            return (
+              <button
+                key={block.id}
+                onClick={() => handleBlockClick(block)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-medium transition-all shrink-0 ${
+                  isActive
+                    ? "text-white"
+                    : block.status === "done"
+                      ? "bg-green-50 text-green-700"
+                      : "text-[var(--muted)] hover:bg-[var(--background)]"
+                }`}
+                style={isActive ? { background: def.color } : undefined}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: isActive ? "white" : def.color }}
+                />
+                {def.nameZh}
+                {block.status === "done" && !isActive && (
+                  <span className="text-[8px] opacity-60">&#10003;</span>
+                )}
+              </button>
+            );
+          })}
+          {/* Done button for current block */}
+          {activeBlock && (
+            <button
+              onClick={() => handleBlockDone(activeBlock.id)}
+              className="ml-auto text-[10px] font-medium px-2.5 py-1 rounded-md transition-all shrink-0"
+              style={{
+                background: activeBlockDef ? `${activeBlockDef.color}15` : undefined,
+                color: activeBlockDef?.color,
+                border: activeBlockDef ? `1px solid ${activeBlockDef.color}30` : undefined,
+              }}
+            >
+              Done →
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Toolbar */}
       <div className="h-10 bg-[var(--card)] border-b border-[var(--card-border)] flex items-center px-3 gap-2 shrink-0">
-        <button
-          onClick={() => {
-            setPhase("welcome");
-            setDocument("");
-            setMessages([]);
-            setAnnotations([]);
-            setTopic("");
-            setStepCards([]);
-            setHasIncrementedThisSession(false);
-          }}
-          className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mr-1"
-          title="New writing"
-        >
-          ← New
-        </button>
+        {board.length === 0 && (
+          <button
+            onClick={handleBackToBoard}
+            className="text-xs text-[var(--muted)] hover:text-[var(--foreground)] transition-colors mr-1"
+            title="Back to workbench"
+          >
+            ← Back
+          </button>
+        )}
 
         <select
           value={genre}
@@ -844,7 +809,7 @@ export default function WritingCenter() {
               title={wordCount < 100 ? `Need ${100 - wordCount} more words` : "Analyze your writing"}
               className="bg-[var(--accent)] hover:bg-[#b5583a] disabled:bg-[#d4cfc7] disabled:text-[#a09a92] text-white text-xs font-medium px-4 py-1.5 rounded-md transition-all flex items-center gap-1.5"
             >
-              {loading ? "Analyzing..." : "Analyze ▶"}
+              {loading ? "Analyzing..." : "Analyze"}
             </button>
             {wordCount < 100 && wordCount > 0 && (
               <span className="text-[10px] text-[var(--muted)]">
@@ -892,8 +857,8 @@ export default function WritingCenter() {
             <div className="flex-1 min-h-0 overflow-auto">
               {activeTab === "chat" && (
                 <ChatPanel
-                  dailyTip={phase === "writing" ? dailyTip : null}
-                  showDailyTip={showDailyTip && phase === "writing"}
+                  dailyTip={dailyTip}
+                  showDailyTip={showDailyTip}
                   onTipTryIt={handleTipTryIt}
                   onTipSkip={() => setShowDailyTip(false)}
                   onTipDisable={handleTipDisable}
@@ -927,10 +892,18 @@ export default function WritingCenter() {
       </div>
 
       {/* Status bar */}
-      <div className="h-6 bg-[var(--accent)] flex items-center px-3 gap-3 shrink-0">
+      <div
+        className="h-6 flex items-center px-3 gap-3 shrink-0"
+        style={{ background: activeBlockDef?.color ?? "var(--accent)" }}
+      >
         <span className="text-white/80 text-[10px]">
           {wordCount > 0 ? `${wordCount} words` : "Ready"}
         </span>
+        {activeBlockDef && (
+          <span className="text-white/80 text-[10px]">
+            {activeBlockDef.nameZh}
+          </span>
+        )}
         <span className="text-white/50 text-[10px]">{GENRE_LABELS[genre]}</span>
         {annotations.length > 0 && (
           <span className="text-white/80 text-[10px]">
@@ -939,7 +912,7 @@ export default function WritingCenter() {
         )}
         {profile.streak.current > 0 && (
           <span className="text-white/80 text-[10px]">
-            🔥 {profile.streak.current}-day streak
+            {profile.streak.current}-day streak
           </span>
         )}
       </div>
