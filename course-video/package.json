@@ -1,0 +1,30 @@
+{
+  "name": "course-video",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "course-video": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "render": "tsc && node dist/cli.js",
+    "dev": "revideo editor --projectFile ./src/renderer/project.tsx"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@revideo/2d": "0.10.3",
+    "@revideo/core": "0.10.3",
+    "@revideo/renderer": "0.10.3",
+    "ws": "^8.20.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@revideo/cli": "0.10.3",
+    "@revideo/ui": "0.10.3",
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.18.1",
+    "typescript": "^5.5.4",
+    "vite": "^4.5.0"
+  }
+}

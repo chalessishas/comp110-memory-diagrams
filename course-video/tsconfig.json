@@ -1,0 +1,12 @@
+{
+  "extends": "@revideo/2d/tsconfig.project.json",
+  "include": ["src"],
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "skipLibCheck": true
+  }
+}
