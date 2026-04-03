@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/CourseTabs";
 import { OutlineTree } from "@/components/OutlineTree";
 import { ArchiveButton } from "@/components/ArchiveButton";
+import { StudyTaskList } from "@/components/StudyTaskList";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -17,6 +18,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .from("outline_nodes")
     .select("*")
     .eq("course_id", id)
+    .order("order");
+
+  const { data: studyTasks } = await supabase
+    .from("study_tasks")
+    .select("*")
+    .eq("course_id", id)
+    .order("priority")
     .order("order");
 
   return (
@@ -36,6 +44,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
 
       <CourseTabs courseId={id} />
       <OutlineTree nodes={outlineNodes ?? []} />
+      <StudyTaskList initialTasks={studyTasks ?? []} />
     </div>
   );
 }
