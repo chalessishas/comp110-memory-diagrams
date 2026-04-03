@@ -1,0 +1,18 @@
+# Sub-projects with their own git repos
+Signal-Map/
+TOEFL/
+ai-text-detector/
+ai-vtuber/
+chronicle/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.claude/
+.playwright-mcp/
+.superpowers/
+*.png
+*.jpg
+
+# Misc
+node_modules/
