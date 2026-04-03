@@ -74,6 +74,10 @@ export default function NewCoursePage() {
       return;
     }
 
+    // Auto-generate study tasks + quiz questions from outline
+    fetch(`/api/courses/${course.id}/generate`, { method: "POST" });
+    // Fire and forget — don't block navigation
+
     router.push(`/course/${course.id}`);
   }
 
