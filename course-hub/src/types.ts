@@ -85,3 +85,19 @@ export interface ParsedQuestion {
   explanation: string | null;
   difficulty: number;
 }
+
+export type TaskType = "read" | "practice" | "review";
+export type TaskStatus = "todo" | "done";
+
+export interface StudyTask {
+  id: string;
+  course_id: string;
+  knowledge_point_id: string | null;
+  title: string;
+  description: string;
+  task_type: TaskType;
+  priority: number;
+  status: TaskStatus;
+  order: number;
+  created_at: string;
+}
