@@ -1,24 +1,27 @@
-import Anthropic from "@anthropic-ai/sdk";
+import { generateText, Output } from "ai";
+import { openai } from "@ai-sdk/openai";
 import { parsedSyllabusSchema, parsedQuestionSchema } from "./schemas";
+import { z } from "zod";
 import type { ParsedSyllabus, ParsedQuestion } from "@/types";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
+// GPT-4.1 nano: $0.10/$0.40 per M tokens (vs Claude Sonnet $3/$15)
+const model = openai("gpt-4.1-nano");
 
 export async function parseSyllabus(fileBase64: string, mimeType: string): Promise<ParsedSyllabus> {
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-5-20250514",
-    max_tokens: 4096,
+  const { output } = await generateText({
+    model,
     messages: [
       {
         role: "user",
         content: [
           {
-            type: "document",
-            source: { type: "base64", media_type: mimeType as "application/pdf", data: fileBase64 },
+            type: "file",
+            data: `data:${mimeType};base64,${fileBase64}`,
+            mediaType: mimeType as "application/pdf",
           },
           {
             type: "text",
-            text: `Analyze this course syllabus and extract its structure. Return a JSON object with:
+            text: `Analyze this course syllabus and extract its structure. Return:
 - title: the course name
 - description: a one-sentence course description
 - professor: instructor name (null if not found)
@@ -26,22 +29,20 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
 - nodes: hierarchical array of course content, where each node has:
   - title: section title
   - type: one of "week", "chapter", "topic", "knowledge_point"
-  - content: brief description of what this section covers (null if obvious from title)
+  - content: brief description (null if obvious from title)
   - children: nested sub-sections
 
-Organize by the document's natural structure (weeks, chapters, units). Break each section into specific knowledge points where possible. Return ONLY valid JSON, no markdown.`,
+Organize by the document's natural structure. Break each section into specific knowledge points.`,
           },
         ],
       },
     ],
+    output: Output.object({
+      schema: parsedSyllabusSchema,
+    }),
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text ?? "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("AI did not return valid JSON");
-
-  const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonMatch[0]));
-  return parsed as ParsedSyllabus;
+  return output as ParsedSyllabus;
 }
 
 export async function parseExamQuestions(
@@ -51,42 +52,41 @@ export async function parseExamQuestions(
 ): Promise<(ParsedQuestion & { matched_kp_title: string | null })[]> {
   const kpList = knowledgePoints.map((kp) => kp.title).join(", ");
 
-  const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 8192,
+  const questionsSchema = z.object({
+    questions: parsedQuestionSchema
+      .extend({ matched_kp_title: z.string().nullable().default(null) })
+      .array(),
+  });
+
+  const { output } = await generateText({
+    model,
     messages: [
       {
         role: "user",
         content: [
           {
-            type: "document",
-            source: { type: "base64", media_type: mimeType as "application/pdf", data: fileBase64 },
+            type: "file",
+            data: `data:${mimeType};base64,${fileBase64}`,
+            mediaType: mimeType as "application/pdf",
           },
           {
             type: "text",
-            text: `Extract all questions from this exam/practice document. For each question, return a JSON array where each item has:
+            text: `Extract all questions from this exam/practice document. For each question return:
 - type: "multiple_choice", "fill_blank", "short_answer", or "true_false"
 - stem: the question text
 - options: array of {label, text} for multiple choice (null otherwise)
 - answer: the correct answer
 - explanation: brief explanation of why this answer is correct
 - difficulty: 1-5 (1=easy, 5=hard)
-- matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.
-
-Return ONLY a JSON array, no markdown.`,
+- matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.`,
           },
         ],
       },
     ],
+    output: Output.object({
+      schema: questionsSchema,
+    }),
   });
 
-  const text = response.content.find((b) => b.type === "text")?.text ?? "";
-  const jsonMatch = text.match(/\[[\s\S]*\]/);
-  if (!jsonMatch) throw new Error("AI did not return valid JSON array");
-
-  const questions = JSON.parse(jsonMatch[0]);
-  return questions.map((q: unknown) => ({
-    ...parsedQuestionSchema.parse(q),
-    matched_kp_title: (q as Record<string, unknown>).matched_kp_title ?? null,
-  }));
+  return (output as z.infer<typeof questionsSchema>).questions;
 }
