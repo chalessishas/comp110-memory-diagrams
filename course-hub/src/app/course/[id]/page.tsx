@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/CourseTabs";
 import { OutlineTree } from "@/components/OutlineTree";
+import { ArchiveButton } from "@/components/ArchiveButton";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -30,6 +31,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>{course.semester}</p>
           )}
         </div>
+        <ArchiveButton courseId={id} status={course.status} />
       </div>
 
       <CourseTabs courseId={id} />
