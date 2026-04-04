@@ -53,3 +53,23 @@ export const attemptCreateSchema = z.object({
   question_id: z.string().uuid(),
   user_answer: z.string().min(1),
 });
+
+export const noteOrganizeSchema = z.object({
+  transcript: z.string().min(1).max(20_000),
+  knowledge_point_id: z.string().uuid().nullable().optional(),
+  clarification_answers: z.array(z.string().max(2_000)).max(3).default([]),
+  source: z.enum(["voice", "text"]).default("voice"),
+});
+
+export const noteCreateSchema = z.object({
+  knowledge_point_id: z.string().uuid().nullable().default(null),
+  raw_transcript: z.string().min(1).max(20_000),
+  source: z.enum(["voice", "text"]).default("voice"),
+  title: z.string().min(1).max(200),
+  summary: z.string().min(1).max(5_000),
+  key_points: z.array(z.string().min(1).max(500)).min(1).max(8),
+  confusing_points: z.array(z.string().min(1).max(500)).max(6).default([]),
+  next_action: z.string().max(500).nullable().default(null),
+  clarification_questions: z.array(z.string().min(1).max(500)).max(3).default([]),
+  clarification_answers: z.array(z.string().min(1).max(2_000)).max(3).default([]),
+});

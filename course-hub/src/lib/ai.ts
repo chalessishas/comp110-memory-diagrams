@@ -2,7 +2,7 @@ import { generateText, Output } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { parsedSyllabusSchema, parsedQuestionSchema } from "./schemas";
 import { z } from "zod";
-import type { ParsedSyllabus, ParsedQuestion } from "@/types";
+import type { OrganizedStudyNote, ParsedQuestion, ParsedSyllabus } from "@/types";
 
 // Qwen3.5-Plus via DashScope OpenAI-compatible API
 // $0.26/$1.56 per M tokens, native PDF vision, json_schema support
@@ -44,6 +44,37 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
 Organize by the document's natural structure. Break each section into specific knowledge points where possible.`,
           },
         ],
+      },
+    ],
+    output: Output.object({ schema: parsedSyllabusSchema }),
+  });
+
+  return output as ParsedSyllabus;
+}
+
+export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus> {
+  const { output } = await generateText({
+    model: textModel,
+    messages: [
+      {
+        role: "user",
+        content: `Analyze the following course syllabus or course description text and extract its structure. Return:
+- title: the course name
+- description: a one-sentence course description
+- professor: instructor name (null if not found)
+- semester: semester info like "Fall 2026" (null if not found)
+- nodes: hierarchical array of course content, where each node has:
+  - title: section title
+  - type: one of "week", "chapter", "topic", "knowledge_point"
+  - content: brief description (null if obvious from title)
+  - children: nested sub-sections
+
+If the text is messy or incomplete, infer the most likely course structure from what is present. Break each section into specific knowledge points where possible.
+
+Course text:
+"""
+${rawText}
+"""`,
       },
     ],
     output: Output.object({ schema: parsedSyllabusSchema }),
@@ -195,4 +226,93 @@ Make questions test understanding, not just memorization.`,
   });
 
   return (output as z.infer<typeof autoQuizSchema>).questions;
+}
+
+// ─── Pipeline 5: Spoken Study Notes → Structured Notes + Clarifying Questions ───
+
+const organizedStudyNoteSchema = z.object({
+  title: z.string().min(1),
+  summary: z.string().min(1),
+  key_points: z.array(z.string().min(1)).min(2).max(6),
+  confusing_points: z.array(z.string().min(1)).max(4).default([]),
+  next_action: z.string().nullable().default(null),
+  clarification_questions: z.array(z.string().min(1)).max(3).default([]),
+  matched_kp_title: z.string().nullable().default(null),
+});
+
+export async function organizeStudyNote({
+  courseTitle,
+  transcript,
+  knowledgePoints,
+  selectedKnowledgePointTitle,
+  clarificationAnswers = [],
+}: {
+  courseTitle: string;
+  transcript: string;
+  knowledgePoints: { title: string; content: string | null }[];
+  selectedKnowledgePointTitle?: string | null;
+  clarificationAnswers?: string[];
+}): Promise<OrganizedStudyNote> {
+  const kpSummary = knowledgePoints.length
+    ? knowledgePoints.map((kp) => `- ${kp.title}${kp.content ? `: ${kp.content}` : ""}`).join("\n")
+    : "- No explicit knowledge points available";
+
+  const clarificationContext = clarificationAnswers.filter(Boolean).length
+    ? clarificationAnswers
+        .filter(Boolean)
+        .map((answer, index) => `Q${index + 1} answer: ${answer}`)
+        .join("\n")
+    : "No clarification answers yet.";
+
+  const { output } = await generateText({
+    model: textModel,
+    messages: [
+      {
+        role: "user",
+        content: `You are turning a student's spoken course note into a clean study note for the course "${courseTitle}".
+
+Knowledge points in this course:
+${kpSummary}
+
+${selectedKnowledgePointTitle ? `The student manually tagged this note to: ${selectedKnowledgePointTitle}` : "No manual knowledge point tag was selected."}
+
+Original spoken note:
+"""
+${transcript}
+"""
+
+Clarification answers so far:
+${clarificationContext}
+
+Return a structured note with:
+- title: short and concrete
+- summary: 2-4 sentences
+- key_points: 2-6 bullet-sized takeaways
+- confusing_points: only the parts the student still seems unsure about
+- next_action: one concrete next step or null
+- clarification_questions: 0-3 short follow-up questions only if the meaning is still ambiguous or incomplete
+- matched_kp_title: exactly one title from the knowledge point list above, or null
+
+Rules:
+- Preserve the student's meaning. Do not invent facts.
+- If a manual knowledge point was selected, use that as matched_kp_title.
+- If the clarification answers already resolve the ambiguity, reduce or remove the clarification questions.
+- If the note is clear enough, return an empty clarification_questions array.`,
+      },
+    ],
+    output: Output.object({ schema: organizedStudyNoteSchema }),
+  });
+
+  const organized = output as z.infer<typeof organizedStudyNoteSchema>;
+
+  return {
+    title: organized.title,
+    summary: organized.summary,
+    key_points: organized.key_points,
+    confusing_points: organized.confusing_points,
+    next_action: organized.next_action,
+    clarification_questions: organized.clarification_questions,
+    matched_knowledge_point_id: null,
+    matched_knowledge_point_title: selectedKnowledgePointTitle ?? organized.matched_kp_title,
+  };
 }

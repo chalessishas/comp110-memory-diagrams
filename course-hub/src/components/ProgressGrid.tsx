@@ -13,9 +13,11 @@ interface KPMastery {
 export function ProgressGrid({ data }: { data: KPMastery[] }) {
   if (data.length === 0) {
     return (
-      <p className="text-sm py-8 text-center" style={{ color: "var(--text-secondary)" }}>
-        No knowledge points to track yet.
-      </p>
+      <div className="ui-empty">
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          No knowledge points to track yet.
+        </p>
+      </div>
     );
   }
 
@@ -27,11 +29,23 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
   };
 
   return (
-    <div>
-      <div className="flex gap-4 mb-6">
+    <div className="ui-panel p-5 md:p-6">
+      <div className="mb-6">
+        <div className="ui-kicker mb-3">Progress</div>
+        <h3 className="text-2xl font-semibold">Knowledge Point Mastery</h3>
+        <p className="ui-copy mt-2">
+          A grayscale map of what feels solid, shaky, or still untouched.
+        </p>
+      </div>
+
+      <div className="flex flex-wrap gap-3 mb-6">
         {(["mastered", "reviewing", "weak", "untested"] as MasteryLevel[]).map((level) => (
-          <div key={level} className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded" style={{ backgroundColor: masteryColors[level] }} />
+          <div
+            key={level}
+            className="flex items-center gap-2 rounded-full px-3 py-2"
+            style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.9)" }}
+          >
+            <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: masteryColors[level] }} />
             <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
               {masteryLabels[level]} ({grouped[level].length})
             </span>
@@ -39,18 +53,19 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2.5">
         {data.map((item) => (
           <div key={item.node.id} className="relative group">
             <div
-              className="w-10 h-10 rounded-lg transition-transform hover:scale-110"
-              style={{ backgroundColor: masteryColors[item.level] }}
+              className="w-12 h-12 rounded-[18px] transition-transform hover:scale-105"
+              style={{ backgroundColor: masteryColors[item.level], border: "1px solid var(--border)" }}
             />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 rounded text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
+            <div
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 rounded-2xl text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
               style={{ backgroundColor: "var(--text-primary)", color: "var(--bg-surface)" }}
             >
               {item.node.title}
-              {item.total > 0 && ` — ${Math.round(item.rate * 100)}% (${item.total} attempts)`}
+              {item.total > 0 && ` • ${Math.round(item.rate * 100)}% (${item.total} attempts)`}
             </div>
           </div>
         ))}

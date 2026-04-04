@@ -21,10 +21,10 @@ export function calculateMastery(attempts: AttemptRecord[]): { level: MasteryLev
 }
 
 export const masteryColors: Record<MasteryLevel, string> = {
-  mastered: "var(--success)",
-  reviewing: "var(--warning)",
-  weak: "var(--danger)",
-  untested: "var(--border)",
+  mastered: "var(--accent)",
+  reviewing: "#6c6c66",
+  weak: "#b6b6af",
+  untested: "#e3e3dc",
 };
 
 export const masteryLabels: Record<MasteryLevel, string> = {

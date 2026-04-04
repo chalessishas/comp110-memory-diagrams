@@ -44,7 +44,7 @@ function Node({ node, style, dragHandle }: NodeRendererProps<TreeNode>) {
     <div
       style={style}
       ref={dragHandle}
-      className="flex items-center gap-1 py-1 px-2 rounded group cursor-pointer"
+      className="group flex items-center gap-2 rounded-2xl px-3 py-2 cursor-pointer hover:bg-black/5"
       onClick={() => node.toggle()}
     >
       <GripVertical size={12} className="opacity-0 group-hover:opacity-40 shrink-0" style={{ color: "var(--text-secondary)" }} />
@@ -58,8 +58,8 @@ function Node({ node, style, dragHandle }: NodeRendererProps<TreeNode>) {
       )}
 
       <span
-        className="text-xs px-1.5 py-0.5 rounded shrink-0"
-        style={{ backgroundColor: "var(--bg-primary)", color: "var(--text-secondary)" }}
+        className="text-[10px] px-2.5 py-1 rounded-full shrink-0 font-semibold uppercase tracking-[0.18em]"
+        style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
       >
         {typeLabel[node.data.type] || "?"}
       </span>
@@ -79,22 +79,26 @@ export function OutlineTree({ nodes }: { nodes: OutlineNode[] }) {
 
   if (treeData.length === 0) {
     return (
-      <p className="text-sm py-8 text-center" style={{ color: "var(--text-secondary)" }}>
-        No outline yet. Upload a syllabus to generate one.
-      </p>
+      <div className="ui-empty">
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          No outline yet. Upload a syllabus to generate one.
+        </p>
+      </div>
     );
   }
 
   return (
-    <Tree
-      data={treeData}
-      width="100%"
-      height={600}
-      indent={24}
-      rowHeight={34}
-      openByDefault={true}
-    >
-      {Node}
-    </Tree>
+    <div className="ui-panel p-4 md:p-6">
+      <Tree
+        data={treeData}
+        width="100%"
+        height={560}
+        indent={26}
+        rowHeight={42}
+        openByDefault={true}
+      >
+        {Node}
+      </Tree>
+    </div>
   );
 }

@@ -2,6 +2,21 @@ import { createClient } from "@/lib/supabase/server";
 import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
+function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
+  const knowledgePoints = nodes.filter((n) => n.type === "knowledge_point");
+  if (knowledgePoints.length > 0) {
+    return knowledgePoints.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+  }
+
+  const parentIds = new Set(nodes.map((n) => n.parent_id).filter(Boolean));
+  const leafNodes = nodes.filter((n) => !parentIds.has(n.id));
+  if (leafNodes.length > 0) {
+    return leafNodes.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+  }
+
+  return nodes.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+}
+
 export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -15,29 +30,29 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   // Get knowledge points from outline
   const { data: allNodes } = await supabase
     .from("outline_nodes")
-    .select("id, title, content, type")
+    .select("id, parent_id, title, content, type")
     .eq("course_id", id);
 
-  const knowledgePoints = (allNodes ?? []).filter((n) => n.type === "knowledge_point");
+  const studyTargets = selectStudyTargets(allNodes ?? []);
 
-  if (knowledgePoints.length === 0) {
-    return NextResponse.json({ error: "No knowledge points in outline" }, { status: 400 });
+  if (studyTargets.length === 0) {
+    return NextResponse.json({ error: "No study targets found in outline" }, { status: 400 });
   }
 
   // Run both pipelines in parallel
   const [studyTasks, questions] = await Promise.all([
     generateStudyTasks(
       course.title,
-      knowledgePoints.map((kp) => ({ title: kp.title, content: kp.content }))
+      studyTargets.map((kp) => ({ title: kp.title, content: kp.content }))
     ),
     generateQuestionsFromOutline(
       course.title,
-      knowledgePoints.map((kp) => ({ title: kp.title, content: kp.content }))
+      studyTargets.map((kp) => ({ title: kp.title, content: kp.content }))
     ),
   ]);
 
   // Map KP titles to IDs
-  const kpMap = new Map(knowledgePoints.map((kp) => [kp.title.toLowerCase(), kp.id]));
+  const kpMap = new Map(studyTargets.map((kp) => [kp.title.toLowerCase(), kp.id]));
 
   // Insert study tasks
   const taskRows = studyTasks.map((task, i) => ({
@@ -73,5 +88,6 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   return NextResponse.json({
     tasks_generated: taskRows.length,
     questions_generated: questionRows.length,
+    study_targets_used: studyTargets.length,
   });
 }

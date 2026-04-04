@@ -48,7 +48,22 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
     setToggling(null);
   }
 
-  if (tasks.length === 0) return null;
+  if (tasks.length === 0) {
+    return (
+      <div className="ui-panel p-5 md:p-6">
+        <div className="ui-kicker mb-3">Study Tasks</div>
+        <h3 className="text-2xl font-semibold">Keep the work concrete.</h3>
+        <p className="ui-copy mt-2">
+          A focused checklist generated from the course outline.
+        </p>
+        <div className="ui-empty mt-6">
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            No study tasks yet. Generate the course content first and they will show up here.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const todoTasks = tasks.filter((t) => t.status === "todo");
   const doneTasks = tasks.filter((t) => t.status === "done");
@@ -61,53 +76,57 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
   })).filter((g) => g.tasks.length > 0);
 
   return (
-    <div className="mt-8">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-medium">Study Tasks</h3>
-        <div className="flex items-center gap-2">
-          <div className="w-32 h-2 rounded-full" style={{ backgroundColor: "var(--border)" }}>
-            <div
-              className="h-2 rounded-full transition-all"
-              style={{ width: `${progress}%`, backgroundColor: "var(--success)" }}
-            />
+    <div className="ui-panel p-5 md:p-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
+        <div>
+          <div className="ui-kicker mb-3">Study Tasks</div>
+          <h3 className="text-2xl font-semibold">Keep the work concrete.</h3>
+          <p className="ui-copy mt-2">
+            A focused checklist generated from the course outline.
+          </p>
+        </div>
+        <div className="min-w-[190px]">
+          <div className="flex items-center justify-between text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
+            <span>Progress</span>
+            <span>{doneTasks.length}/{tasks.length}</span>
           </div>
-          <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            {doneTasks.length}/{tasks.length}
-          </span>
+          <div className="ui-progress-track">
+            <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
+          </div>
         </div>
       </div>
 
       {byPriority.map((group) => (
-        <div key={group.priority} className="mb-4">
-          <p className="text-xs font-medium uppercase tracking-wider mb-2" style={{ color: priorityColors[group.priority] }}>
+        <div key={group.priority} className="mb-5 last:mb-0">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] mb-3" style={{ color: priorityColors[group.priority] }}>
             {priorityLabels[group.priority]}
           </p>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {group.tasks.map((task) => {
               const Icon = typeIcons[task.task_type];
               return (
                 <div
                   key={task.id}
-                  className="flex items-start gap-3 px-3 py-2.5 rounded-lg transition-colors group"
-                  style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+                  className="flex items-start gap-3 rounded-[24px] px-4 py-4 transition-colors group"
+                  style={{ backgroundColor: "rgba(247, 247, 244, 0.92)", border: "1px solid var(--border)" }}
                 >
                   <button
                     onClick={() => toggleTask(task.id, task.status)}
                     disabled={toggling === task.id}
-                    className="mt-0.5 shrink-0 cursor-pointer"
+                    className="mt-0.5 shrink-0 cursor-pointer rounded-full"
                   >
                     {toggling === task.id ? (
                       <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
                     ) : (
-                      <Circle size={16} style={{ color: "var(--border)" }} />
+                      <Circle size={18} style={{ color: "var(--border-strong)" }} />
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{task.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>{task.description}</p>
+                    <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{task.description}</p>
                   </div>
-                  <span className="flex items-center gap-1 text-xs shrink-0 px-2 py-0.5 rounded"
-                    style={{ backgroundColor: "var(--bg-primary)", color: "var(--text-secondary)" }}>
+                  <span className="flex items-center gap-1 text-xs shrink-0 px-3 py-1.5 rounded-full"
+                    style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
                     <Icon size={12} />
                     {typeLabels[task.task_type]}
                   </span>
@@ -119,18 +138,18 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
       ))}
 
       {doneTasks.length > 0 && (
-        <details className="mt-4">
-          <summary className="text-xs cursor-pointer" style={{ color: "var(--text-secondary)" }}>
+        <details className="mt-6">
+          <summary className="text-xs cursor-pointer font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-secondary)" }}>
             Completed ({doneTasks.length})
           </summary>
-          <div className="space-y-1 mt-2 opacity-50">
+          <div className="space-y-2 mt-3 opacity-65">
             {doneTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+                className="flex items-center gap-3 rounded-[22px] px-4 py-3"
+                style={{ backgroundColor: "white", border: "1px solid var(--border)" }}
               >
-                <button onClick={() => toggleTask(task.id, task.status)} className="shrink-0 cursor-pointer">
+                <button onClick={() => toggleTask(task.id, task.status)} className="shrink-0 cursor-pointer rounded-full">
                   <Check size={16} style={{ color: "var(--success)" }} />
                 </button>
                 <p className="text-sm line-through">{task.title}</p>

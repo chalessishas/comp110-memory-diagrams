@@ -1,30 +1,35 @@
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { ArrowUpRight, BookOpen } from "lucide-react";
 import type { Course } from "@/types";
 
 export function CourseCard({ course }: { course: Course }) {
   return (
     <Link
       href={`/course/${course.id}`}
-      className="block p-5 rounded-xl shadow-sm transition-shadow hover:shadow-md"
-      style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+      className="ui-panel block p-6 transition-transform hover:-translate-y-0.5"
     >
-      <div className="flex items-start gap-3">
-        <div className="p-2 rounded-lg" style={{ backgroundColor: "var(--bg-primary)" }}>
-          <BookOpen size={20} style={{ color: "var(--accent)" }} />
+      <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start gap-4 min-w-0">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <BookOpen size={20} style={{ color: "var(--text-primary)" }} />
+          </div>
+          <div className="min-w-0">
+            <div className="ui-kicker mb-3">Course</div>
+            <h3 className="text-lg font-semibold truncate">{course.title}</h3>
+            {course.professor && (
+              <p className="text-sm mt-1 truncate" style={{ color: "var(--text-secondary)" }}>
+                {course.professor}
+              </p>
+            )}
+            {course.semester && (
+              <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+                {course.semester}
+              </p>
+            )}
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-medium truncate">{course.title}</h3>
-          {course.professor && (
-            <p className="text-sm mt-1 truncate" style={{ color: "var(--text-secondary)" }}>
-              {course.professor}
-            </p>
-          )}
-          {course.semester && (
-            <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-              {course.semester}
-            </p>
-          )}
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "var(--accent)", color: "white" }}>
+          <ArrowUpRight size={16} />
         </div>
       </div>
     </Link>

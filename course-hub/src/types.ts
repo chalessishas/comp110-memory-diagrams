@@ -4,6 +4,8 @@ export type UploadType = "syllabus" | "exam" | "practice" | "notes" | "other";
 export type UploadStatus = "pending" | "parsing" | "done" | "failed";
 export type QuestionType = "multiple_choice" | "fill_blank" | "short_answer" | "true_false";
 export type MasteryLevel = "mastered" | "reviewing" | "weak" | "untested";
+export type StudyMode = "solving" | "reviewing" | "studying" | "idle";
+export type NoteSource = "voice" | "text";
 
 export interface Course {
   id: string;
@@ -99,5 +101,33 @@ export interface StudyTask {
   priority: number;
   status: TaskStatus;
   order: number;
+  created_at: string;
+}
+
+export interface OrganizedStudyNote {
+  title: string;
+  summary: string;
+  key_points: string[];
+  confusing_points: string[];
+  next_action: string | null;
+  clarification_questions: string[];
+  matched_knowledge_point_id: string | null;
+  matched_knowledge_point_title: string | null;
+}
+
+export interface CourseNote {
+  id: string;
+  course_id: string;
+  knowledge_point_id: string | null;
+  knowledge_point_title: string | null;
+  raw_transcript: string;
+  source: NoteSource;
+  title: string;
+  summary: string;
+  key_points: string[];
+  confusing_points: string[];
+  next_action: string | null;
+  clarification_questions: string[];
+  clarification_answers: string[];
   created_at: string;
 }

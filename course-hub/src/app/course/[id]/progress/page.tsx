@@ -1,8 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { CourseTabs } from "@/components/CourseTabs";
 import { ProgressGrid } from "@/components/ProgressGrid";
+import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { calculateMastery } from "@/lib/mastery";
+import { ArrowLeft } from "lucide-react";
 
 export default async function ProgressPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -48,9 +51,28 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
   });
 
   return (
-    <div>
+    <div className="space-y-8">
+      <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
+        <ArrowLeft size={14} />
+        Back to Dashboard
+      </Link>
       <CourseTabs courseId={id} />
-      <h2 className="text-lg font-medium mb-4">Knowledge Point Mastery</h2>
+
+      <div>
+        <div className="ui-kicker mb-3">Progress</div>
+        <h2 className="text-3xl font-semibold">See what is sticking.</h2>
+        <p className="ui-copy mt-3 max-w-2xl">
+          CourseHub groups your recent attempts into a quiet mastery map so the weak spots are easy to spot.
+        </p>
+      </div>
+
+      <StudyTrackerPanel
+        courseId={id}
+        activeMode="studying"
+        title="Progress Review Time"
+        description="Time spent checking mastery and revisiting weak areas counts as study time. Long inactive stretches are marked as idle."
+      />
+
       <ProgressGrid data={data} />
     </div>
   );

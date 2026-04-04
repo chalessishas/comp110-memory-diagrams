@@ -1,14 +1,22 @@
 import { createClient } from "@/lib/supabase/server";
-import { parseSyllabus, parseExamQuestions } from "@/lib/ai";
+import { parseSyllabus, parseSyllabusText, parseExamQuestions } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const { storagePath, rawText, parseType, courseId } = await request.json();
+
+  if ((parseType === "syllabus" || !parseType) && typeof rawText === "string" && rawText.trim().length > 0) {
+    const result = await parseSyllabusText(rawText.trim());
+    return NextResponse.json({ type: "syllabus", data: result });
+  }
+
+  if (!storagePath) {
+    return NextResponse.json({ error: "storagePath or rawText required" }, { status: 400 });
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const { storagePath, parseType, courseId } = await request.json();
-  if (!storagePath) return NextResponse.json({ error: "storagePath required" }, { status: 400 });
 
   const { data: fileData, error: downloadError } = await supabase.storage
     .from("course-files")

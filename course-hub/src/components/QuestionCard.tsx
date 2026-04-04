@@ -9,6 +9,13 @@ interface QuestionCardProps {
   onAnswer: (questionId: string, answer: string, isCorrect: boolean) => void;
 }
 
+const QUESTION_TYPE_LABELS: Record<Question["type"], string> = {
+  multiple_choice: "Multiple Choice",
+  true_false: "True or False",
+  fill_blank: "Fill in the Blank",
+  short_answer: "Short Answer",
+};
+
 export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -35,39 +42,60 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
     onAnswer(question.id, userAnswer, correct);
   }
 
+  function getOptionStyles(optionLabel: string) {
+    const normalizedLabel = optionLabel.toLowerCase();
+    const normalizedAnswer = question.answer.trim().toLowerCase();
+    const isAnswer = normalizedLabel === normalizedAnswer;
+    const isSelected = selected === optionLabel;
+
+    if (submitted && isAnswer) {
+      return {
+        borderColor: "var(--accent)",
+        backgroundColor: "rgba(16, 16, 16, 0.06)",
+      };
+    }
+
+    if (submitted && isSelected && !isAnswer) {
+      return {
+        borderColor: "var(--border-strong)",
+        backgroundColor: "rgba(0, 0, 0, 0.03)",
+      };
+    }
+
+    if (!submitted && isSelected) {
+      return {
+        borderColor: "var(--accent)",
+        backgroundColor: "rgba(16, 16, 16, 0.04)",
+      };
+    }
+
+    return {
+      borderColor: "var(--border)",
+      backgroundColor: "white",
+    };
+  }
+
   return (
-    <div className="p-6 rounded-xl" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-      <p className="text-sm font-medium mb-4">{question.stem}</p>
+    <div className="ui-panel p-6 md:p-8">
+      <div className="mb-6">
+        <div className="ui-kicker mb-3">{QUESTION_TYPE_LABELS[question.type]}</div>
+        <p className="text-lg font-medium leading-8">{question.stem}</p>
+      </div>
 
       {(question.type === "multiple_choice" || question.type === "true_false") && question.options && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-5">
           {question.options.map((opt) => (
             <button
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-4 py-3 rounded-lg text-sm transition-colors cursor-pointer disabled:cursor-default"
+              className="w-full text-left px-4 py-4 rounded-[22px] text-sm transition-colors cursor-pointer disabled:cursor-default"
               style={{
                 border: "1px solid",
-                borderColor: submitted
-                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "var(--success)"
-                    : selected === opt.label
-                      ? "var(--danger)"
-                      : "var(--border)"
-                  : selected === opt.label
-                    ? "var(--accent)"
-                    : "var(--border)",
-                backgroundColor: submitted
-                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "rgba(74, 124, 89, 0.1)"
-                    : "transparent"
-                  : selected === opt.label
-                    ? "rgba(196, 169, 125, 0.1)"
-                    : "transparent",
+                ...getOptionStyles(opt.label),
               }}
             >
-              <span className="font-medium mr-2">{opt.label}.</span>
+              <span className="inline-flex min-w-8 font-semibold mr-2">{opt.label}.</span>
               {opt.text}
             </button>
           ))}
@@ -80,8 +108,7 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
           onChange={(e) => !submitted && setTextAnswer(e.target.value)}
           disabled={submitted}
           placeholder="Type your answer..."
-          className="w-full px-4 py-3 rounded-lg text-sm mb-4 resize-none"
-          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-primary)" }}
+          className="ui-textarea text-sm mb-5"
           rows={question.type === "short_answer" ? 4 : 1}
         />
       )}
@@ -90,22 +117,39 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
         <button
           onClick={handleSubmit}
           disabled={!userAnswer}
-          className="px-6 py-2 rounded-lg text-sm font-medium cursor-pointer disabled:opacity-40"
-          style={{ backgroundColor: "var(--accent)", color: "white" }}
+          className="ui-button-primary disabled:opacity-40"
         >
           Submit
         </button>
       ) : (
         <div className="mt-4">
-          <div className="flex items-center gap-2 mb-2">
+          <div
+            className="flex items-start gap-3 rounded-[24px] px-4 py-4 mb-3"
+            style={{
+              backgroundColor: isCorrect ? "var(--accent)" : "var(--bg-muted)",
+              color: isCorrect ? "white" : "var(--text-primary)",
+              border: `1px solid ${isCorrect ? "var(--accent)" : "var(--border)"}`,
+            }}
+          >
             {isCorrect ? (
-              <><Check size={16} style={{ color: "var(--success)" }} /><span className="text-sm font-medium" style={{ color: "var(--success)" }}>Correct</span></>
+              <>
+                <Check size={18} />
+                <span className="text-sm font-medium">Correct</span>
+              </>
             ) : (
-              <><X size={16} style={{ color: "var(--danger)" }} /><span className="text-sm font-medium" style={{ color: "var(--danger)" }}>Incorrect — answer: {question.answer}</span></>
+              <>
+                <X size={18} style={{ color: "var(--text-secondary)" }} />
+                <span className="text-sm font-medium">
+                  Incorrect. Correct answer: {question.answer}
+                </span>
+              </>
             )}
           </div>
           {question.explanation && (
-            <p className="text-sm p-3 rounded-lg" style={{ backgroundColor: "var(--bg-primary)", color: "var(--text-secondary)" }}>
+            <p
+              className="text-sm p-4 rounded-[22px]"
+              style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+            >
               {question.explanation}
             </p>
           )}

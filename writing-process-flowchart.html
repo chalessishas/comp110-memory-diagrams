@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Writing Process — Complete Flowchart</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #fff;
+    --border: #e5e2db;
+    --text: #2c2c2c;
+    --text-secondary: #6b6560;
+    --accent: #3d5a80;
+    --phase-1: #ee6c4d;
+    --phase-2: #e0a458;
+    --phase-3: #3d5a80;
+    --phase-4: #5b8a72;
+    --phase-5: #7b6d8d;
+    --phase-6: #8d6e63;
+    --phase-7: #4a7c96;
+    --feedback: #c44536;
+    --radius: 10px;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    overflow-x: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: 48px 24px 24px;
+  }
+  header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+  }
+  header p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 12px 24px 32px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .legend-line {
+    width: 24px;
+    height: 2px;
+  }
+  .legend-line.dashed {
+    background: repeating-linear-gradient(
+      90deg, var(--feedback) 0, var(--feedback) 6px, transparent 6px, transparent 10px
+    );
+    height: 2px;
+  }
+
+  /* ── Canvas container ── */
+  .canvas {
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 32px 80px;
+  }
+
+  /* ── SVG arrows layer ── */
+  .arrows-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Phase row ── */
+  .phase {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    margin-bottom: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Phase label (left column) ── */
+  .phase-label {
+    flex-shrink: 0;
+    width: 160px;
+    padding: 16px;
+    border-radius: var(--radius);
+    background: var(--surface);
+    border: 2px solid var(--border);
+    text-align: center;
+    cursor: default;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .phase-label:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  }
+  .phase-label .number {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    opacity: 0.6;
+  }
+  .phase-label .name {
+    font-size: 16px;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+  .phase-label .name-en {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  /* ── Connector (phase → modules) ── */
+  .connector {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    justify-content: center;
+    align-self: center;
+  }
+  .connector svg { display: block; }
+
+  /* ── Modules grid ── */
+  .modules {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 8px 0;
+  }
+
+  /* ── Module card ── */
+  .module {
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .module:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  }
+  .module.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(61,90,128,0.15);
+  }
+  .module .zh {
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .module .en {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 1px;
+  }
+  .module .desc {
+    display: none;
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    line-height: 1.6;
+  }
+  .module.active .desc {
+    display: block;
+  }
+
+  /* ── Phase-specific accent colors ── */
+  .phase[data-phase="1"] .phase-label { border-color: var(--phase-1); }
+  .phase[data-phase="1"] .module:hover,
+  .phase[data-phase="1"] .module.active { border-color: var(--phase-1); box-shadow: 0 0 0 3px rgba(238,108,77,0.12); }
+
+  .phase[data-phase="2"] .phase-label { border-color: var(--phase-2); }
+  .phase[data-phase="2"] .module:hover,
+  .phase[data-phase="2"] .module.active { border-color: var(--phase-2); box-shadow: 0 0 0 3px rgba(224,164,88,0.12); }
+
+  .phase[data-phase="3"] .phase-label { border-color: var(--phase-3); }
+  .phase[data-phase="3"] .module:hover,
+  .phase[data-phase="3"] .module.active { border-color: var(--phase-3); box-shadow: 0 0 0 3px rgba(61,90,128,0.12); }
+
+  .phase[data-phase="4"] .phase-label { border-color: var(--phase-4); }
+  .phase[data-phase="4"] .module:hover,
+  .phase[data-phase="4"] .module.active { border-color: var(--phase-4); box-shadow: 0 0 0 3px rgba(91,138,114,0.12); }
+
+  .phase[data-phase="5"] .phase-label { border-color: var(--phase-5); }
+  .phase[data-phase="5"] .module:hover,
+  .phase[data-phase="5"] .module.active { border-color: var(--phase-5); box-shadow: 0 0 0 3px rgba(123,109,141,0.12); }
+
+  .phase[data-phase="6"] .phase-label { border-color: var(--phase-6); }
+  .phase[data-phase="6"] .module:hover,
+  .phase[data-phase="6"] .module.active { border-color: var(--phase-6); box-shadow: 0 0 0 3px rgba(141,110,99,0.12); }
+
+  .phase[data-phase="7"] .phase-label { border-color: var(--phase-7); }
+  .phase[data-phase="7"] .module:hover,
+  .phase[data-phase="7"] .module.active { border-color: var(--phase-7); box-shadow: 0 0 0 3px rgba(74,124,150,0.12); }
+
+  /* ── Down arrow between phases ── */
+  .phase-arrow {
+    display: flex;
+    justify-content: center;
+    padding: 4px 0;
+    padding-left: 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .phase-arrow svg {
+    opacity: 0.3;
+  }
+
+  /* ── Feedback loops sidebar ── */
+  .feedback-panel {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 240px;
+    padding: 20px;
+    background: var(--surface);
+    border-left: 2px solid var(--border);
+    border-radius: var(--radius) 0 0 var(--radius);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.06);
+    z-index: 10;
+    transition: transform 0.3s;
+  }
+  .feedback-panel.collapsed {
+    transform: translateY(-50%) translateX(200px);
+  }
+  .feedback-panel h3 {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--feedback);
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .feedback-loop {
+    font-size: 12px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 6px;
+    background: #fdf4f3;
+    border: 1px solid #f0d4d0;
+    color: var(--text);
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .feedback-loop:hover {
+    background: #fbe8e5;
+  }
+  .feedback-loop .arrow {
+    color: var(--feedback);
+    font-weight: 700;
+  }
+  .feedback-loop .why {
+    display: none;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .feedback-loop.active .why {
+    display: block;
+  }
+
+  /* ── Toggle button ── */
+  .toggle-feedback {
+    position: fixed;
+    right: 12px;
+    top: 12px;
+    padding: 8px 14px;
+    font-size: 12px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+    z-index: 11;
+    transition: background 0.15s;
+  }
+  .toggle-feedback:hover {
+    background: #f0ede8;
+  }
+
+  /* ── AI Assistance indicator ── */
+  .ai-badge {
+    display: inline-block;
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: #e8f0fe;
+    color: var(--accent);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .phase { flex-direction: column; align-items: stretch; }
+    .phase-label { width: 100%; }
+    .connector { display: none; }
+    .phase-arrow { padding-left: 0; }
+    .feedback-panel { display: none; }
+    .toggle-feedback { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>The Writing Process</h1>
+  <p>A comprehensive flowchart of every module in the writing process. Click any module to see details. Writing is recursive — the feedback panel shows common loops between phases.</p>
+</header>
+
+<div class="legend">
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-1)"></div> Pre-Writing
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-2)"></div> Planning
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-3)"></div> Drafting
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-4)"></div> Revising
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-5)"></div> Editing
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-6)"></div> Proofreading
+  </div>
+  <div class="legend-item">
+    <div class="legend-dot" style="background:var(--phase-7)"></div> Reflection
+  </div>
+  <div class="legend-item">
+    <div class="legend-line dashed"></div> Feedback loop
+  </div>
+</div>
+
+<div class="canvas">
+
+  <!-- ═══ Phase 1: Pre-Writing ═══ -->
+  <div class="phase" data-phase="1">
+    <div class="phase-label">
+      <div class="number">Phase 1</div>
+      <div class="name">构思</div>
+      <div class="name-en">Pre-Writing</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="topic">
+        <div class="zh">选题发现</div>
+        <div class="en">Topic Discovery</div>
+        <div class="desc">确定写作的主题范围。从兴趣、课程要求、社会议题中提炼具体可写的切入点。好的选题 = 足够窄（可深入）+ 足够有意义（值得写）。</div>
+      </div>
+      <div class="module" data-id="audience">
+        <div class="zh">受众分析</div>
+        <div class="en">Audience Analysis</div>
+        <div class="desc">读者是谁？他们已经知道什么？他们关心什么？这决定了用词深度、论证策略和语气。学术论文 vs 科普文章 vs 个人随笔，受众完全不同。</div>
+      </div>
+      <div class="module" data-id="purpose">
+        <div class="zh">写作目的</div>
+        <div class="en">Purpose Definition</div>
+        <div class="desc">明确这篇文章要达成什么：说服？解释？叙事？分析？目的决定了文章的整体结构和修辞策略。一篇没有明确目的的文章注定散漫。</div>
+      </div>
+      <div class="module" data-id="research">
+        <div class="zh">调研与收集</div>
+        <div class="en">Research & Gathering</div>
+        <div class="desc">搜集支撑论点的材料：学术文献、数据、案例、专家观点、个人经验。注意来源可信度和时效性。边读边记笔记，标注来源。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="brainstorm">
+        <div class="zh">头脑风暴</div>
+        <div class="en">Brainstorming</div>
+        <div class="desc">自由联想、思维导图、自由写作（freewriting）、列表法。关键：不评判、不筛选，先产生尽可能多的想法，后面再取舍。<span class="ai-badge">AI</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 2: Planning ═══ -->
+  <div class="phase" data-phase="2">
+    <div class="phase-label">
+      <div class="number">Phase 2</div>
+      <div class="name">规划</div>
+      <div class="name-en">Planning</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="thesis">
+        <div class="zh">论点确立</div>
+        <div class="en">Thesis Statement</div>
+        <div class="desc">用一句话概括全文的核心主张。好的 thesis = 有立场（不是陈述事实）+ 可论证（有证据支撑）+ 有争议性（值得讨论）。这是全文的锚点。</div>
+      </div>
+      <div class="module" data-id="outline">
+        <div class="zh">大纲与结构</div>
+        <div class="en">Outline & Structure</div>
+        <div class="desc">确定文章的骨架：几段？每段的核心论点？段落之间的逻辑关系？常见模式：时序、对比、因果、问题-解决、一般-具体。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="evidence-plan">
+        <div class="zh">证据规划</div>
+        <div class="en">Evidence Selection</div>
+        <div class="desc">为每个分论点匹配最有力的证据。考虑：直接引用 vs 转述、定量数据 vs 定性案例、权威来源 vs 个人经验的平衡。</div>
+      </div>
+      <div class="module" data-id="rhetoric">
+        <div class="zh">修辞策略</div>
+        <div class="en">Rhetorical Strategy</div>
+        <div class="desc">选择说服方式：逻辑推理（logos）、情感共鸣（pathos）、权威背书（ethos）。不同受众对不同策略的接受度不同。</div>
+      </div>
+      <div class="module" data-id="structure-pattern">
+        <div class="zh">结构模式</div>
+        <div class="en">Organizational Pattern</div>
+        <div class="desc">选择最适合论点的组织方式。议论文：claim → evidence → warrant。对比文：block 法 vs point-by-point。叙事文：chronological vs in medias res。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 3: Drafting ═══ -->
+  <div class="phase" data-phase="3">
+    <div class="phase-label">
+      <div class="number">Phase 3</div>
+      <div class="name">起草</div>
+      <div class="name-en">Drafting</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="hook">
+        <div class="zh">开头吸引</div>
+        <div class="en">Opening Hook</div>
+        <div class="desc">用一个引人入胜的开头抓住读者。方式：惊人数据、反直觉声明、故事场景、引用名言、提出问题。避免：字典定义开头、空泛陈述。</div>
+      </div>
+      <div class="module" data-id="intro">
+        <div class="zh">引言与背景</div>
+        <div class="en">Introduction</div>
+        <div class="desc">从 hook 过渡到 thesis。提供足够的背景让读者理解论题的重要性，但不过度展开（那是正文的工作）。介绍 → 缩小范围 → thesis。</div>
+      </div>
+      <div class="module" data-id="body">
+        <div class="zh">正文展开</div>
+        <div class="en">Body Development</div>
+        <div class="desc">每段一个分论点（topic sentence），后接证据和分析。TEA 结构：Topic → Evidence → Analysis。分析比证据更重要——证据说"是什么"，分析说"为什么重要"。</div>
+      </div>
+      <div class="module" data-id="evidence-use">
+        <div class="zh">论据整合</div>
+        <div class="en">Evidence Integration</div>
+        <div class="desc">引用不是堆砌。三明治法：自己的话引入 → 引用/数据 → 自己的分析连接回论点。直接引用控制在 10-15%，其余转述。注明出处。</div>
+      </div>
+      <div class="module" data-id="counter">
+        <div class="zh">反驳与让步</div>
+        <div class="en">Counterarguments</div>
+        <div class="desc">预见并回应反对观点。让步（"诚然，X 有道理"）→ 反驳（"但是，Y 更重要因为 Z"）。这展示了思维的深度，增强论证的可信度。</div>
+      </div>
+      <div class="module" data-id="transition">
+        <div class="zh">过渡衔接</div>
+        <div class="en">Transitions</div>
+        <div class="desc">段与段之间的逻辑桥梁。不只是 "however" "moreover" 这种连接词，更重要的是上一段的结尾要暗示下一段的方向。好的过渡让读者感觉不到段落切换。</div>
+      </div>
+      <div class="module" data-id="conclusion">
+        <div class="zh">结论</div>
+        <div class="en">Conclusion</div>
+        <div class="desc">不是简单重复 thesis。升华：so what? 为什么这个论点重要？它对更大问题意味着什么？可以呼应开头的 hook（首尾呼应），或提出新的思考方向。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 4: Revising ═══ -->
+  <div class="phase" data-phase="4">
+    <div class="phase-label">
+      <div class="number">Phase 4</div>
+      <div class="name">修改</div>
+      <div class="name-en">Revising</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="content-check">
+        <div class="zh">内容完整性</div>
+        <div class="en">Content Completeness</div>
+        <div class="desc">每个分论点都有足够的证据支撑吗？有没有遗漏重要的角度？读者可能会问的问题都回答了吗？<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="logic">
+        <div class="zh">论证逻辑</div>
+        <div class="en">Argument Logic</div>
+        <div class="desc">检查逻辑谬误：滑坡论证、以偏概全、因果倒置、稻草人。每一步推理都成立吗？证据真的支持结论吗？有没有跳跃？<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="structure-review">
+        <div class="zh">结构与流畅</div>
+        <div class="en">Structure & Flow</div>
+        <div class="desc">段落的顺序是最佳的吗？信息量的递进合理吗？读者在任何一个点都知道"我在哪、要去哪"吗？可以尝试重新排列段落看效果。</div>
+      </div>
+      <div class="module" data-id="paragraph-unity">
+        <div class="zh">段落统一</div>
+        <div class="en">Paragraph Coherence</div>
+        <div class="desc">每段只讨论一个核心观点。如果一段有两个不同方向的想法，拆成两段。检查：删掉 topic sentence 后，段落的内容还能被预测吗？</div>
+      </div>
+      <div class="module" data-id="voice">
+        <div class="zh">语气与风格</div>
+        <div class="en">Voice & Tone</div>
+        <div class="desc">语气是否与受众和目的匹配？全文风格是否统一？学术文不该突然口语化，随笔不该突然生硬。"这像不像我会说的话？"</div>
+      </div>
+      <div class="module" data-id="depth">
+        <div class="zh">分析深度</div>
+        <div class="en">Depth of Analysis</div>
+        <div class="desc">是在描述表面现象还是在真正分析？描述 = "X 发生了"，分析 = "X 发生因为 Y，这意味着 Z"。反复追问"so what?"直到无法再深入。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 5: Editing ═══ -->
+  <div class="phase" data-phase="5">
+    <div class="phase-label">
+      <div class="number">Phase 5</div>
+      <div class="name">编辑</div>
+      <div class="name-en">Editing</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="grammar">
+        <div class="zh">语法句法</div>
+        <div class="en">Grammar & Syntax</div>
+        <div class="desc">主谓一致、时态统一、代词指代清晰、修饰语位置正确、平行结构。不只是"对不对"，更是"读起来顺不顺"。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="diction">
+        <div class="zh">用词选择</div>
+        <div class="en">Word Choice / Diction</div>
+        <div class="desc">用最精确的词。"好"→ 哪种好？effective? beneficial? advantageous? 避免模糊词（things, stuff, very, really）。每个词都应该不可替代。</div>
+      </div>
+      <div class="module" data-id="sentence-variety">
+        <div class="zh">句式多样</div>
+        <div class="en">Sentence Variety</div>
+        <div class="desc">长短句交替、简单句和复合句混用。连续三个以上相同句式 = 节奏感丧失。短句用于强调，长句用于解释。偶尔用一个反问或倒装打破节奏。</div>
+      </div>
+      <div class="module" data-id="clarity">
+        <div class="zh">清晰与精确</div>
+        <div class="en">Clarity & Precision</div>
+        <div class="desc">读者第一遍就能懂吗？如果需要重读才能理解，那就需要重写。拆长句、去冗余、让主语和动词靠近。写完后大声朗读是最好的检测方式。</div>
+      </div>
+      <div class="module" data-id="conciseness">
+        <div class="zh">简洁性</div>
+        <div class="en">Conciseness</div>
+        <div class="desc">删掉每一个不增加信息量的词。"in order to" → "to"。"the fact that" → 删。"it is important to note that" → 删。好文章不是加出来的，是减出来的。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="register">
+        <div class="zh">语体适配</div>
+        <div class="en">Academic Register</div>
+        <div class="desc">学术文：避免缩写(don't→do not)、避免第一人称（除非学科允许）、避免口语化表达。商务文：简洁直接。创意写作：自由但一致。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 6: Proofreading ═══ -->
+  <div class="phase" data-phase="6">
+    <div class="phase-label">
+      <div class="number">Phase 6</div>
+      <div class="name">校对</div>
+      <div class="name-en">Proofreading</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="spelling">
+        <div class="zh">拼写检查</div>
+        <div class="en">Spelling</div>
+        <div class="desc">不要依赖 spell checker——它不认识 "their/there/they're" 的区别。特别注意专有名词、技术术语、外来词的拼写。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="punctuation">
+        <div class="zh">标点符号</div>
+        <div class="en">Punctuation</div>
+        <div class="desc">逗号不是万能胶水——逗号拼接（comma splice）是最常见的标点错误。分号连接独立句、冒号引出解释、破折号强调。Oxford comma 看学校风格指南。</div>
+      </div>
+      <div class="module" data-id="formatting">
+        <div class="zh">格式规范</div>
+        <div class="en">Formatting</div>
+        <div class="desc">字体、字号、行距、边距是否符合要求（APA? MLA? Chicago?）。标题层级一致。页码、页眉。段落缩进还是空行分隔——保持统一。</div>
+      </div>
+      <div class="module" data-id="citations">
+        <div class="zh">引用与参考</div>
+        <div class="en">Citations & References</div>
+        <div class="desc">正文引用和参考文献列表一一对应。格式统一（APA 第 7 版、MLA 第 9 版等）。所有引用都有出处，所有参考文献都在正文中被提及。<span class="ai-badge">AI</span></div>
+      </div>
+      <div class="module" data-id="compliance">
+        <div class="zh">合规检查</div>
+        <div class="en">Compliance Check</div>
+        <div class="desc">字数在要求范围内？所有 rubric 要求都覆盖了？提交格式正确（PDF? Word? 在线系统?）？文件命名符合规定？截止日期确认。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="phase-arrow">
+    <svg width="24" height="24"><path d="M12 4 L12 18 M6 14 L12 20 L18 14" fill="none" stroke="#bbb" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </div>
+
+  <!-- ═══ Phase 7: Reflection ═══ -->
+  <div class="phase" data-phase="7">
+    <div class="phase-label">
+      <div class="number">Phase 7</div>
+      <div class="name">反思</div>
+      <div class="name-en">Reflection</div>
+    </div>
+    <div class="connector">
+      <svg width="32" height="2"><line x1="0" y1="1" x2="32" y2="1" stroke="#ccc" stroke-width="1.5"/></svg>
+    </div>
+    <div class="modules">
+      <div class="module" data-id="self-assess">
+        <div class="zh">自我评估</div>
+        <div class="en">Self-Assessment</div>
+        <div class="desc">对照 rubric 给自己打分。哪里强？哪里弱？如果可以重来，会怎么改？这个习惯是写作能力提升最快的方式——没有之一。</div>
+      </div>
+      <div class="module" data-id="peer">
+        <div class="zh">同伴反馈</div>
+        <div class="en">Peer Feedback</div>
+        <div class="desc">让别人读你的文章。关注他们困惑的地方（而不只是夸奖的地方）。好问题："你觉得我的论点是什么？"——如果他们说不出来，说明论点不清晰。</div>
+      </div>
+      <div class="module" data-id="revision-log">
+        <div class="zh">修改记录</div>
+        <div class="en">Revision History</div>
+        <div class="desc">记录每次大修改的原因和效果。这不是 git log——是写作决策的反思。"我把第三段移到前面因为 X，效果 Y"。长期积累 = 个人写作方法论。</div>
+      </div>
+      <div class="module" data-id="lessons">
+        <div class="zh">经验总结</div>
+        <div class="en">Lessons Learned</div>
+        <div class="desc">每篇文章写完后，一句话总结最大的收获和最大的坑。形成自己的 checklist。三篇文章都在同一个地方犯错 = 需要专门训练的弱点。</div>
+      </div>
+      <div class="module" data-id="portfolio">
+        <div class="zh">作品集管理</div>
+        <div class="en">Portfolio Curation</div>
+        <div class="desc">选择代表性作品存档，附上写作过程的反思。展示进步轨迹比展示最终产品更有价值。对申请、求职、自我回顾都有用。</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Feedback Loops Panel ── -->
+<button class="toggle-feedback" onclick="toggleFeedback()">Feedback Loops</button>
+<div class="feedback-panel" id="feedbackPanel">
+  <h3 onclick="toggleFeedback()">Recursive Loops</h3>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Drafting → Pre-Writing</span>
+    <div>写到一半发现证据不够</div>
+    <div class="why">起草过程中暴露了调研的空白。需要回到 Research 补充材料，可能还要调整 thesis。这是最常见的回溯。</div>
+  </div>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Revising → Planning</span>
+    <div>修改时发现结构有问题</div>
+    <div class="why">整体审视时发现段落顺序不对，或某个分论点其实不支持 thesis。需要回到 Outline 重组。严重时需要重新定义 thesis。</div>
+  </div>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Revising → Drafting</span>
+    <div>需要重写某些段落</div>
+    <div class="why">修改不是微调——有时整段需要推倒重来。特别是 intro 和 conclusion，往往是写完全文后才知道最好的写法。</div>
+  </div>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Editing → Revising</span>
+    <div>句子层面问题暴露段落问题</div>
+    <div class="why">逐句打磨时发现某一段的逻辑其实不通顺——不是表达问题，是思路问题。需要退回一步从段落层面修改。</div>
+  </div>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Peer Feedback → Any Phase</span>
+    <div>外部反馈触发任何阶段的回溯</div>
+    <div class="why">同伴可能质疑你的 thesis、指出结构混乱、发现逻辑漏洞、或建议不同的证据。反馈的价值在于打破"作者盲区"。</div>
+  </div>
+
+  <div class="feedback-loop" onclick="this.classList.toggle('active')">
+    <span class="arrow">Reflection → Next Writing</span>
+    <div>本次经验优化下次流程</div>
+    <div class="why">写作能力的提升是跨文章的。这次的教训成为下次的 checklist。反思阶段不是结束，是下一篇文章的起点。</div>
+  </div>
+</div>
+
+<script>
+  // Toggle module detail on click
+  document.querySelectorAll('.module').forEach(mod => {
+    mod.addEventListener('click', () => {
+      const wasActive = mod.classList.contains('active');
+      // Close all in same phase
+      mod.closest('.modules').querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+      if (!wasActive) mod.classList.add('active');
+    });
+  });
+
+  // Toggle feedback panel
+  function toggleFeedback() {
+    document.getElementById('feedbackPanel').classList.toggle('collapsed');
+  }
+
+  // Close module when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.module') && !e.target.closest('.feedback-loop')) {
+      document.querySelectorAll('.module.active').forEach(m => m.classList.remove('active'));
+    }
+  });
+</script>
+
+</body>
+</html>
