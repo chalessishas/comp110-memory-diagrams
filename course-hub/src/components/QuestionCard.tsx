@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, Bookmark } from "lucide-react";
 import type { Question } from "@/types";
 
 interface QuestionCardProps {
   question: Question;
   onAnswer: (questionId: string, answer: string, isCorrect: boolean) => void;
+  bookmarked?: boolean;
 }
 
 const QUESTION_TYPE_LABELS: Record<Question["type"], string> = {
@@ -16,10 +17,11 @@ const QUESTION_TYPE_LABELS: Record<Question["type"], string> = {
   short_answer: "Short Answer",
 };
 
-export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
+export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked }: QuestionCardProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [textAnswer, setTextAnswer] = useState("");
+  const [isBookmarked, setIsBookmarked] = useState(initialBookmarked ?? false);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
@@ -75,8 +77,33 @@ export function QuestionCard({ question, onAnswer }: QuestionCardProps) {
     };
   }
 
+  async function handleBookmarkToggle() {
+    if (isBookmarked) {
+      await fetch("/api/bookmarks", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: question.id }),
+      });
+      setIsBookmarked(false);
+    } else {
+      await fetch("/api/bookmarks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question_id: question.id }),
+      });
+      setIsBookmarked(true);
+    }
+  }
+
   return (
-    <div className="ui-panel p-6 md:p-8">
+    <div className="ui-panel p-6 md:p-8 relative">
+      <button
+        onClick={handleBookmarkToggle}
+        className="absolute top-4 right-4 p-1.5 cursor-pointer rounded-lg hover:bg-black/5"
+        title={isBookmarked ? "Remove from bank" : "Save to question bank"}
+      >
+        <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} style={{ color: "var(--accent)" }} />
+      </button>
       <div className="mb-6">
         <div className="ui-kicker mb-3">{QUESTION_TYPE_LABELS[question.type]}</div>
         <p className="text-lg font-medium leading-8">{question.stem}</p>
