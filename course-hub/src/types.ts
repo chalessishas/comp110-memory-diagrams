@@ -115,6 +115,14 @@ export interface OrganizedStudyNote {
   matched_knowledge_point_title: string | null;
 }
 
+export interface QuestionBookmark {
+  id: string;
+  user_id: string;
+  question_id: string;
+  note: string | null;
+  created_at: string;
+}
+
 export interface CourseNote {
   id: string;
   course_id: string;
