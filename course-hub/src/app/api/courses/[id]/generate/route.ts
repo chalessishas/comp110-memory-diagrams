@@ -23,6 +23,10 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Clear previously auto-generated tasks and questions (not exam-sourced ones)
+  await supabase.from("study_tasks").delete().eq("course_id", id);
+  await supabase.from("questions").delete().eq("course_id", id).is("source_upload_id", null);
+
   // Get course
   const { data: course } = await supabase.from("courses").select("title").eq("id", id).single();
   if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });

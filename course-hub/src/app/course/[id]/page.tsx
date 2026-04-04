@@ -256,7 +256,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             <h2 className="text-2xl font-semibold">Course Map</h2>
             <p className="ui-copy mt-2">Use the map to see the structure, then use the study flow above to know what to do with it.</p>
           </div>
-          <OutlineTree nodes={outlineNodes ?? []} />
+          <OutlineTree nodes={outlineNodes ?? []} courseId={id} />
         </section>
 
         <section>
