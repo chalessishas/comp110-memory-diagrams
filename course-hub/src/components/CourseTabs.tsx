@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, BookOpen, BarChart3, NotebookPen, FolderOpen, RotateCcw, PenLine } from "lucide-react";
+import { List, BookOpen, BarChart3, NotebookPen, FolderOpen, RotateCcw, PenLine, TreePine } from "lucide-react";
 
 export function CourseTabs({ courseId }: { courseId: string }) {
   const pathname = usePathname();
@@ -10,6 +10,7 @@ export function CourseTabs({ courseId }: { courseId: string }) {
 
   const tabs = [
     { href: `${base}/learn`, label: "Learn", icon: BookOpen },
+    { href: `${base}/tree`, label: "Tree", icon: TreePine },
     { href: base, label: "Study", icon: List, exact: true },
     { href: `${base}/notes`, label: "Notes", icon: NotebookPen },
     { href: `${base}/practice`, label: "Practice", icon: PenLine },
