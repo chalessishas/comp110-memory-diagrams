@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bookmark, Loader2, Trash2 } from "lucide-react";
 import type { Question } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface BookmarkItem {
   id: string;
@@ -12,6 +13,7 @@ interface BookmarkItem {
 }
 
 export default function QuestionBankPage() {
+  const { t } = useI18n();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,17 +46,17 @@ export default function QuestionBankPage() {
     <div>
       <div className="flex items-center gap-2 mb-6">
         <Bookmark size={20} style={{ color: "var(--accent)" }} />
-        <h1 className="text-2xl font-semibold">Question Bank</h1>
+        <h1 className="text-2xl font-semibold">{t("bank.title")}</h1>
       </div>
       <p className="mb-6 text-sm" style={{ color: "var(--text-secondary)" }}>
-        Questions you bookmarked across all courses.
+        {t("bank.subtitle")}
       </p>
 
       {bookmarks.length === 0 ? (
         <div className="text-center py-16">
-          <p style={{ color: "var(--text-secondary)" }}>No saved questions yet</p>
+          <p style={{ color: "var(--text-secondary)" }}>{t("bank.noSaved")}</p>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-            Bookmark questions while practicing to build your personal bank
+            {t("bank.noSavedDesc")}
           </p>
         </div>
       ) : (
@@ -76,7 +78,7 @@ export default function QuestionBankPage() {
                       {bm.questions.type.replace("_", " ")}
                     </span>
                     <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                      Answer: {bm.questions.answer}
+                      {t("bank.answer")} {bm.questions.answer}
                     </span>
                   </div>
                   {bm.questions.explanation && (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Calendar, Plus, Trash2, AlertTriangle } from "lucide-react";
 import type { ExamDate } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 function daysUntil(dateStr: string): number {
   const exam = new Date(dateStr + "T23:59:59");
@@ -17,6 +18,7 @@ function urgencyColor(days: number): string {
 }
 
 export function ExamCountdown({ courseId, exams: initialExams }: { courseId: string; exams: ExamDate[] }) {
+  const { t } = useI18n();
   const [exams, setExams] = useState(initialExams);
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
@@ -54,7 +56,7 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Calendar size={16} style={{ color: "var(--accent)" }} />
-          <h3 className="text-sm font-semibold">Upcoming Exams</h3>
+          <h3 className="text-sm font-semibold">{t("exam.upcoming")}</h3>
         </div>
         <button
           onClick={() => setAdding(!adding)}
@@ -70,7 +72,7 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="Exam name"
+            placeholder={t("exam.namePlaceholder")}
             className="flex-1 px-3 py-2 rounded-xl text-xs outline-none"
             style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
@@ -82,13 +84,13 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
             style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
           <button onClick={handleAdd} className="px-3 py-2 rounded-xl text-xs font-medium cursor-pointer" style={{ backgroundColor: "var(--accent)", color: "white" }}>
-            Add
+            {t("exam.add")}
           </button>
         </div>
       )}
 
       {upcoming.length === 0 ? (
-        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>No upcoming exams. Add one to get adaptive study recommendations.</p>
+        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>{t("exam.noUpcoming")}</p>
       ) : (
         <div className="space-y-2">
           {upcoming.map((exam) => {
@@ -101,7 +103,7 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold" style={{ color: urgencyColor(days) }}>
-                    {days === 0 ? "Today!" : days === 1 ? "Tomorrow" : `${days} days`}
+                    {days === 0 ? t("exam.today") : days === 1 ? t("exam.tomorrow") : `${days} ${t("exam.days")}`}
                   </span>
                   <button onClick={() => handleDelete(exam.id)} className="opacity-0 group-hover:opacity-100 cursor-pointer">
                     <Trash2 size={11} style={{ color: "var(--danger)" }} />

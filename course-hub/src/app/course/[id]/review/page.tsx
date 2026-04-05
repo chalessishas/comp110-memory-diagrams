@@ -6,9 +6,11 @@ import { QuestionCard } from "@/components/QuestionCard";
 import { getDueCards, loadCards, updateCard, Rating, type ReviewCard } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check } from "lucide-react";
 import type { Question } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [dueCards, setDueCards] = useState<ReviewCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -62,24 +64,24 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
 
       <div className="flex items-center gap-2 mb-6">
         <RotateCcw size={20} style={{ color: "var(--accent)" }} />
-        <h2 className="text-lg font-medium">Spaced Review</h2>
+        <h2 className="text-lg font-medium">{t("review.title")}</h2>
         <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
-          {dueCards.length} due
+          {dueCards.length} {t("review.due")}
         </span>
       </div>
 
       {dueCards.length === 0 ? (
         <div className="text-center py-16 rounded-2xl" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
           <Check size={32} className="mx-auto mb-3" style={{ color: "var(--success)" }} />
-          <p className="font-medium mb-1">All caught up</p>
+          <p className="font-medium mb-1">{t("review.allCaughtUp")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            No questions due for review right now. Keep practicing to build your review queue.
+            {t("review.allCaughtUpDesc")}
           </p>
         </div>
       ) : currentQuestion ? (
         <div>
           <p className="text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
-            {currentIndex + 1} of {dueCards.length} due
+            {currentIndex + 1} of {dueCards.length} {t("review.due")}
           </p>
 
           <QuestionCard
@@ -90,13 +92,13 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
 
           {showRating && (
             <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
-              <p className="text-sm font-medium mb-3">How well did you know this?</p>
+              <p className="text-sm font-medium mb-3">{t("review.howWell")}</p>
               <div className="grid grid-cols-4 gap-2">
                 {([
-                  { rating: Rating.Again, label: "Again", desc: "Forgot completely", color: "var(--danger)" },
-                  { rating: Rating.Hard, label: "Hard", desc: "Barely remembered", color: "var(--warning)" },
-                  { rating: Rating.Good, label: "Good", desc: "Remembered with effort", color: "var(--success)" },
-                  { rating: Rating.Easy, label: "Easy", desc: "Knew instantly", color: "var(--accent)" },
+                  { rating: Rating.Again, label: t("review.again"), desc: t("review.againDesc"), color: "var(--danger)" },
+                  { rating: Rating.Hard, label: t("review.hard"), desc: t("review.hardDesc"), color: "var(--warning)" },
+                  { rating: Rating.Good, label: t("review.good"), desc: t("review.goodDesc"), color: "var(--success)" },
+                  { rating: Rating.Easy, label: t("review.easy"), desc: t("review.easyDesc"), color: "var(--accent)" },
                 ] as { rating: Rating; label: string; desc: string; color: string }[]).map((opt) => (
                   <button
                     key={opt.rating}

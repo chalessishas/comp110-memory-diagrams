@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/client";
 import { LogIn, Mail, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useI18n } from "@/lib/i18n";
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   auth_denied: "Sign-in was canceled or denied. Please try again.",
@@ -46,6 +47,7 @@ function LoginPageFallback() {
 function LoginPageContent() {
   const supabase = createClient();
   const searchParams = useSearchParams();
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -113,12 +115,10 @@ function LoginPageContent() {
 
         <div className="mb-6">
           <h1 className="text-3xl font-semibold leading-tight mb-3" style={{ color: "var(--text-primary)" }}>
-            {mode === "login" ? "Welcome back." : "Create your workspace."}
+            {mode === "login" ? t("login.welcome") : t("login.create")}
           </h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            {mode === "login"
-              ? "Sign in with email or Google to access your courses."
-              : "Create an account with email and password to get started."}
+            {mode === "login" ? t("login.signInDesc") : t("login.createDesc")}
           </p>
         </div>
 
@@ -140,7 +140,7 @@ function LoginPageContent() {
               color: mode === "login" ? "white" : "var(--text-secondary)",
             }}
           >
-            Sign In
+            {t("login.signIn")}
           </button>
           <button
             type="button"
@@ -156,14 +156,14 @@ function LoginPageContent() {
               color: mode === "signup" ? "white" : "var(--text-secondary)",
             }}
           >
-            Create Account
+            {t("login.createAccount")}
           </button>
         </div>
 
         <form onSubmit={handleEmailAuth} className="space-y-3 mb-4">
           <input
             type="email"
-            placeholder="Email"
+            placeholder={t("settings.email")}
             value={email}
             onChange={(e) => {
               setDismissedAuthError(true);
@@ -193,13 +193,13 @@ function LoginPageContent() {
             style={{ backgroundColor: "var(--accent)", color: "white" }}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
-            {mode === "login" ? "Sign In" : "Create Account"}
+            {mode === "login" ? t("login.signIn") : t("login.createAccount")}
           </button>
         </form>
 
         <div className="flex items-center gap-3 mb-4">
           <div className="flex-1 h-px" style={{ backgroundColor: "var(--border)" }} />
-          <span className="text-[11px] uppercase tracking-[0.28em]" style={{ color: "var(--text-secondary)" }}>or</span>
+          <span className="text-[11px] uppercase tracking-[0.28em]" style={{ color: "var(--text-secondary)" }}>{t("misc.or")}</span>
           <div className="flex-1 h-px" style={{ backgroundColor: "var(--border)" }} />
         </div>
 
@@ -209,7 +209,7 @@ function LoginPageContent() {
           style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "#ffffff" }}
         >
           <LogIn size={16} />
-          Continue with Google
+          {t("login.continueGoogle")}
         </button>
 
         {displayedError && (
@@ -231,10 +231,10 @@ function LoginPageContent() {
 
         <div className="mt-6 space-y-3">
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Sign in to save your courses and track progress across devices.
+            {t("login.bottomNote")}
           </p>
           <Link href="/dashboard" className="ui-button-ghost w-full !justify-center">
-            Continue as Guest
+            {t("login.continueGuest")}
           </Link>
         </div>
       </div>

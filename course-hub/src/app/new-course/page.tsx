@@ -9,6 +9,7 @@ import { Loader2, Check, ArrowLeft, ClipboardPenLine, Upload, LogIn, Sparkles, B
 import Link from "next/link";
 import type { ParsedQuestion, ParsedSyllabus, TaskType } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
+import { useI18n } from "@/lib/i18n";
 
 type Step = "upload" | "parsing" | "preview";
 
@@ -209,6 +210,7 @@ type PreviewQuestion = ParsedQuestion & { matched_kp_title: string };
 
 export default function NewCoursePage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [step, setStep] = useState<Step>("upload");
   const [inputMode, setInputMode] = useState<InputMode>("paste");
   const [authState, setAuthState] = useState<AuthState>("loading");
@@ -388,16 +390,16 @@ export default function NewCoursePage() {
 
       <div className="ui-panel p-6 md:p-8">
         <div className="ui-kicker mb-4">New Course</div>
-        <h1 className="text-4xl font-semibold tracking-tight mb-3">Build a course from one file.</h1>
+        <h1 className="text-4xl font-semibold tracking-tight mb-3">{t("newCourse.title")}</h1>
         <p className="ui-copy max-w-2xl">
-          Upload a file or paste your syllabus text. AI handles the rest.
+          {t("newCourse.desc")}
         </p>
 
         <div className="grid gap-3 mt-6 md:grid-cols-3">
           {[
-            { key: "upload", label: "Upload" },
-            { key: "parsing", label: "Analyze" },
-            { key: "preview", label: "Review" },
+            { key: "upload", label: t("newCourse.upload") },
+            { key: "parsing", label: t("newCourse.analyze") },
+            { key: "preview", label: t("newCourse.review") },
           ].map((item) => {
             const isActive = step === item.key;
             return (
@@ -433,7 +435,7 @@ export default function NewCoursePage() {
                 className={`ui-segment ${inputMode === "paste" ? "ui-segment-active" : ""}`}
               >
                 <ClipboardPenLine size={16} />
-                Paste Text
+                {t("newCourse.pasteText")}
               </button>
               <button
                 type="button"
@@ -445,17 +447,17 @@ export default function NewCoursePage() {
                 className={`ui-segment ${inputMode === "upload" ? "ui-segment-active" : ""}`}
               >
                 <Upload size={16} />
-                Upload File
+                {t("newCourse.uploadFile")}
               </button>
             </div>
           </div>
 
           {inputMode === "paste" ? (
             <div className="ui-panel p-5 md:p-6">
-              <div className="ui-kicker mb-4">Text Input</div>
-              <h2 className="text-2xl font-semibold">Paste a syllabus, course plan, or class overview.</h2>
+              <div className="ui-kicker mb-4">{t("newCourse.textInput")}</div>
+              <h2 className="text-2xl font-semibold">{t("newCourse.pasteTitle")}</h2>
               <p className="ui-copy mt-2 max-w-2xl">
-                Works without an account. Paste any course text and see the outline AI generates.
+                {t("newCourse.pasteDesc")}
               </p>
 
               <textarea
@@ -471,7 +473,7 @@ export default function NewCoursePage() {
 
               <div className="flex flex-col gap-4 mt-5 md:flex-row md:items-center md:justify-between">
                 <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {rawText.trim().length} characters. Paste at least a short syllabus or course outline to continue.
+                  {rawText.trim().length} {t("newCourse.charCount")}
                 </p>
                 <button
                   onClick={handleTextParse}
@@ -479,7 +481,7 @@ export default function NewCoursePage() {
                   className="ui-button-primary disabled:opacity-40"
                 >
                   <Sparkles size={16} />
-                  Generate Preview
+                  {t("newCourse.generate")}
                 </button>
               </div>
             </div>
@@ -542,9 +544,7 @@ export default function NewCoursePage() {
               border: `1px solid ${parsed.confidence === "low" ? "var(--danger)" : "var(--warning)"}`,
             }}>
               <p className="text-sm font-medium mb-2" style={{ color: parsed.confidence === "low" ? "var(--danger)" : "var(--warning)" }}>
-                {parsed.confidence === "low"
-                  ? "This syllabus doesn't have enough detail to build a useful course map."
-                  : "Some information is missing — the outline may be incomplete."}
+                {parsed.confidence === "low" ? t("newCourse.missingLow") : t("newCourse.missingMed")}
               </p>
               {parsed.missing_info && parsed.missing_info.length > 0 && (
                 <ul className="text-xs space-y-1" style={{ color: "var(--text-secondary)" }}>
@@ -554,14 +554,14 @@ export default function NewCoursePage() {
                 </ul>
               )}
               <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
-                Tip: Upload your course schedule, lecture slides, or Canvas module list for a more accurate outline.
+                {t("newCourse.missingTip")}
               </p>
             </div>
           )}
 
           <div>
             <div className="ui-kicker mb-3">Outline Preview</div>
-            <h3 className="text-2xl font-semibold mb-2">Check the course map before creating it.</h3>
+            <h3 className="text-2xl font-semibold mb-2">{t("newCourse.checkMap")}</h3>
             <p className="ui-copy mb-4">
               {isAuthenticated
                 ? "If this looks right, CourseHub will save it and generate supporting study materials."
@@ -622,8 +622,8 @@ export default function NewCoursePage() {
                   <BrainCircuit size={18} />
                 </div>
                 <div>
-                  <div className="ui-kicker mb-2">Try It Now</div>
-                  <h4 className="text-xl font-semibold">Answer a few questions — no sign-up needed</h4>
+                  <div className="ui-kicker mb-2">{t("newCourse.tryNow")}</div>
+                  <h4 className="text-xl font-semibold">{t("newCourse.answerNoSignup")}</h4>
                 </div>
               </div>
 

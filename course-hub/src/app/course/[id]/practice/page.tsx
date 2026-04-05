@@ -9,9 +9,11 @@ import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
+import { useI18n } from "@/lib/i18n";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -60,9 +62,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         <div className="ui-panel p-10 md:p-14 flex flex-col items-center gap-4 text-center">
           <Loader2 className="animate-spin" size={30} style={{ color: "var(--accent)" }} />
           <div>
-            <p className="text-lg font-medium">Loading practice questions...</p>
+            <p className="text-lg font-medium">{t("practice.loadingQuestions")}</p>
             <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-              Pulling together the current practice set for this course.
+              {t("practice.loadingDesc")}
             </p>
           </div>
         </div>
@@ -80,10 +82,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
 
       <div className="ui-panel p-6 md:p-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="ui-kicker mb-4">Practice</div>
-          <h2 className="text-3xl font-semibold">Turn material into reps.</h2>
+          <div className="ui-kicker mb-4">{t("practice.title")}</div>
+          <h2 className="text-3xl font-semibold">{t("practice.turnMaterial")}</h2>
           <p className="ui-copy mt-3 max-w-2xl">
-            Work through generated questions or upload an exam to build a fresh drill set.
+            {t("practice.workThrough")}
           </p>
         </div>
         <button
@@ -91,7 +93,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           className="ui-button-secondary"
         >
           <Upload size={14} />
-          {showUpload ? "Hide Upload" : "Upload Exam"}
+          {showUpload ? t("practice.uploadExamHide") : t("practice.uploadExam")}
         </button>
       </div>
 
@@ -100,7 +102,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           {generating ? (
             <div className="ui-panel p-10 flex items-center gap-3 justify-center">
               <Loader2 size={20} className="animate-spin" style={{ color: "var(--accent)" }} />
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>AI is converting questions...</p>
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("practice.converting")}</p>
             </div>
           ) : (
             <FileDropzone onFileUploaded={handleExamUpload} courseId={id} />
@@ -110,9 +112,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
 
       {questions.length === 0 ? (
         <div className="ui-empty">
-          <p className="text-base font-medium mb-2">No practice questions yet</p>
+          <p className="text-base font-medium mb-2">{t("practice.noQuestions")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Upload a past exam or practice sheet to generate interactive questions.
+            {t("practice.noQuestionsDesc")}
           </p>
         </div>
       ) : (

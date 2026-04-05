@@ -4,6 +4,7 @@ import { Plus, Archive, LogIn, ClipboardPenLine, ShieldCheck, Sparkles } from "l
 import { CourseCard } from "@/components/CourseCard";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { StudyStatsCard } from "@/components/StudyStatsCard";
+import { T } from "@/components/T";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -26,19 +27,19 @@ export default async function DashboardPage() {
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
               <div className="ui-kicker mb-4">CourseHub</div>
-              <h1 className="text-4xl font-semibold tracking-tight">Try CourseHub. No sign-up needed.</h1>
+              <h1 className="text-4xl font-semibold tracking-tight"><T k="dashboard.guestTitle" /></h1>
               <p className="ui-copy mt-3 max-w-3xl">
-                Paste a syllabus and see what AI builds for you — course outline, study tasks, and practice questions. Sign in later to save.
+                <T k="dashboard.guestDesc" />
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Link href="/new-course" className="ui-button-primary">
                 <ClipboardPenLine size={16} />
-                Start as Guest
+                <T k="dashboard.startGuest" />
               </Link>
               <Link href="/login" className="ui-button-secondary">
                 <LogIn size={16} />
-                Sign In
+                <T k="nav.signIn" />
               </Link>
             </div>
           </div>
@@ -49,27 +50,27 @@ export default async function DashboardPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Sparkles size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Paste any syllabus</h2>
+            <h2 className="text-lg font-semibold"><T k="dashboard.pasteAny" /></h2>
             <p className="ui-copy mt-2">
-              Paste text, get a structured outline instantly.
+              <T k="dashboard.pasteDesc" />
             </p>
           </div>
           <div className="ui-panel p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <ShieldCheck size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Save when you're ready</h2>
+            <h2 className="text-lg font-semibold"><T k="dashboard.saveReady" /></h2>
             <p className="ui-copy mt-2">
-              Sign in to keep your courses, progress, and practice history.
+              <T k="dashboard.saveDesc" />
             </p>
           </div>
           <div className="ui-panel p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Plus size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Create an account anytime</h2>
+            <h2 className="text-lg font-semibold"><T k="dashboard.createAnytime" /></h2>
             <p className="ui-copy mt-2">
-              No pressure. Use CourseHub freely and create an account whenever you want.
+              <T k="dashboard.createDesc" />
             </p>
           </div>
         </div>
@@ -82,9 +83,9 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between mb-8">
         <div>
           <div className="ui-kicker mb-4">Dashboard</div>
-          <h1 className="text-4xl font-semibold tracking-tight">My Courses</h1>
+          <h1 className="text-4xl font-semibold tracking-tight"><T k="dashboard.title" /></h1>
           <p className="ui-copy mt-3">
-            All your courses organized in one place.
+            <T k="dashboard.subtitle" />
           </p>
         </div>
         <Link
@@ -92,7 +93,7 @@ export default async function DashboardPage() {
           className="ui-button-primary"
         >
           <Plus size={16} />
-          New Course
+          <T k="dashboard.newCourse" />
         </Link>
       </div>
 
@@ -107,16 +108,16 @@ export default async function DashboardPage() {
 
       {activeCourses.length === 0 ? (
         <div className="ui-empty">
-          <p className="text-lg font-medium mb-2">No courses yet</p>
+          <p className="text-lg font-medium mb-2"><T k="dashboard.noCourses" /></p>
           <p className="mb-6" style={{ color: "var(--text-secondary)" }}>
-            Upload a syllabus to get started
+            <T k="dashboard.uploadToStart" />
           </p>
           <Link
             href="/new-course"
             className="ui-button-primary"
           >
             <Plus size={18} />
-            Add Your First Course
+            <T k="dashboard.addFirst" />
           </Link>
         </div>
       ) : (
@@ -134,9 +135,9 @@ export default async function DashboardPage() {
               <Archive size={16} />
             </div>
             <div>
-              <span className="block">Archived Courses</span>
+              <span className="block"><T k="dashboard.archived" /></span>
               <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                {archivedCourses.length} tucked away for later
+                {archivedCourses.length} <T k="dashboard.archivedCount" />
               </span>
             </div>
           </summary>

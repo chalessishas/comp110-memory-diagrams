@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { Flame, Shield, Target } from "lucide-react";
 import { getStreakData, getWeekHistory, type StreakData } from "@/lib/streaks";
+import { useI18n } from "@/lib/i18n";
 
 const DAY_NAMES = ["S", "M", "T", "W", "T", "F", "S"];
 
 export function StreakBadge() {
+  const { t } = useI18n();
   const [data, setData] = useState<StreakData | null>(null);
   const [open, setOpen] = useState(false);
   const [week, setWeek] = useState(getWeekHistory());
@@ -58,7 +60,7 @@ export function StreakBadge() {
               <Flame size={28} className="mx-auto mb-2" style={{ color: "#f59e0b" }} />
               <p className="text-3xl font-bold">{data.currentStreak}</p>
               <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                day streak{data.longestStreak > data.currentStreak ? ` (best: ${data.longestStreak})` : ""}
+                {t("streak.dayStreak")}{data.longestStreak > data.currentStreak ? ` (${t("streak.best")} ${data.longestStreak})` : ""}
               </p>
             </div>
 
@@ -66,7 +68,7 @@ export function StreakBadge() {
             <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
               <div className="flex items-center justify-between text-xs mb-2">
                 <span className="flex items-center gap-1">
-                  <Target size={12} /> Daily Goal
+                  <Target size={12} /> {t("streak.dailyGoal")}
                 </span>
                 <span>{data.todayMinutes}/{data.dailyGoal} min</span>
               </div>
@@ -115,7 +117,7 @@ export function StreakBadge() {
               style={{ borderTop: "1px solid var(--border)", color: "var(--text-secondary)" }}
             >
               <Shield size={11} />
-              {data.freezeAvailable ? "Streak freeze available" : "Streak freeze used this month"}
+              {data.freezeAvailable ? t("streak.freezeAvailable") : t("streak.freezeUsed")}
             </div>
           </div>
         </>

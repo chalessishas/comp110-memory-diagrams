@@ -3,20 +3,22 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { List, BookOpen, BarChart3, NotebookPen, FolderOpen, RotateCcw, PenLine, TreePine } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export function CourseTabs({ courseId }: { courseId: string }) {
   const pathname = usePathname();
+  const { t } = useI18n();
   const base = `/course/${courseId}`;
 
   const tabs = [
-    { href: `${base}/learn`, label: "Learn", icon: BookOpen },
-    { href: `${base}/tree`, label: "Tree", icon: TreePine },
-    { href: base, label: "Study", icon: List, exact: true },
-    { href: `${base}/notes`, label: "Notes", icon: NotebookPen },
-    { href: `${base}/practice`, label: "Practice", icon: PenLine },
-    { href: `${base}/progress`, label: "Progress", icon: BarChart3 },
-    { href: `${base}/library`, label: "Library", icon: FolderOpen },
-    { href: `${base}/review`, label: "Review", icon: RotateCcw },
+    { href: `${base}/learn`, label: t("tabs.learn"), icon: BookOpen },
+    { href: `${base}/tree`, label: t("tabs.tree"), icon: TreePine },
+    { href: base, label: t("tabs.outline"), icon: List, exact: true },
+    { href: `${base}/notes`, label: t("tabs.notes"), icon: NotebookPen },
+    { href: `${base}/practice`, label: t("tabs.practice"), icon: PenLine },
+    { href: `${base}/progress`, label: t("tabs.progress"), icon: BarChart3 },
+    { href: `${base}/library`, label: t("tabs.library"), icon: FolderOpen },
+    { href: `${base}/review`, label: t("tabs.review"), icon: RotateCcw },
   ];
 
   return (

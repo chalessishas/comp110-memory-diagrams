@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/CourseTabs";
 import { KnowledgeTree } from "@/components/KnowledgeTree";
 import { calculateMastery } from "@/lib/mastery";
+import { T } from "@/components/T";
 
 export default async function TreePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -70,9 +71,9 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
     <div>
       <CourseTabs courseId={id} />
       <div className="mb-4">
-        <h2 className="text-xl font-semibold">Knowledge Tree</h2>
+        <h2 className="text-xl font-semibold"><T k="tree.title" /></h2>
         <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
-          Watch your understanding grow. Each node represents a concept — it fills up as you learn and practice.
+          <T k="tree.desc" />
         </p>
       </div>
       <KnowledgeTree nodes={treeNodes} courseId={id} />

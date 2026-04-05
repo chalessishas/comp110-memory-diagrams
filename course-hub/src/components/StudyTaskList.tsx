@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Circle, BookOpen, PenLine, RotateCcw, Loader2 } from "lucide-react";
 import type { StudyTask } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 const typeIcons = {
   read: BookOpen,
@@ -10,17 +11,7 @@ const typeIcons = {
   review: RotateCcw,
 };
 
-const typeLabels = {
-  read: "Read",
-  practice: "Practice",
-  review: "Review",
-};
-
-const priorityLabels = {
-  1: "Must Know",
-  2: "Should Know",
-  3: "Nice to Know",
-};
+// Labels are now resolved via i18n in the component
 
 const priorityColors = {
   1: "var(--danger)",
@@ -29,8 +20,21 @@ const priorityColors = {
 };
 
 export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
+  const { t } = useI18n();
   const [tasks, setTasks] = useState(initialTasks);
   const [toggling, setToggling] = useState<string | null>(null);
+
+  const typeLabels: Record<string, string> = {
+    read: t("studyTask.typeRead"),
+    practice: t("studyTask.typePractice"),
+    review: t("studyTask.typeReview"),
+  };
+
+  const priorityLabels: Record<number, string> = {
+    1: t("studyTask.mustKnow"),
+    2: t("studyTask.shouldKnow"),
+    3: t("studyTask.niceToKnow"),
+  };
 
   async function toggleTask(taskId: string, currentStatus: string) {
     setToggling(taskId);

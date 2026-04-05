@@ -5,6 +5,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { FileDropzone } from "@/components/FileDropzone";
 import { FileText, Image, Presentation, Download, Trash2, Loader2, Upload as UploadIcon, File, Sparkles } from "lucide-react";
 import type { Upload } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 type UploadWithUrl = Upload & { download_url: string | null };
 
@@ -30,6 +31,7 @@ function formatDate(dateStr: string) {
 
 export default function LibraryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const { t } = useI18n();
   const [uploads, setUploads] = useState<UploadWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
@@ -74,14 +76,14 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
       <CourseTabs courseId={id} />
 
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium">Course Library</h2>
+        <h2 className="text-lg font-medium">{t("library.title")}</h2>
         <button
           onClick={() => setShowUpload(!showUpload)}
           className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm cursor-pointer"
           style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
         >
           <UploadIcon size={14} />
-          Upload File
+          {t("library.uploadFile")}
         </button>
       </div>
 
@@ -93,9 +95,9 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
 
       {uploads.length === 0 ? (
         <div className="text-center py-16">
-          <p className="mb-2" style={{ color: "var(--text-secondary)" }}>No files yet</p>
+          <p className="mb-2" style={{ color: "var(--text-secondary)" }}>{t("library.noFiles")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Upload textbooks, slides, past exams — all stored in the cloud
+            {t("library.noFilesDesc")}
           </p>
         </div>
       ) : (

@@ -5,6 +5,7 @@ import { Check, X, Bookmark } from "lucide-react";
 import type { Question } from "@/types";
 import { updateCard, Rating } from "@/lib/spaced-repetition";
 import { recordActivity } from "@/lib/streaks";
+import { useI18n } from "@/lib/i18n";
 
 interface QuestionCardProps {
   question: Question;
@@ -12,14 +13,17 @@ interface QuestionCardProps {
   bookmarked?: boolean;
 }
 
-const QUESTION_TYPE_LABELS: Record<Question["type"], string> = {
-  multiple_choice: "Multiple Choice",
-  true_false: "True or False",
-  fill_blank: "Fill in the Blank",
-  short_answer: "Short Answer",
+// Type labels are now rendered via i18n keys in the component
+
+const QUESTION_TYPE_I18N_KEYS: Record<Question["type"], string> = {
+  multiple_choice: "questionCard.multipleChoice",
+  true_false: "questionCard.trueFalse",
+  fill_blank: "questionCard.fillBlank",
+  short_answer: "questionCard.shortAnswer",
 };
 
 export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked }: QuestionCardProps) {
+  const { t } = useI18n();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [textAnswer, setTextAnswer] = useState("");
@@ -112,7 +116,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
         <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} style={{ color: "var(--accent)" }} />
       </button>
       <div className="mb-6">
-        <div className="ui-kicker mb-3">{QUESTION_TYPE_LABELS[question.type]}</div>
+        <div className="ui-kicker mb-3">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
         <p className="text-lg font-medium leading-8">{question.stem}</p>
       </div>
 
@@ -141,7 +145,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           value={textAnswer}
           onChange={(e) => !submitted && setTextAnswer(e.target.value)}
           disabled={submitted}
-          placeholder="Type your answer..."
+          placeholder={t("questionCard.typeAnswer")}
           className="ui-textarea text-sm mb-5"
           rows={question.type === "short_answer" ? 4 : 1}
         />
@@ -153,7 +157,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           disabled={!userAnswer}
           className="ui-button-primary disabled:opacity-40"
         >
-          Submit
+          {t("practice.submit")}
         </button>
       ) : (
         <div className="mt-4">
@@ -168,13 +172,13 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
             {isCorrect ? (
               <>
                 <Check size={18} />
-                <span className="text-sm font-medium">Correct</span>
+                <span className="text-sm font-medium">{t("practice.correct")}</span>
               </>
             ) : (
               <>
                 <X size={18} />
                 <span className="text-sm font-medium">
-                  Incorrect. Correct answer: {question.answer}
+                  {t("questionCard.incorrectAnswer")} {question.answer}
                 </span>
               </>
             )}
@@ -188,12 +192,12 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
             </p>
           )}
           <div className="mt-3 flex items-center gap-1">
-            <span className="text-[10px] mr-1" style={{ color: "var(--text-secondary)" }}>Report:</span>
+            <span className="text-[10px] mr-1" style={{ color: "var(--text-secondary)" }}>{t("questionCard.report")}</span>
             {[
-              { reason: "wrong_answer", label: "Wrong" },
-              { reason: "unclear", label: "Unclear" },
-              { reason: "too_easy", label: "Too Easy" },
-              { reason: "too_hard", label: "Too Hard" },
+              { reason: "wrong_answer", label: t("questionCard.reportWrong") },
+              { reason: "unclear", label: t("questionCard.reportUnclear") },
+              { reason: "too_easy", label: t("questionCard.reportTooEasy") },
+              { reason: "too_hard", label: t("questionCard.reportTooHard") },
             ].map((fb) => (
               <button
                 key={fb.reason}
