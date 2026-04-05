@@ -44,15 +44,39 @@ function flattenNodes(
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { nodes } = await request.json();
+  const { nodes, version } = await request.json();
 
-  await supabase.from("outline_nodes").delete().eq("course_id", id);
+  // Optimistic locking: check updated_at matches what the client last saw
+  if (version) {
+    const { data: course } = await supabase
+      .from("courses")
+      .select("updated_at")
+      .eq("id", id)
+      .single();
 
-  const rows = flattenNodes(nodes, id);
-  if (rows.length > 0) {
-    const { error } = await supabase.from("outline_nodes").insert(rows);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (course && course.updated_at !== version) {
+      return NextResponse.json(
+        { error: "Course was modified by another session. Please refresh." },
+        { status: 409 }
+      );
+    }
   }
 
-  return NextResponse.json({ count: rows.length });
+  const rows = flattenNodes(nodes, id);
+
+  // Atomic delete + insert via RPC transaction
+  const { data, error } = await supabase.rpc("replace_outline", {
+    p_course_id: id,
+    p_nodes: JSON.stringify(rows),
+  });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Touch updated_at so future version checks reflect this save
+  await supabase
+    .from("courses")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", id);
+
+  return NextResponse.json({ count: data });
 }
