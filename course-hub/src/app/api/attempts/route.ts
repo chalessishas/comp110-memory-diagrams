@@ -13,13 +13,22 @@ export async function POST(request: Request) {
 
   const { data: question } = await supabase
     .from("questions")
-    .select("answer")
+    .select("answer, type")
     .eq("id", parsed.data.question_id)
     .single();
 
   if (!question) return NextResponse.json({ error: "Question not found" }, { status: 404 });
 
-  const isCorrect = parsed.data.user_answer.trim().toLowerCase() === question.answer.trim().toLowerCase();
+  let isCorrect: boolean;
+  if (question.type === "short_answer") {
+    // Key-term overlap: correct if ≥50% of meaningful answer words are present in user's answer
+    const userWords = new Set(parsed.data.user_answer.trim().toLowerCase().split(/\s+/));
+    const answerWords = question.answer.trim().toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+    const matchCount = answerWords.filter((w: string) => userWords.has(w)).length;
+    isCorrect = answerWords.length > 0 ? matchCount / answerWords.length >= 0.5 : true;
+  } else {
+    isCorrect = parsed.data.user_answer.trim().toLowerCase() === question.answer.trim().toLowerCase();
+  }
 
   const { data, error } = await supabase
     .from("attempts")
