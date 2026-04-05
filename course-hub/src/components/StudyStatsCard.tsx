@@ -60,7 +60,7 @@ export function StudyStatsCard() {
                 className="w-full rounded-lg transition-all"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "#c8c8c0" : "#e8e8e2",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
                   minHeight: "3px",
                 }}
               />
@@ -92,15 +92,15 @@ export function StudyStatsCard() {
       {allTime.totalMs > 60_000 && (
         <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
           <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>Time Distribution</p>
-          <div className="flex h-2 rounded-full overflow-hidden" style={{ backgroundColor: "#e8e8e2" }}>
+          <div className="flex h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
             {allTime.byMode.solving > 0 && (
               <div style={{ width: `${(allTime.byMode.solving / allTime.totalMs) * 100}%`, backgroundColor: "var(--accent)" }} />
             )}
             {allTime.byMode.reviewing > 0 && (
-              <div style={{ width: `${(allTime.byMode.reviewing / allTime.totalMs) * 100}%`, backgroundColor: "#5e5e58" }} />
+              <div style={{ width: `${(allTime.byMode.reviewing / allTime.totalMs) * 100}%`, backgroundColor: "var(--warning)" }} />
             )}
             {allTime.byMode.studying > 0 && (
-              <div style={{ width: `${(allTime.byMode.studying / allTime.totalMs) * 100}%`, backgroundColor: "#8b8b84" }} />
+              <div style={{ width: `${(allTime.byMode.studying / allTime.totalMs) * 100}%`, backgroundColor: "var(--success)" }} />
             )}
           </div>
           <div className="flex gap-3 mt-2">
@@ -108,10 +108,10 @@ export function StudyStatsCard() {
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--accent)" }} /> Solving
             </span>
             <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#5e5e58" }} /> Reviewing
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--warning)" }} /> Reviewing
             </span>
             <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "#8b8b84" }} /> Studying
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--success)" }} /> Studying
             </span>
           </div>
         </div>

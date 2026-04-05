@@ -124,7 +124,7 @@ function LoginPageContent() {
 
         <div
           className="grid grid-cols-2 gap-1 rounded-2xl p-1 mb-6"
-          style={{ backgroundColor: "#efefeb", border: "1px solid var(--border)" }}
+          style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
         >
           <button
             type="button"
@@ -171,7 +171,7 @@ function LoginPageContent() {
             }}
             required
             className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
-            style={{ border: "1px solid var(--border)", backgroundColor: "#f7f7f5" }}
+            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
           <input
             type="password"
@@ -184,7 +184,7 @@ function LoginPageContent() {
             required
             minLength={6}
             className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
-            style={{ border: "1px solid var(--border)", backgroundColor: "#f7f7f5" }}
+            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
           <button
             type="submit"
@@ -215,7 +215,7 @@ function LoginPageContent() {
         {displayedError && (
           <div
             className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--border)", backgroundColor: "#f3f3f1", color: "var(--danger)" }}
+            style={{ border: "1px solid var(--danger)", backgroundColor: "rgba(239, 68, 68, 0.06)", color: "var(--danger)" }}
           >
             {displayedError}
           </div>
@@ -223,7 +223,7 @@ function LoginPageContent() {
         {message && (
           <div
             className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--border)", backgroundColor: "#f8f8f6", color: "var(--success)" }}
+            style={{ border: "1px solid var(--success)", backgroundColor: "rgba(22, 163, 74, 0.06)", color: "var(--success)" }}
           >
             {message}
           </div>

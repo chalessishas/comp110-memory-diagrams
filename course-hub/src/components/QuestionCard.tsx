@@ -57,22 +57,22 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
     if (submitted && isAnswer) {
       return {
-        borderColor: "var(--accent)",
-        backgroundColor: "rgba(16, 16, 16, 0.06)",
+        borderColor: "var(--success)",
+        backgroundColor: "rgba(22, 163, 74, 0.08)",
       };
     }
 
     if (submitted && isSelected && !isAnswer) {
       return {
-        borderColor: "var(--border-strong)",
-        backgroundColor: "rgba(0, 0, 0, 0.03)",
+        borderColor: "var(--danger)",
+        backgroundColor: "rgba(239, 68, 68, 0.08)",
       };
     }
 
     if (!submitted && isSelected) {
       return {
         borderColor: "var(--accent)",
-        backgroundColor: "rgba(16, 16, 16, 0.04)",
+        backgroundColor: "rgba(91, 108, 240, 0.08)",
       };
     }
 
@@ -158,9 +158,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           <div
             className="flex items-start gap-3 rounded-[24px] px-4 py-4 mb-3"
             style={{
-              backgroundColor: isCorrect ? "var(--accent)" : "var(--bg-muted)",
-              color: isCorrect ? "white" : "var(--text-primary)",
-              border: `1px solid ${isCorrect ? "var(--accent)" : "var(--border)"}`,
+              backgroundColor: isCorrect ? "rgba(22, 163, 74, 0.08)" : "rgba(239, 68, 68, 0.08)",
+              color: isCorrect ? "var(--success)" : "var(--danger)",
+              border: `1px solid ${isCorrect ? "var(--success)" : "var(--danger)"}`,
             }}
           >
             {isCorrect ? (
@@ -170,7 +170,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               </>
             ) : (
               <>
-                <X size={18} style={{ color: "var(--text-secondary)" }} />
+                <X size={18} />
                 <span className="text-sm font-medium">
                   Incorrect. Correct answer: {question.answer}
                 </span>

@@ -30,9 +30,9 @@ const MODE_ICONS: Record<StudyMode, typeof Brain> = {
 
 function modeTone(mode: StudyMode) {
   if (mode === "solving") return { backgroundColor: "var(--accent)", color: "white" };
-  if (mode === "reviewing") return { backgroundColor: "#5e5e58", color: "white" };
-  if (mode === "studying") return { backgroundColor: "#8b8b84", color: "white" };
-  return { backgroundColor: "#e5e5de", color: "var(--text-primary)" };
+  if (mode === "reviewing") return { backgroundColor: "var(--warning)", color: "white" };
+  if (mode === "studying") return { backgroundColor: "var(--success)", color: "white" };
+  return { backgroundColor: "var(--bg-muted)", color: "var(--text-primary)" };
 }
 
 function percent(total: number, value: number) {
@@ -78,7 +78,7 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
                 className="w-full rounded-lg"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "#c8c8c0" : "#e8e8e2",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
                   minHeight: "3px",
                 }}
               />
