@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { List, BookOpen, BarChart3, NotebookPen, FolderOpen } from "lucide-react";
+import { List, BookOpen, BarChart3, NotebookPen, FolderOpen, RotateCcw } from "lucide-react";
 
 export function CourseTabs({ courseId }: { courseId: string }) {
   const pathname = usePathname();
@@ -14,6 +14,7 @@ export function CourseTabs({ courseId }: { courseId: string }) {
     { href: `${base}/practice`, label: "Practice", icon: BookOpen },
     { href: `${base}/progress`, label: "Progress", icon: BarChart3 },
     { href: `${base}/library`, label: "Library", icon: FolderOpen },
+    { href: `${base}/review`, label: "Review", icon: RotateCcw },
   ];
 
   return (
