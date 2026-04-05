@@ -75,3 +75,10 @@ export const noteCreateSchema = z.object({
   clarification_questions: z.array(z.string().min(1).max(500)).max(3).default([]),
   clarification_answers: z.array(z.string().min(1).max(2_000)).max(3).default([]),
 });
+
+export const generatedLessonSchema = z.object({
+  title: z.string(),
+  content: z.string(), // markdown: explanation with headers, paragraphs, code blocks
+  key_takeaways: z.array(z.string()),
+  examples: z.array(z.string()),
+});

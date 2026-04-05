@@ -1,6 +1,6 @@
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
-import { parsedSyllabusSchema, parsedQuestionSchema } from "./schemas";
+import { parsedSyllabusSchema, parsedQuestionSchema, generatedLessonSchema } from "./schemas";
 import { z } from "zod";
 import type { OrganizedStudyNote, ParsedQuestion, ParsedSyllabus } from "@/types";
 
@@ -297,7 +297,54 @@ Return ONLY valid JSON (no markdown, no code fences).`,
   }
 }
 
-// ─── Pipeline 5: Spoken Study Notes → Structured Notes + Clarifying Questions ───
+// ─── Pipeline 5: Knowledge Point → Full AI Mini-Lesson ───
+
+export async function generateLesson(
+  courseTitle: string,
+  knowledgePoint: { title: string; content: string | null },
+  courseDescription: string
+): Promise<{ title: string; content: string; key_takeaways: string[]; examples: string[] }> {
+  try {
+    const { text } = await generateText({
+      model: textModel,
+      messages: [
+        {
+          role: "user",
+          content: `You are creating a lesson for a college course called "${courseTitle}".
+${courseDescription ? `Course description: ${courseDescription}` : ""}
+
+Topic: ${knowledgePoint.title}
+${knowledgePoint.content ? `Context: ${knowledgePoint.content}` : ""}
+
+Write a complete mini-lesson that a student can learn from. Return ONLY valid JSON (no markdown fences, no extra text):
+
+{
+  "title": "Lesson title",
+  "content": "Full lesson content in markdown format. Include:\\n- Clear explanation of the concept (2-3 paragraphs, student-friendly language)\\n- Use ## headers to organize sections\\n- Include code examples in \`\`\`python code blocks if it's a CS/programming topic\\n- Include worked examples with step-by-step solutions if it's math/science\\n- Use analogies and real-world connections\\n- End with a 'Think About It' question to check understanding",
+  "key_takeaways": ["3-5 bullet points summarizing the most important ideas"],
+  "examples": ["1-3 concrete examples or code snippets that illustrate the concept"]
+}
+
+Rules:
+- Write at a college freshman level — clear but not dumbed down
+- The lesson should be self-contained — a student should be able to understand the topic from this lesson alone
+- If it's a programming topic, include runnable code examples
+- Content should be 300-600 words (substantial but not overwhelming)
+- Return ONLY the JSON object`,
+        },
+      ],
+    });
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+
+    return generatedLessonSchema.parse(JSON.parse(jsonMatch[0]));
+  } catch (err) {
+    throw new Error(`Lesson generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
+}
+
+// ─── Pipeline 6: Spoken Study Notes → Structured Notes + Clarifying Questions ───
 
 const organizedStudyNoteSchema = z.object({
   title: z.string().min(1),

@@ -141,3 +141,15 @@ export interface CourseNote {
   clarification_answers: string[];
   created_at: string;
 }
+
+export interface Lesson {
+  id: string;
+  course_id: string;
+  knowledge_point_id: string;
+  title: string;
+  content: string; // markdown content
+  key_takeaways: string[];
+  examples: string[];
+  order: number;
+  created_at: string;
+}
