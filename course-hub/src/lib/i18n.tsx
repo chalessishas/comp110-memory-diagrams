@@ -141,12 +141,90 @@ const translations: Record<Locale, Record<string, string>> = {
     "login.bottomNote": "Sign in to save your courses and track progress across devices.",
     "login.continueGuest": "Continue as Guest",
 
+    // Review
+    "review.title": "Spaced Review",
+    "review.due": "due",
+    "review.allCaughtUp": "All caught up",
+    "review.allCaughtUpDesc": "No questions due for review right now. Keep practicing to build your review queue.",
+    "review.howWell": "How well did you know this?",
+    "review.again": "Again",
+    "review.againDesc": "Forgot completely",
+    "review.hard": "Hard",
+    "review.hardDesc": "Barely remembered",
+    "review.good": "Good",
+    "review.goodDesc": "Remembered with effort",
+    "review.easy": "Easy",
+    "review.easyDesc": "Knew instantly",
+
+    // Study Tasks
+    "studyTask.title": "Study Tasks",
+    "studyTask.mustKnow": "Must Know",
+    "studyTask.shouldKnow": "Should Know",
+    "studyTask.niceToKnow": "Nice to Know",
+    "studyTask.typeRead": "Read",
+    "studyTask.typePractice": "Practice",
+    "studyTask.typeReview": "Review",
+    "studyTask.progress": "Progress",
+    "studyTask.completed": "Completed",
+
+    // Question Card
+    "questionCard.multipleChoice": "Multiple Choice",
+    "questionCard.trueFalse": "True or False",
+    "questionCard.fillBlank": "Fill in the Blank",
+    "questionCard.shortAnswer": "Short Answer",
+    "questionCard.typeAnswer": "Type your answer...",
+    "questionCard.incorrectAnswer": "Incorrect. Correct answer:",
+    "questionCard.report": "Report:",
+    "questionCard.reportWrong": "Wrong",
+    "questionCard.reportUnclear": "Unclear",
+    "questionCard.reportTooEasy": "Too Easy",
+    "questionCard.reportTooHard": "Too Hard",
+
+    // Exam Countdown
+    "exam.upcoming": "Upcoming Exams",
+    "exam.noUpcoming": "No upcoming exams. Add one to get adaptive study recommendations.",
+    "exam.today": "Today!",
+    "exam.tomorrow": "Tomorrow",
+    "exam.days": "days",
+    "exam.add": "Add",
+    "exam.namePlaceholder": "Exam name",
+
+    // Streak Badge
+    "streak.dayStreak": "day streak",
+    "streak.best": "best:",
+    "streak.dailyGoal": "Daily Goal",
+    "streak.freezeAvailable": "Streak freeze available",
+    "streak.freezeUsed": "Streak freeze used this month",
+
+    // Question Bank
+    "bank.title": "Question Bank",
+    "bank.subtitle": "Questions you bookmarked across all courses.",
+    "bank.noSaved": "No saved questions yet",
+    "bank.noSavedDesc": "Bookmark questions while practicing to build your personal bank",
+    "bank.answer": "Answer:",
+
+    // Dashboard - Today section
+    "dashboard.today": "Today",
+    "dashboard.newCourse": "New Course",
+    "dashboard.archivedCount": "tucked away for later",
+
+    // Practice extra
+    "practice.loadingQuestions": "Loading practice questions...",
+    "practice.loadingDesc": "Pulling together the current practice set for this course.",
+    "practice.questionOf": "Question",
+    "practice.of": "of",
+    "practice.uploadExamHide": "Hide Upload",
+    "practice.turnMaterial": "Turn material into reps.",
+    "practice.workThrough": "Work through generated questions or upload an exam to build a fresh drill set.",
+
     // Misc
     "misc.loading": "Loading...",
     "misc.error": "Something went wrong",
     "misc.delete": "Delete",
     "misc.cancel": "Cancel",
     "misc.confirm": "Confirm",
+    "misc.backToDashboard": "Back to Dashboard",
+    "misc.or": "or",
   },
   zh: {
     // Nav
@@ -284,12 +362,90 @@ const translations: Record<Locale, Record<string, string>> = {
     "login.bottomNote": "登录后可跨设备保存课程和学习进度。",
     "login.continueGuest": "游客模式继续",
 
+    // Review
+    "review.title": "间隔复习",
+    "review.due": "待复习",
+    "review.allCaughtUp": "全部完成",
+    "review.allCaughtUpDesc": "当前没有需要复习的题目，继续练习来积累复习队列。",
+    "review.howWell": "你对这道题的掌握程度？",
+    "review.again": "再来一次",
+    "review.againDesc": "完全忘记了",
+    "review.hard": "较难",
+    "review.hardDesc": "勉强记住了",
+    "review.good": "还好",
+    "review.goodDesc": "费力想起来了",
+    "review.easy": "很简单",
+    "review.easyDesc": "瞬间就知道了",
+
+    // Study Tasks
+    "studyTask.title": "学习任务",
+    "studyTask.mustKnow": "必须掌握",
+    "studyTask.shouldKnow": "应当掌握",
+    "studyTask.niceToKnow": "了解即可",
+    "studyTask.typeRead": "阅读",
+    "studyTask.typePractice": "练习",
+    "studyTask.typeReview": "复习",
+    "studyTask.progress": "进度",
+    "studyTask.completed": "已完成",
+
+    // Question Card
+    "questionCard.multipleChoice": "单项选择",
+    "questionCard.trueFalse": "判断题",
+    "questionCard.fillBlank": "填空题",
+    "questionCard.shortAnswer": "简答题",
+    "questionCard.typeAnswer": "输入你的答案...",
+    "questionCard.incorrectAnswer": "错误。正确答案：",
+    "questionCard.report": "反馈：",
+    "questionCard.reportWrong": "答案有误",
+    "questionCard.reportUnclear": "表述不清",
+    "questionCard.reportTooEasy": "太简单",
+    "questionCard.reportTooHard": "太难",
+
+    // Exam Countdown
+    "exam.upcoming": "即将到来的考试",
+    "exam.noUpcoming": "暂无考试计划。添加后可获得自适应学习建议。",
+    "exam.today": "今天！",
+    "exam.tomorrow": "明天",
+    "exam.days": "天",
+    "exam.add": "添加",
+    "exam.namePlaceholder": "考试名称",
+
+    // Streak Badge
+    "streak.dayStreak": "天连续打卡",
+    "streak.best": "最高：",
+    "streak.dailyGoal": "每日目标",
+    "streak.freezeAvailable": "连续打卡保护可用",
+    "streak.freezeUsed": "本月已使用连续打卡保护",
+
+    // Question Bank
+    "bank.title": "题库",
+    "bank.subtitle": "你在所有课程中收藏的题目。",
+    "bank.noSaved": "还没有收藏的题目",
+    "bank.noSavedDesc": "练习时收藏题目，构建你的专属题库",
+    "bank.answer": "答案：",
+
+    // Dashboard - Today section
+    "dashboard.today": "今天",
+    "dashboard.newCourse": "新建课程",
+    "dashboard.archivedCount": "已归档待用",
+
+    // Practice extra
+    "practice.loadingQuestions": "加载练习题中...",
+    "practice.loadingDesc": "正在整理本课程的练习题。",
+    "practice.questionOf": "第",
+    "practice.of": "题，共",
+    "practice.uploadExamHide": "隐藏上传",
+    "practice.turnMaterial": "把课程内容变成练习。",
+    "practice.workThrough": "做生成的题目，或上传试卷来创建专项练习集。",
+
     // Misc
     "misc.loading": "加载中...",
     "misc.error": "出错了",
     "misc.delete": "删除",
     "misc.cancel": "取消",
     "misc.confirm": "确认",
+    "misc.backToDashboard": "返回仪表盘",
+    "misc.or": "或",
   },
 };
 
