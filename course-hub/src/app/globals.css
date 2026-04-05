@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #efefeb;
+  --bg-primary: #f8f7f4;
   --bg-surface: #ffffff;
-  --bg-muted: #f7f7f4;
-  --text-primary: #101010;
-  --text-secondary: #656560;
-  --text-muted: #8b8b84;
-  --accent: #101010;
-  --accent-hover: #000000;
-  --success: #1f1f1f;
-  --warning: #5f5f5a;
-  --danger: #202020;
-  --border: #d9d9d2;
-  --border-strong: #bcbcb5;
-  --shadow-soft: 0 24px 80px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 18px 48px rgba(0, 0, 0, 0.05);
+  --bg-muted: #f2f1ee;
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --accent: #5b6cf0;
+  --accent-hover: #4a5ae0;
+  --accent-light: rgba(91, 108, 240, 0.08);
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: #e5e2dc;
+  --border-strong: #d1cdc4;
+  --shadow-soft: 0 24px 80px rgba(26, 26, 46, 0.06);
+  --shadow-card: 0 12px 40px rgba(26, 26, 46, 0.04);
 }
 
 * {
@@ -24,12 +25,9 @@
 
 body {
   margin: 0;
-  background:
-    radial-gradient(circle at top left, rgba(0, 0, 0, 0.05), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(0, 0, 0, 0.04), transparent 28%),
-    linear-gradient(180deg, #f7f7f4 0%, #ecece7 100%);
+  background: linear-gradient(160deg, #f8f7f4 0%, #f0efe9 50%, #eae8e2 100%);
   color: var(--text-primary);
-  font-family: "Helvetica Neue", "Segoe UI", sans-serif;
+  font-family: "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
   line-height: 1.7;
   min-height: 100vh;
 }
@@ -54,14 +52,14 @@ select {
 
 .ui-panel {
   border: 1px solid var(--border);
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.92);
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
 }
 
 .ui-panel-muted {
-  background: rgba(247, 247, 244, 0.92);
+  background: rgba(242, 241, 238, 0.92);
 }
 
 .ui-kicker {
@@ -101,7 +99,16 @@ select {
   cursor: pointer;
 }
 
-.ui-button-primary:hover,
+.ui-button-primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.ui-button-primary:active {
+  transform: translateY(0);
+}
+
 .ui-button-secondary:hover,
 .ui-button-ghost:hover,
 .ui-icon-button:hover {
@@ -157,8 +164,9 @@ select {
 
 .ui-input:focus,
 .ui-textarea:focus {
-  border-color: var(--border-strong);
+  border-color: var(--accent);
   background: white;
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .ui-textarea {
@@ -217,6 +225,7 @@ select {
   height: 100%;
   border-radius: inherit;
   background: var(--accent);
+  transition: width 300ms ease;
 }
 
 .ui-segmented {
@@ -225,7 +234,7 @@ select {
   gap: 0.25rem;
   border: 1px solid var(--border);
   border-radius: 20px;
-  background: rgba(239, 239, 235, 0.96);
+  background: rgba(242, 241, 238, 0.96);
   padding: 0.25rem;
 }
 
