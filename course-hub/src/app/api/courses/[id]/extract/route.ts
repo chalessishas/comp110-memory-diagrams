@@ -68,11 +68,15 @@ Focus on educational value — what would a student need to know for an exam?` }
   const result = output as z.infer<typeof extractionSchema>;
 
   // Save extraction results to the upload record
-  await supabase
-    .from("uploads")
-    .update({ parsed_content: result, status: "done" })
-    .eq("course_id", id)
-    .ilike("file_url", `%${storagePath.split("/").pop()}%`);
+  // Use exact file_name match to avoid ilike injection via user-controlled storagePath
+  const fileName = storagePath.split("/").pop() ?? "";
+  if (fileName) {
+    await supabase
+      .from("uploads")
+      .update({ parsed_content: result, status: "done" })
+      .eq("course_id", id)
+      .eq("file_name", fileName);
+  }
 
   return NextResponse.json(result);
 }
