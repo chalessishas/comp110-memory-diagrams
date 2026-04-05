@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Course } from "@/types";
 import { UsagePanel } from "@/components/UsagePanel";
+import { useI18n } from "@/lib/i18n";
 
 function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
   const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
@@ -39,6 +40,7 @@ export function Sidebar({
   const router = useRouter();
   const supabase = createClient();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { locale, setLocale, t } = useI18n();
 
   const activeCourses = courses.filter((c) => c.status === "active");
 
@@ -66,9 +68,9 @@ export function Sidebar({
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            <NavLink href="/dashboard" label="Dashboard" icon={LayoutDashboard} pathname={pathname} />
-            <NavLink href="/new-course" label="New Course" icon={Plus} pathname={pathname} />
-            <NavLink href="/dashboard/bank" label="Question Bank" icon={Bookmark} pathname={pathname} />
+            <NavLink href="/dashboard" label={t("nav.dashboard")} icon={LayoutDashboard} pathname={pathname} />
+            <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
+            <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
             {activeCourses.map((course) => (
               <Link
                 key={course.id}
@@ -87,7 +89,15 @@ export function Sidebar({
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-2">
-            <NavLink href="/settings" label="Settings" icon={Settings} pathname={pathname} />
+            <button
+              onClick={() => setLocale(locale === "en" ? "zh" : "en")}
+              className="px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+              style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              title={locale === "en" ? "切换中文" : "Switch to English"}
+            >
+              {locale === "en" ? "中文" : "EN"}
+            </button>
+            <NavLink href="/settings" label={t("nav.settings")} icon={Settings} pathname={pathname} />
             {isAuthenticated ? (
               <button
                 onClick={handleSignOut}
@@ -95,7 +105,7 @@ export function Sidebar({
                 style={{ color: "var(--text-secondary)" }}
               >
                 <LogOut size={15} />
-                Sign Out
+                {t("nav.signOut")}
               </button>
             ) : (
               <Link
@@ -104,7 +114,7 @@ export function Sidebar({
                 style={{ backgroundColor: "var(--accent)", color: "white" }}
               >
                 <LogIn size={15} />
-                Sign In
+                {t("nav.signIn")}
               </Link>
             )}
           </div>
@@ -122,10 +132,10 @@ export function Sidebar({
         {/* Mobile dropdown */}
         {mobileOpen && (
           <div className="md:hidden pb-4 space-y-1" onClick={() => setMobileOpen(false)}>
-            <NavLink href="/dashboard" label="Dashboard" icon={LayoutDashboard} pathname={pathname} />
-            <NavLink href="/new-course" label="New Course" icon={Plus} pathname={pathname} />
-            <NavLink href="/dashboard/bank" label="Question Bank" icon={Bookmark} pathname={pathname} />
-            <NavLink href="/settings" label="Settings" icon={Settings} pathname={pathname} />
+            <NavLink href="/dashboard" label={t("nav.dashboard")} icon={LayoutDashboard} pathname={pathname} />
+            <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
+            <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
+            <NavLink href="/settings" label={t("nav.settings")} icon={Settings} pathname={pathname} />
             {activeCourses.map((course) => (
               <Link
                 key={course.id}
@@ -140,13 +150,20 @@ export function Sidebar({
               </Link>
             ))}
             <div className="pt-2" style={{ borderTop: "1px solid var(--border)" }}>
+              <button
+                onClick={(e) => { e.stopPropagation(); setLocale(locale === "en" ? "zh" : "en"); }}
+                className="flex items-center px-3.5 py-2 text-xs font-semibold cursor-pointer"
+                style={{ color: "var(--text-secondary)" }}
+              >
+                {locale === "en" ? "切换中文" : "Switch to English"}
+              </button>
               {isAuthenticated ? (
                 <button onClick={handleSignOut} className="flex items-center gap-2 px-3.5 py-2 text-sm cursor-pointer" style={{ color: "var(--text-secondary)" }}>
-                  <LogOut size={15} /> Sign Out
+                  <LogOut size={15} /> {t("nav.signOut")}
                 </button>
               ) : (
                 <Link href="/login" className="flex items-center gap-2 px-3.5 py-2 text-sm" style={{ color: "var(--accent)" }}>
-                  <LogIn size={15} /> Sign In
+                  <LogIn size={15} /> {t("nav.signIn")}
                 </Link>
               )}
             </div>
