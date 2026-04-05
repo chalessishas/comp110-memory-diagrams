@@ -17,11 +17,19 @@ function selectStudyTargets(nodes: { id: string; title: string; content: string 
   return nodes.map((n) => ({ id: n.id, title: n.title, content: n.content }));
 }
 
-export async function POST(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  let language: string | undefined;
+  try {
+    const body = await request.json();
+    language = body?.language;
+  } catch {
+    // No body is fine — fire-and-forget calls don't send body
+  }
 
   // Clear previously auto-generated tasks and questions (not exam-sourced ones)
   await supabase.from("study_tasks").delete().eq("course_id", id);
@@ -47,11 +55,13 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const [studyTasks, questions] = await Promise.all([
     generateStudyTasks(
       course.title,
-      studyTargets.map((kp) => ({ title: kp.title, content: kp.content }))
+      studyTargets.map((kp) => ({ title: kp.title, content: kp.content })),
+      language
     ),
     generateQuestionsFromOutline(
       course.title,
-      studyTargets.map((kp) => ({ title: kp.title, content: kp.content }))
+      studyTargets.map((kp) => ({ title: kp.title, content: kp.content })),
+      language
     ),
   ]);
 

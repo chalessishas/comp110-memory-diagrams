@@ -18,10 +18,12 @@ const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 
 // ─── Pipeline 1: Syllabus → Course Outline ───
 
-export async function parseSyllabus(fileBase64: string, mimeType: string): Promise<ParsedSyllabus> {
+export async function parseSyllabus(fileBase64: string, mimeType: string, language?: string): Promise<ParsedSyllabus> {
   if (fileBase64.length > MAX_BASE64_SIZE) {
     throw new Error("File too large for AI processing (max ~15MB). Try a shorter document.");
   }
+
+  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
 
   try {
     const { text } = await generateText({
@@ -50,7 +52,7 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
 
 Organize by the document's natural structure. Break each section into specific knowledge points where possible.
 
-Return ONLY valid JSON (no markdown, no code fences).`,
+Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
             },
           ],
         },
@@ -66,7 +68,9 @@ Return ONLY valid JSON (no markdown, no code fences).`,
   }
 }
 
-export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus> {
+export async function parseSyllabusText(rawText: string, language?: string): Promise<ParsedSyllabus> {
+  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
+
   try {
     const { text } = await generateText({
       model: textModel,
@@ -113,7 +117,7 @@ Examples of missing_info:
 Course text:
 """
 ${rawText}
-"""`,
+"""${langInstruction}`,
         },
       ],
     });
@@ -204,11 +208,14 @@ const studyTasksSchema = z.object({
 
 export async function generateStudyTasks(
   courseTitle: string,
-  knowledgePoints: { title: string; content: string | null }[]
+  knowledgePoints: { title: string; content: string | null }[],
+  language?: string
 ): Promise<StudyTask[]> {
   const kpSummary = knowledgePoints
     .map((kp, i) => `${i + 1}. ${kp.title}${kp.content ? ` — ${kp.content}` : ""}`)
     .join("\n");
+
+  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
 
   try {
     const { text } = await generateText({
@@ -228,7 +235,7 @@ For each knowledge point, generate 1-3 study tasks. Each task should be:
 
 Focus on what a student actually needs to DO, not just what to know.
 
-Return ONLY valid JSON (no markdown, no code fences).`,
+Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
         },
       ],
     });
@@ -246,11 +253,14 @@ Return ONLY valid JSON (no markdown, no code fences).`,
 
 export async function generateQuestionsFromOutline(
   courseTitle: string,
-  knowledgePoints: { title: string; content: string | null }[]
+  knowledgePoints: { title: string; content: string | null }[],
+  language?: string
 ): Promise<(ParsedQuestion & { matched_kp_title: string })[]> {
   const kpSummary = knowledgePoints
     .map((kp) => `- ${kp.title}${kp.content ? `: ${kp.content}` : ""}`)
     .join("\n");
+
+  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
 
   const autoQuizSchema = z.object({
     questions: parsedQuestionSchema
@@ -283,7 +293,7 @@ Each question must have:
 
 Make questions test understanding, not just memorization.
 
-Return ONLY valid JSON (no markdown, no code fences).`,
+Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
         },
       ],
     });
@@ -302,8 +312,11 @@ Return ONLY valid JSON (no markdown, no code fences).`,
 export async function generateLesson(
   courseTitle: string,
   knowledgePoint: { title: string; content: string | null },
-  courseDescription: string
+  courseDescription: string,
+  language?: string
 ): Promise<{ title: string; content: string; key_takeaways: string[]; examples: string[] }> {
+  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
+
   try {
     const { text } = await generateText({
       model: textModel,
@@ -330,7 +343,7 @@ Rules:
 - The lesson should be self-contained — a student should be able to understand the topic from this lesson alone
 - If it's a programming topic, include runnable code examples
 - Content should be 300-600 words (substantial but not overwhelming)
-- Return ONLY the JSON object`,
+- Return ONLY the JSON object${langInstruction}`,
         },
       ],
     });
