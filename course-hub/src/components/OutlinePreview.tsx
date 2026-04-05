@@ -3,28 +3,29 @@
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { ParsedOutlineNode } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
-const TYPE_STYLES: Record<string, { label: string; color: string; backgroundColor: string; borderColor: string }> = {
+const TYPE_DISPLAY: Record<string, { labelKey: string; color: string; backgroundColor: string; borderColor: string }> = {
   week: {
-    label: "Week",
+    labelKey: "outline.week",
     color: "var(--text-primary)",
     backgroundColor: "rgba(16, 16, 16, 0.06)",
     borderColor: "var(--border-strong)",
   },
   chapter: {
-    label: "Chapter",
+    labelKey: "outline.chapter",
     color: "var(--text-primary)",
     backgroundColor: "rgba(16, 16, 16, 0.06)",
     borderColor: "var(--border)",
   },
   topic: {
-    label: "Topic",
+    labelKey: "outline.topic",
     color: "var(--text-secondary)",
     backgroundColor: "var(--bg-muted)",
     borderColor: "var(--border)",
   },
   knowledge_point: {
-    label: "Point",
+    labelKey: "outline.knowledgePoint",
     color: "var(--text-muted)",
     backgroundColor: "white",
     borderColor: "var(--border)",
@@ -32,9 +33,10 @@ const TYPE_STYLES: Record<string, { label: string; color: string; backgroundColo
 };
 
 function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.children && node.children.length > 0;
-  const typeStyle = TYPE_STYLES[node.type] ?? TYPE_STYLES.topic;
+  const typeDisplay = TYPE_DISPLAY[node.type] ?? TYPE_DISPLAY.topic;
 
   return (
     <div style={{ marginLeft: depth * 18 }}>
@@ -52,12 +54,12 @@ function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number
         <span
           className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
           style={{
-            color: typeStyle.color,
-            backgroundColor: typeStyle.backgroundColor,
-            border: `1px solid ${typeStyle.borderColor}`,
+            color: typeDisplay.color,
+            backgroundColor: typeDisplay.backgroundColor,
+            border: `1px solid ${typeDisplay.borderColor}`,
           }}
         >
-          {typeStyle.label}
+          {t(typeDisplay.labelKey)}
         </span>
         <span className="text-sm" style={{ color: "var(--text-primary)", fontWeight: depth < 2 ? 600 : 500 }}>
           {node.title}

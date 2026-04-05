@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef } from "react";
 import { ChevronRight, ChevronDown, Plus, Trash2, Pencil, Check, X, Loader2, Sparkles } from "lucide-react";
 import type { OutlineNode } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface TreeNode {
   id: string;
@@ -47,6 +48,7 @@ function EditableNode({
   onDelete: (id: string) => void;
   onAdd: (parentId: string) => void;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.name);
@@ -56,10 +58,10 @@ function EditableNode({
   const hasChildren = node.children.length > 0;
 
   const typeLabel: Record<string, string> = {
-    week: "W",
-    chapter: "Ch",
-    topic: "T",
-    knowledge_point: "KP",
+    week: t("outline.week"),
+    chapter: t("outline.chapter"),
+    topic: t("outline.topic"),
+    knowledge_point: t("outline.knowledgePoint"),
   };
 
   async function handleSave() {

@@ -11,26 +11,27 @@ import type { ParsedQuestion, ParsedSyllabus, TaskType } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
 
+const GENERATION_STEP_DURATIONS = [2000, 3000, 3000, 4000, 3000, 3000, 4000, 4000, 5000, 10000];
+
 type Step = "upload" | "parsing" | "preview";
 
-// ─── World-generation style progress ───
-
-const GENERATION_STEPS = [
-  { text: "Reading your document...", duration: 2000 },
-  { text: "Identifying course structure...", duration: 3000 },
-  { text: "Extracting weekly topics...", duration: 3000 },
-  { text: "Breaking down knowledge points...", duration: 4000 },
-  { text: "Mapping prerequisite relationships...", duration: 3000 },
-  { text: "Building the outline tree...", duration: 3000 },
-  { text: "Generating study tasks...", duration: 4000 },
-  { text: "Creating practice questions...", duration: 4000 },
-  { text: "Almost there — polishing results...", duration: 5000 },
-  { text: "Finalizing your course...", duration: 10000 },
-];
-
 function GeneratingStatus() {
+  const { t } = useI18n();
   const [currentStep, setCurrentStep] = useState(0);
   const [elapsed, setElapsed] = useState(0);
+
+  const steps = [
+    { text: t("gen.step1"), duration: GENERATION_STEP_DURATIONS[0] },
+    { text: t("gen.step2"), duration: GENERATION_STEP_DURATIONS[1] },
+    { text: t("gen.step3"), duration: GENERATION_STEP_DURATIONS[2] },
+    { text: t("gen.step4"), duration: GENERATION_STEP_DURATIONS[3] },
+    { text: t("gen.step5"), duration: GENERATION_STEP_DURATIONS[4] },
+    { text: t("gen.step6"), duration: GENERATION_STEP_DURATIONS[5] },
+    { text: t("gen.step7"), duration: GENERATION_STEP_DURATIONS[6] },
+    { text: t("gen.step8"), duration: GENERATION_STEP_DURATIONS[7] },
+    { text: t("gen.step9"), duration: GENERATION_STEP_DURATIONS[8] },
+    { text: t("gen.step10"), duration: GENERATION_STEP_DURATIONS[9] },
+  ];
 
   useEffect(() => {
     const start = Date.now();
@@ -39,21 +40,22 @@ function GeneratingStatus() {
       setElapsed(ms);
 
       let accumulated = 0;
-      for (let i = 0; i < GENERATION_STEPS.length; i++) {
-        accumulated += GENERATION_STEPS[i].duration;
+      for (let i = 0; i < steps.length; i++) {
+        accumulated += steps[i].duration;
         if (ms < accumulated) {
           setCurrentStep(i);
           return;
         }
       }
-      setCurrentStep(GENERATION_STEPS.length - 1);
+      setCurrentStep(steps.length - 1);
     }, 200);
 
     return () => clearInterval(interval);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const step = GENERATION_STEPS[currentStep];
-  const totalDuration = GENERATION_STEPS.reduce((s, st) => s + st.duration, 0);
+  const step = steps[currentStep];
+  const totalDuration = steps.reduce((s, st) => s + st.duration, 0);
   const progress = Math.min((elapsed / totalDuration) * 100, 95);
 
   return (
@@ -67,7 +69,7 @@ function GeneratingStatus() {
       <div>
         <p className="text-lg font-medium" style={{ minHeight: "1.8em" }}>{step.text}</p>
         <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-          {Math.floor(elapsed / 1000)}s elapsed
+          {Math.floor(elapsed / 1000)}s {t("gen.elapsed")}
         </p>
       </div>
 
@@ -88,13 +90,13 @@ function GeneratingStatus() {
       {/* Timeout warning */}
       {elapsed > 30000 && (
         <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "var(--warning)" }}>
-          This is taking longer than usual. Long syllabi with many policies can be slow — hang tight.
+          {t("gen.slowWarning")}
         </p>
       )}
 
       {/* Step log (like game world gen) */}
       <div className="w-full max-w-sm text-left space-y-1.5 mt-2">
-        {GENERATION_STEPS.slice(0, currentStep + 1).map((s, i) => (
+        {steps.slice(0, currentStep + 1).map((s, i) => (
           <div key={i} className="flex items-center gap-2 text-xs" style={{ color: i < currentStep ? "var(--success)" : "var(--text-primary)" }}>
             {i < currentStep ? (
               <Check size={12} style={{ color: "var(--success)" }} />
@@ -335,7 +337,7 @@ export default function NewCoursePage() {
     }
 
     setCreating(true);
-    setSaveStage("Creating course record...");
+    setSaveStage(t("newCourse.savingCourse"));
     setError(null);
     setGuestNotice(null);
 
@@ -358,7 +360,7 @@ export default function NewCoursePage() {
       return;
     }
 
-    setSaveStage("Saving outline tree...");
+    setSaveStage(t("newCourse.savingOutline"));
     const res = await fetch(`/api/courses/${course.id}/outline`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -381,7 +383,7 @@ export default function NewCoursePage() {
       .then(() => trackUsage(15000, 5000))
       .catch(() => {});
 
-    setSaveStage("Redirecting to your course...");
+    setSaveStage(t("newCourse.redirecting"));
     router.push(`/course/${course.id}`);
   }
 
@@ -389,11 +391,11 @@ export default function NewCoursePage() {
     <div className="max-w-4xl mx-auto py-4 space-y-8">
       <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
         <ArrowLeft size={14} />
-        Back to Dashboard
+        {t("newCourse.back")}
       </Link>
 
       <div className="ui-panel p-6 md:p-8">
-        <div className="ui-kicker mb-4">New Course</div>
+        <div className="ui-kicker mb-4">{t("newCourse.kicker")}</div>
         <h1 className="text-4xl font-semibold tracking-tight mb-3">{t("newCourse.title")}</h1>
         <p className="ui-copy max-w-2xl">
           {t("newCourse.desc")}
@@ -416,7 +418,7 @@ export default function NewCoursePage() {
                 }}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--text-secondary)" }}>
-                  Step
+                  {t("newCourse.step")}
                 </p>
                 <p className="text-base font-medium mt-2">{item.label}</p>
               </div>
@@ -471,7 +473,7 @@ export default function NewCoursePage() {
                   setError(null);
                   setGuestNotice(null);
                 }}
-                placeholder={`Example:\nCourse: Introduction to Cognitive Science\nInstructor: Dr. Lee\nWeeks 1-2: Foundations of perception\nWeek 3: Memory systems\nWeek 4: Language processing...`}
+                placeholder={t("newCourse.placeholder")}
                 className="ui-textarea mt-5 min-h-[280px]"
               />
 
@@ -537,7 +539,7 @@ export default function NewCoursePage() {
             <div className="flex flex-wrap gap-2 mt-5">
               {parsed.professor && <span className="ui-badge">Instructor: {parsed.professor}</span>}
               {parsed.semester && <span className="ui-badge">{parsed.semester}</span>}
-              <span className="ui-badge">{parsed.nodes.length} top-level sections</span>
+              <span className="ui-badge">{parsed.nodes.length} {t("newCourse.topSections")}</span>
             </div>
           </div>
 
@@ -564,12 +566,12 @@ export default function NewCoursePage() {
           )}
 
           <div>
-            <div className="ui-kicker mb-3">Outline Preview</div>
+            <div className="ui-kicker mb-3">{t("newCourse.outlinePreview")}</div>
             <h3 className="text-2xl font-semibold mb-2">{t("newCourse.checkMap")}</h3>
             <p className="ui-copy mb-4">
               {isAuthenticated
-                ? "If this looks right, CourseHub will save it and generate supporting study materials."
-                : "You can keep exploring in guest mode. Sign in only when you're ready to save this preview to your dashboard."}
+                ? t("newCourse.authSave")
+                : t("newCourse.guestExplore")}
             </p>
           </div>
           <OutlinePreview nodes={parsed.nodes} />
@@ -581,8 +583,8 @@ export default function NewCoursePage() {
                   <BookOpen size={18} />
                 </div>
                 <div>
-                  <div className="ui-kicker mb-2">Study Preview</div>
-                  <h4 className="text-xl font-semibold">What would this course ask you to do?</h4>
+                  <div className="ui-kicker mb-2">{t("newCourse.studyPreview")}</div>
+                  <h4 className="text-xl font-semibold">{t("newCourse.studyPreviewTitle")}</h4>
                 </div>
               </div>
 
@@ -590,7 +592,7 @@ export default function NewCoursePage() {
                 <div className="ui-empty">
                   <Loader2 size={22} className="animate-spin mx-auto" style={{ color: "var(--accent)" }} />
                   <p className="text-sm mt-3" style={{ color: "var(--text-secondary)" }}>
-                    Building study tasks from the outline...
+                    {t("newCourse.buildingTasks")}
                   </p>
                 </div>
               ) : previewTasks.length > 0 ? (
@@ -635,7 +637,7 @@ export default function NewCoursePage() {
                 <div className="ui-empty">
                   <Loader2 size={22} className="animate-spin mx-auto" style={{ color: "var(--accent)" }} />
                   <p className="text-sm mt-3" style={{ color: "var(--text-secondary)" }}>
-                    Generating sample questions...
+                    {t("newCourse.generatingQuestions")}
                   </p>
                 </div>
               ) : previewQuestions.length > 0 ? (
@@ -647,7 +649,7 @@ export default function NewCoursePage() {
               ) : (
                 <div className="ui-empty">
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                    Question preview is not ready yet.
+                    {t("newCourse.questionPreviewEmpty")}
                   </p>
                 </div>
               )}
@@ -664,14 +666,14 @@ export default function NewCoursePage() {
             <div className="ui-panel ui-panel-muted p-5">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <div className="ui-kicker mb-3">Guest Mode</div>
+                  <div className="ui-kicker mb-3">{t("newCourse.guestMode")}</div>
                   <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                    Your preview is ready. Open sign in in another tab whenever you want to save it permanently.
+                    {t("newCourse.guestReady")}
                   </p>
                 </div>
                 <Link href="/login" target="_blank" rel="noreferrer" className="ui-button-secondary">
                   <LogIn size={16} />
-                  Sign In in Another Tab
+                  {t("newCourse.signInTab")}
                 </Link>
               </div>
             </div>
@@ -687,7 +689,7 @@ export default function NewCoursePage() {
               }}
               className="ui-button-secondary"
             >
-              Try Another Input
+              {t("newCourse.tryAnother")}
             </button>
             {isAuthenticated ? (
               <button
@@ -704,7 +706,7 @@ export default function NewCoursePage() {
                 className="ui-button-primary"
               >
                 <LogIn size={16} />
-                Log In to Save
+                {t("newCourse.loginToSave")}
               </button>
             )}
           </div>
