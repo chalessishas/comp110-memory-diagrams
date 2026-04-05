@@ -7,6 +7,7 @@ import {
   STUDY_TRACKER_UPDATED_EVENT,
   formatDuration,
   getStudySummary,
+  getWeeklySummary,
   recordStudyTime,
   type StudySummary,
 } from "@/lib/study-tracker";
@@ -49,6 +50,50 @@ function emptySummary(): StudySummary {
       idle: 0,
     },
   };
+}
+
+function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
+  const [weekly, setWeekly] = useState(() => getWeeklySummary(courseId));
+
+  useEffect(() => {
+    const refresh = () => setWeekly(getWeeklySummary(courseId));
+    window.addEventListener(STUDY_TRACKER_UPDATED_EVENT, refresh);
+    return () => window.removeEventListener(STUDY_TRACKER_UPDATED_EVENT, refresh);
+  }, [courseId]);
+
+  const maxMs = Math.max(...weekly.map((d) => d.totalMs), 1);
+  const weekTotal = weekly.reduce((s, d) => s + d.totalMs, 0);
+
+  return (
+    <div>
+      <div className="flex items-end gap-1.5 h-16">
+        {weekly.map((day, i) => {
+          const height = day.totalMs > 0 ? Math.max((day.totalMs / maxMs) * 100, 6) : 4;
+          const isToday = i === weekly.length - 1;
+          const d = new Date(day.day + "T12:00:00");
+          const dayName = ["S", "M", "T", "W", "T", "F", "S"][d.getDay()];
+          return (
+            <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
+              <div
+                className="w-full rounded-lg"
+                style={{
+                  height: `${height}%`,
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "#c8c8c0" : "#e8e8e2",
+                  minHeight: "3px",
+                }}
+              />
+              <span className="text-[9px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-secondary)" }}>
+                {dayName}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+        Week total: {formatDuration(weekTotal)}
+      </p>
+    </div>
+  );
 }
 
 export function StudyTrackerPanel({
@@ -221,6 +266,12 @@ export function StudyTrackerPanel({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Weekly trend */}
+      <div className="mt-6 pt-5" style={{ borderTop: "1px solid var(--border)" }}>
+        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-secondary)" }}>This Week</p>
+        <WeeklyMiniChart courseId={courseId} />
       </div>
     </div>
   );
