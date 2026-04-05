@@ -6,12 +6,15 @@ export function CourseCard({ course }: { course: Course }) {
   return (
     <Link
       href={`/course/${course.id}`}
-      className="ui-panel block p-6 transition-transform hover:-translate-y-0.5"
+      className="ui-panel block p-6 transition-all hover:-translate-y-0.5"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
-            <BookOpen size={20} style={{ color: "var(--text-primary)" }} />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center"
+            style={{ borderRadius: "10px", backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
+          >
+            <BookOpen size={18} style={{ color: "var(--text-primary)" }} />
           </div>
           <div className="min-w-0">
             <div className="ui-kicker mb-3">Course</div>
@@ -28,8 +31,11 @@ export function CourseCard({ course }: { course: Course }) {
             )}
           </div>
         </div>
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: "var(--accent)", color: "white" }}>
-          <ArrowUpRight size={16} />
+        <div
+          className="flex h-9 w-9 shrink-0 items-center justify-center"
+          style={{ borderRadius: "10px", backgroundColor: "var(--accent)", color: "white" }}
+        >
+          <ArrowUpRight size={15} />
         </div>
       </div>
     </Link>

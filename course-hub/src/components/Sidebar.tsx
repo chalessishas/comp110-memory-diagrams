@@ -16,10 +16,12 @@ function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: s
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap"
+      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap"
       style={{
-        backgroundColor: isActive ? "var(--accent)" : "transparent",
-        color: isActive ? "white" : "var(--text-secondary)",
+        borderRadius: "8px",
+        backgroundColor: isActive ? "var(--accent-light)" : "transparent",
+        color: isActive ? "var(--accent)" : "var(--text-secondary)",
+        fontWeight: isActive ? 600 : 500,
       }}
     >
       <Icon size={15} />
@@ -54,21 +56,21 @@ export function Sidebar({
     <header
       className="sticky top-0 z-40 ui-sidebar-wrapper"
       style={{
-        backgroundColor: "rgba(252, 251, 249, 0.88)",
+        backgroundColor: "rgba(250, 249, 247, 0.92)",
         backdropFilter: "blur(16px)",
         borderBottom: "1px solid var(--border)",
       }}
     >
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
         {/* Main bar */}
         <div className="flex items-center justify-between h-14 gap-4">
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center gap-2 shrink-0">
-            <span className="text-base font-bold" style={{ color: "var(--text-primary)" }}>CourseHub</span>
+            <span className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>CourseHub</span>
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden md:flex items-center gap-0.5">
             <NavLink href="/dashboard" label={t("nav.dashboard")} icon={LayoutDashboard} pathname={pathname} />
             <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
             <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
@@ -76,9 +78,10 @@ export function Sidebar({
               <Link
                 key={course.id}
                 href={`/course/${course.id}`}
-                className="px-3 py-1.5 rounded-xl text-sm transition-colors truncate max-w-[160px]"
+                className="px-3 py-1.5 text-sm transition-all truncate max-w-[160px]"
                 style={{
-                  backgroundColor: pathname.startsWith(`/course/${course.id}`) ? "rgba(91, 108, 240, 0.1)" : "transparent",
+                  borderRadius: "8px",
+                  backgroundColor: pathname.startsWith(`/course/${course.id}`) ? "var(--accent-light)" : "transparent",
                   color: pathname.startsWith(`/course/${course.id}`) ? "var(--accent)" : "var(--text-secondary)",
                   fontWeight: pathname.startsWith(`/course/${course.id}`) ? 600 : 400,
                 }}
@@ -89,12 +92,12 @@ export function Sidebar({
           </nav>
 
           {/* Right side */}
-          <div className="hidden md:flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-1.5">
             <StreakBadge />
             <button
               onClick={() => setLocale(locale === "en" ? "zh" : "en")}
-              className="px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
-              style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              className="px-2.5 py-1.5 text-xs font-semibold cursor-pointer transition-all"
+              style={{ borderRadius: "8px", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
               title={locale === "en" ? "切换中文" : "Switch to English"}
             >
               {locale === "en" ? "中文" : "EN"}
@@ -103,8 +106,8 @@ export function Sidebar({
             {isAuthenticated ? (
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm cursor-pointer transition-colors"
-                style={{ color: "var(--text-secondary)" }}
+                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer transition-all"
+                style={{ borderRadius: "8px", color: "var(--text-secondary)" }}
               >
                 <LogOut size={15} />
                 {t("nav.signOut")}
@@ -112,8 +115,8 @@ export function Sidebar({
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium"
-                style={{ backgroundColor: "var(--accent)", color: "white" }}
+                className="flex items-center gap-2 px-4 py-1.5 text-sm font-medium"
+                style={{ borderRadius: "10px", backgroundColor: "var(--accent)", color: "white" }}
               >
                 <LogIn size={15} />
                 {t("nav.signIn")}
@@ -124,8 +127,8 @@ export function Sidebar({
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 cursor-pointer rounded-xl"
-            style={{ color: "var(--text-primary)" }}
+            className="md:hidden p-2 cursor-pointer"
+            style={{ borderRadius: "8px", color: "var(--text-primary)" }}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -142,8 +145,9 @@ export function Sidebar({
               <Link
                 key={course.id}
                 href={`/course/${course.id}`}
-                className="block px-3.5 py-2 rounded-xl text-sm truncate"
+                className="block px-3 py-1.5 text-sm truncate"
                 style={{
+                  borderRadius: "8px",
                   color: pathname.startsWith(`/course/${course.id}`) ? "var(--accent)" : "var(--text-secondary)",
                   fontWeight: pathname.startsWith(`/course/${course.id}`) ? 600 : 400,
                 }}
@@ -154,17 +158,17 @@ export function Sidebar({
             <div className="pt-2" style={{ borderTop: "1px solid var(--border)" }}>
               <button
                 onClick={(e) => { e.stopPropagation(); setLocale(locale === "en" ? "zh" : "en"); }}
-                className="flex items-center px-3.5 py-2 text-xs font-semibold cursor-pointer"
+                className="flex items-center px-3 py-1.5 text-xs font-semibold cursor-pointer"
                 style={{ color: "var(--text-secondary)" }}
               >
                 {locale === "en" ? "切换中文" : "Switch to English"}
               </button>
               {isAuthenticated ? (
-                <button onClick={handleSignOut} className="flex items-center gap-2 px-3.5 py-2 text-sm cursor-pointer" style={{ color: "var(--text-secondary)" }}>
+                <button onClick={handleSignOut} className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer" style={{ color: "var(--text-secondary)" }}>
                   <LogOut size={15} /> {t("nav.signOut")}
                 </button>
               ) : (
-                <Link href="/login" className="flex items-center gap-2 px-3.5 py-2 text-sm" style={{ color: "var(--accent)" }}>
+                <Link href="/login" className="flex items-center gap-2 px-3 py-1.5 text-sm" style={{ color: "var(--accent)" }}>
                   <LogIn size={15} /> {t("nav.signIn")}
                 </Link>
               )}

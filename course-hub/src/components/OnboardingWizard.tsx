@@ -35,7 +35,6 @@ export function OnboardingWizard({ onComplete }: Props) {
     completed: false,
   });
 
-  // Auto-detect browser language
   useEffect(() => {
     const browserLang = navigator.language;
     if (browserLang.startsWith("zh")) {
@@ -91,10 +90,11 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={lang.key}
               onClick={() => setPrefs((p) => ({ ...p, language: lang.key }))}
-              className="p-5 rounded-2xl text-center cursor-pointer transition-all"
+              className="p-5 text-center cursor-pointer transition-all"
               style={{
+                borderRadius: "12px",
                 border: `2px solid ${prefs.language === lang.key ? "var(--accent)" : "var(--border)"}`,
-                backgroundColor: prefs.language === lang.key ? "rgba(91, 108, 240, 0.06)" : "var(--bg-surface)",
+                backgroundColor: prefs.language === lang.key ? "var(--accent-light)" : "var(--bg-surface)",
               }}
             >
               <p className="text-lg font-semibold">{lang.label}</p>
@@ -118,10 +118,11 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={role.key}
               onClick={() => setPrefs((p) => ({ ...p, role: role.key as OnboardingPreferences["role"] }))}
-              className="p-4 rounded-2xl text-left cursor-pointer transition-all"
+              className="p-4 text-left cursor-pointer transition-all"
               style={{
+                borderRadius: "12px",
                 border: `2px solid ${prefs.role === role.key ? "var(--accent)" : "var(--border)"}`,
-                backgroundColor: prefs.role === role.key ? "rgba(91, 108, 240, 0.06)" : "var(--bg-surface)",
+                backgroundColor: prefs.role === role.key ? "var(--accent-light)" : "var(--bg-surface)",
               }}
             >
               <span className="text-2xl">{role.icon}</span>
@@ -145,8 +146,8 @@ export function OnboardingWizard({ onComplete }: Props) {
             value={prefs.semester ?? ""}
             onChange={(e) => setPrefs((p) => ({ ...p, semester: e.target.value || null }))}
             placeholder={isZh ? "例如：2026 春季" : "e.g. Spring 2026"}
-            className="w-full px-5 py-4 rounded-2xl text-base outline-none"
-            style={{ border: "2px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+            className="w-full px-4 py-3.5 text-base outline-none"
+            style={{ borderRadius: "12px", border: "2px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
             onFocus={(e) => (e.target.style.borderColor = "var(--accent)")}
             onBlur={(e) => (e.target.style.borderColor = "var(--border)")}
           />
@@ -167,10 +168,11 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={goal.key}
               onClick={() => toggleGoal(goal.key)}
-              className="w-full flex items-center gap-3 p-4 rounded-2xl text-left cursor-pointer transition-all"
+              className="w-full flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
               style={{
+                borderRadius: "12px",
                 border: `2px solid ${prefs.goals.includes(goal.key) ? "var(--accent)" : "var(--border)"}`,
-                backgroundColor: prefs.goals.includes(goal.key) ? "rgba(91, 108, 240, 0.06)" : "var(--bg-surface)",
+                backgroundColor: prefs.goals.includes(goal.key) ? "var(--accent-light)" : "var(--bg-surface)",
               }}
             >
               <span className="text-xl">{goal.icon}</span>
@@ -193,24 +195,24 @@ export function OnboardingWizard({ onComplete }: Props) {
       canSkip: false,
       content: (
         <div className="mt-6 space-y-3">
-          <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+          <div className="p-4" style={{ borderRadius: "12px", backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
             <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>{isZh ? "语言" : "Language"}</p>
             <p className="text-sm font-medium">{prefs.language === "zh" ? "中文" : "English"}</p>
           </div>
           {prefs.role && (
-            <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="p-4" style={{ borderRadius: "12px", backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>{isZh ? "身份" : "Role"}</p>
               <p className="text-sm font-medium">{ROLES.find((r) => r.key === prefs.role)?.[isZh ? "zh" : "en"]}</p>
             </div>
           )}
           {prefs.semester && (
-            <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="p-4" style={{ borderRadius: "12px", backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>{isZh ? "学期" : "Semester"}</p>
               <p className="text-sm font-medium">{prefs.semester}</p>
             </div>
           )}
           {prefs.goals.length > 0 && (
-            <div className="p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="p-4" style={{ borderRadius: "12px", backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <p className="text-xs font-medium mb-2" style={{ color: "var(--text-secondary)" }}>{isZh ? "学习目标" : "Goals"}</p>
               <div className="flex flex-wrap gap-2">
                 {prefs.goals.map((g) => (
@@ -232,7 +234,7 @@ export function OnboardingWizard({ onComplete }: Props) {
       <div className="w-full max-w-md">
         {/* Progress bar */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+          <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
             <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }} />
           </div>
           <span className="text-xs font-medium shrink-0" style={{ color: "var(--text-secondary)" }}>{step + 1}/{steps.length}</span>
@@ -277,8 +279,8 @@ export function OnboardingWizard({ onComplete }: Props) {
               )}
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium cursor-pointer"
-                style={{ backgroundColor: "var(--accent)", color: "white" }}
+                className="flex items-center gap-2 px-5 py-2.5 font-medium cursor-pointer transition-all"
+                style={{ borderRadius: "10px", backgroundColor: "var(--accent)", color: "white" }}
               >
                 {step === steps.length - 1
                   ? (isZh ? "开始使用" : "Get Started")
