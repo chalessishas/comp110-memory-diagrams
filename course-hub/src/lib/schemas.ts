@@ -38,6 +38,8 @@ export const parsedSyllabusSchema = z.object({
   professor: z.string().nullable().default(null),
   semester: z.string().nullable().default(null),
   nodes: parsedOutlineNodeSchema.array(),
+  missing_info: z.array(z.string()).default([]),
+  confidence: z.enum(["high", "medium", "low"]).default("high"),
 });
 
 export const parsedQuestionSchema = z.object({

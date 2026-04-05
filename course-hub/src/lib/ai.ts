@@ -73,13 +73,22 @@ export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus
       messages: [
         {
           role: "user",
-          content: `Analyze the following course syllabus and extract its structure. Return ONLY valid JSON (no markdown, no code fences, no extra text). The JSON must have this exact shape:
+          content: `You are analyzing a course syllabus to extract its ACTUAL teaching content. Return ONLY valid JSON (no markdown, no code fences).
 
+CRITICAL RULES:
+1. Only extract topics/knowledge points that are EXPLICITLY mentioned as being taught. Do NOT invent or guess topics.
+2. If the syllabus only has a course description but no week-by-week schedule or topic list, the nodes array should reflect ONLY what is explicitly stated.
+3. Administrative content (grading policies, honor code, attendance, accommodations) is NOT course content — do not turn these into knowledge points.
+4. If the syllabus lacks a detailed topic schedule, set confidence to "low" and list what's missing in missing_info.
+
+JSON shape:
 {
   "title": "course name",
   "description": "one sentence description",
   "professor": "name or null",
   "semester": "e.g. Spring 2026 or null",
+  "confidence": "high|medium|low",
+  "missing_info": ["list of what's missing, e.g. 'No week-by-week topic schedule found', 'No specific learning objectives per unit'"],
   "nodes": [
     {
       "title": "section title",
@@ -90,11 +99,16 @@ export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus
   ]
 }
 
-Rules:
-- "type" must be one of: "week", "chapter", "topic", "knowledge_point"
-- Break each section into specific knowledge points where possible
-- If the text is messy, infer the most likely course structure
-- Return ONLY the JSON object, nothing else
+Confidence levels:
+- "high": syllabus has a clear week-by-week or chapter-by-chapter topic breakdown
+- "medium": syllabus lists topics but not organized by time/chapter
+- "low": syllabus is mostly administrative with only a vague course description
+
+Examples of missing_info:
+- "No week-by-week topic schedule — only a general course description was found"
+- "No specific readings or textbook chapters listed"
+- "Topics mentioned in course description but no breakdown into units"
+- "Consider uploading lecture slides or course calendar for better results"
 
 Course text:
 """

@@ -446,6 +446,30 @@ export default function NewCoursePage() {
             </div>
           </div>
 
+          {/* Missing info warning */}
+          {parsed.confidence && parsed.confidence !== "high" && (
+            <div className="rounded-2xl p-5" style={{
+              backgroundColor: parsed.confidence === "low" ? "rgba(239, 68, 68, 0.06)" : "rgba(245, 158, 11, 0.06)",
+              border: `1px solid ${parsed.confidence === "low" ? "var(--danger)" : "var(--warning)"}`,
+            }}>
+              <p className="text-sm font-medium mb-2" style={{ color: parsed.confidence === "low" ? "var(--danger)" : "var(--warning)" }}>
+                {parsed.confidence === "low"
+                  ? "This syllabus doesn't have enough detail to build a useful course map."
+                  : "Some information is missing — the outline may be incomplete."}
+              </p>
+              {parsed.missing_info && parsed.missing_info.length > 0 && (
+                <ul className="text-xs space-y-1" style={{ color: "var(--text-secondary)" }}>
+                  {parsed.missing_info.map((info, i) => (
+                    <li key={i}>- {info}</li>
+                  ))}
+                </ul>
+              )}
+              <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
+                Tip: Upload your course schedule, lecture slides, or Canvas module list for a more accurate outline.
+              </p>
+            </div>
+          )}
+
           <div>
             <div className="ui-kicker mb-3">Outline Preview</div>
             <h3 className="text-2xl font-semibold mb-2">Check the course map before creating it.</h3>

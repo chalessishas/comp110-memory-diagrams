@@ -70,6 +70,8 @@ export interface ParsedSyllabus {
   professor: string | null;
   semester: string | null;
   nodes: ParsedOutlineNode[];
+  missing_info: string[];
+  confidence: "high" | "medium" | "low";
 }
 
 export interface ParsedOutlineNode {
