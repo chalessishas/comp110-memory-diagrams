@@ -21,6 +21,10 @@ export function UsagePanel() {
 
   if (!today) return null;
 
+  // Hide when no usage data (e.g. guest users)
+  const hasAnyUsage = today.requests > 0 || weekly.some((d) => d.requests > 0);
+  if (!hasAnyUsage) return null;
+
   const weeklyTotal = weekly.reduce(
     (s, d) => ({
       inputTokens: s.inputTokens + d.inputTokens,

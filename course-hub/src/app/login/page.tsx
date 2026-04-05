@@ -117,8 +117,8 @@ function LoginPageContent() {
           </h1>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             {mode === "login"
-              ? "Sign in with email or Google to pick up where you left off."
-              : "Start with email and password, then let CourseHub organize the rest."}
+              ? "Sign in with email or Google to access your courses."
+              : "Create an account with email and password to get started."}
           </p>
         </div>
 
@@ -231,7 +231,7 @@ function LoginPageContent() {
 
         <div className="mt-6 space-y-3">
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Sign in when you want your dashboard, uploads, and saved courses to sync.
+            Sign in to save your courses and track progress across devices.
           </p>
           <Link href="/dashboard" className="ui-button-ghost w-full !justify-center">
             Continue as Guest

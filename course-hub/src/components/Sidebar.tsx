@@ -34,20 +34,17 @@ export function Sidebar({
         <div className="mb-6">
           <div className="ui-kicker mb-4">CourseHub</div>
           <Link href="/dashboard" className="block text-2xl font-semibold leading-tight" style={{ color: "var(--text-primary)" }}>
-            Study in one quiet place.
+            All your courses, one place.
           </Link>
           <p className="mt-2 text-sm" style={{ color: "var(--text-secondary)" }}>
             {isAuthenticated
-              ? "Courses, practice, and progress in a monochrome workspace."
-              : "Guest mode is open. Try the workflow first and sign in only when you want to save."}
+              ? "Courses, practice, and progress — all organized."
+              : "Try it first. Sign in when you're ready to save."}
           </p>
           {!isAuthenticated && (
             <div className="mt-4 rounded-[22px] px-4 py-4" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--text-secondary)" }}>
-                Guest Mode
-              </p>
-              <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-                Paste a syllabus, preview the outline, and decide later if you want an account.
+              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                No account needed to preview. Sign in to save your courses.
               </p>
             </div>
           )}

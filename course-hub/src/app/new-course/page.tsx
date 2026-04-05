@@ -202,13 +202,13 @@ export default function NewCoursePage() {
         <div className="ui-kicker mb-4">New Course</div>
         <h1 className="text-4xl font-semibold tracking-tight mb-3">Build a course from one file.</h1>
         <p className="ui-copy max-w-2xl">
-          Upload a file if you are signed in, or paste course text directly if you just want to try the workflow first.
+          Upload a file or paste your syllabus text. AI handles the rest.
         </p>
 
         <div className="grid gap-3 mt-6 md:grid-cols-3">
           {[
             { key: "upload", label: "Upload" },
-            { key: "parsing", label: "Parse" },
+            { key: "parsing", label: "Analyze" },
             { key: "preview", label: "Review" },
           ].map((item) => {
             const isActive = step === item.key;
@@ -267,7 +267,7 @@ export default function NewCoursePage() {
               <div className="ui-kicker mb-4">Text Input</div>
               <h2 className="text-2xl font-semibold">Paste a syllabus, course plan, or class overview.</h2>
               <p className="ui-copy mt-2 max-w-2xl">
-                This mode works in guest mode too. Drop in any structured course text and CourseHub will infer the outline.
+                Works without an account. Paste any course text and see the outline AI generates.
               </p>
 
               <textarea

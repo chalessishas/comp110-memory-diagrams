@@ -25,11 +25,10 @@ export default async function DashboardPage() {
         <div className="ui-panel p-6 md:p-8">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <div className="ui-kicker mb-4">Guest Dashboard</div>
-              <h1 className="text-4xl font-semibold tracking-tight">Try CourseHub before you commit.</h1>
+              <div className="ui-kicker mb-4">CourseHub</div>
+              <h1 className="text-4xl font-semibold tracking-tight">Try CourseHub. No sign-up needed.</h1>
               <p className="ui-copy mt-3 max-w-3xl">
-                No account required to explore the flow. Paste a syllabus, preview the structure,
-                and log in later only if you want to save it to your dashboard.
+                Paste a syllabus and see what AI builds for you — course outline, study tasks, and practice questions. Sign in later to save.
               </p>
             </div>
             <div className="flex flex-wrap gap-3">
@@ -50,27 +49,27 @@ export default async function DashboardPage() {
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Sparkles size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Paste text and preview fast</h2>
+            <h2 className="text-lg font-semibold">Paste any syllabus</h2>
             <p className="ui-copy mt-2">
-              Guests can paste course text directly and still get an outline preview right away.
+              Paste text, get a structured outline instantly.
             </p>
           </div>
           <div className="ui-panel p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <ShieldCheck size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Login only when it matters</h2>
+            <h2 className="text-lg font-semibold">Save when you're ready</h2>
             <p className="ui-copy mt-2">
-              Saving courses, syncing practice, and keeping long-term progress still happen behind sign-in.
+              Sign in to keep your courses, progress, and practice history.
             </p>
           </div>
           <div className="ui-panel p-6">
             <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Plus size={20} />
             </div>
-            <h2 className="text-lg font-semibold">Upgrade from guest whenever you want</h2>
+            <h2 className="text-lg font-semibold">Create an account anytime</h2>
             <p className="ui-copy mt-2">
-              The product stays usable without making account creation the very first step.
+              No pressure. Use CourseHub freely and create an account whenever you want.
             </p>
           </div>
         </div>
@@ -85,7 +84,7 @@ export default async function DashboardPage() {
           <div className="ui-kicker mb-4">Dashboard</div>
           <h1 className="text-4xl font-semibold tracking-tight">My Courses</h1>
           <p className="ui-copy mt-3">
-            Keep your semester quiet, organized, and easy to revisit.
+            All your courses organized in one place.
           </p>
         </div>
         <Link
@@ -101,7 +100,7 @@ export default async function DashboardPage() {
 
       <StudyTrackerPanel
         title="Today"
-        description="A local breakdown of how much time went into solving, reviewing, studying, or just sitting idle today."
+        description="How you spent your study time today — solving, reviewing, studying, or idle."
         track={false}
         className="mb-8"
       />
