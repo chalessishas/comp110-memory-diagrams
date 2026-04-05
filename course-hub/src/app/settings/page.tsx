@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ArrowLeft, User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, RotateCcw } from "lucide-react";
-import Link from "next/link";
+import { User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, RotateCcw } from "lucide-react";
 
 type Section = "profile" | "account" | "preferences" | "data" | "about";
 
@@ -140,11 +139,6 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
-      <Link href="/dashboard" className="inline-flex items-center gap-1.5 text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
-        <ArrowLeft size={14} />
-        Back to Dashboard
-      </Link>
-
       <h1 className="text-3xl font-semibold mb-8">Settings</h1>
 
       {/* Section nav */}
