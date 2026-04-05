@@ -9,14 +9,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 
-  const { storagePath, rawText, parseType, courseId } = await request.json();
+  const { storagePath, rawText, parseType, courseId, language } = await request.json();
 
   if ((parseType === "syllabus" || !parseType) && typeof rawText === "string" && rawText.trim().length > 0) {
     try {
       // Truncate very long text to avoid timeout (keep first 6000 chars which covers course structure)
       const trimmed = rawText.trim();
       const text = trimmed.length > 6000 ? trimmed.slice(0, 6000) + "\n\n[Remaining content truncated for processing]" : trimmed;
-      const result = await parseSyllabusText(text);
+      const result = await parseSyllabusText(text, language);
       return NextResponse.json({ type: "syllabus", data: result });
     } catch (err) {
       const message = err instanceof Error ? err.message : "Unknown error";
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
 
   try {
     if (parseType === "syllabus" || !parseType) {
-      const result = await parseSyllabus(base64, mimeType);
+      const result = await parseSyllabus(base64, mimeType, language);
       return NextResponse.json({ type: "syllabus", data: result });
     }
 

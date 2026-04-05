@@ -210,7 +210,7 @@ type PreviewQuestion = ParsedQuestion & { matched_kp_title: string };
 
 export default function NewCoursePage() {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [step, setStep] = useState<Step>("upload");
   const [inputMode, setInputMode] = useState<InputMode>("paste");
   const [authState, setAuthState] = useState<AuthState>("loading");
@@ -259,7 +259,7 @@ export default function NewCoursePage() {
     const res = await fetch("/api/parse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ storagePath: result.storagePath, parseType: "syllabus" }),
+      body: JSON.stringify({ storagePath: result.storagePath, parseType: "syllabus", language: locale }),
     });
 
     const data = await res.json();
@@ -288,7 +288,7 @@ export default function NewCoursePage() {
     const res = await fetch("/api/parse", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rawText, parseType: "syllabus" }),
+      body: JSON.stringify({ rawText, parseType: "syllabus", language: locale }),
     });
 
     const data = await res.json();
@@ -373,7 +373,11 @@ export default function NewCoursePage() {
     }
 
     // Fire-and-forget — don't block navigation waiting for AI generation
-    fetch(`/api/courses/${course.id}/generate`, { method: "POST" })
+    fetch(`/api/courses/${course.id}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language: locale }),
+    })
       .then(() => trackUsage(15000, 5000))
       .catch(() => {});
 
