@@ -10,7 +10,7 @@ import type { Course } from "@/types";
 import { UsagePanel } from "@/components/UsagePanel";
 
 function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
-  const isActive = href === "/" ? pathname === href : pathname.startsWith(href);
+  const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
   return (
     <Link
       href={href}
