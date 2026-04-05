@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Plus, LogOut, LogIn, Bookmark } from "lucide-react";
+import { LayoutDashboard, Plus, LogOut, LogIn, Bookmark, Settings } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { Course } from "@/types";
@@ -93,6 +93,19 @@ export function Sidebar({
           >
             <Bookmark size={16} />
             Question Bank
+          </Link>
+
+          <Link
+            href="/settings"
+            className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors"
+            style={{
+              backgroundColor: pathname === "/settings" ? "var(--accent)" : "rgba(247, 247, 244, 0.96)",
+              color: pathname === "/settings" ? "white" : "var(--text-primary)",
+              border: `1px solid ${pathname === "/settings" ? "var(--accent)" : "var(--border)"}`,
+            }}
+          >
+            <Settings size={16} />
+            Settings
           </Link>
         </nav>
 
