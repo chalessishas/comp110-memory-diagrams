@@ -107,6 +107,95 @@ function GeneratingStatus() {
     </div>
   );
 }
+function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matched_kp_title: string } }) {
+  const [selected, setSelected] = useState<string | null>(null);
+  const [textAnswer, setTextAnswer] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
+  const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
+    ? selected ?? "" : textAnswer;
+  const isCorrect = submitted && userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase();
+
+  function handleSubmit() {
+    if (!userAnswer) return;
+    setSubmitted(true);
+  }
+
+  return (
+    <div className="rounded-[22px] px-5 py-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+      <div className="flex flex-wrap gap-2 mb-3">
+        <span className="ui-badge">{question.type.replaceAll("_", " ")}</span>
+        <span className="ui-badge">{question.matched_kp_title}</span>
+      </div>
+      <p className="text-sm font-medium mb-3">{question.stem}</p>
+
+      {(question.type === "multiple_choice" || question.type === "true_false") && question.options && (
+        <div className="space-y-2 mb-3">
+          {question.options.map((opt) => (
+            <button
+              key={opt.label}
+              onClick={() => !submitted && setSelected(opt.label)}
+              disabled={submitted}
+              className="w-full text-left px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:cursor-default transition-colors"
+              style={{
+                border: "1px solid",
+                borderColor: submitted
+                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
+                    ? "var(--success)" : selected === opt.label ? "var(--danger)" : "var(--border)"
+                  : selected === opt.label ? "var(--accent)" : "var(--border)",
+                backgroundColor: submitted
+                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
+                    ? "rgba(22, 163, 74, 0.08)" : "transparent"
+                  : selected === opt.label ? "rgba(91, 108, 240, 0.08)" : "transparent",
+              }}
+            >
+              <span className="font-medium mr-2">{opt.label}.</span>{opt.text}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {(question.type === "fill_blank" || question.type === "short_answer") && (
+        <input
+          value={textAnswer}
+          onChange={(e) => !submitted && setTextAnswer(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+          disabled={submitted}
+          placeholder="Type your answer..."
+          className="w-full px-4 py-2.5 rounded-xl text-sm mb-3 outline-none"
+          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+        />
+      )}
+
+      {!submitted ? (
+        <button
+          onClick={handleSubmit}
+          disabled={!userAnswer}
+          className="px-5 py-2 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-30"
+          style={{ backgroundColor: "var(--accent)", color: "white" }}
+        >
+          Check
+        </button>
+      ) : (
+        <div className="mt-2">
+          <div className="flex items-center gap-2 mb-2">
+            {isCorrect ? (
+              <><Check size={14} style={{ color: "var(--success)" }} /><span className="text-sm font-medium" style={{ color: "var(--success)" }}>Correct</span></>
+            ) : (
+              <><span className="text-sm font-medium" style={{ color: "var(--danger)" }}>Answer: {question.answer}</span></>
+            )}
+          </div>
+          {question.explanation && (
+            <p className="text-xs p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+              {question.explanation}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 type InputMode = "paste" | "upload";
 type AuthState = "loading" | "guest" | "authenticated";
 type PreviewStudyTask = {
@@ -533,8 +622,8 @@ export default function NewCoursePage() {
                   <BrainCircuit size={18} />
                 </div>
                 <div>
-                  <div className="ui-kicker mb-2">Question Preview</div>
-                  <h4 className="text-xl font-semibold">What kind of practice would it generate?</h4>
+                  <div className="ui-kicker mb-2">Try It Now</div>
+                  <h4 className="text-xl font-semibold">Answer a few questions — no sign-up needed</h4>
                 </div>
               </div>
 
@@ -547,35 +636,8 @@ export default function NewCoursePage() {
                 </div>
               ) : previewQuestions.length > 0 ? (
                 <div className="space-y-3">
-                  {previewQuestions.slice(0, 3).map((question, index) => (
-                    <div
-                      key={`${question.stem}-${index}`}
-                      className="rounded-[22px] px-4 py-4"
-                      style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
-                    >
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        <span className="ui-badge">{question.type.replaceAll("_", " ")}</span>
-                        <span className="ui-badge">{question.matched_kp_title}</span>
-                      </div>
-                      <p className="text-sm font-medium">{question.stem}</p>
-                      {question.options && question.options.length > 0 && (
-                        <div className="mt-3 space-y-2">
-                          {question.options.map((option) => (
-                            <div
-                              key={`${question.stem}-${option.label}`}
-                              className="rounded-2xl px-3 py-2 text-sm"
-                              style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
-                            >
-                              <span className="font-medium mr-2">{option.label}.</span>
-                              {option.text}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
-                        Answer: {question.answer}
-                      </p>
-                    </div>
+                  {previewQuestions.slice(0, 5).map((question, index) => (
+                    <PreviewQuestionCard key={`${question.stem}-${index}`} question={question} />
                   ))}
                 </div>
               ) : (
