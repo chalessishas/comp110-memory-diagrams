@@ -26,10 +26,8 @@ export function StudyStatsCard() {
       setAllTime(getAllTimeStats());
     };
     window.addEventListener(STUDY_TRACKER_UPDATED_EVENT, refresh);
-    const interval = setInterval(refresh, 30_000);
     return () => {
       window.removeEventListener(STUDY_TRACKER_UPDATED_EVENT, refresh);
-      clearInterval(interval);
     };
   }, []);
 

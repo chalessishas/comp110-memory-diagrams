@@ -67,7 +67,11 @@ export async function POST(request: Request) {
       order: node.order,
     }));
 
-    await supabase.from("outline_nodes").insert(newNodes);
+    const { error: nodesError } = await supabase.from("outline_nodes").insert(newNodes);
+    if (nodesError) {
+      await supabase.from("courses").delete().eq("id", newCourse.id);
+      return NextResponse.json({ error: "Failed to copy outline" }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ course_id: newCourse.id });

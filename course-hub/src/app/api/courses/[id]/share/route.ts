@@ -33,6 +33,9 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
 export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   await supabase.from("share_tokens").delete().eq("course_id", id);
   return NextResponse.json({ success: true });
 }

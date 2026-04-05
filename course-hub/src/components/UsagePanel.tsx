@@ -70,8 +70,9 @@ export function UsagePanel() {
 
       {/* Weekly bar chart */}
       <div className="flex items-end gap-1 h-12">
-        {weekly.map((day, i) => {
+        {(() => {
           const maxReqs = Math.max(...weekly.map((d) => d.requests), 1);
+          return weekly.map((day, i) => {
           const height = day.requests > 0 ? Math.max((day.requests / maxReqs) * 100, 8) : 4;
           const isToday = i === weekly.length - 1;
           return (
@@ -83,14 +84,15 @@ export function UsagePanel() {
                   backgroundColor: isToday
                     ? "var(--accent)"
                     : day.requests > 0
-                    ? "#c8c8c0"
-                    : "#e8e8e2",
+                    ? "rgba(91, 108, 240, 0.35)"
+                    : "var(--border)",
                   minHeight: "2px",
                 }}
               />
             </div>
           );
-        })}
+        });
+        })()}
       </div>
     </div>
   );

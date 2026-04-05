@@ -76,12 +76,21 @@ export default function SettingsPage() {
 
   async function handleExportData() {
     setExporting(true);
-    const { data: courses } = await supabase.from("courses").select("*");
-    const { data: nodes } = await supabase.from("outline_nodes").select("*");
-    const { data: questions } = await supabase.from("questions").select("*");
-    const { data: attempts } = await supabase.from("attempts").select("*");
-    const { data: tasks } = await supabase.from("study_tasks").select("*");
-    const { data: bookmarks } = await supabase.from("question_bookmarks").select("*");
+    const [
+      { data: courses },
+      { data: nodes },
+      { data: questions },
+      { data: attempts },
+      { data: tasks },
+      { data: bookmarks },
+    ] = await Promise.all([
+      supabase.from("courses").select("*"),
+      supabase.from("outline_nodes").select("*"),
+      supabase.from("questions").select("*"),
+      supabase.from("attempts").select("*"),
+      supabase.from("study_tasks").select("*"),
+      supabase.from("question_bookmarks").select("*"),
+    ]);
 
     const exportData = { exported_at: new Date().toISOString(), courses, outline_nodes: nodes, questions, attempts, study_tasks: tasks, question_bookmarks: bookmarks };
     const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" });
@@ -112,10 +121,8 @@ export default function SettingsPage() {
     if (!confirm("Delete your account and ALL data? This cannot be undone.")) return;
     if (!confirm("Are you absolutely sure? All courses, questions, and progress will be permanently deleted.")) return;
     const { data: courses } = await supabase.from("courses").select("id");
-    if (courses) {
-      for (const course of courses) {
-        await supabase.from("courses").delete().eq("id", course.id);
-      }
+    if (courses && courses.length > 0) {
+      await supabase.from("courses").delete().in("id", courses.map((c) => c.id));
     }
     await supabase.auth.signOut();
     router.push("/login");
