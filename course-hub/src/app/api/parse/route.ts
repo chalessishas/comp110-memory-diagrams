@@ -1,8 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseSyllabus, parseSyllabusText, parseExamQuestions } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  if (!checkRateLimit(ip, 10, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
+
   const { storagePath, rawText, parseType, courseId } = await request.json();
 
   if ((parseType === "syllabus" || !parseType) && typeof rawText === "string" && rawText.trim().length > 0) {

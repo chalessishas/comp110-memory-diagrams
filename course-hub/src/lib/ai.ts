@@ -14,23 +14,30 @@ const qwen = createOpenAI({
 const visionModel = qwen("qwen-plus-latest");
 const textModel = qwen("qwen-plus-latest");
 
+const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
+
 // ─── Pipeline 1: Syllabus → Course Outline ───
 
 export async function parseSyllabus(fileBase64: string, mimeType: string): Promise<ParsedSyllabus> {
-  const { output } = await generateText({
-    model: visionModel,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "file",
-            data: `data:${mimeType};base64,${fileBase64}`,
-            mediaType: mimeType as "application/pdf",
-          },
-          {
-            type: "text",
-            text: `Analyze this course syllabus and extract its structure. Return:
+  if (fileBase64.length > MAX_BASE64_SIZE) {
+    throw new Error("File too large for AI processing (max ~15MB). Try a shorter document.");
+  }
+
+  try {
+    const { output } = await generateText({
+      model: visionModel,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "file",
+              data: `data:${mimeType};base64,${fileBase64}`,
+              mediaType: mimeType as "application/pdf",
+            },
+            {
+              type: "text",
+              text: `Analyze this course syllabus and extract its structure. Return:
 - title: the course name
 - description: a one-sentence course description
 - professor: instructor name (null if not found)
@@ -42,23 +49,28 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
   - children: nested sub-sections
 
 Organize by the document's natural structure. Break each section into specific knowledge points where possible.`,
-          },
-        ],
-      },
-    ],
-    output: Output.object({ schema: parsedSyllabusSchema }),
-  });
+            },
+          ],
+        },
+      ],
+      output: Output.object({ schema: parsedSyllabusSchema }),
+    });
 
-  return output as ParsedSyllabus;
+    if (!output) throw new Error("AI failed to produce structured output");
+    return output as ParsedSyllabus;
+  } catch (err) {
+    throw new Error(`Syllabus parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }
 
 export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus> {
-  const { output } = await generateText({
-    model: textModel,
-    messages: [
-      {
-        role: "user",
-        content: `Analyze the following course syllabus or course description text and extract its structure. Return:
+  try {
+    const { output } = await generateText({
+      model: textModel,
+      messages: [
+        {
+          role: "user",
+          content: `Analyze the following course syllabus or course description text and extract its structure. Return:
 - title: the course name
 - description: a one-sentence course description
 - professor: instructor name (null if not found)
@@ -75,12 +87,16 @@ Course text:
 """
 ${rawText}
 """`,
-      },
-    ],
-    output: Output.object({ schema: parsedSyllabusSchema }),
-  });
+        },
+      ],
+      output: Output.object({ schema: parsedSyllabusSchema }),
+    });
 
-  return output as ParsedSyllabus;
+    if (!output) throw new Error("AI failed to produce structured output");
+    return output as ParsedSyllabus;
+  } catch (err) {
+    throw new Error(`Syllabus text parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }
 
 // ─── Pipeline 2: Exam/Practice → Interactive Questions ───
@@ -98,20 +114,21 @@ export async function parseExamQuestions(
       .array(),
   });
 
-  const { output } = await generateText({
-    model: visionModel,
-    messages: [
-      {
-        role: "user",
-        content: [
-          {
-            type: "file",
-            data: `data:${mimeType};base64,${fileBase64}`,
-            mediaType: mimeType as "application/pdf",
-          },
-          {
-            type: "text",
-            text: `Extract all questions from this exam/practice document. For each question return:
+  try {
+    const { output } = await generateText({
+      model: visionModel,
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "file",
+              data: `data:${mimeType};base64,${fileBase64}`,
+              mediaType: mimeType as "application/pdf",
+            },
+            {
+              type: "text",
+              text: `Extract all questions from this exam/practice document. For each question return:
 - type: "multiple_choice", "fill_blank", "short_answer", or "true_false"
 - stem: the question text
 - options: array of {label, text} for multiple choice (null otherwise)
@@ -119,14 +136,18 @@ export async function parseExamQuestions(
 - explanation: brief explanation of why this answer is correct
 - difficulty: 1-5 (1=easy, 5=hard)
 - matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.`,
-          },
-        ],
-      },
-    ],
-    output: Output.object({ schema: questionsSchema }),
-  });
+            },
+          ],
+        },
+      ],
+      output: Output.object({ schema: questionsSchema }),
+    });
 
-  return (output as z.infer<typeof questionsSchema>).questions;
+    if (!output) throw new Error("AI failed to produce structured output");
+    return (output as z.infer<typeof questionsSchema>).questions;
+  } catch (err) {
+    throw new Error(`Exam question parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }
 
 // ─── Pipeline 3: Outline → Study Tasks (auto-generated) ───
@@ -157,12 +178,13 @@ export async function generateStudyTasks(
     .map((kp, i) => `${i + 1}. ${kp.title}${kp.content ? ` — ${kp.content}` : ""}`)
     .join("\n");
 
-  const { output } = await generateText({
-    model: textModel,
-    messages: [
-      {
-        role: "user",
-        content: `You are a study planner for the course "${courseTitle}".
+  try {
+    const { output } = await generateText({
+      model: textModel,
+      messages: [
+        {
+          role: "user",
+          content: `You are a study planner for the course "${courseTitle}".
 
 Here are the knowledge points from the course outline:
 ${kpSummary}
@@ -173,12 +195,16 @@ For each knowledge point, generate 1-3 study tasks. Each task should be:
 - Prioritized: 1=must-know (core concept), 2=should-know (important detail), 3=nice-to-know (supplementary)
 
 Focus on what a student actually needs to DO, not just what to know.`,
-      },
-    ],
-    output: Output.object({ schema: studyTasksSchema }),
-  });
+        },
+      ],
+      output: Output.object({ schema: studyTasksSchema }),
+    });
 
-  return (output as z.infer<typeof studyTasksSchema>).tasks;
+    if (!output) throw new Error("AI failed to produce structured output");
+    return (output as z.infer<typeof studyTasksSchema>).tasks;
+  } catch (err) {
+    throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }
 
 // ─── Pipeline 4: Outline → Auto Quiz Questions (no exam needed) ───
@@ -197,12 +223,13 @@ export async function generateQuestionsFromOutline(
       .array(),
   });
 
-  const { output } = await generateText({
-    model: textModel,
-    messages: [
-      {
-        role: "user",
-        content: `You are creating practice questions for the course "${courseTitle}".
+  try {
+    const { output } = await generateText({
+      model: textModel,
+      messages: [
+        {
+          role: "user",
+          content: `You are creating practice questions for the course "${courseTitle}".
 
 Knowledge points:
 ${kpSummary}
@@ -220,12 +247,16 @@ Each question must have:
 - matched_kp_title: exactly matching one of the knowledge point titles listed above
 
 Make questions test understanding, not just memorization.`,
-      },
-    ],
-    output: Output.object({ schema: autoQuizSchema }),
-  });
+        },
+      ],
+      output: Output.object({ schema: autoQuizSchema }),
+    });
 
-  return (output as z.infer<typeof autoQuizSchema>).questions;
+    if (!output) throw new Error("AI failed to produce structured output");
+    return (output as z.infer<typeof autoQuizSchema>).questions;
+  } catch (err) {
+    throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }
 
 // ─── Pipeline 5: Spoken Study Notes → Structured Notes + Clarifying Questions ───
@@ -264,12 +295,13 @@ export async function organizeStudyNote({
         .join("\n")
     : "No clarification answers yet.";
 
-  const { output } = await generateText({
-    model: textModel,
-    messages: [
-      {
-        role: "user",
-        content: `You are turning a student's spoken course note into a clean study note for the course "${courseTitle}".
+  try {
+    const { output } = await generateText({
+      model: textModel,
+      messages: [
+        {
+          role: "user",
+          content: `You are turning a student's spoken course note into a clean study note for the course "${courseTitle}".
 
 Knowledge points in this course:
 ${kpSummary}
@@ -298,21 +330,26 @@ Rules:
 - If a manual knowledge point was selected, use that as matched_kp_title.
 - If the clarification answers already resolve the ambiguity, reduce or remove the clarification questions.
 - If the note is clear enough, return an empty clarification_questions array.`,
-      },
-    ],
-    output: Output.object({ schema: organizedStudyNoteSchema }),
-  });
+        },
+      ],
+      output: Output.object({ schema: organizedStudyNoteSchema }),
+    });
 
-  const organized = output as z.infer<typeof organizedStudyNoteSchema>;
+    if (!output) throw new Error("AI failed to produce structured output");
 
-  return {
-    title: organized.title,
-    summary: organized.summary,
-    key_points: organized.key_points,
-    confusing_points: organized.confusing_points,
-    next_action: organized.next_action,
-    clarification_questions: organized.clarification_questions,
-    matched_knowledge_point_id: null,
-    matched_knowledge_point_title: selectedKnowledgePointTitle ?? organized.matched_kp_title,
-  };
+    const organized = output as z.infer<typeof organizedStudyNoteSchema>;
+
+    return {
+      title: organized.title,
+      summary: organized.summary,
+      key_points: organized.key_points,
+      confusing_points: organized.confusing_points,
+      next_action: organized.next_action,
+      clarification_questions: organized.clarification_questions,
+      matched_knowledge_point_id: null,
+      matched_knowledge_point_title: selectedKnowledgePointTitle ?? organized.matched_kp_title,
+    };
+  } catch (err) {
+    throw new Error(`Study note organization failed: ${err instanceof Error ? err.message : "Unknown error"}`);
+  }
 }

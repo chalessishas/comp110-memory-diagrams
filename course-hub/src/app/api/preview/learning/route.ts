@@ -1,4 +1,5 @@
 import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import type { ParsedOutlineNode } from "@/types";
 
@@ -34,6 +35,11 @@ function collectStudyTargets(nodes: ParsedOutlineNode[]) {
 }
 
 export async function POST(request: Request) {
+  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  if (!checkRateLimit(ip, 10, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
+
   const { title, nodes } = await request.json();
 
   if (!title || !Array.isArray(nodes)) {
