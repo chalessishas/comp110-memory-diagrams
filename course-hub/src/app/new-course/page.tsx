@@ -274,10 +274,12 @@ export default function NewCoursePage() {
       return;
     }
 
-    setSaveStage("AI is generating study tasks and practice questions...");
-    await fetch(`/api/courses/${course.id}/generate`, { method: "POST" });
-    trackUsage(15000, 5000); // Estimated study tasks + questions generation tokens
+    // Fire-and-forget — don't block navigation waiting for AI generation
+    fetch(`/api/courses/${course.id}/generate`, { method: "POST" })
+      .then(() => trackUsage(15000, 5000))
+      .catch(() => {});
 
+    setSaveStage("Redirecting to your course...");
     router.push(`/course/${course.id}`);
   }
 
