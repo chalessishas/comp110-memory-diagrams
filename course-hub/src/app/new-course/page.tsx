@@ -84,6 +84,13 @@ function GeneratingStatus() {
         </div>
       </div>
 
+      {/* Timeout warning */}
+      {elapsed > 30000 && (
+        <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "var(--warning)" }}>
+          This is taking longer than usual. Long syllabi with many policies can be slow — hang tight.
+        </p>
+      )}
+
       {/* Step log (like game world gen) */}
       <div className="w-full max-w-sm text-left space-y-1.5 mt-2">
         {GENERATION_STEPS.slice(0, currentStep + 1).map((s, i) => (

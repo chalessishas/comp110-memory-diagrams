@@ -12,8 +12,16 @@ export async function POST(request: Request) {
   const { storagePath, rawText, parseType, courseId } = await request.json();
 
   if ((parseType === "syllabus" || !parseType) && typeof rawText === "string" && rawText.trim().length > 0) {
-    const result = await parseSyllabusText(rawText.trim());
-    return NextResponse.json({ type: "syllabus", data: result });
+    try {
+      // Truncate very long text to avoid timeout (keep first 6000 chars which covers course structure)
+      const trimmed = rawText.trim();
+      const text = trimmed.length > 6000 ? trimmed.slice(0, 6000) + "\n\n[Remaining content truncated for processing]" : trimmed;
+      const result = await parseSyllabusText(text);
+      return NextResponse.json({ type: "syllabus", data: result });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return NextResponse.json({ error: `Failed to parse syllabus: ${message}` }, { status: 500 });
+    }
   }
 
   if (!storagePath) {
@@ -40,25 +48,30 @@ export async function POST(request: Request) {
     : ["jpg", "jpeg"].includes(ext) ? "image/jpeg"
     : "application/pdf";
 
-  if (parseType === "syllabus" || !parseType) {
-    const result = await parseSyllabus(base64, mimeType);
-    return NextResponse.json({ type: "syllabus", data: result });
-  }
-
-  if (parseType === "exam") {
-    let knowledgePoints: { id: string; title: string }[] = [];
-
-    if (courseId) {
-      const { data: nodes } = await supabase
-        .from("outline_nodes")
-        .select("id, title")
-        .eq("course_id", courseId)
-        .eq("type", "knowledge_point");
-      knowledgePoints = nodes ?? [];
+  try {
+    if (parseType === "syllabus" || !parseType) {
+      const result = await parseSyllabus(base64, mimeType);
+      return NextResponse.json({ type: "syllabus", data: result });
     }
 
-    const questions = await parseExamQuestions(base64, mimeType, knowledgePoints);
-    return NextResponse.json({ type: "exam", data: questions });
+    if (parseType === "exam") {
+      let knowledgePoints: { id: string; title: string }[] = [];
+
+      if (courseId) {
+        const { data: nodes } = await supabase
+          .from("outline_nodes")
+          .select("id, title")
+          .eq("course_id", courseId)
+          .eq("type", "knowledge_point");
+        knowledgePoints = nodes ?? [];
+      }
+
+      const questions = await parseExamQuestions(base64, mimeType, knowledgePoints);
+      return NextResponse.json({ type: "exam", data: questions });
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ error: `AI parsing failed: ${message}` }, { status: 500 });
   }
 
   return NextResponse.json({ error: "Invalid parseType" }, { status: 400 });
