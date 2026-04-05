@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { FileDropzone } from "@/components/FileDropzone";
-import { FileText, Image, Presentation, Download, Trash2, Loader2, Upload as UploadIcon, File } from "lucide-react";
+import { FileText, Image, Presentation, Download, Trash2, Loader2, Upload as UploadIcon, File, Sparkles } from "lucide-react";
 import type { Upload } from "@/types";
 
 type UploadWithUrl = Upload & { download_url: string | null };
@@ -34,6 +34,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [extracting, setExtracting] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/courses/${id}/uploads`)
@@ -102,43 +103,91 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
           {uploads.map((upload) => {
             const Icon = typeIcons[upload.file_type] ?? File;
             return (
-              <div
-                key={upload.id}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl group"
-                style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
-              >
-                <Icon size={20} style={{ color: "var(--text-secondary)" }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{upload.file_name}</p>
-                  <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                    {typeLabels[upload.upload_type] ?? "File"} · {formatDate(upload.created_at)}
-                  </p>
-                </div>
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  {upload.download_url && (
-                    <a
-                      href={upload.download_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
-                      title="Download"
-                    >
-                      <Download size={15} style={{ color: "var(--text-secondary)" }} />
-                    </a>
-                  )}
-                  <button
-                    onClick={() => handleDelete(upload.id)}
-                    disabled={deleting === upload.id}
-                    className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
-                    title="Delete"
-                  >
-                    {deleting === upload.id ? (
-                      <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
-                    ) : (
-                      <Trash2 size={15} style={{ color: "var(--danger)" }} />
+              <div key={upload.id}>
+                <div
+                  className="flex items-center gap-3 px-4 py-3 rounded-2xl group"
+                  style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+                >
+                  <Icon size={20} style={{ color: "var(--text-secondary)" }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{upload.file_name}</p>
+                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                      {typeLabels[upload.upload_type] ?? "File"} · {formatDate(upload.created_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {(upload.file_type === "pdf" || upload.file_type === "image") && !upload.parsed_content && (
+                      <button
+                        onClick={async () => {
+                          const pathMatch = upload.file_url.match(/course-files\/(.+)$/);
+                          if (!pathMatch) return;
+                          setExtracting(upload.id);
+                          const res = await fetch(`/api/courses/${id}/extract`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ storagePath: pathMatch[1] }),
+                          });
+                          if (res.ok) {
+                            const data = await res.json();
+                            setUploads((prev) => prev.map((u) => u.id === upload.id ? { ...u, parsed_content: data } : u));
+                          }
+                          setExtracting(null);
+                        }}
+                        disabled={extracting === upload.id}
+                        className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                        title="Extract key content with AI"
+                      >
+                        {extracting === upload.id ? (
+                          <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+                        ) : (
+                          <Sparkles size={15} style={{ color: "var(--accent)" }} />
+                        )}
+                      </button>
                     )}
-                  </button>
+                    {upload.download_url && (
+                      <a
+                        href={upload.download_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                        title="Download"
+                      >
+                        <Download size={15} style={{ color: "var(--text-secondary)" }} />
+                      </a>
+                    )}
+                    <button
+                      onClick={() => handleDelete(upload.id)}
+                      disabled={deleting === upload.id}
+                      className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                      title="Delete"
+                    >
+                      {deleting === upload.id ? (
+                        <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+                      ) : (
+                        <Trash2 size={15} style={{ color: "var(--danger)" }} />
+                      )}
+                    </button>
+                  </div>
                 </div>
+                {upload.parsed_content != null && (
+                  <div className="mt-2 ml-9 space-y-2">
+                    {(upload.parsed_content as any).sections?.map((section: any, i: number) => (
+                      <div key={i} className="p-3 rounded-xl text-xs" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                        <p className="font-medium">{section.title}</p>
+                        <p className="mt-1" style={{ color: "var(--text-secondary)" }}>{section.summary}</p>
+                        {section.key_concepts?.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {section.key_concepts.map((c: string, j: number) => (
+                              <span key={j} className="px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
