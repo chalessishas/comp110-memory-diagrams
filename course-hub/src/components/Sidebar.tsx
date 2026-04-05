@@ -6,6 +6,7 @@ import { LayoutDashboard, Plus, LogOut, LogIn, Bookmark } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import type { Course } from "@/types";
+import { UsagePanel } from "@/components/UsagePanel";
 
 export function Sidebar({
   courses,
@@ -125,6 +126,10 @@ export function Sidebar({
             </div>
           </div>
         )}
+
+        <div className="mt-6">
+          <UsagePanel />
+        </div>
 
         <div className="mt-6 pt-5 flex flex-wrap gap-2" style={{ borderTop: "1px solid var(--border)" }}>
           {isAuthenticated ? (
