@@ -9,6 +9,7 @@ import { useState } from "react";
 import type { Course } from "@/types";
 import { UsagePanel } from "@/components/UsagePanel";
 import { useI18n } from "@/lib/i18n";
+import { StreakBadge } from "@/components/StreakBadge";
 
 function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: string; icon: typeof LayoutDashboard; pathname: string }) {
   const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
@@ -89,6 +90,7 @@ export function Sidebar({
 
           {/* Right side */}
           <div className="hidden md:flex items-center gap-2">
+            <StreakBadge />
             <button
               onClick={() => setLocale(locale === "en" ? "zh" : "en")}
               className="px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors"

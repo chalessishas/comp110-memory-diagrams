@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, X, Bookmark } from "lucide-react";
 import type { Question } from "@/types";
 import { updateCard } from "@/lib/spaced-repetition";
+import { recordActivity } from "@/lib/streaks";
 
 interface QuestionCardProps {
   question: Question;
@@ -45,6 +46,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
     // Add to spaced repetition review queue
     updateCard(question.id, correct ? 3 : 1); // 3=Good if correct, 1=Again if wrong
+    recordActivity("question");
 
     onAnswer(question.id, userAnswer, correct);
   }
