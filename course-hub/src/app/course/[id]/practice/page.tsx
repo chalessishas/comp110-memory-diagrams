@@ -8,6 +8,7 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft } from "lucide-react";
 import type { Question } from "@/types";
+import { trackUsage } from "@/lib/usage-tracker";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -33,6 +34,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     });
     const newQuestions = await res.json();
     if (res.ok) {
+      trackUsage(10000, 3000); // Estimated exam question extraction tokens
       setQuestions((prev) => [...newQuestions, ...prev]);
       setCurrentIndex(0);
       setQuestionMode("solving");

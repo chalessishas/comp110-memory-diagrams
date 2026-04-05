@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, X, Bookmark } from "lucide-react";
 import type { Question } from "@/types";
+import { updateCard } from "@/lib/spaced-repetition";
 
 interface QuestionCardProps {
   question: Question;
@@ -22,6 +23,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   const [submitted, setSubmitted] = useState(false);
   const [textAnswer, setTextAnswer] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked ?? false);
+  const [feedbackGiven, setFeedbackGiven] = useState<string | null>(null);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
@@ -40,6 +42,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question_id: question.id, user_answer: userAnswer }),
     });
+
+    // Add to spaced repetition review queue
+    updateCard(question.id, correct ? 3 : 1); // 3=Good if correct, 1=Again if wrong
 
     onAnswer(question.id, userAnswer, correct);
   }
@@ -180,6 +185,36 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               {question.explanation}
             </p>
           )}
+          <div className="mt-3 flex items-center gap-1">
+            <span className="text-[10px] mr-1" style={{ color: "var(--text-secondary)" }}>Report:</span>
+            {[
+              { reason: "wrong_answer", label: "Wrong" },
+              { reason: "unclear", label: "Unclear" },
+              { reason: "too_easy", label: "Too Easy" },
+              { reason: "too_hard", label: "Too Hard" },
+            ].map((fb) => (
+              <button
+                key={fb.reason}
+                onClick={async () => {
+                  await fetch(`/api/questions/${question.id}/feedback`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ reason: fb.reason }),
+                  });
+                  setFeedbackGiven(fb.reason);
+                }}
+                disabled={!!feedbackGiven}
+                className="px-2 py-0.5 rounded-full text-[10px] cursor-pointer disabled:opacity-40"
+                style={{
+                  border: "1px solid var(--border)",
+                  backgroundColor: feedbackGiven === fb.reason ? "var(--bg-muted)" : "transparent",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                {fb.label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

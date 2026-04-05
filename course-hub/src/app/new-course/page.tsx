@@ -8,6 +8,7 @@ import { OutlinePreview } from "@/components/OutlinePreview";
 import { Loader2, Check, ArrowLeft, ClipboardPenLine, Upload, LogIn, Sparkles, BookOpen, BrainCircuit } from "lucide-react";
 import Link from "next/link";
 import type { ParsedQuestion, ParsedSyllabus, TaskType } from "@/types";
+import { trackUsage } from "@/lib/usage-tracker";
 
 type Step = "upload" | "parsing" | "preview";
 type InputMode = "paste" | "upload";
@@ -81,6 +82,7 @@ export default function NewCoursePage() {
       return;
     }
 
+    trackUsage(20000, 2000); // Estimated syllabus parse tokens
     setParsed(data.data);
     setStep("preview");
     void loadLearningPreview(data.data);
@@ -109,6 +111,7 @@ export default function NewCoursePage() {
       return;
     }
 
+    trackUsage(20000, 2000); // Estimated syllabus parse tokens
     setParsed(data.data);
     setStep("preview");
     void loadLearningPreview(data.data);
@@ -183,6 +186,7 @@ export default function NewCoursePage() {
 
     setSaveStage("Generating study tasks and practice questions...");
     await fetch(`/api/courses/${course.id}/generate`, { method: "POST" });
+    trackUsage(15000, 5000); // Estimated study tasks + questions generation tokens
 
     router.push(`/course/${course.id}`);
   }
