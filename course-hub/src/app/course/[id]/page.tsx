@@ -5,6 +5,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { OutlineTree } from "@/components/OutlineTree";
 import { ArchiveButton } from "@/components/ArchiveButton";
 import { ShareButton } from "@/components/ShareButton";
+import { RegenerateButton } from "@/components/RegenerateButton";
 import { StudyTaskList } from "@/components/StudyTaskList";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { LearningBlueprint } from "@/components/LearningBlueprint";
@@ -259,6 +260,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             >
               <Download size={18} />
             </a>
+            <RegenerateButton courseId={id} />
             <ShareButton courseId={id} />
             <ArchiveButton courseId={id} status={course.status} />
           </div>
