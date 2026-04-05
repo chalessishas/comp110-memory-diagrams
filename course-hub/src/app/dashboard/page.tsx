@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Plus, Archive, LogIn, ClipboardPenLine, ShieldCheck, Sparkles } from "lucide-react";
 import { CourseCard } from "@/components/CourseCard";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
+import { StudyStatsCard } from "@/components/StudyStatsCard";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -95,6 +96,8 @@ export default async function DashboardPage() {
           New Course
         </Link>
       </div>
+
+      <StudyStatsCard />
 
       <StudyTrackerPanel
         title="Today"

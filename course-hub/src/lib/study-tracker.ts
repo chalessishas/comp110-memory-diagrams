@@ -132,3 +132,63 @@ export function formatDuration(ms: number) {
   if (minutes === 0) return `${hours}h`;
   return `${hours}h ${minutes}m`;
 }
+
+export function getWeeklySummary(courseId?: string | null): { day: string; totalMs: number; byMode: StudyModeBreakdown }[] {
+  const store = readStore();
+  const result: { day: string; totalMs: number; byMode: StudyModeBreakdown }[] = [];
+
+  const today = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = getTodayKey(d);
+    const dayRecord = store.days[key];
+
+    if (!dayRecord) {
+      result.push({ day: key, totalMs: 0, byMode: emptyBreakdown() });
+      continue;
+    }
+
+    if (courseId) {
+      const courseRecord = dayRecord.courses[courseId];
+      result.push({
+        day: key,
+        totalMs: courseRecord?.totalMs ?? 0,
+        byMode: courseRecord?.byMode ?? emptyBreakdown(),
+      });
+    } else {
+      result.push({ day: key, totalMs: dayRecord.totalMs, byMode: dayRecord.byMode });
+    }
+  }
+
+  return result;
+}
+
+export function getAllTimeStats(): { totalMs: number; totalDays: number; avgPerDay: number; byMode: StudyModeBreakdown; courseBreakdown: { courseId: string; totalMs: number }[] } {
+  const store = readStore();
+  const days = Object.values(store.days);
+
+  const totalMs = days.reduce((sum, d) => sum + d.totalMs, 0);
+  const totalDays = days.filter(d => d.totalMs > 0).length;
+  const avgPerDay = totalDays > 0 ? totalMs / totalDays : 0;
+
+  const byMode = emptyBreakdown();
+  const courseMap = new Map<string, number>();
+
+  for (const day of days) {
+    byMode.solving += day.byMode.solving;
+    byMode.reviewing += day.byMode.reviewing;
+    byMode.studying += day.byMode.studying;
+    byMode.idle += day.byMode.idle;
+
+    for (const [courseId, courseData] of Object.entries(day.courses)) {
+      courseMap.set(courseId, (courseMap.get(courseId) ?? 0) + courseData.totalMs);
+    }
+  }
+
+  const courseBreakdown = Array.from(courseMap.entries())
+    .map(([courseId, totalMs]) => ({ courseId, totalMs }))
+    .sort((a, b) => b.totalMs - a.totalMs);
+
+  return { totalMs, totalDays, avgPerDay, byMode, courseBreakdown };
+}
