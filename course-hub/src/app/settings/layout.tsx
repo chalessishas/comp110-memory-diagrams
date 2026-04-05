@@ -15,9 +15,9 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     .order("created_at", { ascending: false });
 
   return (
-    <div className="min-h-screen lg:flex lg:gap-5">
+    <div className="min-h-screen flex flex-col">
       <Sidebar courses={courses ?? []} isAuthenticated={true} userEmail={user.email ?? null} />
-      <main className="flex-1 min-w-0 overflow-auto">
+      <main className="flex-1 min-w-0">
         <div className="ui-shell">{children}</div>
       </main>
     </div>

@@ -13,9 +13,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
     : [];
 
   return (
-    <div className="min-h-screen lg:flex lg:gap-5">
+    <div className="min-h-screen flex flex-col">
       <Sidebar courses={courses ?? []} isAuthenticated={Boolean(user)} userEmail={user?.email ?? null} />
-      <main className="flex-1 min-w-0 overflow-auto">
+      <main className="flex-1 min-w-0">
         <div className="ui-shell">{children}</div>
       </main>
     </div>
