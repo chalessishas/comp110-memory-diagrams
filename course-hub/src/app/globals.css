@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --bg-primary: #f8f7f4;
+  --bg-primary: #fcfbf9;
   --bg-surface: #ffffff;
-  --bg-muted: #f2f1ee;
+  --bg-muted: #f5f4f1;
   --text-primary: #1a1a2e;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
@@ -25,7 +25,7 @@
 
 body {
   margin: 0;
-  background: linear-gradient(160deg, #f8f7f4 0%, #f0efe9 50%, #eae8e2 100%);
+  background: linear-gradient(160deg, #fcfbf9 0%, #f7f6f2 50%, #f3f2ee 100%);
   color: var(--text-primary);
   font-family: "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
   line-height: 1.7;

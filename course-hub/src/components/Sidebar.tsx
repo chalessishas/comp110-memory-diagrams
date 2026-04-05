@@ -51,7 +51,7 @@ export function Sidebar({
     <header
       className="sticky top-0 z-40 ui-sidebar-wrapper"
       style={{
-        backgroundColor: "rgba(248, 247, 244, 0.85)",
+        backgroundColor: "rgba(252, 251, 249, 0.88)",
         backdropFilter: "blur(16px)",
         borderBottom: "1px solid var(--border)",
       }}
