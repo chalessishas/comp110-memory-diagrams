@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
-import { getDueCards, loadCards, updateCard, type ReviewCard, type Rating } from "@/lib/spaced-repetition";
+import { getDueCards, loadCards, updateCard, Rating, type ReviewCard } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check } from "lucide-react";
 import type { Question } from "@/types";
 
@@ -32,7 +32,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     setShowRating(true);
   }
 
-  function handleRate(rating: Rating) {
+  function handleRate(rating: Rating): void {
     const card = dueCards[currentIndex];
     if (card) {
       updateCard(card.question_id, rating);
@@ -93,11 +93,11 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
               <p className="text-sm font-medium mb-3">How well did you know this?</p>
               <div className="grid grid-cols-4 gap-2">
                 {([
-                  { rating: 1 as Rating, label: "Again", desc: "Forgot completely", color: "var(--danger)" },
-                  { rating: 2 as Rating, label: "Hard", desc: "Barely remembered", color: "var(--warning)" },
-                  { rating: 3 as Rating, label: "Good", desc: "Remembered with effort", color: "var(--success)" },
-                  { rating: 4 as Rating, label: "Easy", desc: "Knew instantly", color: "var(--accent)" },
-                ]).map((opt) => (
+                  { rating: Rating.Again, label: "Again", desc: "Forgot completely", color: "var(--danger)" },
+                  { rating: Rating.Hard, label: "Hard", desc: "Barely remembered", color: "var(--warning)" },
+                  { rating: Rating.Good, label: "Good", desc: "Remembered with effort", color: "var(--success)" },
+                  { rating: Rating.Easy, label: "Easy", desc: "Knew instantly", color: "var(--accent)" },
+                ] as { rating: Rating; label: string; desc: string; color: string }[]).map((opt) => (
                   <button
                     key={opt.rating}
                     onClick={() => handleRate(opt.rating)}
