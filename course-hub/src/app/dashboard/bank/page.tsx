@@ -17,8 +17,12 @@ export default function QuestionBankPage() {
 
   useEffect(() => {
     fetch("/api/bookmarks")
-      .then((r) => r.json())
-      .then((data) => { setBookmarks(data); setLoading(false); });
+      .then((r) => {
+        if (!r.ok) return [];
+        return r.json();
+      })
+      .then((data) => { setBookmarks(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setBookmarks([]); setLoading(false); });
   }, []);
 
   async function removeBookmark(questionId: string) {

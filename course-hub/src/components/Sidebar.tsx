@@ -29,7 +29,7 @@ export function Sidebar({
   }
 
   return (
-    <aside className="w-full shrink-0 p-4 pb-0 lg:w-[320px] lg:p-6">
+    <aside className="w-full shrink-0 p-4 pb-0 lg:w-[320px] lg:p-6 ui-sidebar-wrapper">
       <div className="ui-panel p-4 md:p-5 lg:sticky lg:top-6">
         <div className="mb-6">
           <div className="ui-kicker mb-4">CourseHub</div>

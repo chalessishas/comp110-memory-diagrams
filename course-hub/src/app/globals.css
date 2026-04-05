@@ -282,6 +282,71 @@ select {
   color: white;
 }
 
+/* ── Page transitions ── */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ui-shell > *,
+main > .ui-shell {
+  animation: page-enter 280ms ease-out both;
+}
+
+/* View Transitions API (Chrome/Edge) */
+::view-transition-old(root) {
+  animation: 180ms ease-out both fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 280ms ease-out both fade-in-up;
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* Shared element: sidebar stays put during transitions */
+.ui-sidebar-wrapper {
+  view-transition-name: sidebar;
+}
+
+::view-transition-old(sidebar),
+::view-transition-new(sidebar) {
+  animation: none;
+}
+
+/* Smooth transitions for interactive elements */
+.ui-panel,
+.ui-button-primary,
+.ui-button-secondary,
+.ui-tab,
+.ui-badge {
+  transition:
+    background-color 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 200ms ease,
+    transform 200ms ease,
+    opacity 200ms ease;
+}
+
 @media (min-width: 768px) {
   .ui-shell {
     padding: 2rem;
