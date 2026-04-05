@@ -11,6 +11,95 @@ import type { ParsedQuestion, ParsedSyllabus, TaskType } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 
 type Step = "upload" | "parsing" | "preview";
+
+// ─── World-generation style progress ───
+
+const GENERATION_STEPS = [
+  { text: "Reading your document...", duration: 2000 },
+  { text: "Identifying course structure...", duration: 3000 },
+  { text: "Extracting weekly topics...", duration: 3000 },
+  { text: "Breaking down knowledge points...", duration: 4000 },
+  { text: "Mapping prerequisite relationships...", duration: 3000 },
+  { text: "Building the outline tree...", duration: 3000 },
+  { text: "Generating study tasks...", duration: 4000 },
+  { text: "Creating practice questions...", duration: 4000 },
+  { text: "Almost there — polishing results...", duration: 5000 },
+  { text: "Finalizing your course...", duration: 10000 },
+];
+
+function GeneratingStatus() {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const start = Date.now();
+    const interval = setInterval(() => {
+      const ms = Date.now() - start;
+      setElapsed(ms);
+
+      let accumulated = 0;
+      for (let i = 0; i < GENERATION_STEPS.length; i++) {
+        accumulated += GENERATION_STEPS[i].duration;
+        if (ms < accumulated) {
+          setCurrentStep(i);
+          return;
+        }
+      }
+      setCurrentStep(GENERATION_STEPS.length - 1);
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const step = GENERATION_STEPS[currentStep];
+  const totalDuration = GENERATION_STEPS.reduce((s, st) => s + st.duration, 0);
+  const progress = Math.min((elapsed / totalDuration) * 100, 95);
+
+  return (
+    <div className="ui-panel p-10 md:p-14 flex flex-col items-center text-center gap-6">
+      {/* Spinner */}
+      <div className="relative">
+        <Loader2 size={36} className="animate-spin" style={{ color: "var(--accent)" }} />
+      </div>
+
+      {/* Current step text */}
+      <div>
+        <p className="text-lg font-medium" style={{ minHeight: "1.8em" }}>{step.text}</p>
+        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+          {Math.floor(elapsed / 1000)}s elapsed
+        </p>
+      </div>
+
+      {/* Progress bar */}
+      <div className="w-full max-w-sm">
+        <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+          <div
+            className="h-full rounded-full"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: "var(--accent)",
+              transition: "width 400ms ease",
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Step log (like game world gen) */}
+      <div className="w-full max-w-sm text-left space-y-1.5 mt-2">
+        {GENERATION_STEPS.slice(0, currentStep + 1).map((s, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs" style={{ color: i < currentStep ? "var(--success)" : "var(--text-primary)" }}>
+            {i < currentStep ? (
+              <Check size={12} style={{ color: "var(--success)" }} />
+            ) : (
+              <Loader2 size={12} className="animate-spin" style={{ color: "var(--accent)" }} />
+            )}
+            <span style={{ opacity: i < currentStep ? 0.6 : 1 }}>{s.text}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 type InputMode = "paste" | "upload";
 type AuthState = "loading" | "guest" | "authenticated";
 type PreviewStudyTask = {
@@ -148,7 +237,7 @@ export default function NewCoursePage() {
     }
 
     setCreating(true);
-    setSaveStage("Saving your course...");
+    setSaveStage("Creating course record...");
     setError(null);
     setGuestNotice(null);
 
@@ -171,6 +260,7 @@ export default function NewCoursePage() {
       return;
     }
 
+    setSaveStage("Saving outline tree...");
     const res = await fetch(`/api/courses/${course.id}/outline`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -184,7 +274,7 @@ export default function NewCoursePage() {
       return;
     }
 
-    setSaveStage("Generating study tasks and practice questions...");
+    setSaveStage("AI is generating study tasks and practice questions...");
     await fetch(`/api/courses/${course.id}/generate`, { method: "POST" });
     trackUsage(15000, 5000); // Estimated study tasks + questions generation tokens
 
@@ -331,15 +421,7 @@ export default function NewCoursePage() {
       )}
 
       {step === "parsing" && (
-        <div className="ui-panel p-10 md:p-14 flex flex-col items-center text-center gap-4">
-          <Loader2 size={32} className="animate-spin" style={{ color: "var(--accent)" }} />
-          <div>
-            <p className="text-lg font-medium">Reading your syllabus...</p>
-            <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-              CourseHub is extracting the structure, topics, and likely knowledge points.
-            </p>
-          </div>
-        </div>
+        <GeneratingStatus />
       )}
 
       {step === "preview" && parsed && (
@@ -537,8 +619,9 @@ export default function NewCoursePage() {
       )}
 
       {creating && saveStage && (
-        <div className="ui-panel p-4 text-sm" style={{ color: "var(--text-secondary)" }}>
-          {saveStage}
+        <div className="ui-panel p-5 flex items-center gap-3">
+          <Loader2 size={16} className="animate-spin shrink-0" style={{ color: "var(--accent)" }} />
+          <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{saveStage}</span>
         </div>
       )}
 
