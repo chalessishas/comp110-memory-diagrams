@@ -153,3 +153,12 @@ export interface Lesson {
   order: number;
   created_at: string;
 }
+
+export interface ExamDate {
+  id: string;
+  course_id: string;
+  title: string;
+  exam_date: string;
+  knowledge_point_ids: string[];
+  created_at: string;
+}

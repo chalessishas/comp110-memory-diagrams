@@ -13,7 +13,8 @@ import { VoiceNotesPanel } from "@/components/VoiceNotesPanel";
 import { calculateMastery } from "@/lib/mastery";
 import { toCourseNote, type CourseNoteRow } from "@/lib/course-notes";
 import type { MasteryLevel, OutlineNode, StudyTask } from "@/types";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
+import { ExamCountdown } from "@/components/ExamCountdown";
 
 type CourseAttempt = {
   question_id: string;
@@ -95,6 +96,12 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .select("*")
     .eq("course_id", id)
     .order("created_at", { ascending: false });
+
+  const { data: exams } = await supabase
+    .from("exam_dates")
+    .select("*")
+    .eq("course_id", id)
+    .order("exam_date");
 
   const questionIds = (questions ?? []).map((question) => question.id);
   const { data: attempts } = questionIds.length > 0
@@ -243,6 +250,15 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
             </div>
           </div>
           <div className="flex flex-wrap justify-end items-center gap-2">
+            <a
+              href={`/api/courses/${id}/export-anki`}
+              download
+              className="p-2 rounded-lg cursor-pointer"
+              style={{ color: "var(--text-secondary)" }}
+              title="Export to Anki"
+            >
+              <Download size={18} />
+            </a>
             <ShareButton courseId={id} />
             <ArchiveButton courseId={id} status={course.status} />
           </div>
@@ -278,6 +294,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               knowledgePoints={studyTargets.map((target) => ({ id: target.id, title: target.title }))}
               initialNotes={notes}
             />
+          </div>
+
+          <div className="mb-6">
+            <ExamCountdown courseId={id} exams={exams ?? []} />
           </div>
 
           <StudyTaskList initialTasks={studyTasks ?? []} />
