@@ -1,4 +1,4 @@
-import { generateText, Output } from "ai";
+import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { parsedSyllabusSchema, parsedQuestionSchema } from "./schemas";
 import { z } from "zod";
@@ -24,7 +24,7 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
   }
 
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: visionModel,
       messages: [
         {
@@ -48,16 +48,19 @@ export async function parseSyllabus(fileBase64: string, mimeType: string): Promi
   - content: brief description (null if obvious from title)
   - children: nested sub-sections
 
-Organize by the document's natural structure. Break each section into specific knowledge points where possible.`,
+Organize by the document's natural structure. Break each section into specific knowledge points where possible.
+
+Return ONLY valid JSON (no markdown, no code fences).`,
             },
           ],
         },
       ],
-      output: Output.object({ schema: parsedSyllabusSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-    return output as ParsedSyllabus;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonMatch[0]));
+    return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -65,23 +68,33 @@ Organize by the document's natural structure. Break each section into specific k
 
 export async function parseSyllabusText(rawText: string): Promise<ParsedSyllabus> {
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: textModel,
       messages: [
         {
           role: "user",
-          content: `Analyze the following course syllabus or course description text and extract its structure. Return:
-- title: the course name
-- description: a one-sentence course description
-- professor: instructor name (null if not found)
-- semester: semester info like "Fall 2026" (null if not found)
-- nodes: hierarchical array of course content, where each node has:
-  - title: section title
-  - type: one of "week", "chapter", "topic", "knowledge_point"
-  - content: brief description (null if obvious from title)
-  - children: nested sub-sections
+          content: `Analyze the following course syllabus and extract its structure. Return ONLY valid JSON (no markdown, no code fences, no extra text). The JSON must have this exact shape:
 
-If the text is messy or incomplete, infer the most likely course structure from what is present. Break each section into specific knowledge points where possible.
+{
+  "title": "course name",
+  "description": "one sentence description",
+  "professor": "name or null",
+  "semester": "e.g. Spring 2026 or null",
+  "nodes": [
+    {
+      "title": "section title",
+      "type": "week|chapter|topic|knowledge_point",
+      "content": "brief description or null",
+      "children": []
+    }
+  ]
+}
+
+Rules:
+- "type" must be one of: "week", "chapter", "topic", "knowledge_point"
+- Break each section into specific knowledge points where possible
+- If the text is messy, infer the most likely course structure
+- Return ONLY the JSON object, nothing else
 
 Course text:
 """
@@ -89,11 +102,13 @@ ${rawText}
 """`,
         },
       ],
-      output: Output.object({ schema: parsedSyllabusSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-    return output as ParsedSyllabus;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+
+    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonMatch[0]));
+    return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus text parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -115,7 +130,7 @@ export async function parseExamQuestions(
   });
 
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: visionModel,
       messages: [
         {
@@ -135,16 +150,19 @@ export async function parseExamQuestions(
 - answer: the correct answer
 - explanation: brief explanation of why this answer is correct
 - difficulty: 1-5 (1=easy, 5=hard)
-- matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.`,
+- matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.
+
+Return ONLY valid JSON (no markdown, no code fences).`,
             },
           ],
         },
       ],
-      output: Output.object({ schema: questionsSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-    return (output as z.infer<typeof questionsSchema>).questions;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const parsed = questionsSchema.parse(JSON.parse(jsonMatch[0]));
+    return parsed.questions;
   } catch (err) {
     throw new Error(`Exam question parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -179,7 +197,7 @@ export async function generateStudyTasks(
     .join("\n");
 
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: textModel,
       messages: [
         {
@@ -194,14 +212,17 @@ For each knowledge point, generate 1-3 study tasks. Each task should be:
 - Categorized as "read" (learn the concept), "practice" (do exercises), or "review" (revisit/summarize)
 - Prioritized: 1=must-know (core concept), 2=should-know (important detail), 3=nice-to-know (supplementary)
 
-Focus on what a student actually needs to DO, not just what to know.`,
+Focus on what a student actually needs to DO, not just what to know.
+
+Return ONLY valid JSON (no markdown, no code fences).`,
         },
       ],
-      output: Output.object({ schema: studyTasksSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-    return (output as z.infer<typeof studyTasksSchema>).tasks;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const parsed = studyTasksSchema.parse(JSON.parse(jsonMatch[0]));
+    return parsed.tasks;
   } catch (err) {
     throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -224,7 +245,7 @@ export async function generateQuestionsFromOutline(
   });
 
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: textModel,
       messages: [
         {
@@ -246,14 +267,17 @@ Each question must have:
 - difficulty 1-5
 - matched_kp_title: exactly matching one of the knowledge point titles listed above
 
-Make questions test understanding, not just memorization.`,
+Make questions test understanding, not just memorization.
+
+Return ONLY valid JSON (no markdown, no code fences).`,
         },
       ],
-      output: Output.object({ schema: autoQuizSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-    return (output as z.infer<typeof autoQuizSchema>).questions;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const parsed = autoQuizSchema.parse(JSON.parse(jsonMatch[0]));
+    return parsed.questions;
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -296,7 +320,7 @@ export async function organizeStudyNote({
     : "No clarification answers yet.";
 
   try {
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: textModel,
       messages: [
         {
@@ -329,15 +353,16 @@ Rules:
 - Preserve the student's meaning. Do not invent facts.
 - If a manual knowledge point was selected, use that as matched_kp_title.
 - If the clarification answers already resolve the ambiguity, reduce or remove the clarification questions.
-- If the note is clear enough, return an empty clarification_questions array.`,
+- If the note is clear enough, return an empty clarification_questions array.
+
+Return ONLY valid JSON (no markdown, no code fences).`,
         },
       ],
-      output: Output.object({ schema: organizedStudyNoteSchema }),
     });
 
-    if (!output) throw new Error("AI failed to produce structured output");
-
-    const organized = output as z.infer<typeof organizedStudyNoteSchema>;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const organized = organizedStudyNoteSchema.parse(JSON.parse(jsonMatch[0]));
 
     return {
       title: organized.title,
