@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CourseTabs } from "@/components/CourseTabs";
 import { OutlineTree } from "@/components/OutlineTree";
 import { ArchiveButton } from "@/components/ArchiveButton";
+import { ShareButton } from "@/components/ShareButton";
 import { StudyTaskList } from "@/components/StudyTaskList";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { LearningBlueprint } from "@/components/LearningBlueprint";
@@ -241,7 +242,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
               <span className="ui-badge">{notes.length} study notes</span>
             </div>
           </div>
-          <ArchiveButton courseId={id} status={course.status} />
+          <div className="flex flex-wrap justify-end items-center gap-2">
+            <ShareButton courseId={id} />
+            <ArchiveButton courseId={id} status={course.status} />
+          </div>
         </div>
       </div>
 
