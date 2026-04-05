@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { BookOpen, ChevronLeft, ChevronRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
+import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import type { Lesson } from "@/types";
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
@@ -88,27 +89,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
             <div className="ui-kicker mb-4">Lesson {currentIndex + 1}</div>
             <h2 className="text-2xl font-semibold mb-6">{lesson.title}</h2>
 
-            {/* Markdown-ish content rendering */}
-            <div className="prose-custom text-sm leading-relaxed space-y-4" style={{ color: "var(--text-primary)" }}>
-              {lesson.content.split("\n").map((line, i) => {
-                if (line.startsWith("## ")) return <h3 key={i} className="text-lg font-semibold mt-6 mb-2">{line.slice(3)}</h3>;
-                if (line.startsWith("### ")) return <h4 key={i} className="text-base font-semibold mt-4 mb-1">{line.slice(4)}</h4>;
-                if (line.startsWith("```")) return null; // handled below
-                if (line.startsWith("- ")) return <li key={i} className="ml-4">{line.slice(2)}</li>;
-                if (line.trim() === "") return <br key={i} />;
-                return <p key={i}>{line}</p>;
-              })}
-
-              {/* Render code blocks */}
-              {lesson.content.match(/```[\s\S]*?```/g)?.map((block, i) => {
-                const code = block.replace(/```\w*\n?/, "").replace(/```$/, "").trim();
-                return (
-                  <pre key={`code-${i}`} className="p-4 rounded-xl overflow-x-auto text-xs" style={{ backgroundColor: "#1a1a2e", color: "#e2e8f0" }}>
-                    <code>{code}</code>
-                  </pre>
-                );
-              })}
-            </div>
+            <MarkdownRenderer content={lesson.content} />
           </div>
 
           {/* Key takeaways */}
