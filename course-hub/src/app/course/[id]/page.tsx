@@ -1,69 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { CourseTabs } from "@/components/CourseTabs";
-import { OutlineTree } from "@/components/OutlineTree";
-import { ArchiveButton } from "@/components/ArchiveButton";
-import { ShareButton } from "@/components/ShareButton";
-import { RegenerateButton } from "@/components/RegenerateButton";
-import { StudyTaskList } from "@/components/StudyTaskList";
-import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { LearningBlueprint } from "@/components/LearningBlueprint";
-import { WrongAnswerNotebook } from "@/components/WrongAnswerNotebook";
-import { VoiceNotesPanel } from "@/components/VoiceNotesPanel";
-import { calculateMastery } from "@/lib/mastery";
-import { toCourseNote, type CourseNoteRow } from "@/lib/course-notes";
-import type { MasteryLevel, OutlineNode, StudyTask } from "@/types";
-import { ArrowLeft, Download } from "lucide-react";
-import { ExamCountdown } from "@/components/ExamCountdown";
-
-type CourseAttempt = {
-  question_id: string;
-  is_correct: boolean;
-  answered_at: string;
-  user_answer: string;
-};
-
-function selectStudyTargets(nodes: OutlineNode[]) {
-  const knowledgePoints = nodes.filter((node) => node.type === "knowledge_point");
-  if (knowledgePoints.length > 0) return knowledgePoints;
-
-  const parentIds = new Set(nodes.map((node) => node.parent_id).filter(Boolean));
-  const leafNodes = nodes.filter((node) => !parentIds.has(node.id));
-  if (leafNodes.length > 0) return leafNodes;
-
-  return nodes;
-}
-
-function buildNextAction({
-  title,
-  nextTask,
-  questionCount,
-  masteryLevel,
-  totalAttempts,
-}: {
-  title: string;
-  nextTask?: StudyTask;
-  questionCount: number;
-  masteryLevel: MasteryLevel;
-  totalAttempts: number;
-}) {
-  if (nextTask) {
-    if (nextTask.task_type === "read") return `Start by learning "${title}": ${nextTask.title}.`;
-    if (nextTask.task_type === "practice") return `Do reps on "${title}": ${nextTask.title}.`;
-    return `Review "${title}" and close the gap: ${nextTask.title}.`;
-  }
-
-  if (questionCount > 0 && totalAttempts === 0) {
-    return `Open practice and answer a few questions on "${title}" to measure your baseline.`;
-  }
-
-  if (questionCount > 0 && masteryLevel !== "mastered") {
-    return `Redo the questions on "${title}" until you can explain the idea without looking at the answer.`;
-  }
-
-  return `Write a short summary of "${title}" in your own words, then move to the next point.`;
-}
+import { TodayView } from "@/components/TodayView";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -74,240 +12,234 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const { data: course } = await supabase.from("courses").select("*").eq("id", id).single();
   if (!course) redirect("/dashboard");
 
-  const { data: outlineNodes } = await supabase
+  // Get all knowledge points
+  const { data: kps } = await supabase
     .from("outline_nodes")
-    .select("*")
+    .select("id, title, type")
     .eq("course_id", id)
-    .order("order");
+    .eq("type", "knowledge_point");
 
-  const { data: studyTasks } = await supabase
-    .from("study_tasks")
-    .select("*")
-    .eq("course_id", id)
-    .order("priority")
-    .order("order");
+  // Get mastery data
+  const { data: mastery } = await supabase
+    .from("element_mastery")
+    .select("concept_id, current_level, fsrs_retrievability")
+    .eq("user_id", user.id)
+    .in("concept_id", (kps ?? []).map(k => k.id));
 
-  const { data: questions } = await supabase
-    .from("questions")
-    .select("id, knowledge_point_id, stem, answer, explanation")
-    .eq("course_id", id);
-
-  const { data: noteRows } = await supabase
-    .from("course_notes")
-    .select("*")
-    .eq("course_id", id)
-    .order("created_at", { ascending: false });
-
+  // Get exam dates (future only)
   const { data: exams } = await supabase
     .from("exam_dates")
     .select("*")
     .eq("course_id", id)
+    .gte("exam_date", new Date().toISOString().split("T")[0])
     .order("exam_date");
 
-  const questionIds = (questions ?? []).map((question) => question.id);
-  const { data: attempts } = questionIds.length > 0
-    ? await supabase
-        .from("attempts")
-        .select("question_id, is_correct, answered_at, user_answer")
-        .eq("user_id", user.id)
-        .in("question_id", questionIds)
-    : { data: [] as CourseAttempt[] };
+  // Get active misconceptions
+  const { data: misconceptions } = await supabase
+    .from("misconceptions")
+    .select("*")
+    .eq("user_id", user.id)
+    .in("concept_id", (kps ?? []).map(k => k.id))
+    .eq("resolved", false);
 
-  const nodeTitleById = new Map((outlineNodes ?? []).map((node) => [node.id, node.title]));
-  const notes = (noteRows ?? []).map((row) =>
-    toCourseNote(row as CourseNoteRow, row.knowledge_point_id ? nodeTitleById.get(row.knowledge_point_id) ?? null : null)
-  );
-  const studyTargets = selectStudyTargets(outlineNodes ?? []);
+  // Get lessons to check what's been learned
+  const { data: lessons } = await supabase
+    .from("lessons")
+    .select("id, knowledge_point_id")
+    .eq("course_id", id);
 
-  const tasksByTarget = new Map<string, StudyTask[]>();
-  for (const task of studyTasks ?? []) {
-    if (!task.knowledge_point_id) continue;
-    const list = tasksByTarget.get(task.knowledge_point_id) ?? [];
-    list.push(task);
-    tasksByTarget.set(task.knowledge_point_id, list);
-  }
+  const { data: progress } = await supabase
+    .from("lesson_progress")
+    .select("lesson_id, completed")
+    .eq("user_id", user.id)
+    .in("lesson_id", (lessons ?? []).map(l => l.id));
 
-  const questionById = new Map((questions ?? []).map((question) => [question.id, question]));
-  const questionCountByTarget = new Map<string, number>();
-  for (const question of questions ?? []) {
-    if (!question.knowledge_point_id) continue;
-    questionCountByTarget.set(
-      question.knowledge_point_id,
-      (questionCountByTarget.get(question.knowledge_point_id) ?? 0) + 1
-    );
-  }
-
-  const attemptsByQuestion = new Map<string, CourseAttempt[]>();
-  const attemptsByTarget = new Map<string, CourseAttempt[]>();
-  for (const attempt of attempts ?? []) {
-    const questionAttempts = attemptsByQuestion.get(attempt.question_id) ?? [];
-    questionAttempts.push(attempt);
-    attemptsByQuestion.set(attempt.question_id, questionAttempts);
-
-    const targetId = questionById.get(attempt.question_id)?.knowledge_point_id;
-    if (!targetId) continue;
-
-    const targetAttempts = attemptsByTarget.get(targetId) ?? [];
-    targetAttempts.push(attempt);
-    attemptsByTarget.set(targetId, targetAttempts);
-  }
-
-  const masteryRank: Record<MasteryLevel, number> = {
-    weak: 0,
-    reviewing: 1,
-    untested: 2,
-    mastered: 3,
-  };
-
-  const blueprintItems = studyTargets
-    .map((target) => {
-      const targetTasks = [...(tasksByTarget.get(target.id) ?? [])].sort((a, b) => a.priority - b.priority || a.order - b.order);
-      const remainingTasks = targetTasks.filter((task) => task.status !== "done");
-      const targetAttempts = attemptsByTarget.get(target.id) ?? [];
-      const mastery = calculateMastery(targetAttempts);
-      const questionCount = questionCountByTarget.get(target.id) ?? 0;
-      const nextTask = remainingTasks[0] ?? targetTasks[0];
-
-      return {
-        id: target.id,
-        title: target.title,
-        content: target.content,
-        nextAction: buildNextAction({
-          title: target.title,
-          nextTask,
-          questionCount,
-          masteryLevel: mastery.level,
-          totalAttempts: mastery.total,
-        }),
-        taskCount: targetTasks.length,
-        remainingTaskCount: remainingTasks.length,
-        questionCount,
-        masteryLevel: mastery.level,
-        masteryRate: mastery.rate,
-        totalAttempts: mastery.total,
-        nextTaskType: nextTask?.task_type ?? null,
-      };
-    })
-    .sort((a, b) => {
-      const masteryDelta = masteryRank[a.masteryLevel] - masteryRank[b.masteryLevel];
-      if (masteryDelta !== 0) return masteryDelta;
-      if (a.remainingTaskCount !== b.remainingTaskCount) return b.remainingTaskCount - a.remainingTaskCount;
-      if (a.questionCount !== b.questionCount) return b.questionCount - a.questionCount;
-      return a.title.localeCompare(b.title);
-    });
-
-  const wrongNotebookItems = (questions ?? [])
-    .map((question) => {
-      const grouped = [...(attemptsByQuestion.get(question.id) ?? [])].sort(
-        (a, b) => new Date(b.answered_at).getTime() - new Date(a.answered_at).getTime()
-      );
-      const wrongAttempts = grouped.filter((attempt) => !attempt.is_correct);
-      if (wrongAttempts.length === 0) return null;
-
-      const latestAttempt = grouped[0];
-      const latestWrongAttempt = wrongAttempts[0];
-
-      return {
-        questionId: question.id,
-        stem: question.stem,
-        knowledgePointTitle: question.knowledge_point_id ? nodeTitleById.get(question.knowledge_point_id) ?? null : null,
-        lastWrongAnswer: latestWrongAttempt.user_answer,
-        correctAnswer: question.answer,
-        explanation: question.explanation,
-        wrongCount: wrongAttempts.length,
-        lastWrongAt: latestWrongAttempt.answered_at,
-        status: latestAttempt?.is_correct ? "fixed" as const : "needs_redo" as const,
-      };
-    })
-    .filter((item): item is NonNullable<typeof item> => item !== null)
-    .sort((a, b) => {
-      if (a.status !== b.status) return a.status === "needs_redo" ? -1 : 1;
-      return new Date(b.lastWrongAt).getTime() - new Date(a.lastWrongAt).getTime();
-    });
+  const tasks = buildTodayTasks({
+    kps: kps ?? [],
+    mastery: mastery ?? [],
+    exams: exams ?? [],
+    misconceptions: misconceptions ?? [],
+    lessons: lessons ?? [],
+    progress: progress ?? [],
+    courseTitle: course.title,
+    courseId: id,
+  });
 
   return (
-    <div className="space-y-8">
-      <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
-        <ArrowLeft size={14} />
-        Back to Dashboard
-      </Link>
-
-      <div className="ui-panel p-6 md:p-8">
-        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <div className="ui-kicker mb-4">Course Space</div>
-            <h1 className="text-4xl font-semibold tracking-tight">{course.title}</h1>
-            {course.description && (
-              <p className="ui-copy mt-3 max-w-3xl">{course.description}</p>
-            )}
-            <div className="flex flex-wrap gap-2 mt-5">
-              {course.professor && <span className="ui-badge">{course.professor}</span>}
-              {course.semester && <span className="ui-badge">{course.semester}</span>}
-              <span className="ui-badge">{(outlineNodes ?? []).length} outline items</span>
-              <span className="ui-badge">{(studyTasks ?? []).length} study tasks</span>
-              <span className="ui-badge">{(questions ?? []).length} questions</span>
-              <span className="ui-badge">{wrongNotebookItems.length} wrong notes</span>
-              <span className="ui-badge">{notes.length} study notes</span>
-            </div>
-          </div>
-          <div className="flex flex-wrap justify-end items-center gap-2">
-            <a
-              href={`/api/courses/${id}/export-anki`}
-              download
-              className="p-2 rounded-lg cursor-pointer"
-              style={{ color: "var(--text-secondary)" }}
-              title="Export to Anki"
-            >
-              <Download size={18} />
-            </a>
-            <RegenerateButton courseId={id} />
-            <ShareButton courseId={id} />
-            <ArchiveButton courseId={id} status={course.status} />
-          </div>
-        </div>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-semibold">{course.title}</h1>
+        {course.professor && (
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{course.professor}</p>
+        )}
       </div>
-
       <CourseTabs courseId={id} />
-
-      <LearningBlueprint courseId={id} items={blueprintItems} />
-
-      <div className="grid gap-8 xl:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.9fr)]">
-        <section>
-          <div className="mb-4">
-            <div className="ui-kicker mb-3">Outline</div>
-            <h2 className="text-2xl font-semibold">Course Map</h2>
-            <p className="ui-copy mt-2">Use the map to see the structure, then use the study flow above to know what to do with it.</p>
-          </div>
-          <OutlineTree nodes={outlineNodes ?? []} courseId={id} />
-        </section>
-
-        <section>
-          <StudyTrackerPanel
-            courseId={id}
-            activeMode="studying"
-            title="Study Time"
-            description="Reading the outline and working through tasks counts as study time. If the page sits untouched for a while, it shifts into idle."
-            className="mb-6"
-          />
-
-          <div className="mb-6">
-            <VoiceNotesPanel
-              courseId={id}
-              knowledgePoints={studyTargets.map((target) => ({ id: target.id, title: target.title }))}
-              initialNotes={notes}
-            />
-          </div>
-
-          <div className="mb-6">
-            <ExamCountdown courseId={id} exams={exams ?? []} />
-          </div>
-
-          <StudyTaskList initialTasks={studyTasks ?? []} />
-          <div className="mt-6">
-            <WrongAnswerNotebook courseId={id} items={wrongNotebookItems} />
-          </div>
-        </section>
-      </div>
+      <TodayView tasks={tasks} courseId={id} />
     </div>
   );
+}
+
+// Priority sorting algorithm from the design doc
+function buildTodayTasks(data: {
+  kps: { id: string; title: string; type: string }[];
+  mastery: { concept_id: string; current_level: string; fsrs_retrievability: number }[];
+  exams: { id: string; title: string; exam_date: string }[];
+  misconceptions: { id: string; concept_id: string; misconception_description: string; occurrence_count: number }[];
+  lessons: { id: string; knowledge_point_id: string }[];
+  progress: { lesson_id: string; completed: boolean }[];
+  courseTitle: string;
+  courseId: string;
+}) {
+  const tasks: Array<{
+    id: string;
+    type: string;
+    priority: number;
+    title: string;
+    description: string;
+    estimatedMinutes: number;
+    count: number;
+    color: string;
+    courseId: string;
+    courseTitle: string;
+  }> = [];
+
+  const masteryMap = new Map(data.mastery.map(m => [m.concept_id, m]));
+  const completedLessons = new Set(data.progress.filter(p => p.completed).map(p => p.lesson_id));
+  const now = new Date();
+
+  // Priority 0+1: Exam urgent (≤3 days)
+  for (const exam of data.exams) {
+    const examDate = new Date(exam.exam_date + "T23:59:59");
+    const daysUntil = Math.ceil((examDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (daysUntil <= 3) {
+      const activeMisconceptions = data.misconceptions;
+      if (activeMisconceptions.length > 0) {
+        tasks.push({
+          id: `exam-review-${exam.id}`,
+          type: "exam_review",
+          priority: 1,
+          title: `${exam.title} — Exam Review`,
+          description: `${activeMisconceptions.length} weak spots need attention`,
+          estimatedMinutes: activeMisconceptions.length * 8,
+          count: activeMisconceptions.length,
+          color: "var(--danger)",
+          courseId: data.courseId,
+          courseTitle: data.courseTitle,
+        });
+      }
+
+      const unseenCount = data.kps.filter(kp => {
+        const m = masteryMap.get(kp.id);
+        return !m || m.current_level === "unseen";
+      }).length;
+
+      if (unseenCount > 0 && data.kps.length > 0 && unseenCount / data.kps.length >= 0.3) {
+        tasks.push({
+          id: `urgent-study-${exam.id}`,
+          type: "urgent_study",
+          priority: 0,
+          title: `${exam.title} — Urgent Study`,
+          description: `${unseenCount} knowledge points not yet learned`,
+          estimatedMinutes: unseenCount * 6,
+          count: unseenCount,
+          color: "var(--danger)",
+          courseId: data.courseId,
+          courseTitle: data.courseTitle,
+        });
+      }
+    } else if (daysUntil <= 14) {
+      // Priority 3: Exam prep
+      const weakCount = data.kps.filter(kp => {
+        const m = masteryMap.get(kp.id);
+        return !m || m.current_level === "unseen" || m.current_level === "exposed";
+      }).length;
+
+      if (weakCount > 0) {
+        tasks.push({
+          id: `exam-prep-${exam.id}`,
+          type: "exam_prep",
+          priority: 3,
+          title: `${exam.title} — Study Plan`,
+          description: `${weakCount} topics to strengthen before ${exam.title}`,
+          estimatedMinutes: weakCount * 12,
+          count: weakCount,
+          color: "var(--warning)",
+          courseId: data.courseId,
+          courseTitle: data.courseTitle,
+        });
+      }
+    }
+  }
+
+  // Priority 2: FSRS review (due cards)
+  const dueForReview = data.mastery.filter(m =>
+    m.fsrs_retrievability < 0.85 &&
+    m.current_level !== "unseen"
+  );
+
+  if (dueForReview.length > 0) {
+    tasks.push({
+      id: "fsrs-review",
+      type: "fsrs_review",
+      priority: 2,
+      title: `Review ${Math.min(dueForReview.length, 20)} knowledge points`,
+      description: "Strengthen your memory before it fades",
+      estimatedMinutes: Math.min(dueForReview.length, 20) * 1,
+      count: Math.min(dueForReview.length, 20),
+      color: "var(--warning)",
+      courseId: data.courseId,
+      courseTitle: data.courseTitle,
+    });
+  }
+
+  // Priority 4: New content
+  const lessonKpMap = new Map<string, string>();
+  for (const l of data.lessons) {
+    if (l.knowledge_point_id) lessonKpMap.set(l.knowledge_point_id, l.id);
+  }
+
+  const nextToLearn = data.kps.find(kp => {
+    const lessonId = lessonKpMap.get(kp.id);
+    if (!lessonId) return false;
+    if (completedLessons.has(lessonId)) return false;
+    const m = masteryMap.get(kp.id);
+    return !m || m.current_level === "unseen";
+  });
+
+  if (nextToLearn) {
+    tasks.push({
+      id: `new-${nextToLearn.id}`,
+      type: "new_content",
+      priority: 4,
+      title: nextToLearn.title,
+      description: "Next lesson available",
+      estimatedMinutes: 25,
+      count: 1,
+      color: "var(--accent)",
+      courseId: data.courseId,
+      courseTitle: data.courseTitle,
+    });
+  }
+
+  // Priority 5: Weakness (recurring misconceptions)
+  const persistentMisconceptions = data.misconceptions.filter(m => m.occurrence_count >= 3);
+  if (persistentMisconceptions.length > 0) {
+    tasks.push({
+      id: "weakness",
+      type: "weakness",
+      priority: 5,
+      title: "Strengthen weak spots",
+      description: `${persistentMisconceptions.length} recurring issues to address`,
+      estimatedMinutes: persistentMisconceptions.length * 5,
+      count: persistentMisconceptions.length,
+      color: "var(--accent)",
+      courseId: data.courseId,
+      courseTitle: data.courseTitle,
+    });
+  }
+
+  tasks.sort((a, b) => a.priority - b.priority);
+
+  return tasks;
 }
