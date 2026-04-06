@@ -26,6 +26,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   const [chunks, setChunks] = useState<LessonChunk[]>([]);
   const [loadingChunks, setLoadingChunks] = useState(false);
   const [generatingForKp, setGeneratingForKp] = useState<string | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -67,6 +68,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
 
     // Generate lesson for this KP on-demand
     setGeneratingForKp(kp.id);
+    setGenerateError(null);
     try {
       const res = await fetch(`/api/courses/${id}/lessons/generate-one`, {
         method: "POST",
@@ -76,17 +78,17 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
 
       if (res.ok) {
         const data = await res.json();
-        // Update the item to reflect the new lesson
         setItems(prev => prev.map(item =>
           item.id === kp.id
             ? { ...item, hasLesson: true, lessonId: data.lesson_id }
             : item
         ));
-        // Open the newly generated lesson
         openLesson(data.lesson_id);
+      } else {
+        setGenerateError(isZh ? "生成失败，请稍后重试" : "Generation failed. Please try again.");
       }
     } catch {
-      // silent fail
+      setGenerateError(isZh ? "网络错误或超时，请重试" : "Network error or timeout. Please retry.");
     }
     setGeneratingForKp(null);
   }
@@ -148,6 +150,12 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           </p>
         </div>
       </div>
+
+      {generateError && (
+        <div className="mb-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: "rgba(239,68,68,0.08)", color: "var(--danger)", border: "1px solid var(--danger)" }}>
+          {generateError}
+        </div>
+      )}
 
       {items.length === 0 ? (
         <div className="ui-empty">
