@@ -95,9 +95,16 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
   }
 
   function handleNext() {
+    // If wrong and has remediation content → show remediation for retry
     if (state.submitted && !state.correct && state.attempts < 3 && chunk.remediation_question) {
       updateState({ showRemediation: true, submitted: false, selected: null, textAnswer: "" });
-    } else {
+    }
+    // If wrong on first try and NO remediation → show content as "review before retry"
+    else if (state.submitted && !state.correct && state.attempts === 1 && !chunk.remediation_question && !state.showRemediation) {
+      updateState({ showRemediation: true, submitted: false, selected: null, textAnswer: "" });
+    }
+    // Otherwise proceed to next chunk
+    else {
       setCurrentChunkIndex(i => i + 1);
     }
   }
@@ -132,8 +139,8 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
 
       {/* Checkpoint */}
       {chunk.checkpoint_type && activePrompt && (
-        <div className="ui-panel p-6 mb-4" style={{ borderLeft: `3px solid ${currentChunkIndex === 0 && !state.submitted ? "var(--warning)" : "var(--accent)"}` }}>
-          {currentChunkIndex === 0 && !state.submitted && (
+        <div className="ui-panel p-6 mb-4" style={{ borderLeft: `3px solid ${chunk.chunk_index === 0 && !state.submitted ? "var(--warning)" : "var(--accent)"}` }}>
+          {chunk.chunk_index === 0 && !state.submitted && (
             <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
               {isZh ? "💡 先试试看——答错没关系，尝试本身就能帮助学习" : "💡 Try first — getting it wrong is fine, the attempt itself helps you learn"}
             </p>
@@ -224,8 +231,8 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
                           {isZh ? "我答对了" : "I got it right"}
                         </button>
                         <button
-                          onClick={() => {}}
-                          className="text-xs px-3 py-1.5 rounded-lg"
+                          onClick={() => updateState({ showRemediation: true, submitted: false, textAnswer: "" })}
+                          className="text-xs px-3 py-1.5 rounded-lg cursor-pointer"
                           style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
                         >
                           {isZh ? "我需要复习" : "I need to review"}
@@ -258,7 +265,7 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
       )}
 
       {/* Pretest: show content AFTER checkpoint submission */}
-      {currentChunkIndex === 0 && state.submitted && (
+      {chunk.chunk_index === 0 && state.submitted && (
         <div className="ui-panel p-6 mb-4">
           <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>
             {isZh ? "现在来学习" : "Now let's learn"}
