@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+        "start": "node dist/cli.js",
     "render": "tsc && node dist/cli.js",
     "dev": "revideo editor --projectFile ./src/renderer/project.tsx"
   },
