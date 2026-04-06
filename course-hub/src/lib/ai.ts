@@ -497,12 +497,12 @@ Return ONLY JSON:
         checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
         checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
         checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
-      } satisfies GeneratedChunk;
+      } as GeneratedChunk;
     }).catch(() => null)
   );
 
   const results = await Promise.all(chunkPromises);
-  const chunks = results.filter((c): c is GeneratedChunk => c !== null);
+  const chunks: GeneratedChunk[] = results.filter(c => c !== null);
 
   if (chunks.length === 0) throw new Error("All chunk generations failed");
 
