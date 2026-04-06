@@ -40,7 +40,7 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
 
   const chunk = chunks[currentChunkIndex];
   const state = checkpointState[currentChunkIndex] ?? defaultCheckpointState;
-  const isComplete = !chunk;
+  const isComplete = chunks.length > 0 && currentChunkIndex >= chunks.length;
 
   // Save progress to server when lesson is completed
   useEffect(() => {
@@ -62,6 +62,16 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
       }),
     }).catch(() => {}); // best-effort, don't block UI
   }, [isComplete, courseId, lessonId, checkpointState, chunks.length]);
+
+  if (chunks.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          {isZh ? "课程内容加载失败，请重试。" : "Lesson content failed to load. Please try again."}
+        </p>
+      </div>
+    );
+  }
 
   if (isComplete) {
     return (
@@ -104,7 +114,7 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
     if (answerWords.length === 0) return ua.length > 0; // any non-empty answer passes
     const userWords = new Set(ua.split(/\s+/));
     const matched = answerWords.filter(w => userWords.has(w)).length;
-    return matched / answerWords.length >= 0.4;
+    return matched / answerWords.length >= 0.5;
   }
 
   function handleSubmitCheckpoint() {
@@ -112,7 +122,9 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
     const userAnswer = chunk.checkpoint_type === "mcq" ? state.selected : state.textAnswer;
     if (!userAnswer) return;
 
-    const correct = checkAnswer(userAnswer, chunk.checkpoint_answer, chunk.checkpoint_type);
+    // Use remediation_answer when in remediation mode and it exists
+    const expectedAnswer = (state.showRemediation && chunk.remediation_answer) ? chunk.remediation_answer : chunk.checkpoint_answer;
+    const correct = checkAnswer(userAnswer, expectedAnswer, chunk.checkpoint_type);
     updateState({ submitted: true, correct, attempts: state.attempts + 1 });
     recordActivity("question");
   }
