@@ -5,8 +5,9 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
-// Max knowledge points per AI call — keeps within Vercel function timeout
-const MAX_STUDY_TARGETS = 15;
+// Max knowledge points per AI call — 8 keeps within Vercel 60s function timeout
+// (each AI call processes all KPs in one prompt, ~5-10s per 8 KPs)
+const MAX_STUDY_TARGETS = 8;
 
 function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
   const knowledgePoints = nodes.filter((n) => n.type === "knowledge_point");
