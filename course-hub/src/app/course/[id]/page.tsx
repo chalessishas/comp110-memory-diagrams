@@ -194,23 +194,56 @@ function buildTodayTasks(data: {
     if (l.knowledge_point_id) lessonKpMap.set(l.knowledge_point_id, l.id);
   }
 
-  const nextToLearn = data.kps.find(kp => {
-    const lessonId = lessonKpMap.get(kp.id);
-    if (!lessonId) return false;
-    if (completedLessons.has(lessonId)) return false;
-    const m = masteryMap.get(kp.id);
-    return !m || m.current_level === "unseen";
-  });
-
-  if (nextToLearn) {
+  // If no lessons generated yet, recommend generating them
+  if (data.lessons.length === 0 && data.kps.length > 0) {
     tasks.push({
-      id: `new-${nextToLearn.id}`,
+      id: "generate-lessons",
       type: "new_content",
       priority: 4,
-      title: nextToLearn.title,
-      description: "Next lesson available",
-      estimatedMinutes: 25,
-      count: 1,
+      title: "Generate course lessons",
+      description: `${data.kps.length} knowledge points ready to become lessons`,
+      estimatedMinutes: 2,
+      count: data.kps.length,
+      color: "var(--accent)",
+      courseId: data.courseId,
+      courseTitle: data.courseTitle,
+    });
+  } else {
+    // Find next unlearned knowledge point that has a lesson
+    const nextToLearn = data.kps.find(kp => {
+      const lessonId = lessonKpMap.get(kp.id);
+      if (!lessonId) return false;
+      if (completedLessons.has(lessonId)) return false;
+      const m = masteryMap.get(kp.id);
+      return !m || m.current_level === "unseen" || m.current_level === "exposed";
+    });
+
+    if (nextToLearn) {
+      tasks.push({
+        id: `new-${nextToLearn.id}`,
+        type: "new_content",
+        priority: 4,
+        title: nextToLearn.title,
+        description: "Next lesson available",
+        estimatedMinutes: 25,
+        count: 1,
+        color: "var(--accent)",
+        courseId: data.courseId,
+        courseTitle: data.courseTitle,
+      });
+    }
+  }
+
+  // If no kps at all, recommend uploading syllabus
+  if (data.kps.length === 0) {
+    tasks.push({
+      id: "setup-course",
+      type: "new_content",
+      priority: 4,
+      title: "Set up this course",
+      description: "Upload a syllabus or add knowledge points to get started",
+      estimatedMinutes: 5,
+      count: 0,
       color: "var(--accent)",
       courseId: data.courseId,
       courseTitle: data.courseTitle,
