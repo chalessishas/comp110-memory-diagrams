@@ -2,41 +2,77 @@
 
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
-import { BookOpen, ChevronLeft, ChevronRight, Loader2, Sparkles, CheckCircle2 } from "lucide-react";
-import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import type { Lesson } from "@/types";
+import { ChunkLesson } from "@/components/ChunkLesson";
+import { BookOpen, ChevronRight, Loader2, Sparkles } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { levelConfig } from "@/lib/mastery-v2";
+import type { Lesson, LessonChunk, MasteryLevelV2 } from "@/types";
+
+interface KnowledgePointItem {
+  id: string;
+  title: string;
+  level: MasteryLevelV2;
+  hasLesson: boolean;
+  lessonId: string | null;
+}
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t } = useI18n();
-  const [lessons, setLessons] = useState<Lesson[]>([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
+  const [items, setItems] = useState<KnowledgePointItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
+  const [chunks, setChunks] = useState<LessonChunk[]>([]);
+  const [loadingChunks, setLoadingChunks] = useState(false);
   const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/courses/${id}/lessons`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data) => {
-        setLessons(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/courses/${id}/lessons`).then(r => r.ok ? r.json() : []),
+      fetch(`/api/courses/${id}/mastery`).then(r => r.ok ? r.json() : []),
+    ]).then(([lessons, mastery]) => {
+      const masteryMap = new Map((mastery as { concept_id: string; current_level: MasteryLevelV2 }[]).map(m => [m.concept_id, m.current_level]));
+
+      const list: KnowledgePointItem[] = (lessons as Lesson[]).map(l => ({
+        id: l.knowledge_point_id,
+        title: l.title,
+        level: masteryMap.get(l.knowledge_point_id) ?? "unseen",
+        hasLesson: true,
+        lessonId: l.id,
+      }));
+
+      setItems(list);
+      setLoading(false);
+    });
   }, [id]);
+
+  async function openLesson(lessonId: string) {
+    setActiveLessonId(lessonId);
+    setLoadingChunks(true);
+
+    const res = await fetch(`/api/courses/${id}/lessons/${lessonId}/chunks`);
+    if (res.ok) {
+      const data = await res.json();
+      setChunks(data);
+    }
+    setLoadingChunks(false);
+  }
 
   async function handleGenerate() {
     setGenerating(true);
-    const res = await fetch(`/api/courses/${id}/lessons`, { method: "POST" });
-    if (res.ok) {
-      const data = await fetch(`/api/courses/${id}/lessons`).then((r) => r.json());
-      setLessons(Array.isArray(data) ? data : []);
-    }
+    await fetch(`/api/courses/${id}/lessons`, { method: "POST" });
+    const res = await fetch(`/api/courses/${id}/lessons`);
+    const lessons = res.ok ? await res.json() : [];
+    setItems((lessons as Lesson[]).map(l => ({
+      id: l.knowledge_point_id,
+      title: l.title,
+      level: "unseen" as MasteryLevelV2,
+      hasLesson: true,
+      lessonId: l.id,
+    })));
     setGenerating(false);
   }
-
-  const lesson = lessons[currentIndex];
-  const progress = lessons.length > 0 ? ((currentIndex + 1) / lessons.length) * 100 : 0;
 
   if (loading) return (
     <div>
@@ -45,94 +81,88 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     </div>
   );
 
+  if (activeLessonId) {
+    if (loadingChunks) {
+      return (
+        <div>
+          <CourseTabs courseId={id} />
+          <Loader2 className="animate-spin mx-auto mt-16" style={{ color: "var(--accent)" }} />
+        </div>
+      );
+    }
+
+    return (
+      <div>
+        <CourseTabs courseId={id} />
+        <button
+          onClick={() => { setActiveLessonId(null); setChunks([]); }}
+          className="ui-button-ghost mb-4 !px-0"
+        >
+          ← {isZh ? "返回知识点列表" : "Back to topics"}
+        </button>
+        <ChunkLesson chunks={chunks} courseId={id} lessonId={activeLessonId} />
+      </div>
+    );
+  }
+
   return (
     <div>
       <CourseTabs courseId={id} />
 
-      {lessons.length === 0 ? (
-        <div className="text-center py-16">
-          <BookOpen size={40} className="mx-auto mb-4" style={{ color: "var(--border)" }} />
-          <h2 className="text-xl font-semibold mb-2">{t("learn.noLessons")}</h2>
-          <p className="text-sm mb-6" style={{ color: "var(--text-secondary)" }}>
-            {t("learn.generateDesc")}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-xl font-semibold">{t("tabs.learn")}</h2>
+          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+            {isZh ? "选择一个知识点开始学习" : "Pick a topic to start learning"}
           </p>
+        </div>
+        {items.length === 0 && (
           <button
             onClick={handleGenerate}
             disabled={generating}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium cursor-pointer disabled:opacity-50"
-            style={{ backgroundColor: "var(--accent)", color: "white" }}
+            className="ui-button-primary disabled:opacity-50"
           >
-            {generating ? (
-              <><Loader2 size={16} className="animate-spin" /> {t("learn.generating")}</>
-            ) : (
-              <><Sparkles size={16} /> {t("learn.generateBtn")}</>
-            )}
+            {generating ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
+            {isZh ? "生成课程" : "Generate Lessons"}
           </button>
-          {generating && (
-            <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
-              {t("learn.generatingDesc")}
-            </p>
-          )}
+        )}
+      </div>
+
+      {items.length === 0 ? (
+        <div className="ui-empty">
+          <BookOpen size={32} className="mx-auto mb-3" style={{ color: "var(--border)" }} />
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            {isZh ? "还没有课程内容。点击上方按钮生成。" : "No lessons yet. Click Generate above."}
+          </p>
         </div>
-      ) : lesson ? (
-        <div>
-          {/* Progress bar */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
-              <div className="h-full rounded-full transition-all" style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }} />
-            </div>
-            <span className="text-xs font-medium shrink-0" style={{ color: "var(--text-secondary)" }}>
-              {currentIndex + 1} / {lessons.length}
-            </span>
-          </div>
-
-          {/* Lesson card */}
-          <div className="ui-panel p-6 md:p-8 mb-6">
-            <div className="ui-kicker mb-4">Lesson {currentIndex + 1}</div>
-            <h2 className="text-2xl font-semibold mb-6">{lesson.title}</h2>
-
-            <MarkdownRenderer content={lesson.content} />
-          </div>
-
-          {/* Key takeaways */}
-          {lesson.key_takeaways && (lesson.key_takeaways as string[]).length > 0 && (
-            <div className="ui-panel p-5 mb-6" style={{ backgroundColor: "rgba(91, 108, 240, 0.04)" }}>
-              <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                <CheckCircle2 size={16} style={{ color: "var(--accent)" }} />
-                {t("learn.keyTakeaways")}
-              </h4>
-              <ul className="space-y-2">
-                {(lesson.key_takeaways as string[]).map((t, i) => (
-                  <li key={i} className="text-sm flex gap-2">
-                    <span style={{ color: "var(--accent)" }}>-</span>
-                    <span>{t}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setCurrentIndex((i) => Math.max(0, i - 1))}
-              disabled={currentIndex === 0}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:opacity-30"
-              style={{ border: "1px solid var(--border)" }}
-            >
-              <ChevronLeft size={16} /> {t("learn.previous")}
-            </button>
-            <button
-              onClick={() => setCurrentIndex((i) => Math.min(lessons.length - 1, i + 1))}
-              disabled={currentIndex === lessons.length - 1}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-30"
-              style={{ backgroundColor: "var(--accent)", color: "white" }}
-            >
-              {t("learn.next")} <ChevronRight size={16} />
-            </button>
-          </div>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item, i) => {
+            const config = levelConfig[item.level];
+            return (
+              <button
+                key={item.id}
+                onClick={() => item.lessonId && openLesson(item.lessonId)}
+                className="w-full ui-panel p-4 flex items-center gap-4 text-left cursor-pointer group"
+              >
+                <div
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold"
+                  style={{ backgroundColor: config.bgColor, color: config.color, border: `1px solid ${config.color}20` }}
+                >
+                  {i + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{item.title}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                    {isZh ? config.labelZh : config.label}
+                  </p>
+                </div>
+                <ChevronRight size={16} className="shrink-0 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "var(--text-secondary)" }} />
+              </button>
+            );
+          })}
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
