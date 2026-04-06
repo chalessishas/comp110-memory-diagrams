@@ -20,6 +20,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [generating, setGenerating] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
+  const [showExamPrep, setShowExamPrep] = useState(false);
+  const [examScope, setExamScope] = useState("");
+  const [examPrepLoading, setExamPrepLoading] = useState(false);
+  const [examPrepResult, setExamPrepResult] = useState<{ topics_found: number; questions_generated: number; topics: string[] } | null>(null);
   const [questionMode, setQuestionMode] = useState<"solving" | "reviewing">("solving");
 
   useEffect(() => {
@@ -89,14 +93,82 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             {t("practice.workThrough")}
           </p>
         </div>
-        <button
-          onClick={() => setShowUpload(!showUpload)}
-          className="ui-button-secondary"
-        >
-          <Upload size={14} />
-          {showUpload ? t("practice.uploadExamHide") : t("practice.uploadExam")}
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => { setShowExamPrep(!showExamPrep); setShowUpload(false); }}
+            className="ui-button-primary"
+          >
+            <Sparkles size={14} />
+            {showExamPrep ? "Hide Exam Prep" : "Exam Prep"}
+          </button>
+          <button
+            onClick={() => { setShowUpload(!showUpload); setShowExamPrep(false); }}
+            className="ui-button-secondary"
+          >
+            <Upload size={14} />
+            {showUpload ? t("practice.uploadExamHide") : t("practice.uploadExam")}
+          </button>
+        </div>
       </div>
+
+      {showExamPrep && (
+        <div className="ui-panel p-6 md:p-8">
+          <div className="ui-kicker mb-3">EXAM PREP</div>
+          <h3 className="text-xl font-semibold mb-2">Paste your exam scope</h3>
+          <p className="ui-copy mb-4">Paste the email or document that describes what the exam covers. AI will generate targeted practice questions.</p>
+          <textarea
+            value={examScope}
+            onChange={(e) => setExamScope(e.target.value)}
+            placeholder={"Paste exam topics here...\n\nExample: The midterm covers 5.3 Error bounds, 5.5 Alternating series, 6.1 Power series..."}
+            className="ui-textarea text-sm mb-4"
+            rows={6}
+            disabled={examPrepLoading}
+          />
+          {examPrepResult && (
+            <div className="rounded-[18px] px-4 py-3 mb-4" style={{ backgroundColor: "rgba(22, 163, 74, 0.08)", border: "1px solid var(--success)" }}>
+              <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
+                Generated {examPrepResult.questions_generated} questions from {examPrepResult.topics_found} topics
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                Topics: {examPrepResult.topics.join(", ")}
+              </p>
+            </div>
+          )}
+          <button
+            onClick={async () => {
+              if (!examScope.trim()) return;
+              setExamPrepLoading(true);
+              setExamPrepResult(null);
+              try {
+                const res = await fetch(`/api/courses/${id}/exam-prep`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ scope_text: examScope }),
+                });
+                if (res.ok) {
+                  const result = await res.json();
+                  setExamPrepResult(result);
+                  if (result.questions_generated > 0) {
+                    const qRes = await fetch(`/api/questions?courseId=${id}`);
+                    const qs = await qRes.json();
+                    setQuestions(qs);
+                    setCurrentIndex(0);
+                  }
+                }
+              } catch { /* ignore */ }
+              setExamPrepLoading(false);
+            }}
+            disabled={examPrepLoading || !examScope.trim()}
+            className="ui-button-primary disabled:opacity-50"
+          >
+            {examPrepLoading ? (
+              <><Loader2 size={16} className="animate-spin" /> Generating exam questions...</>
+            ) : (
+              <><Sparkles size={16} /> Generate Exam Questions</>
+            )}
+          </button>
+        </div>
+      )}
 
       {showUpload && (
         <div>
