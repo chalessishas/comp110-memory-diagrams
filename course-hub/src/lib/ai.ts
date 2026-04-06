@@ -406,6 +406,109 @@ Rules:
   }
 }
 
+// ─── Pipeline 5b: Knowledge Point → Interactive Lesson Chunks (outline + parallel chunks) ───
+
+interface ChunkOutlineItem {
+  title: string;
+  teaching_goal: string;
+}
+
+interface GeneratedChunk {
+  chunk_index: number;
+  content: string;
+  checkpoint_type: "mcq" | "code" | "open" | "latex" | null;
+  checkpoint_prompt: string | null;
+  checkpoint_answer: string | null;
+  checkpoint_options: { label: string; text: string }[] | null;
+}
+
+export async function generateLessonChunks(
+  courseTitle: string,
+  knowledgePoint: { title: string; content: string | null },
+  courseDescription: string,
+): Promise<{ outline: ChunkOutlineItem[]; chunks: GeneratedChunk[] }> {
+  // Phase 1: Generate outline (fast, ~2s)
+  const { text: outlineText } = await generateText({
+    model: textModel,
+    messages: [{
+      role: "user",
+      content: `Split this knowledge point into 4 teaching sub-topics for a college Calculus II student.
+
+Knowledge point: ${knowledgePoint.title}
+${knowledgePoint.content ? `Context: ${knowledgePoint.content}` : ""}
+Course: ${courseTitle}
+
+Return JSON:
+{"chunks_outline": [{"title": "...", "teaching_goal": "..."}]}
+
+Requirements:
+- 4 sub-topics, ordered from foundation to application
+- Last one should be synthesis/application
+- Each teaching_goal is one sentence
+ONLY JSON.`,
+    }],
+  });
+
+  const outlineJson = extractJSON(outlineText);
+  if (!outlineJson) throw new Error("Failed to generate lesson outline");
+  const outlineRaw = JSON.parse(outlineJson);
+  const outline: ChunkOutlineItem[] = (outlineRaw.chunks_outline ?? []).map((item: { title?: string; teaching_goal?: string }) => ({
+    title: String(item.title ?? ""),
+    teaching_goal: String(item.teaching_goal ?? ""),
+  }));
+
+  if (outline.length === 0) throw new Error("Empty lesson outline");
+
+  // Phase 2: Generate chunks in parallel (~12-15s for 4 chunks)
+  const outlineSummary = outline.map((o, i) => `${i + 1}. ${o.title}`).join("\n");
+
+  const chunkPromises = outline.map((item, index) =>
+    generateText({
+      model: textModel,
+      messages: [{
+        role: "user",
+        content: `You are an interactive course content generator.
+
+Full lesson outline:
+${outlineSummary}
+
+Generate part ${index + 1}: "${item.title}"
+Teaching goal: ${item.teaching_goal}
+
+Course: ${courseTitle}
+Student level: College sophomore
+
+Requirements:
+1. content: 150-200 words, Markdown with LaTeX math ($...$). Include a concrete example.
+2. checkpoint: One MCQ with 4 options. Wrong options should reflect common misconceptions.
+3. Do NOT generate remediation (generated on-demand when student answers wrong).
+
+Return ONLY JSON:
+{"content": "markdown...", "checkpoint_type": "mcq", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": [{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]}`,
+      }],
+    }).then(({ text }) => {
+      const json = extractJSON(text);
+      if (!json) return null;
+      const raw = JSON.parse(json);
+      return {
+        chunk_index: index,
+        content: String(raw.content ?? ""),
+        checkpoint_type: raw.checkpoint_type === "mcq" ? "mcq" as const : null,
+        checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
+        checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
+        checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
+      } satisfies GeneratedChunk;
+    }).catch(() => null)
+  );
+
+  const results = await Promise.all(chunkPromises);
+  const chunks = results.filter((c): c is GeneratedChunk => c !== null);
+
+  if (chunks.length === 0) throw new Error("All chunk generations failed");
+
+  return { outline, chunks };
+}
+
 // ─── Pipeline 6: Spoken Study Notes → Structured Notes + Clarifying Questions ───
 
 const organizedStudyNoteSchema = z.object({
