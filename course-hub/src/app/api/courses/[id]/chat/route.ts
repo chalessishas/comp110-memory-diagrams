@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 const qwen = createOpenAI({
@@ -13,6 +14,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (!checkRateLimit(`chat:${user.id}`, 20, 60_000)) {
+    return NextResponse.json({ error: "Too many messages. Slow down." }, { status: 429 });
+  }
 
   const { messages }: { messages: UIMessage[] } = await request.json();
 

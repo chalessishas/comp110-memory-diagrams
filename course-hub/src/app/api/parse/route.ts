@@ -4,7 +4,12 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  // All parse paths require auth — AI calls cost money
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const ip = user.id;
   if (!checkRateLimit(ip, 10, 60_000)) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
@@ -27,10 +32,6 @@ export async function POST(request: Request) {
   if (!storagePath) {
     return NextResponse.json({ error: "storagePath or rawText required" }, { status: 400 });
   }
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data: fileData, error: downloadError } = await supabase.storage
     .from("course-files")

@@ -1,3 +1,4 @@
+import { createClient } from "@/lib/supabase/server";
 import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
@@ -35,7 +36,12 @@ function collectStudyTargets(nodes: ParsedOutlineNode[]) {
 }
 
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for") ?? "unknown";
+  // Guest preview requires auth — unauthenticated AI calls burn API budget
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Sign in to preview AI-generated content" }, { status: 401 });
+
+  const ip = request.headers.get("x-forwarded-for") ?? user.id;
   if (!checkRateLimit(ip, 10, 60_000)) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }

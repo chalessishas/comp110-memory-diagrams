@@ -8,9 +8,13 @@ export async function GET(request: Request) {
   if (!courseId) return NextResponse.json({ error: "courseId required" }, { status: 400 });
 
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Never send answer/explanation to client — revealed only after attempt submission
   const { data, error } = await supabase
     .from("questions")
-    .select("*")
+    .select("id, course_id, source_upload_id, knowledge_point_id, type, stem, options, difficulty, created_at")
     .eq("course_id", courseId)
     .order("created_at", { ascending: false });
 

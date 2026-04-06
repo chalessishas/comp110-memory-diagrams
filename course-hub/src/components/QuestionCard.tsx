@@ -29,24 +29,31 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   const [textAnswer, setTextAnswer] = useState("");
   const [isBookmarked, setIsBookmarked] = useState(initialBookmarked ?? false);
   const [feedbackGiven, setFeedbackGiven] = useState<string | null>(null);
+  // Answer + explanation are revealed only after server-side grading
+  const [revealedAnswer, setRevealedAnswer] = useState<string | null>(null);
+  const [revealedExplanation, setRevealedExplanation] = useState<string | null>(null);
+  const [isCorrect, setIsCorrect] = useState(false);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
     : textAnswer;
 
-  const isCorrect = submitted && userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase();
-
   async function handleSubmit() {
     if (!userAnswer) return;
 
-    const correct = userAnswer.trim().toLowerCase() === question.answer.trim().toLowerCase();
-    setSubmitted(true);
-
-    await fetch("/api/attempts", {
+    const res = await fetch("/api/attempts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question_id: question.id, user_answer: userAnswer }),
     });
+
+    const data = await res.json();
+    const correct = data.is_correct ?? false;
+
+    setIsCorrect(correct);
+    setRevealedAnswer(data.correct_answer ?? null);
+    setRevealedExplanation(data.explanation ?? null);
+    setSubmitted(true);
 
     // Add to spaced repetition review queue
     updateCard(question.id, correct ? Rating.Good : Rating.Again);
@@ -57,8 +64,8 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
   function getOptionStyles(optionLabel: string) {
     const normalizedLabel = optionLabel.toLowerCase();
-    const normalizedAnswer = question.answer.trim().toLowerCase();
-    const isAnswer = normalizedLabel === normalizedAnswer;
+    const normalizedAnswer = (revealedAnswer ?? "").trim().toLowerCase();
+    const isAnswer = submitted && normalizedLabel === normalizedAnswer;
     const isSelected = selected === optionLabel;
 
     if (submitted && isAnswer) {
@@ -178,17 +185,17 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               <>
                 <X size={18} />
                 <span className="text-sm font-medium">
-                  {t("questionCard.incorrectAnswer")} {question.answer}
+                  {t("questionCard.incorrectAnswer")} {revealedAnswer}
                 </span>
               </>
             )}
           </div>
-          {question.explanation && (
+          {revealedExplanation && (
             <p
               className="text-sm p-4 rounded-[22px]"
               style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
             >
-              {question.explanation}
+              {revealedExplanation}
             </p>
           )}
           <div className="mt-3 flex items-center gap-1">

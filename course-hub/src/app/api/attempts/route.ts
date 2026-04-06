@@ -42,5 +42,11 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data, { status: 201 });
+
+  // Reveal answer + explanation only after submission
+  return NextResponse.json({
+    ...data,
+    correct_answer: question.answer,
+    explanation: question.explanation ?? null,
+  }, { status: 201 });
 }

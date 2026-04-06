@@ -41,6 +41,7 @@ export interface Upload {
   created_at: string;
 }
 
+// Answer and explanation are NOT included — they are revealed only after attempt submission
 export interface Question {
   id: string;
   course_id: string;
@@ -49,10 +50,14 @@ export interface Question {
   type: QuestionType;
   stem: string;
   options: { label: string; text: string }[] | null;
-  answer: string;
-  explanation: string | null;
   difficulty: number;
   created_at: string;
+}
+
+// Full question with answer — only used server-side or in admin contexts
+export interface QuestionWithAnswer extends Question {
+  answer: string;
+  explanation: string | null;
 }
 
 export interface Attempt {

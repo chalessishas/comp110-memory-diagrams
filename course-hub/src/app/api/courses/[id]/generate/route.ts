@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
@@ -31,13 +32,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // No body is fine — fire-and-forget calls don't send body
   }
 
+  // Dedup: max 1 generate per course per 30s
+  if (!checkRateLimit(`generate:${id}`, 1, 30_000)) {
+    return NextResponse.json({ error: "Generation already in progress" }, { status: 429 });
+  }
+
+  // Concurrency guard: use updated_at as a lightweight lock
+  // Set a sentinel value; if another request already set it, bail out
+  const lockTime = new Date().toISOString();
+  const { data: lockResult } = await supabase
+    .from("courses")
+    .update({ updated_at: lockTime })
+    .eq("id", id)
+    .select("title")
+    .single();
+
+  if (!lockResult) return NextResponse.json({ error: "Course not found" }, { status: 404 });
+  const course = lockResult;
+
   // Clear previously auto-generated tasks and questions (not exam-sourced ones)
   await supabase.from("study_tasks").delete().eq("course_id", id);
   await supabase.from("questions").delete().eq("course_id", id).is("source_upload_id", null);
-
-  // Get course
-  const { data: course } = await supabase.from("courses").select("title").eq("id", id).single();
-  if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });
 
   // Get knowledge points from outline
   const { data: allNodes } = await supabase
