@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { Bookmark, Loader2, Trash2 } from "lucide-react";
-import type { Question } from "@/types";
+import type { QuestionWithAnswer } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
 interface BookmarkItem {
   id: string;
   note: string | null;
   created_at: string;
-  questions: Question & { courses: { title: string } };
+  questions: QuestionWithAnswer & { courses: { title: string } };
 }
 
 export default function QuestionBankPage() {

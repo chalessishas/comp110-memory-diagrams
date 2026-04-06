@@ -6,6 +6,8 @@ import type { ParsedOutlineNode } from "@/types";
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { data, error } = await supabase
     .from("outline_nodes")
@@ -64,20 +66,13 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   const rows = flattenNodes(nodes, id);
 
-  // Delete existing then insert new (simple approach — RPC had auth issues)
-  const { error: deleteError } = await supabase.from("outline_nodes").delete().eq("course_id", id);
-  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
+  // Atomic delete+insert via RPC (SECURITY INVOKER — respects RLS)
+  const { data: count, error: rpcError } = await supabase.rpc("upsert_outline_nodes", {
+    p_course_id: id,
+    p_nodes: rows,
+  });
 
-  if (rows.length > 0) {
-    const { error: insertError } = await supabase.from("outline_nodes").insert(rows);
-    if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
-  }
+  if (rpcError) return NextResponse.json({ error: rpcError.message }, { status: 500 });
 
-  // Touch updated_at
-  await supabase
-    .from("courses")
-    .update({ updated_at: new Date().toISOString() })
-    .eq("id", id);
-
-  return NextResponse.json({ count: rows.length });
+  return NextResponse.json({ count: count ?? rows.length });
 }

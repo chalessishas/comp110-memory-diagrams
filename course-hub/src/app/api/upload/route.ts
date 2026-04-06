@@ -22,7 +22,8 @@ export async function POST(request: Request) {
 
   if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 });
 
-  const { data: { publicUrl } } = supabase.storage.from("course-files").getPublicUrl(path);
+  // Bucket is private — store the storage path, not a public URL
+  // Use createSignedUrl when you need to serve the file to the client
 
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
   const fileType = ["pdf"].includes(ext) ? "pdf"
@@ -36,7 +37,7 @@ export async function POST(request: Request) {
       .from("uploads")
       .insert({
         course_id: courseId,
-        file_url: publicUrl,
+        file_url: path, // storage path, not public URL (bucket is private)
         file_name: file.name,
         file_type: fileType,
         status: "pending",
@@ -48,5 +49,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ upload, storagePath: path });
   }
 
-  return NextResponse.json({ storagePath: path, fileUrl: publicUrl, fileName: file.name, fileType });
+  return NextResponse.json({ storagePath: path, fileName: file.name, fileType });
 }
