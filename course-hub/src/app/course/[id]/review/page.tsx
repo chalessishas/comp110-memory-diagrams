@@ -3,21 +3,28 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
-import { getDueCards, loadCards, updateCard, Rating, type ReviewCard } from "@/lib/spaced-repetition";
-import { RotateCcw, Loader2, Check } from "lucide-react";
+import { getDueCards, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
+import { RotateCcw, Loader2, Check, Calendar, Zap } from "lucide-react";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [dueCards, setDueCards] = useState<ReviewCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [showRating, setShowRating] = useState(false);
+  const [examActive, setExamActive] = useState(false);
+  const [examDays, setExamDays] = useState<number | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
+    setExamActive(isExamMode());
+    setExamDays(daysUntilExam());
+
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())
       .then((data: Question[]) => {
@@ -29,6 +36,19 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         setLoading(false);
       });
   }, [id]);
+
+  function handleSetExamDate(dateStr: string) {
+    if (!dateStr) {
+      setExamDate(null);
+      setExamActive(false);
+      setExamDays(null);
+    } else {
+      setExamDate(new Date(dateStr + "T23:59:59"));
+      setExamActive(true);
+      setExamDays(Math.max(1, Math.ceil((new Date(dateStr + "T23:59:59").getTime() - Date.now()) / 86400000)));
+    }
+    setShowDatePicker(false);
+  }
 
   function handleAnswer(_questionId: string, _answer: string, _isCorrect: boolean) {
     setShowRating(true);
@@ -61,6 +81,50 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   return (
     <div>
       <CourseTabs courseId={id} />
+
+      {/* Exam mode banner */}
+      {examActive && examDays !== null ? (
+        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.3)" }}>
+          <div className="flex items-center gap-2">
+            <Zap size={16} style={{ color: "var(--warning)" }} />
+            <span className="text-sm font-medium" style={{ color: "var(--warning)" }}>
+              {isZh ? `考试模式 · ${examDays} 天后考试` : `Exam Mode · ${examDays} day${examDays > 1 ? "s" : ""} until exam`}
+            </span>
+          </div>
+          <button
+            onClick={() => handleSetExamDate("")}
+            className="text-xs cursor-pointer"
+            style={{ color: "var(--text-muted)" }}
+          >
+            {isZh ? "关闭" : "Turn off"}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowDatePicker(true)}
+          className="mb-4 px-4 py-3 rounded-xl w-full text-left flex items-center gap-2 cursor-pointer transition-colors"
+          style={{ border: "1px dashed var(--border)", color: "var(--text-secondary)" }}
+        >
+          <Calendar size={16} />
+          <span className="text-sm">{isZh ? "设置考试日期，启用高强度复习" : "Set exam date for intensive review mode"}</span>
+        </button>
+      )}
+
+      {showDatePicker && (
+        <div className="mb-4 p-4 rounded-xl flex items-center gap-3" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+          <input
+            type="date"
+            min={new Date().toISOString().split("T")[0]}
+            defaultValue={getExamDate()?.toISOString().split("T")[0] ?? ""}
+            onChange={(e) => handleSetExamDate(e.target.value)}
+            className="px-3 py-2 rounded-lg text-sm"
+            style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
+          />
+          <button onClick={() => setShowDatePicker(false)} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
+            {isZh ? "取消" : "Cancel"}
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-2 mb-6">
         <RotateCcw size={20} style={{ color: "var(--accent)" }} />

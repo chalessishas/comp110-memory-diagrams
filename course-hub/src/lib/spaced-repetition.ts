@@ -1,9 +1,31 @@
 import { createEmptyCard, fsrs, generatorParameters, Rating, type Card, type ReviewLog } from "ts-fsrs";
 
 const STORAGE_KEY = "coursehub.review-cards";
+const EXAM_DATE_KEY = "coursehub.exam-date";
 
-const params = generatorParameters({ request_retention: 0.9 });
-const scheduler = fsrs(params);
+function getExamModeParams() {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(EXAM_DATE_KEY);
+  if (!raw) return null;
+  const examDate = new Date(raw);
+  const now = new Date();
+  const daysUntilExam = Math.max(1, Math.ceil((examDate.getTime() - now.getTime()) / 86400000));
+  if (daysUntilExam > 30) return null; // only activate within 30 days of exam
+  return { request_retention: 0.95, maximum_interval: daysUntilExam };
+}
+
+let _scheduler: ReturnType<typeof fsrs> | null = null;
+let _lastExamKey: string | null = null;
+
+function getScheduler() {
+  const examKey = typeof window !== "undefined" ? localStorage.getItem(EXAM_DATE_KEY) : null;
+  if (!_scheduler || examKey !== _lastExamKey) {
+    _lastExamKey = examKey ?? null;
+    const ep = getExamModeParams();
+    _scheduler = fsrs(generatorParameters(ep ?? { request_retention: 0.9 }));
+  }
+  return _scheduler;
+}
 
 export { Rating } from "ts-fsrs";
 export type { Card } from "ts-fsrs";
@@ -53,7 +75,7 @@ export function updateCard(questionId: string, rating: Rating): ReviewCard {
   }
 
   const now = new Date();
-  const result = scheduler.repeat(reviewCard.card, now);
+  const result = getScheduler().repeat(reviewCard.card, now);
   // Rating.Manual (5) is not schedulable; callers should only pass Again/Hard/Good/Easy
   const scheduled = result[rating as 1 | 2 | 3 | 4];
 
@@ -80,4 +102,33 @@ export function getNextReviewDate(cards: ReviewCard[]): Date | null {
   if (cards.length === 0) return null;
   const sorted = [...cards].sort((a, b) => new Date(a.card.due).getTime() - new Date(b.card.due).getTime());
   return new Date(sorted[0].card.due);
+}
+
+export function setExamDate(date: Date | null) {
+  if (typeof window === "undefined") return;
+  if (date) {
+    localStorage.setItem(EXAM_DATE_KEY, date.toISOString());
+  } else {
+    localStorage.removeItem(EXAM_DATE_KEY);
+  }
+}
+
+export function getExamDate(): Date | null {
+  if (typeof window === "undefined") return null;
+  const raw = localStorage.getItem(EXAM_DATE_KEY);
+  return raw ? new Date(raw) : null;
+}
+
+export function isExamMode(): boolean {
+  const exam = getExamDate();
+  if (!exam) return false;
+  const days = Math.ceil((exam.getTime() - Date.now()) / 86400000);
+  return days > 0 && days <= 30;
+}
+
+export function daysUntilExam(): number | null {
+  const exam = getExamDate();
+  if (!exam) return null;
+  const days = Math.ceil((exam.getTime() - Date.now()) / 86400000);
+  return days > 0 ? days : null;
 }
