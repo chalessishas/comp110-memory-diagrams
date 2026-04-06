@@ -20,6 +20,12 @@ export const outlineNodeSchema = z.object({
   order: z.number().int().min(0),
 });
 
+// Accept any string for type, map unknown values to "topic"
+const outlineNodeType = z.string().transform((val) => {
+  const valid = ["week", "chapter", "topic", "knowledge_point"];
+  return valid.includes(val) ? val as "week" | "chapter" | "topic" | "knowledge_point" : "topic" as const;
+});
+
 export const parsedOutlineNodeSchema: z.ZodType<{
   title: string;
   type: "week" | "chapter" | "topic" | "knowledge_point";
@@ -27,7 +33,7 @@ export const parsedOutlineNodeSchema: z.ZodType<{
   children: unknown[];
 }> = z.object({
   title: z.string(),
-  type: z.enum(["week", "chapter", "topic", "knowledge_point"]),
+  type: outlineNodeType,
   content: z.string().nullable().default(null),
   children: z.lazy(() => parsedOutlineNodeSchema.array()).default([]),
 });
