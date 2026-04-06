@@ -94,10 +94,12 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     setActiveLessonId(lessonId);
     setLoadingChunks(true);
 
-    const res = await fetch(`/api/courses/${id}/lessons/${lessonId}/chunks`);
-    if (res.ok) {
-      const data = await res.json();
-      setChunks(data);
+    try {
+      const res = await fetch(`/api/courses/${id}/lessons/${lessonId}/chunks`);
+      const data = res.ok ? await res.json() : [];
+      setChunks(Array.isArray(data) ? data : []);
+    } catch {
+      setChunks([]);
     }
     setLoadingChunks(false);
   }
