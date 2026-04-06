@@ -64,19 +64,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   const rows = flattenNodes(nodes, id);
 
-  // Atomic delete + insert via RPC transaction
-  const { data, error } = await supabase.rpc("replace_outline", {
-    p_course_id: id,
-    p_nodes: JSON.stringify(rows),
-  });
+  // Delete existing then insert new (simple approach — RPC had auth issues)
+  const { error: deleteError } = await supabase.from("outline_nodes").delete().eq("course_id", id);
+  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (rows.length > 0) {
+    const { error: insertError } = await supabase.from("outline_nodes").insert(rows);
+    if (insertError) return NextResponse.json({ error: insertError.message }, { status: 500 });
+  }
 
-  // Touch updated_at so future version checks reflect this save
+  // Touch updated_at
   await supabase
     .from("courses")
     .update({ updated_at: new Date().toISOString() })
     .eq("id", id);
 
-  return NextResponse.json({ count: data });
+  return NextResponse.json({ count: rows.length });
 }
