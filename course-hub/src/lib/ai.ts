@@ -207,24 +207,28 @@ export interface StudyTask {
   priority: number; // 1=high, 3=low
 }
 
-// Fix #8: lenient studyTasksSchema — normalize task_type variants, clamp priority
+// Lenient studyTasksSchema — handles various AI output formats
+const normalizeTaskType = (val: string) => {
+  const v = val.toLowerCase().replace(/[-_\s]/g, "");
+  if (v.includes("read") || v.includes("study") || v.includes("learn")) return "read" as const;
+  if (v.includes("practice") || v.includes("exercise") || v.includes("drill") || v.includes("do")) return "practice" as const;
+  if (v.includes("review") || v.includes("revisit") || v.includes("recap") || v.includes("summary")) return "review" as const;
+  return "read" as const;
+};
+
 const studyTasksSchema = z.object({
-  tasks: z.array(z.object({
-    knowledge_point_title: z.string(),
-    title: z.string(),
-    description: z.string(),
-    task_type: z.string().transform((val) => {
-      const v = val.toLowerCase().replace(/[-_\s]/g, "");
-      if (v.includes("read") || v.includes("study") || v.includes("learn")) return "read" as const;
-      if (v.includes("practice") || v.includes("exercise") || v.includes("drill") || v.includes("do")) return "practice" as const;
-      if (v.includes("review") || v.includes("revisit") || v.includes("recap") || v.includes("summary")) return "review" as const;
-      return "read" as const; // safe fallback
-    }),
-    priority: z.union([z.number(), z.string()]).transform((val) => {
-      const n = typeof val === "string" ? parseInt(val, 10) : val;
-      if (isNaN(n)) return 2;
-      return Math.max(1, Math.min(3, Math.round(n)));
-    }),
+  tasks: z.array(z.any().transform((item) => {
+    const obj = item as Record<string, unknown>;
+    return {
+      knowledge_point_title: String(obj.knowledge_point_title ?? obj.knowledgePoint ?? obj.topic ?? ""),
+      title: String(obj.title ?? obj.task ?? obj.name ?? "Study task"),
+      description: String(obj.description ?? obj.task ?? obj.details ?? ""),
+      task_type: normalizeTaskType(String(obj.task_type ?? obj.type ?? obj.category ?? "read")),
+      priority: (() => {
+        const n = typeof obj.priority === "string" ? parseInt(obj.priority, 10) : Number(obj.priority ?? 2);
+        return isNaN(n) ? 2 : Math.max(1, Math.min(3, Math.round(n)));
+      })(),
+    };
   })),
 });
 
@@ -248,17 +252,16 @@ export async function generateStudyTasks(
           role: "user",
           content: `You are a study planner for the course "${courseTitle}".
 
-Here are the knowledge points from the course outline:
+Knowledge points:
 ${kpSummary}
 
-For each knowledge point, generate 1-3 study tasks. Each task should be:
-- Actionable and specific (not vague like "study chapter 3")
-- Categorized as "read" (learn the concept), "practice" (do exercises), or "review" (revisit/summarize)
-- Prioritized: 1=must-know (core concept), 2=should-know (important detail), 3=nice-to-know (supplementary)
+Generate 1-2 study tasks per knowledge point. Return this EXACT JSON structure:
+{"tasks": [{"knowledge_point_title": "exact KP title", "title": "task title", "description": "what to do", "task_type": "read", "priority": 1}]}
 
-Focus on what a student actually needs to DO, not just what to know.
+task_type: "read" (learn concept), "practice" (do exercises), or "review" (revisit)
+priority: 1=must-know, 2=should-know, 3=nice-to-know
 
-Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
+Return ONLY the JSON object with a "tasks" array. No other format.${langInstruction}`,
         },
       ],
     });
@@ -266,9 +269,17 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
     const raw = JSON.parse(jsonStr);
-    // AI might return { tasks: [...] } or just [...] — handle both
-    const wrapped = Array.isArray(raw) ? { tasks: raw } : raw;
-    const parsed = studyTasksSchema.parse(wrapped);
+    // AI returns various formats: { tasks: [...] }, [...], or { "1": [...], "2": [...] }
+    let tasks: unknown[];
+    if (Array.isArray(raw)) {
+      tasks = raw;
+    } else if (raw.tasks && Array.isArray(raw.tasks)) {
+      tasks = raw.tasks;
+    } else {
+      // Flatten object values: { "1": [task, task], "2": [task] } → flat array
+      tasks = Object.values(raw).flat();
+    }
+    const parsed = studyTasksSchema.parse({ tasks });
     return parsed.tasks;
   } catch (err) {
     throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
