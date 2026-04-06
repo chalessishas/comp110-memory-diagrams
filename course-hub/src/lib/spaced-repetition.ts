@@ -123,12 +123,12 @@ export function isExamMode(): boolean {
   const exam = getExamDate();
   if (!exam) return false;
   const days = Math.ceil((exam.getTime() - Date.now()) / 86400000);
-  return days > 0 && days <= 30;
+  return days >= 0 && days <= 30;
 }
 
 export function daysUntilExam(): number | null {
   const exam = getExamDate();
   if (!exam) return null;
   const days = Math.ceil((exam.getTime() - Date.now()) / 86400000);
-  return days > 0 ? days : null;
+  return days >= 0 ? Math.max(1, days) : null;
 }

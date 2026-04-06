@@ -166,7 +166,8 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
 
       {/* Pretest: show checkpoint BEFORE content (attempt → learn) */}
       {/* Regular: show content BEFORE checkpoint (learn → verify) */}
-      {currentChunkIndex > 0 && (
+      {/* Remediation on chunk 0: also show content so student can learn before retry */}
+      {(currentChunkIndex > 0 || (currentChunkIndex === 0 && state.showRemediation)) && (
         <div className="ui-panel p-6 mb-4">
           <MarkdownRenderer content={activeContent} />
         </div>
