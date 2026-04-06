@@ -1,5 +1,41 @@
 # CourseHub Status
 
+## [2026-04-06 12:50] Phase 3 — Exam Prep Overhaul (11 commits, all deployed)
+
+Calculus II midterm on April 10. Major improvements to learning system for exam readiness.
+
+### FSRS Exam Mode
+- `spaced-repetition.ts`: Lazy scheduler with exam-date-aware params (`retention=0.95`, `maximum_interval=daysToExam`)
+- Review page: exam date picker UI, countdown banner ("考试模式 · N 天后考试")
+- Boundary fix: exam mode stays active on exam day (`days >= 0`)
+
+### Exam Prep Pipeline (12 topics, parallel)
+- `exam-prep/route.ts`: Increased from 4→12 topic limit, parallel batches of 4 via `Promise.allSettled`
+- Switched to `qwen3.5-plus` (19x faster than qwen-plus-latest)
+- Fuzzy KP matching (substring containment fallback)
+- `topics_failed` returned in API response
+- Practice page: error handling, failed topics banner, Chinese i18n
+
+### Interactive Lessons
+- `ChunkLesson.tsx`: Progress tracking (useRef + useEffect → POST lesson_progress), remediation skip button, pretest remediation content fix
+- `progress/route.ts` (new): Saves lesson completion + bumps element_mastery
+- `learn/page.tsx`: refreshKey pattern for re-fetching mastery after lesson, error banner on generation failure
+
+### Grading & Model
+- `attempts/route.ts`: Fuzzy fill_blank grading (contains + numeric), normalized input
+- `ChunkLesson.tsx`: Grading threshold aligned to 0.5, remediation_answer used correctly
+- All text routes → `qwen3.5-plus` (exam-prep, regenerate, chat). Vision routes stay `qwen-plus-latest`
+
+### Known Issues
+- Vercel Git integration not auto-deploying (manual `npx vercel deploy --prod` works)
+- SRS data in localStorage only (no cross-device sync)
+- qwen3.5-plus untested with live AI call (build passes, zero runtime errors)
+
+### DB Changes (prod Supabase)
+- `lesson_chunks.checkpoint_type` constraint updated to include `fill_blank`
+- 5 new outline_nodes (power series week + 4 KPs)
+- 38 questions inserted, 12 orphans linked to KPs, 6 true_false fixed
+
 ## [2026-04-04 06:53] Phase 2 — UI 重构 + 新功能（未提交）
 
 另一个 session 在 MVP 基础上做了大量改进（+2005 行，27 个文件修改，7 个新文件），尚未 commit：
@@ -70,8 +106,8 @@
 - 部署研究：Vercel AI SDK 集成、学生产品分发、Supabase 部署模式
 
 ## 文件统计 (当前)
-- 源文件：48 个 (.ts/.tsx)
-- 新增组件（未提交）：7 个
-- API 路由：12 个
-- 数据库表：6 张 (courses, outline_nodes, uploads, questions, attempts, study_tasks)
-- 研究文档：5 份
+- 源文件：~60 个 (.ts/.tsx)
+- API 路由：18+ 个 (including lessons/progress, exam-prep, generate-one)
+- 数据库表：10+ 张 (+ lessons, lesson_chunks, lesson_progress, element_mastery, exam_dates)
+- 数据库迁移：12 个 SQL 文件
+- 研究文档：8+ 份 (docs/research/)
