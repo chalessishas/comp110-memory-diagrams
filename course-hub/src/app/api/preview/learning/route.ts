@@ -4,6 +4,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import type { ParsedOutlineNode } from "@/types";
 
+export const maxDuration = 60;
+
 function collectStudyTargets(nodes: ParsedOutlineNode[]) {
   const knowledgePoints: { title: string; content: string | null }[] = [];
   const leafNodes: { title: string; content: string | null }[] = [];

@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { parseExamQuestions } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get("courseId");

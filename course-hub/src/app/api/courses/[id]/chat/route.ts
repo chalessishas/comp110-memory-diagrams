@@ -4,6 +4,8 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 30;
+
 const qwen = createOpenAI({
   baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",

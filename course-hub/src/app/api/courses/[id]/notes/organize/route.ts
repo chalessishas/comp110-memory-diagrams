@@ -4,6 +4,8 @@ import { noteOrganizeSchema } from "@/lib/schemas";
 import { organizeStudyNote } from "@/lib/ai";
 import type { OutlineNode } from "@/types";
 
+export const maxDuration = 60;
+
 function selectStudyTargets(nodes: OutlineNode[]) {
   const knowledgePoints = nodes.filter((node) => node.type === "knowledge_point");
   if (knowledgePoints.length > 0) return knowledgePoints;
