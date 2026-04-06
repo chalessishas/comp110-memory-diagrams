@@ -16,6 +16,19 @@ const textModel = qwen("qwen-plus-latest");
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 
+// Fix #9: robust JSON extraction — strips markdown fences, finds object or array
+function extractJSON(text: string): string | null {
+  // Strip markdown code fences
+  const cleaned = text.replace(/```(?:json)?\s*/g, "").replace(/```\s*/g, "");
+  // Try to find JSON object
+  const objMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (objMatch) return objMatch[0];
+  // Try array
+  const arrMatch = cleaned.match(/\[[\s\S]*\]/);
+  if (arrMatch) return arrMatch[0];
+  return null;
+}
+
 // ─── Pipeline 1: Syllabus → Course Outline ───
 
 export async function parseSyllabus(fileBase64: string, mimeType: string, language?: string): Promise<ParsedSyllabus> {
@@ -59,9 +72,9 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonMatch[0]));
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
+    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
     return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -122,10 +135,10 @@ ${rawText}
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
 
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonMatch[0]));
+    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
     return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus text parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -177,9 +190,9 @@ Return ONLY valid JSON (no markdown, no code fences).`,
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
-    const parsed = questionsSchema.parse(JSON.parse(jsonMatch[0]));
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
+    const parsed = questionsSchema.parse(JSON.parse(jsonStr));
     return parsed.questions;
   } catch (err) {
     throw new Error(`Exam question parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -196,13 +209,24 @@ export interface StudyTask {
   priority: number; // 1=high, 3=low
 }
 
+// Fix #8: lenient studyTasksSchema — normalize task_type variants, clamp priority
 const studyTasksSchema = z.object({
   tasks: z.array(z.object({
     knowledge_point_title: z.string(),
     title: z.string(),
     description: z.string(),
-    task_type: z.enum(["read", "practice", "review"]),
-    priority: z.number().int().min(1).max(3),
+    task_type: z.string().transform((val) => {
+      const v = val.toLowerCase().replace(/[-_\s]/g, "");
+      if (v.includes("read") || v.includes("study") || v.includes("learn")) return "read" as const;
+      if (v.includes("practice") || v.includes("exercise") || v.includes("drill") || v.includes("do")) return "practice" as const;
+      if (v.includes("review") || v.includes("revisit") || v.includes("recap") || v.includes("summary")) return "review" as const;
+      return "read" as const; // safe fallback
+    }),
+    priority: z.union([z.number(), z.string()]).transform((val) => {
+      const n = typeof val === "string" ? parseInt(val, 10) : val;
+      if (isNaN(n)) return 2;
+      return Math.max(1, Math.min(3, Math.round(n)));
+    }),
   })),
 });
 
@@ -240,9 +264,9 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
-    const parsed = studyTasksSchema.parse(JSON.parse(jsonMatch[0]));
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
+    const parsed = studyTasksSchema.parse(JSON.parse(jsonStr));
     return parsed.tasks;
   } catch (err) {
     throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -298,9 +322,9 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
-    const parsed = autoQuizSchema.parse(JSON.parse(jsonMatch[0]));
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
+    const parsed = autoQuizSchema.parse(JSON.parse(jsonStr));
     return parsed.questions;
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -348,10 +372,10 @@ Rules:
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
 
-    return generatedLessonSchema.parse(JSON.parse(jsonMatch[0]));
+    return generatedLessonSchema.parse(JSON.parse(jsonStr));
   } catch (err) {
     throw new Error(`Lesson generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -362,10 +386,21 @@ Rules:
 const organizedStudyNoteSchema = z.object({
   title: z.string().min(1),
   summary: z.string().min(1),
-  key_points: z.array(z.string().min(1)).min(2).max(6),
-  confusing_points: z.array(z.string().min(1)).max(4).default([]),
+  key_points: z.union([
+    z.array(z.string().min(1)),
+    z.string().transform((s) => [s]),
+  ]).pipe(z.array(z.string()).min(2).max(6)),
+  confusing_points: z.union([
+    z.array(z.string().min(1)),
+    z.string().transform((s) => [s]),
+    z.null().transform(() => [] as string[]),
+  ]).default([]),
   next_action: z.string().nullable().default(null),
-  clarification_questions: z.array(z.string().min(1)).max(3).default([]),
+  clarification_questions: z.union([
+    z.array(z.string().min(1)),
+    z.string().transform((s) => [s]),
+    z.null().transform(() => [] as string[]),
+  ]).default([]),
   matched_kp_title: z.string().nullable().default(null),
 });
 
@@ -434,9 +469,9 @@ Return ONLY valid JSON (no markdown, no code fences).`,
       ],
     });
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("AI did not return valid JSON");
-    const organized = organizedStudyNoteSchema.parse(JSON.parse(jsonMatch[0]));
+    const jsonStr = extractJSON(text);
+    if (!jsonStr) throw new Error("AI did not return valid JSON");
+    const organized = organizedStudyNoteSchema.parse(JSON.parse(jsonStr));
 
     return {
       title: organized.title,
