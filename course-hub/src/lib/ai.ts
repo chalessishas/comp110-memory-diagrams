@@ -11,8 +11,8 @@ const qwen = createOpenAI({
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
 });
 
-const visionModel = qwen("qwen-plus-latest");
-const textModel = qwen("qwen-plus-latest");
+const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsing (proven stable)
+const textModel = qwen("qwen3.5-plus"); // 19x faster than qwen-plus (MoE, 17B active params)
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 // Temporarily disabled AbortSignal — investigating generate failures
