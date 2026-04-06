@@ -69,7 +69,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   // Atomic delete+insert via RPC (SECURITY INVOKER — respects RLS)
   const { data: count, error: rpcError } = await supabase.rpc("upsert_outline_nodes", {
     p_course_id: id,
-    p_nodes: JSON.stringify(rows),
+    p_nodes: rows,
   });
 
   if (rpcError) return NextResponse.json({ error: rpcError.message }, { status: 500 });

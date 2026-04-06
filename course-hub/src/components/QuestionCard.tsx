@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, Bookmark } from "lucide-react";
+import { Check, X, Bookmark, Loader2 } from "lucide-react";
 import type { Question } from "@/types";
 import { updateCard, Rating } from "@/lib/spaced-repetition";
 import { recordActivity } from "@/lib/streaks";
@@ -33,13 +33,15 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   const [revealedAnswer, setRevealedAnswer] = useState<string | null>(null);
   const [revealedExplanation, setRevealedExplanation] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
     : textAnswer;
 
   async function handleSubmit() {
-    if (!userAnswer) return;
+    if (!userAnswer || submitting) return;
+    setSubmitting(true);
 
     const res = await fetch("/api/attempts", {
       method: "POST",
@@ -161,10 +163,10 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
       {!submitted ? (
         <button
           onClick={handleSubmit}
-          disabled={!userAnswer}
+          disabled={!userAnswer || submitting}
           className="ui-button-primary disabled:opacity-40"
         >
-          {t("practice.submit")}
+          {submitting ? <Loader2 size={16} className="animate-spin" /> : t("practice.submit")}
         </button>
       ) : (
         <div className="mt-4">
