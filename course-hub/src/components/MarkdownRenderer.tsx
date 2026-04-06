@@ -12,7 +12,7 @@ export function MarkdownRenderer({ content }: { content: string }) {
     <div className="prose-custom">
       <ReactMarkdown
         remarkPlugins={[remarkGfm, remarkMath]}
-        rehypePlugins={[rehypeKatex, rehypeHighlight]}
+        rehypePlugins={[[rehypeKatex, { throwOnError: false, errorColor: "#cc0000" }], rehypeHighlight]}
         components={{
           h2: ({ children }) => <h3 className="text-lg font-semibold mt-6 mb-2">{children}</h3>,
           h3: ({ children }) => <h4 className="text-base font-semibold mt-4 mb-1">{children}</h4>,
