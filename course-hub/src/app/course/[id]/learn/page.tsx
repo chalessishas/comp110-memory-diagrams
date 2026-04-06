@@ -26,6 +26,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   const [chunks, setChunks] = useState<LessonChunk[]>([]);
   const [loadingChunks, setLoadingChunks] = useState(false);
   const [generatingForKp, setGeneratingForKp] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -55,7 +56,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       setItems(kps);
       setLoading(false);
     });
-  }, [id]);
+  }, [id, refreshKey]);
 
   async function handleKpClick(kp: KnowledgePointItem) {
     if (kp.hasLesson && kp.lessonId) {
@@ -125,7 +126,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       <div>
         <CourseTabs courseId={id} />
         <button
-          onClick={() => { setActiveLessonId(null); setChunks([]); }}
+          onClick={() => { setActiveLessonId(null); setChunks([]); setRefreshKey(k => k + 1); }}
           className="ui-button-ghost mb-4 !px-0"
         >
           ← {isZh ? "返回知识点列表" : "Back to topics"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
 import { Check, X, Loader2, ChevronRight } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -31,16 +31,39 @@ const defaultCheckpointState: CheckpointState = {
   showRemediation: false,
 };
 
-export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }: ChunkLessonProps) {
+export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [checkpointState, setCheckpointState] = useState<Record<number, CheckpointState>>({});
+  const progressSaved = useRef(false);
 
   const chunk = chunks[currentChunkIndex];
   const state = checkpointState[currentChunkIndex] ?? defaultCheckpointState;
+  const isComplete = !chunk;
 
-  if (!chunk) {
+  // Save progress to server when lesson is completed
+  useEffect(() => {
+    if (!isComplete || progressSaved.current) return;
+    progressSaved.current = true;
+
+    const results: Record<string, { passed: boolean; attempts: number }> = {};
+    for (const [idx, s] of Object.entries(checkpointState)) {
+      results[idx] = { passed: s.correct, attempts: s.attempts };
+    }
+
+    fetch(`/api/courses/${courseId}/lessons/${lessonId}/progress`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        completed: true,
+        lastChunkIndex: chunks.length - 1,
+        checkpointResults: results,
+      }),
+    }).catch(() => {}); // best-effort, don't block UI
+  }, [isComplete, courseId, lessonId, checkpointState, chunks.length]);
+
+  if (isComplete) {
     return (
       <div className="text-center py-16">
         <Check size={40} className="mx-auto mb-4" style={{ color: "var(--success)" }} />
