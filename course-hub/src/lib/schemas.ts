@@ -38,23 +38,82 @@ export const parsedOutlineNodeSchema: z.ZodType<{
   children: z.lazy(() => parsedOutlineNodeSchema.array()).default([]),
 });
 
+// Fix #4: lenient confidence field — case-insensitive, unknown → "medium"
+const confidenceField = z.string().transform((val) => {
+  const v = val.toLowerCase();
+  if (v.includes("high")) return "high" as const;
+  if (v.includes("low")) return "low" as const;
+  return "medium" as const;
+}).default("high");
+
+// Fix #5: missing_info — handle string instead of array, or null
+const missingInfoField = z.union([
+  z.array(z.string()),
+  z.string().transform((s) => [s]),
+  z.null().transform(() => [] as string[]),
+]).default([]);
+
 export const parsedSyllabusSchema = z.object({
   title: z.string(),
   description: z.string(),
   professor: z.string().nullable().default(null),
   semester: z.string().nullable().default(null),
   nodes: parsedOutlineNodeSchema.array(),
-  missing_info: z.array(z.string()).default([]),
-  confidence: z.enum(["high", "medium", "low"]).default("high"),
+  missing_info: missingInfoField,
+  confidence: confidenceField,
 });
 
+// Fix #2: lenient question type — normalize MCQ variants
+const questionType = z.string().transform((val) => {
+  const v = val.toLowerCase().replace(/[-_\s]/g, "");
+  if (v.includes("multiple") || v === "mcq" || v === "mc") return "multiple_choice" as const;
+  if (v.includes("fill") || v.includes("blank")) return "fill_blank" as const;
+  if (v.includes("short") || v.includes("essay") || v.includes("open")) return "short_answer" as const;
+  if (v.includes("true") || v.includes("false") || v.includes("tf") || v.includes("bool")) return "true_false" as const;
+  return "short_answer" as const; // safe fallback
+});
+
+// Fix #3: lenient difficulty — clamp to 1-5, handle string input, handle NaN
+const difficultyField = z.union([z.number(), z.string()]).transform((val) => {
+  const n = typeof val === "string" ? parseInt(val, 10) : val;
+  if (isNaN(n)) return 3;
+  return Math.max(1, Math.min(5, Math.round(n)));
+}).default(3);
+
+// Fix #6: lenient options — handle string arrays, object maps, mixed formats
+const optionsField = z.any().transform((val) => {
+  if (val === null || val === undefined) return null;
+  if (Array.isArray(val)) {
+    return val.map((item, i) => {
+      if (typeof item === "string") {
+        // "A. some text" or "A) some text" format
+        const match = item.match(/^([A-Da-d])[.)]\s*(.+)/);
+        if (match) return { label: match[1].toUpperCase(), text: match[2] };
+        return { label: String.fromCharCode(65 + i), text: item };
+      }
+      if (typeof item === "object" && item !== null) {
+        return {
+          label: String((item as Record<string, unknown>).label ?? (item as Record<string, unknown>).key ?? String.fromCharCode(65 + i)),
+          text: String((item as Record<string, unknown>).text ?? (item as Record<string, unknown>).value ?? (item as Record<string, unknown>).content ?? ""),
+        };
+      }
+      return { label: String.fromCharCode(65 + i), text: String(item) };
+    });
+  }
+  if (typeof val === "object") {
+    // {A: "foo", B: "bar"} format
+    return Object.entries(val as Record<string, unknown>).map(([k, v]) => ({ label: k, text: String(v) }));
+  }
+  return null;
+}).nullable().default(null);
+
 export const parsedQuestionSchema = z.object({
-  type: z.enum(["multiple_choice", "fill_blank", "short_answer", "true_false"]),
+  type: questionType,
   stem: z.string().min(1),
-  options: z.array(z.object({ label: z.string(), text: z.string() })).nullable().default(null),
+  options: optionsField,
   answer: z.string().min(1),
   explanation: z.string().nullable().default(null),
-  difficulty: z.number().int().min(1).max(5).default(3),
+  difficulty: difficultyField,
 });
 
 export const attemptCreateSchema = z.object({
@@ -82,9 +141,16 @@ export const noteCreateSchema = z.object({
   clarification_answers: z.array(z.string().min(1).max(2_000)).max(3).default([]),
 });
 
+// Fix #7: lenient generatedLessonSchema — defaults + handle string-instead-of-array
 export const generatedLessonSchema = z.object({
-  title: z.string(),
-  content: z.string(), // markdown: explanation with headers, paragraphs, code blocks
-  key_takeaways: z.array(z.string()),
-  examples: z.array(z.string()),
-});
+  title: z.string().default("Untitled Lesson"),
+  content: z.string().default(""),
+  key_takeaways: z.union([
+    z.array(z.string()),
+    z.string().transform((s) => [s]),
+  ]).default([]),
+  examples: z.union([
+    z.array(z.string()),
+    z.string().transform((s) => [s]),
+  ]).default([]),
+}).passthrough();
