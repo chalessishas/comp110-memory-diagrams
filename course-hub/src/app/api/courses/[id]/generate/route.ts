@@ -68,19 +68,23 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "No study targets found in outline" }, { status: 400 });
   }
 
-  // Run both pipelines in parallel
-  const [studyTasks, questions] = await Promise.all([
-    generateStudyTasks(
-      course.title,
-      studyTargets.map((kp) => ({ title: kp.title, content: kp.content })),
-      language
-    ),
-    generateQuestionsFromOutline(
-      course.title,
-      studyTargets.map((kp) => ({ title: kp.title, content: kp.content })),
-      language
-    ),
-  ]);
+  // Run sequentially to stay within Vercel function time limits
+  // (parallel caused timeouts — two large AI calls competing for bandwidth)
+  const kpData = studyTargets.map((kp) => ({ title: kp.title, content: kp.content }));
+
+  let studyTasks: Awaited<ReturnType<typeof generateStudyTasks>> = [];
+  try {
+    studyTasks = await generateStudyTasks(course.title, kpData, language);
+  } catch (e) {
+    console.error("Study task generation failed:", e instanceof Error ? e.message : e);
+  }
+
+  let questions: Awaited<ReturnType<typeof generateQuestionsFromOutline>> = [];
+  try {
+    questions = await generateQuestionsFromOutline(course.title, kpData, language);
+  } catch (e) {
+    console.error("Question generation failed:", e instanceof Error ? e.message : e);
+  }
 
   // Map KP titles to IDs
   const kpMap = new Map(studyTargets.map((kp) => [kp.title.toLowerCase(), kp.id]));
