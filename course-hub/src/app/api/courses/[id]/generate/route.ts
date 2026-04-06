@@ -1,13 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
-import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
+import { generateStudyTasks } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
-// Max knowledge points per AI call — 8 keeps within Vercel 60s function timeout
-// (each AI call processes all KPs in one prompt, ~5-10s per 8 KPs)
-const MAX_STUDY_TARGETS = 8;
+// Max knowledge points per AI call — 5 keeps within Vercel 60s function timeout
+// DashScope takes ~20-25s for 5 KPs with study tasks
+const MAX_STUDY_TARGETS = 5;
 
 function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
   const knowledgePoints = nodes.filter((n) => n.type === "knowledge_point");
@@ -72,8 +72,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "No study targets found in outline" }, { status: 400 });
   }
 
-  // Run sequentially to stay within Vercel function time limits
-  // (parallel caused timeouts — two large AI calls competing for bandwidth)
+  // Only generate study tasks on course creation — questions generated on-demand
+  // when user visits Practice tab (keeps within Vercel 60s function timeout)
   const kpData = studyTargets.map((kp) => ({ title: kp.title, content: kp.content }));
 
   let studyTasks: Awaited<ReturnType<typeof generateStudyTasks>> = [];
@@ -83,12 +83,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     console.error("Study task generation failed:", e instanceof Error ? e.message : e);
   }
 
-  let questions: Awaited<ReturnType<typeof generateQuestionsFromOutline>> = [];
-  try {
-    questions = await generateQuestionsFromOutline(course.title, kpData, language);
-  } catch (e) {
-    console.error("Question generation failed:", e instanceof Error ? e.message : e);
-  }
+  // Questions are NOT generated here — too slow for serverless.
+  // They are generated on-demand via POST /api/courses/[id]/regenerate or Practice tab.
+  const questions: { type: string; stem: string; options: unknown; answer: string; explanation: string | null; difficulty: number; matched_kp_title: string }[] = [];
 
   // Map KP titles to IDs
   const kpMap = new Map(studyTargets.map((kp) => [kp.title.toLowerCase(), kp.id]));
