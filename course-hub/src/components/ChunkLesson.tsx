@@ -59,12 +59,37 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
     }));
   }
 
+  function checkAnswer(userAnswer: string, expected: string, type: string): boolean {
+    const ua = userAnswer.trim().toLowerCase().replace(/[.,;:!?'"()]/g, "").replace(/\s+/g, " ");
+    const ea = expected.trim().toLowerCase().replace(/[.,;:!?'"()]/g, "").replace(/\s+/g, " ");
+
+    // MCQ: exact label match
+    if (type === "mcq") return ua === ea;
+
+    // fill_blank: exact or contained match (student might write more context)
+    if (type === "fill_blank") {
+      if (ua === ea) return true;
+      if (ua.includes(ea) || ea.includes(ua)) return true;
+      // Numeric: compare as numbers if both parseable
+      const uNum = parseFloat(ua), eNum = parseFloat(ea);
+      if (!isNaN(uNum) && !isNaN(eNum) && Math.abs(uNum - eNum) < 0.001) return true;
+      return false;
+    }
+
+    // open: keyword overlap — correct if ≥50% of meaningful answer words found
+    const answerWords = ea.split(/\s+/).filter(w => w.length > 3);
+    if (answerWords.length === 0) return ua.length > 0; // any non-empty answer passes
+    const userWords = new Set(ua.split(/\s+/));
+    const matched = answerWords.filter(w => userWords.has(w)).length;
+    return matched / answerWords.length >= 0.4;
+  }
+
   function handleSubmitCheckpoint() {
     if (!chunk.checkpoint_type || !chunk.checkpoint_answer) return;
     const userAnswer = chunk.checkpoint_type === "mcq" ? state.selected : state.textAnswer;
     if (!userAnswer) return;
 
-    const correct = userAnswer.trim().toLowerCase() === chunk.checkpoint_answer.trim().toLowerCase();
+    const correct = checkAnswer(userAnswer, chunk.checkpoint_answer, chunk.checkpoint_type);
     updateState({ submitted: true, correct, attempts: state.attempts + 1 });
     recordActivity("question");
   }
@@ -183,6 +208,30 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
                     <span className="text-sm font-medium" style={{ color: "var(--success)" }}>
                       {isZh ? "正确" : "Correct"}
                     </span>
+                  </>
+                ) : chunk.checkpoint_type === "open" ? (
+                  <>
+                    <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {isZh ? "参考答案：" : "Expected answer:"} <strong>{chunk.checkpoint_answer}</strong>
+                    </span>
+                    {!state.correct && (
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => updateState({ correct: true })}
+                          className="text-xs px-3 py-1.5 rounded-lg cursor-pointer"
+                          style={{ border: "1px solid var(--success)", color: "var(--success)" }}
+                        >
+                          {isZh ? "我答对了" : "I got it right"}
+                        </button>
+                        <button
+                          onClick={() => {}}
+                          className="text-xs px-3 py-1.5 rounded-lg"
+                          style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+                        >
+                          {isZh ? "我需要复习" : "I need to review"}
+                        </button>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <>
