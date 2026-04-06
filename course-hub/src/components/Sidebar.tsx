@@ -94,14 +94,6 @@ export function Sidebar({
           {/* Right side */}
           <div className="hidden md:flex items-center gap-1.5">
             <StreakBadge />
-            <button
-              onClick={() => setLocale(locale === "en" ? "zh" : "en")}
-              className="px-2.5 py-1.5 text-xs font-semibold cursor-pointer transition-all"
-              style={{ borderRadius: "8px", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
-              title={locale === "en" ? "切换中文" : "Switch to English"}
-            >
-              {locale === "en" ? "中文" : "EN"}
-            </button>
             <NavLink href="/settings" label={t("nav.settings")} icon={Settings} pathname={pathname} />
             {isAuthenticated ? (
               <button
@@ -156,13 +148,6 @@ export function Sidebar({
               </Link>
             ))}
             <div className="pt-2" style={{ borderTop: "1px solid var(--border)" }}>
-              <button
-                onClick={(e) => { e.stopPropagation(); setLocale(locale === "en" ? "zh" : "en"); }}
-                className="flex items-center px-3 py-1.5 text-xs font-semibold cursor-pointer"
-                style={{ color: "var(--text-secondary)" }}
-              >
-                {locale === "en" ? "切换中文" : "Switch to English"}
-              </button>
               {isAuthenticated ? (
                 <button onClick={handleSignOut} className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer" style={{ color: "var(--text-secondary)" }}>
                   <LogOut size={15} /> {t("nav.signOut")}

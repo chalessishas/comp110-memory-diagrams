@@ -35,20 +35,10 @@ export function OnboardingWizard({ onComplete }: Props) {
     completed: false,
   });
 
-  useEffect(() => {
-    const browserLang = navigator.language;
-    if (browserLang.startsWith("zh")) {
-      setPrefs((p) => ({ ...p, language: "zh" }));
-    }
-  }, []);
-
-  const isZh = prefs.language === "zh";
+  const isZh = false;
 
   function handleNext() {
-    if (step === 0) {
-      setLocale(prefs.language as Locale);
-    }
-    if (step < 4) {
+    if (step < steps.length - 1) {
       setStep(step + 1);
     } else {
       const final = { ...prefs, completed: true };
@@ -73,37 +63,6 @@ export function OnboardingWizard({ onComplete }: Props) {
   }
 
   const steps = [
-    // Step 0: Language
-    {
-      icon: <Globe size={28} style={{ color: "var(--accent)" }} />,
-      title: "Choose your language",
-      titleZh: "选择你的语言",
-      subtitle: "You can change this later in Settings.",
-      subtitleZh: "之后可以在设置中修改。",
-      canSkip: false,
-      content: (
-        <div className="grid grid-cols-2 gap-3 mt-6">
-          {[
-            { key: "en" as const, label: "English", sub: "Continue in English" },
-            { key: "zh" as const, label: "中文", sub: "使用中文继续" },
-          ].map((lang) => (
-            <button
-              key={lang.key}
-              onClick={() => setPrefs((p) => ({ ...p, language: lang.key }))}
-              className="p-5 text-center cursor-pointer transition-all"
-              style={{
-                borderRadius: "12px",
-                border: `2px solid ${prefs.language === lang.key ? "var(--accent)" : "var(--border)"}`,
-                backgroundColor: prefs.language === lang.key ? "var(--accent-light)" : "var(--bg-surface)",
-              }}
-            >
-              <p className="text-lg font-semibold">{lang.label}</p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>{lang.sub}</p>
-            </button>
-          ))}
-        </div>
-      ),
-    },
     // Step 1: Role
     {
       icon: <GraduationCap size={28} style={{ color: "var(--accent)" }} />,
