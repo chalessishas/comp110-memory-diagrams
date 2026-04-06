@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { noteOrganizeSchema } from "@/lib/schemas";
 import { organizeStudyNote } from "@/lib/ai";
+
+export const maxDuration = 30;
 import type { OutlineNode } from "@/types";
 
 function selectStudyTargets(nodes: OutlineNode[]) {

@@ -2,6 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { generateLesson } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 export async function GET(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();

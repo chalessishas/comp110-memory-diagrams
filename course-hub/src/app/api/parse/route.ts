@@ -3,6 +3,8 @@ import { parseSyllabus, parseSyllabusText, parseExamQuestions } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
   // All parse paths require auth — AI calls cost money
   const supabase = await createClient();

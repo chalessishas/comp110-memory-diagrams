@@ -3,6 +3,9 @@ import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+// AI generation needs more than default 10s Vercel timeout
+export const maxDuration = 60;
+
 function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
   const knowledgePoints = nodes.filter((n) => n.type === "knowledge_point");
   if (knowledgePoints.length > 0) {

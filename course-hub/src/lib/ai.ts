@@ -15,7 +15,7 @@ const visionModel = qwen("qwen-plus-latest");
 const textModel = qwen("qwen-plus-latest");
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
-const AI_TIMEOUT_MS = 30_000; // 30s timeout for all AI calls
+const AI_TIMEOUT_MS = 55_000; // 55s timeout — just under Vercel's 60s maxDuration
 
 // Fix #9: robust JSON extraction — strips markdown fences, finds object or array
 function extractJSON(text: string): string | null {
