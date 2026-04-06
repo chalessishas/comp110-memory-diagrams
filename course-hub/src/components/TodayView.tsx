@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertTriangle, RotateCcw, Calendar, BookOpen, Target, Check } from "lucide-react";
+import { AlertTriangle, RotateCcw, Calendar, BookOpen, Target, Check, Upload } from "lucide-react";
+import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import { StreakBadge } from "@/components/StreakBadge";
 
@@ -99,10 +100,17 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         );
       })}
 
-      <div className="flex items-center justify-between pt-4 mt-4" style={{ borderTop: "1px solid var(--border)" }}>
-        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-          {isZh ? "今日目标：完成上方任意 2 项" : "Daily goal: complete any 2 tasks above"}
-        </p>
+      {/* Quick actions */}
+      <div className="flex items-center gap-2 pt-4 mt-2" style={{ borderTop: "1px solid var(--border)" }}>
+        <Link
+          href={`/course/${courseId}/library`}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs cursor-pointer"
+          style={{ borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+        >
+          <Upload size={12} />
+          Upload material
+        </Link>
+        <div className="flex-1" />
         <StreakBadge />
       </div>
     </div>

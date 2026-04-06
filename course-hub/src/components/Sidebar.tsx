@@ -69,26 +69,11 @@ export function Sidebar({
             <span className="text-base font-bold tracking-tight" style={{ color: "var(--text-primary)", letterSpacing: "-0.02em" }}>CourseHub</span>
           </Link>
 
-          {/* Desktop nav */}
+          {/* Desktop nav — only core links, no course list */}
           <nav className="hidden md:flex items-center gap-0.5">
             <NavLink href="/dashboard" label={t("nav.dashboard")} icon={LayoutDashboard} pathname={pathname} />
             <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
             <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
-            {activeCourses.map((course) => (
-              <Link
-                key={course.id}
-                href={`/course/${course.id}`}
-                className="px-3 py-1.5 text-sm transition-all truncate max-w-[160px]"
-                style={{
-                  borderRadius: "8px",
-                  backgroundColor: pathname.startsWith(`/course/${course.id}`) ? "var(--accent-light)" : "transparent",
-                  color: pathname.startsWith(`/course/${course.id}`) ? "var(--accent)" : "var(--text-secondary)",
-                  fontWeight: pathname.startsWith(`/course/${course.id}`) ? 600 : 400,
-                }}
-              >
-                {course.title}
-              </Link>
-            ))}
           </nav>
 
           {/* Right side */}
@@ -133,20 +118,6 @@ export function Sidebar({
             <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
             <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
             <NavLink href="/settings" label={t("nav.settings")} icon={Settings} pathname={pathname} />
-            {activeCourses.map((course) => (
-              <Link
-                key={course.id}
-                href={`/course/${course.id}`}
-                className="block px-3 py-1.5 text-sm truncate"
-                style={{
-                  borderRadius: "8px",
-                  color: pathname.startsWith(`/course/${course.id}`) ? "var(--accent)" : "var(--text-secondary)",
-                  fontWeight: pathname.startsWith(`/course/${course.id}`) ? 600 : 400,
-                }}
-              >
-                {course.title}
-              </Link>
-            ))}
             <div className="pt-2" style={{ borderTop: "1px solid var(--border)" }}>
               {isAuthenticated ? (
                 <button onClick={handleSignOut} className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer" style={{ color: "var(--text-secondary)" }}>
