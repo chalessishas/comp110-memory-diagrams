@@ -6,7 +6,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
@@ -18,6 +18,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [generatingAI, setGeneratingAI] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [questionMode, setQuestionMode] = useState<"solving" | "reviewing">("solving");
 
@@ -113,9 +114,36 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       {questions.length === 0 ? (
         <div className="ui-empty">
           <p className="text-base font-medium mb-2">{t("practice.noQuestions")}</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
             {t("practice.noQuestionsDesc")}
           </p>
+          <button
+            onClick={async () => {
+              setGeneratingAI(true);
+              const res = await fetch(`/api/courses/${id}/generate-questions`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+              });
+              if (res.ok) {
+                const data = await res.json();
+                if (data.generated > 0) {
+                  const qRes = await fetch(`/api/questions?courseId=${id}`);
+                  const qs = await qRes.json();
+                  setQuestions(qs);
+                  setCurrentIndex(0);
+                }
+              }
+              setGeneratingAI(false);
+            }}
+            disabled={generatingAI}
+            className="ui-button-primary disabled:opacity-50"
+          >
+            {generatingAI ? (
+              <><Loader2 size={16} className="animate-spin" /> Generating questions...</>
+            ) : (
+              <><Sparkles size={16} /> Generate Practice Questions</>
+            )}
+          </button>
         </div>
       ) : (
         <div className="space-y-5">

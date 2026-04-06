@@ -339,8 +339,16 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
     const raw = JSON.parse(jsonStr);
-    const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
-    const parsed = autoQuizSchema.parse(wrapped);
+    // Handle: { questions: [...] }, [...], or { "1": [...], "2": [...] }
+    let qArr: unknown[];
+    if (Array.isArray(raw)) {
+      qArr = raw;
+    } else if (raw.questions && Array.isArray(raw.questions)) {
+      qArr = raw.questions;
+    } else {
+      qArr = Object.values(raw).flat();
+    }
+    const parsed = autoQuizSchema.parse({ questions: qArr });
     return parsed.questions;
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
