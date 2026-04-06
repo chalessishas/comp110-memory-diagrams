@@ -13,7 +13,8 @@ import { useI18n } from "@/lib/i18n";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [showExamPrep, setShowExamPrep] = useState(false);
   const [examScope, setExamScope] = useState("");
   const [examPrepLoading, setExamPrepLoading] = useState(false);
-  const [examPrepResult, setExamPrepResult] = useState<{ topics_found: number; questions_generated: number; topics: string[] } | null>(null);
+  const [examPrepResult, setExamPrepResult] = useState<{ topics_found: number; topics_processed: number; questions_generated: number; topics_failed: string[]; topics: string[] } | null>(null);
+  const [examPrepError, setExamPrepError] = useState<string | null>(null);
   const [questionMode, setQuestionMode] = useState<"solving" | "reviewing">("solving");
 
   useEffect(() => {
@@ -99,7 +101,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             className="ui-button-primary"
           >
             <Sparkles size={14} />
-            {showExamPrep ? "Hide Exam Prep" : "Exam Prep"}
+            {showExamPrep ? (isZh ? "收起" : "Hide Exam Prep") : (isZh ? "考前冲刺" : "Exam Prep")}
           </button>
           <button
             onClick={() => { setShowUpload(!showUpload); setShowExamPrep(false); }}
@@ -113,25 +115,46 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
 
       {showExamPrep && (
         <div className="ui-panel p-6 md:p-8">
-          <div className="ui-kicker mb-3">EXAM PREP</div>
-          <h3 className="text-xl font-semibold mb-2">Paste your exam scope</h3>
-          <p className="ui-copy mb-4">Paste the email or document that describes what the exam covers. AI will generate targeted practice questions.</p>
+          <div className="ui-kicker mb-3">{isZh ? "考前冲刺" : "EXAM PREP"}</div>
+          <h3 className="text-xl font-semibold mb-2">{isZh ? "粘贴考试范围" : "Paste your exam scope"}</h3>
+          <p className="ui-copy mb-4">{isZh ? "粘贴老师发的考试范围邮件或文档，AI 会根据考点生成针对性练习题。" : "Paste the email or document that describes what the exam covers. AI will generate targeted practice questions."}</p>
           <textarea
             value={examScope}
             onChange={(e) => setExamScope(e.target.value)}
-            placeholder={"Paste exam topics here...\n\nExample: The midterm covers 5.3 Error bounds, 5.5 Alternating series, 6.1 Power series..."}
+            placeholder={isZh ? "在此粘贴考试范围...\n\n例如：期中考试范围包括 5.3 误差界、5.5 交替级数、6.1 幂级数..." : "Paste exam topics here...\n\nExample: The midterm covers 5.3 Error bounds, 5.5 Alternating series, 6.1 Power series..."}
             className="ui-textarea text-sm mb-4"
             rows={6}
             disabled={examPrepLoading}
           />
+          {examPrepError && (
+            <div className="rounded-[18px] px-4 py-3 mb-4" style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid var(--danger)" }}>
+              <p className="text-sm font-medium" style={{ color: "var(--danger)" }}>{examPrepError}</p>
+            </div>
+          )}
           {examPrepResult && (
-            <div className="rounded-[18px] px-4 py-3 mb-4" style={{ backgroundColor: "rgba(22, 163, 74, 0.08)", border: "1px solid var(--success)" }}>
-              <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
-                Generated {examPrepResult.questions_generated} questions from {examPrepResult.topics_found} topics
-              </p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-                Topics: {examPrepResult.topics.join(", ")}
-              </p>
+            <div className="space-y-2 mb-4">
+              <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(22, 163, 74, 0.08)", border: "1px solid var(--success)" }}>
+                <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
+                  {isZh
+                    ? `从 ${examPrepResult.topics_processed} 个主题生成了 ${examPrepResult.questions_generated} 道题`
+                    : `Generated ${examPrepResult.questions_generated} questions from ${examPrepResult.topics_processed} topics`}
+                </p>
+                <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  {examPrepResult.topics.join(", ")}
+                </p>
+              </div>
+              {examPrepResult.topics_failed.length > 0 && (
+                <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.5)" }}>
+                  <p className="text-sm font-medium" style={{ color: "var(--warning)" }}>
+                    {isZh
+                      ? `${examPrepResult.topics_failed.length} 个主题生成失败，可重试`
+                      : `${examPrepResult.topics_failed.length} topic${examPrepResult.topics_failed.length > 1 ? "s" : ""} failed — try again`}
+                  </p>
+                  <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                    {examPrepResult.topics_failed.join(", ")}
+                  </p>
+                </div>
+              )}
             </div>
           )}
           <button
@@ -139,6 +162,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               if (!examScope.trim()) return;
               setExamPrepLoading(true);
               setExamPrepResult(null);
+              setExamPrepError(null);
               try {
                 const res = await fetch(`/api/courses/${id}/exam-prep`, {
                   method: "POST",
@@ -147,24 +171,35 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                 });
                 if (res.ok) {
                   const result = await res.json();
-                  setExamPrepResult(result);
+                  setExamPrepResult({
+                    topics_found: result.topics_found,
+                    topics_processed: result.topics_processed ?? result.topics_found,
+                    questions_generated: result.questions_generated,
+                    topics_failed: result.topics_failed ?? [],
+                    topics: result.topics,
+                  });
                   if (result.questions_generated > 0) {
                     const qRes = await fetch(`/api/questions?courseId=${id}`);
                     const qs = await qRes.json();
                     setQuestions(qs);
                     setCurrentIndex(0);
                   }
+                } else {
+                  const err = await res.json().catch(() => null);
+                  setExamPrepError(err?.error ?? (isZh ? "生成失败，请稍后重试" : "Generation failed. Please try again."));
                 }
-              } catch { /* ignore */ }
+              } catch {
+                setExamPrepError(isZh ? "网络错误或超时，请重试" : "Network error or timeout. Please retry.");
+              }
               setExamPrepLoading(false);
             }}
             disabled={examPrepLoading || !examScope.trim()}
             className="ui-button-primary disabled:opacity-50"
           >
             {examPrepLoading ? (
-              <><Loader2 size={16} className="animate-spin" /> Generating exam questions...</>
+              <><Loader2 size={16} className="animate-spin" /> {isZh ? "正在生成考试题目..." : "Generating exam questions..."}</>
             ) : (
-              <><Sparkles size={16} /> Generate Exam Questions</>
+              <><Sparkles size={16} /> {isZh ? "生成考试题目" : "Generate Exam Questions"}</>
             )}
           </button>
         </div>
