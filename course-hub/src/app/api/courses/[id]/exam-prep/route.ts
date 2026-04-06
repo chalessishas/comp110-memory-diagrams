@@ -53,7 +53,7 @@ ${scope_text.slice(0, 3000)}
   // Step 2: Generate 2 questions per topic (sequential, one topic at a time)
   const allQuestions: { type: string; stem: string; options: unknown; answer: string; explanation: string | null; difficulty: number; topic: string }[] = [];
 
-  for (const topic of topics.slice(0, 10)) { // max 10 topics
+  for (const topic of topics.slice(0, 4)) { // max 4 topics per call (DashScope ~10s each, 60s limit)
     try {
       const { text } = await generateText({
         model: qwen("qwen-plus-latest"),
@@ -110,6 +110,7 @@ Questions should test the specific skills described in this topic. Return ONLY J
 
   return NextResponse.json({
     topics_found: topics.length,
+    topics_processed: Math.min(topics.length, 4),
     questions_generated: allQuestions.length,
     topics,
   });
