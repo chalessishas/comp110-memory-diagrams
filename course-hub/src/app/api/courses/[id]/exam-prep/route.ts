@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { parsedQuestionSchema } from "@/lib/schemas";
+import { stripThinkBlocks } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
@@ -42,7 +43,7 @@ ${scope_text.slice(0, 3000)}
 
   let topics: string[];
   try {
-    const match = topicsText.match(/\[[\s\S]*\]/);
+    const match = stripThinkBlocks(topicsText).match(/\[[\s\S]*\]/);
     topics = match ? JSON.parse(match[0]) : [];
   } catch {
     return NextResponse.json({ error: "Failed to extract topics" }, { status: 500 });
@@ -73,7 +74,7 @@ Questions should test the specific skills described in this topic. Return ONLY J
         }],
       });
 
-      const match = text.match(/\{[\s\S]*\}/);
+      const match = stripThinkBlocks(text).match(/\{[\s\S]*\}/);
       if (!match) return { topic, questions: [] as GenQ[] };
 
       const raw = JSON.parse(match[0]);

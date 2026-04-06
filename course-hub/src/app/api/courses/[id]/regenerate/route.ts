@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { generateStudyTasks, generateQuestionsFromOutline } from "@/lib/ai";
+import { generateStudyTasks, generateQuestionsFromOutline, stripThinkBlocks } from "@/lib/ai";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -47,7 +47,7 @@ Return format: [{"id": "...", "title": "translated title", "content": "translate
       }],
     });
 
-    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    const jsonMatch = stripThinkBlocks(text).match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       const translated = JSON.parse(jsonMatch[0]) as { id: string; title: string; content: string | null }[];
       for (const node of translated) {

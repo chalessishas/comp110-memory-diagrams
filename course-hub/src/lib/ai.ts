@@ -18,10 +18,18 @@ const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 // Temporarily disabled AbortSignal — investigating generate failures
 const AI_TIMEOUT_MS = 55_000;
 
-// Fix #9: robust JSON extraction — strips markdown fences, finds object or array
+// Strip qwen3.5-plus thinking mode leaks (can corrupt JSON output)
+export function stripThinkBlocks(text: string): string {
+  return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
+}
+
+// Fix #9: robust JSON extraction — strips markdown fences + think blocks, finds object or array
 function extractJSON(text: string): string | null {
-  // Strip markdown code fences
-  const cleaned = text.replace(/```(?:json)?\s*/g, "").replace(/```\s*/g, "");
+  // Strip qwen3.5-plus thinking mode leaks and markdown code fences
+  const cleaned = text
+    .replace(/<think>[\s\S]*?<\/think>/g, "")
+    .replace(/```(?:json)?\s*/g, "")
+    .replace(/```\s*/g, "");
   // Try to find JSON object
   const objMatch = cleaned.match(/\{[\s\S]*\}/);
   if (objMatch) return objMatch[0];
