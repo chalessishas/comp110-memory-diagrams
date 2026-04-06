@@ -5,19 +5,22 @@ import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
 
+// Max knowledge points per AI call — keeps within Vercel function timeout
+const MAX_STUDY_TARGETS = 15;
+
 function selectStudyTargets(nodes: { id: string; title: string; content: string | null; type: string; parent_id: string | null }[]) {
   const knowledgePoints = nodes.filter((n) => n.type === "knowledge_point");
   if (knowledgePoints.length > 0) {
-    return knowledgePoints.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+    return knowledgePoints.slice(0, MAX_STUDY_TARGETS).map((n) => ({ id: n.id, title: n.title, content: n.content }));
   }
 
   const parentIds = new Set(nodes.map((n) => n.parent_id).filter(Boolean));
   const leafNodes = nodes.filter((n) => !parentIds.has(n.id));
   if (leafNodes.length > 0) {
-    return leafNodes.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+    return leafNodes.slice(0, MAX_STUDY_TARGETS).map((n) => ({ id: n.id, title: n.title, content: n.content }));
   }
 
-  return nodes.map((n) => ({ id: n.id, title: n.title, content: n.content }));
+  return nodes.slice(0, MAX_STUDY_TARGETS).map((n) => ({ id: n.id, title: n.title, content: n.content }));
 }
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {

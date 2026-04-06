@@ -55,18 +55,14 @@ export async function parseSyllabus(fileBase64: string, mimeType: string, langua
             },
             {
               type: "text",
-              text: `Analyze this course syllabus and extract its structure. Return:
-- title: the course name
-- description: a one-sentence course description
-- professor: instructor name (null if not found)
-- semester: semester info like "Fall 2026" (null if not found)
-- nodes: hierarchical array of course content, where each node has:
-  - title: section title
-  - type: one of "week", "chapter", "topic", "knowledge_point"
-  - content: brief description (null if obvious from title)
-  - children: nested sub-sections
+              text: `Analyze this course syllabus and extract its structure as a NESTED hierarchy.
 
-Organize by the document's natural structure. Break each section into specific knowledge points where possible.
+Return JSON with: title, description, professor (null if not found), semester (null if not found), confidence ("high"/"medium"/"low"), missing_info (array), and nodes.
+
+Each node: { title, type, content (null if obvious), children }
+Types: "week", "chapter", "topic", "knowledge_point"
+
+CRITICAL: Every week/chapter MUST have children. Sub-topics and bullet points become "knowledge_point" children. Do NOT create flat week nodes with empty children. Leaf nodes must be type "knowledge_point".
 
 Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
             },
@@ -94,13 +90,14 @@ export async function parseSyllabusText(rawText: string, language?: string): Pro
       messages: [
         {
           role: "user",
-          content: `You are analyzing a course syllabus to extract its ACTUAL teaching content. Return ONLY valid JSON (no markdown, no code fences).
+          content: `You are analyzing a course syllabus to extract its ACTUAL teaching content as a nested hierarchy. Return ONLY valid JSON (no markdown, no code fences).
 
 CRITICAL RULES:
-1. Only extract topics/knowledge points that are EXPLICITLY mentioned as being taught. Do NOT invent or guess topics.
-2. If the syllabus only has a course description but no week-by-week schedule or topic list, the nodes array should reflect ONLY what is explicitly stated.
-3. Administrative content (grading policies, honor code, attendance, accommodations) is NOT course content — do not turn these into knowledge points.
-4. If the syllabus lacks a detailed topic schedule, set confidence to "low" and list what's missing in missing_info.
+1. Only extract topics/knowledge points that are EXPLICITLY mentioned. Do NOT invent topics.
+2. Administrative content (grading, attendance, accommodations) is NOT course content.
+3. EVERY week/chapter MUST have children. Sub-topics and bullet points from the syllabus become children with type "knowledge_point". If a week lists "Integration by parts, Partial fractions", those are TWO separate knowledge_point children.
+4. The hierarchy should be: week/chapter → topic → knowledge_point. Use at least 2 levels. Leaf nodes should be type "knowledge_point".
+5. If the syllabus lacks a detailed topic schedule, set confidence to "low".
 
 JSON shape:
 {
@@ -109,27 +106,21 @@ JSON shape:
   "professor": "name or null",
   "semester": "e.g. Spring 2026 or null",
   "confidence": "high|medium|low",
-  "missing_info": ["list of what's missing, e.g. 'No week-by-week topic schedule found', 'No specific learning objectives per unit'"],
+  "missing_info": [],
   "nodes": [
     {
-      "title": "section title",
-      "type": "week|chapter|topic|knowledge_point",
-      "content": "brief description or null",
-      "children": []
+      "title": "Week 1: Functions",
+      "type": "week",
+      "content": null,
+      "children": [
+        { "title": "Domain and range", "type": "knowledge_point", "content": "Determining domain and range of functions", "children": [] },
+        { "title": "Composition of functions", "type": "knowledge_point", "content": null, "children": [] }
+      ]
     }
   ]
 }
 
-Confidence levels:
-- "high": syllabus has a clear week-by-week or chapter-by-chapter topic breakdown
-- "medium": syllabus lists topics but not organized by time/chapter
-- "low": syllabus is mostly administrative with only a vague course description
-
-Examples of missing_info:
-- "No week-by-week topic schedule — only a general course description was found"
-- "No specific readings or textbook chapters listed"
-- "Topics mentioned in course description but no breakdown into units"
-- "Consider uploading lecture slides or course calendar for better results"
+IMPORTANT: Do NOT create flat week nodes with empty children. Every week/chapter that lists sub-topics MUST have those sub-topics as knowledge_point children.
 
 Course text:
 """
