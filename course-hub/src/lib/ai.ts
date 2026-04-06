@@ -188,7 +188,9 @@ Return ONLY valid JSON (no markdown, no code fences).`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const parsed = questionsSchema.parse(JSON.parse(jsonStr));
+    const raw = JSON.parse(jsonStr);
+    const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
+    const parsed = questionsSchema.parse(wrapped);
     return parsed.questions;
   } catch (err) {
     throw new Error(`Exam question parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -263,7 +265,10 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const parsed = studyTasksSchema.parse(JSON.parse(jsonStr));
+    const raw = JSON.parse(jsonStr);
+    // AI might return { tasks: [...] } or just [...] — handle both
+    const wrapped = Array.isArray(raw) ? { tasks: raw } : raw;
+    const parsed = studyTasksSchema.parse(wrapped);
     return parsed.tasks;
   } catch (err) {
     throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -322,7 +327,9 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const parsed = autoQuizSchema.parse(JSON.parse(jsonStr));
+    const raw = JSON.parse(jsonStr);
+    const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
+    const parsed = autoQuizSchema.parse(wrapped);
     return parsed.questions;
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
