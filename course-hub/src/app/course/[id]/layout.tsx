@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { StudyBuddy } from "@/components/StudyBuddy";
 
 export default async function CourseLayout({
   children,
@@ -14,13 +13,8 @@ export default async function CourseLayout({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: course } = await supabase.from("courses").select("id, title").eq("id", id).single();
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).single();
   if (!course) redirect("/dashboard");
 
-  return (
-    <>
-      {children}
-      <StudyBuddy courseId={id} courseTitle={course.title} />
-    </>
-  );
+  return <>{children}</>;
 }

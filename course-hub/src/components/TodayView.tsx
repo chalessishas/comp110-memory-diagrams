@@ -67,12 +67,11 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         return (
           <div
             key={task.id}
-            className="ui-panel p-5 flex items-start gap-4 group cursor-pointer transition-all"
-            style={{ borderLeft: `3px solid ${task.color}` }}
+            className="ui-panel p-5 flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
           >
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${task.color}12`, color: task.color }}
+              className="w-10 h-10 flex items-center justify-center shrink-0"
+              style={{ backgroundColor: `${task.color}15`, color: task.color, borderRadius: "var(--radius-md)", border: `2px solid ${task.color}30` }}
             >
               <Icon size={18} />
             </div>
@@ -91,8 +90,8 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
               </p>
             </div>
             <button
-              className="px-4 py-2 rounded-lg text-sm font-medium cursor-pointer shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ backgroundColor: task.color, color: "white" }}
+              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0"
+              style={{ backgroundColor: task.color, color: "white", borderRadius: "var(--radius-sm)" }}
             >
               {isZh ? "开始" : "Start"}
             </button>
