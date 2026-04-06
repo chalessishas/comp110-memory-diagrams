@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
   const { data: question } = await supabase
     .from("questions")
-    .select("answer, type")
+    .select("answer, type, explanation")
     .eq("id", parsed.data.question_id)
     .single();
 
