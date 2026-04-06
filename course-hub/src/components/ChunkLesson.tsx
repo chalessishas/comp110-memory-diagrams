@@ -199,13 +199,24 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
 
           {/* Submit / Result */}
           {!state.submitted ? (
-            <button
-              onClick={handleSubmitCheckpoint}
-              disabled={!state.selected && !state.textAnswer}
-              className="ui-button-primary disabled:opacity-30"
-            >
-              {isZh ? "提交" : "Check"}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSubmitCheckpoint}
+                disabled={!state.selected && !state.textAnswer}
+                className="ui-button-primary disabled:opacity-30"
+              >
+                {isZh ? "提交" : "Check"}
+              </button>
+              {state.showRemediation && (
+                <button
+                  onClick={() => setCurrentChunkIndex(i => i + 1)}
+                  className="text-xs px-3 py-1.5 rounded-lg cursor-pointer"
+                  style={{ border: "1px solid var(--border)", color: "var(--text-muted)" }}
+                >
+                  {isZh ? "跳过，继续" : "Skip, move on"}
+                </button>
+              )}
+            </div>
           ) : (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
