@@ -11,8 +11,10 @@ const qwen = createOpenAI({
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
 });
 
+const model = qwen("qwen3.5-plus");
+
 // Exam Prep: paste exam scope text → generate targeted questions
-// Generates 2 questions per topic, one topic at a time to avoid timeout
+// qwen3.5-plus is fast enough to handle 10+ topics within 60s
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -24,9 +26,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "scope_text required" }, { status: 400 });
   }
 
-  // Step 1: Extract exam topics from the scope text (fast, small output)
+  // Step 1: Extract exam topics from the scope text
   const { text: topicsText } = await generateText({
-    model: qwen("qwen-plus-latest"),
+    model,
     messages: [{
       role: "user",
       content: `Extract the exam topics from this text. Return a JSON array of strings, each being one specific testable topic. Be specific — "Alternating series test" not just "Series". Return ONLY a JSON array like ["topic1", "topic2"].
@@ -50,13 +52,17 @@ ${scope_text.slice(0, 3000)}
     return NextResponse.json({ error: "No topics found in the exam scope" }, { status: 400 });
   }
 
-  // Step 2: Generate 2 questions per topic (sequential, one topic at a time)
-  const allQuestions: { type: string; stem: string; options: unknown; answer: string; explanation: string | null; difficulty: number; topic: string }[] = [];
+  // Step 2: Generate 2 questions per topic in parallel batches of 4
+  type GenQ = { type: string; stem: string; options: unknown; answer: string; explanation: string | null; difficulty: number; topic: string };
+  const allQuestions: GenQ[] = [];
+  const topicsFailed: string[] = [];
+  const maxTopics = Math.min(topics.length, 12);
 
-  for (const topic of topics.slice(0, 4)) { // max 4 topics per call (DashScope ~10s each, 60s limit)
-    try {
+  for (let i = 0; i < maxTopics; i += 4) {
+    const batch = topics.slice(i, i + 4);
+    const results = await Promise.allSettled(batch.map(async (topic) => {
       const { text } = await generateText({
-        model: qwen("qwen-plus-latest"),
+        model,
         messages: [{
           role: "user",
           content: `Generate exactly 2 practice questions about "${topic}" for a Calculus II exam. Return JSON:
@@ -68,31 +74,49 @@ Questions should test the specific skills described in this topic. Return ONLY J
       });
 
       const match = text.match(/\{[\s\S]*\}/);
-      if (match) {
-        const raw = JSON.parse(match[0]);
-        const qs = Array.isArray(raw) ? raw : (raw.questions ?? Object.values(raw).flat());
-        for (const q of qs) {
-          try {
-            const parsed = parsedQuestionSchema.parse(q);
-            allQuestions.push({ ...parsed, topic });
-          } catch { /* skip malformed questions */ }
-        }
+      if (!match) return { topic, questions: [] as GenQ[] };
+
+      const raw = JSON.parse(match[0]);
+      const qs = Array.isArray(raw) ? raw : (raw.questions ?? Object.values(raw).flat());
+      const parsed: GenQ[] = [];
+      for (const q of qs) {
+        const r = parsedQuestionSchema.safeParse(q);
+        if (r.success) parsed.push({ ...r.data, topic });
       }
-    } catch {
-      // Skip topics that fail, continue with rest
+      return { topic, questions: parsed };
+    }));
+
+    for (let j = 0; j < results.length; j++) {
+      const r = results[j];
+      if (r.status === "fulfilled" && r.value.questions.length > 0) {
+        allQuestions.push(...r.value.questions);
+      } else {
+        topicsFailed.push(batch[j]);
+      }
     }
   }
 
-  // Step 3: Insert all questions into DB
+  // Step 3: Insert all questions with fuzzy KP matching
   if (allQuestions.length > 0) {
-    // Try to match topics to existing knowledge points
     const { data: kps } = await supabase
       .from("outline_nodes")
       .select("id, title")
       .eq("course_id", id)
       .eq("type", "knowledge_point");
 
-    const kpMap = new Map((kps ?? []).map((kp) => [kp.title.toLowerCase(), kp.id]));
+    const kpList = kps ?? [];
+    const kpMap = new Map(kpList.map((kp) => [kp.title.toLowerCase(), kp.id]));
+
+    function findKpId(topic: string): string | null {
+      const t = topic.toLowerCase();
+      if (kpMap.has(t)) return kpMap.get(t)!;
+      // Fuzzy: check if topic contains or is contained by any KP title
+      for (const kp of kpList) {
+        const kpLower = kp.title.toLowerCase();
+        if (kpLower.includes(t) || t.includes(kpLower)) return kp.id;
+      }
+      return null;
+    }
 
     const rows = allQuestions.map((q) => ({
       course_id: id,
@@ -102,7 +126,7 @@ Questions should test the specific skills described in this topic. Return ONLY J
       answer: q.answer,
       explanation: q.explanation,
       difficulty: q.difficulty,
-      knowledge_point_id: kpMap.get(q.topic.toLowerCase()) ?? null,
+      knowledge_point_id: findKpId(q.topic),
     }));
 
     await supabase.from("questions").insert(rows);
@@ -110,8 +134,9 @@ Questions should test the specific skills described in this topic. Return ONLY J
 
   return NextResponse.json({
     topics_found: topics.length,
-    topics_processed: Math.min(topics.length, 4),
+    topics_processed: maxTopics,
     questions_generated: allQuestions.length,
+    topics_failed: topicsFailed,
     topics,
   });
 }

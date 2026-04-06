@@ -57,7 +57,7 @@ Instructions:
 - You can suggest which knowledge points to review for a topic`;
 
   const result = streamText({
-    model: qwen("qwen-plus-latest"),
+    model: qwen("qwen3.5-plus"),
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
   });
