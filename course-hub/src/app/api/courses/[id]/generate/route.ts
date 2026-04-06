@@ -77,10 +77,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const kpData = studyTargets.map((kp) => ({ title: kp.title, content: kp.content }));
 
   let studyTasks: Awaited<ReturnType<typeof generateStudyTasks>> = [];
+  let taskError: string | null = null;
   try {
     studyTasks = await generateStudyTasks(course.title, kpData, language);
   } catch (e) {
-    console.error("Study task generation failed:", e instanceof Error ? e.message : e);
+    taskError = e instanceof Error ? e.message : String(e);
+    console.error("Study task generation failed:", taskError);
   }
 
   // Questions are NOT generated here — too slow for serverless.
@@ -125,5 +127,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     tasks_generated: taskRows.length,
     questions_generated: questionRows.length,
     study_targets_used: studyTargets.length,
+    ...(taskError ? { task_error: taskError } : {}),
   });
 }
