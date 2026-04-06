@@ -19,12 +19,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .eq("course_id", id)
     .eq("type", "knowledge_point");
 
-  // Get mastery data
-  const { data: mastery } = await supabase
-    .from("element_mastery")
-    .select("concept_id, current_level, fsrs_retrievability")
-    .eq("user_id", user.id)
-    .in("concept_id", (kps ?? []).map(k => k.id));
+  // Get mastery data (guard empty array)
+  const kpIds = (kps ?? []).map(k => k.id);
+  const { data: mastery } = kpIds.length > 0
+    ? await supabase.from("element_mastery").select("concept_id, current_level, fsrs_retrievability").eq("user_id", user.id).in("concept_id", kpIds)
+    : { data: [] };
 
   // Get exam dates (future only)
   const { data: exams } = await supabase
@@ -34,13 +33,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .gte("exam_date", new Date().toISOString().split("T")[0])
     .order("exam_date");
 
-  // Get active misconceptions
-  const { data: misconceptions } = await supabase
-    .from("misconceptions")
-    .select("*")
-    .eq("user_id", user.id)
-    .in("concept_id", (kps ?? []).map(k => k.id))
-    .eq("resolved", false);
+  // Get active misconceptions (guard empty array)
+  const { data: misconceptions } = kpIds.length > 0
+    ? await supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).eq("resolved", false)
+    : { data: [] };
 
   // Get lessons to check what's been learned
   const { data: lessons } = await supabase
@@ -48,11 +44,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
     .select("id, knowledge_point_id")
     .eq("course_id", id);
 
-  const { data: progress } = await supabase
-    .from("lesson_progress")
-    .select("lesson_id, completed")
-    .eq("user_id", user.id)
-    .in("lesson_id", (lessons ?? []).map(l => l.id));
+  const lessonIds = (lessons ?? []).map(l => l.id);
+  const { data: progress } = lessonIds.length > 0
+    ? await supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id).in("lesson_id", lessonIds)
+    : { data: [] };
 
   const tasks = buildTodayTasks({
     kps: kps ?? [],
