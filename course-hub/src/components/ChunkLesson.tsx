@@ -97,14 +97,22 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
         </span>
       </div>
 
-      {/* Chunk content */}
-      <div className="ui-panel p-6 mb-4">
-        <MarkdownRenderer content={activeContent} />
-      </div>
+      {/* Pretest: show checkpoint BEFORE content (attempt → learn) */}
+      {/* Regular: show content BEFORE checkpoint (learn → verify) */}
+      {currentChunkIndex > 0 && (
+        <div className="ui-panel p-6 mb-4">
+          <MarkdownRenderer content={activeContent} />
+        </div>
+      )}
 
       {/* Checkpoint */}
       {chunk.checkpoint_type && activePrompt && (
-        <div className="ui-panel p-6 mb-4" style={{ borderLeft: "3px solid var(--accent)" }}>
+        <div className="ui-panel p-6 mb-4" style={{ borderLeft: `3px solid ${currentChunkIndex === 0 && !state.submitted ? "var(--warning)" : "var(--accent)"}` }}>
+          {currentChunkIndex === 0 && !state.submitted && (
+            <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+              {isZh ? "💡 先试试看——答错没关系，尝试本身就能帮助学习" : "💡 Try first — getting it wrong is fine, the attempt itself helps you learn"}
+            </p>
+          )}
           <p className="text-sm font-semibold mb-4">{activePrompt}</p>
 
           {/* MCQ options */}
@@ -144,13 +152,16 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
           )}
 
           {/* Text/code/open/latex input */}
-          {(chunk.checkpoint_type === "code" || chunk.checkpoint_type === "open" || chunk.checkpoint_type === "latex") && (
+          {(chunk.checkpoint_type === "code" || chunk.checkpoint_type === "open" || chunk.checkpoint_type === "latex" || chunk.checkpoint_type === "fill_blank") && (
             <textarea
               value={state.textAnswer}
               onChange={e => !state.submitted && updateState({ textAnswer: e.target.value })}
               disabled={state.submitted}
-              placeholder={isZh ? "输入你的答案..." : "Type your answer..."}
-              className="ui-textarea mb-4 min-h-[80px] text-sm font-mono"
+              placeholder={chunk.checkpoint_type === "fill_blank"
+                ? (isZh ? "填写答案..." : "Fill in the blank...")
+                : (isZh ? "输入你的答案..." : "Type your answer...")}
+              className="ui-textarea mb-4 text-sm font-mono"
+              rows={chunk.checkpoint_type === "fill_blank" ? 1 : 3}
             />
           )}
 
@@ -194,6 +205,16 @@ export function ChunkLesson({ chunks, courseId: _courseId, lessonId: _lessonId }
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Pretest: show content AFTER checkpoint submission */}
+      {currentChunkIndex === 0 && state.submitted && (
+        <div className="ui-panel p-6 mb-4">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>
+            {isZh ? "现在来学习" : "Now let's learn"}
+          </p>
+          <MarkdownRenderer content={activeContent} />
         </div>
       )}
 

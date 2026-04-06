@@ -462,8 +462,29 @@ ONLY JSON.`,
   // Phase 2: Generate chunks in parallel (~12-15s for 4 chunks)
   const outlineSummary = outline.map((o, i) => `${i + 1}. ${o.title}`).join("\n");
 
-  const chunkPromises = outline.map((item, index) =>
-    generateText({
+  // Checkpoint type rotation: pretest → MCQ → fill_blank → open
+  const checkpointTypes = ["pretest", "mcq", "fill_blank", "open"] as const;
+
+  const chunkPromises = outline.map((item, index) => {
+    const cpType = checkpointTypes[index % checkpointTypes.length];
+    const isPretest = cpType === "pretest";
+
+    // Pretest chunks: question FIRST, then teaching content
+    // All others: teaching content first, then checkpoint
+    const pretestInstruction = isPretest
+      ? `IMPORTANT: This is a PRETEST chunk. Structure it as:
+1. Start with a challenging question the student probably can't answer yet (this is intentional — attempting retrieval before learning enhances memory, even if they get it wrong)
+2. After the checkpoint, provide the teaching content that explains the answer
+The student will see "Don't worry if you don't know this yet — trying first helps you learn better" in the UI.`
+      : "";
+
+    const checkpointInstruction = cpType === "mcq" || cpType === "pretest"
+      ? `checkpoint_type: "mcq" with 4 options. Wrong options based on common misconceptions.`
+      : cpType === "fill_blank"
+      ? `checkpoint_type: "fill_blank". checkpoint_options: null. Answer is a short phrase or number.`
+      : `checkpoint_type: "open". checkpoint_options: null. Answer is 1-2 sentences. checkpoint_answer should contain the key concepts that must appear.`;
+
+    return generateText({
       model: textModel,
       messages: [{
         role: "user",
@@ -477,14 +498,15 @@ Teaching goal: ${item.teaching_goal}
 
 Course: ${courseTitle}
 Student level: College sophomore
+${pretestInstruction}
 
 Requirements:
 1. content: 150-200 words, Markdown with LaTeX math ($...$). Include a concrete example.
-2. checkpoint: One MCQ with 4 options. Wrong options should reflect common misconceptions.
-3. Do NOT generate remediation (generated on-demand when student answers wrong).
+2. checkpoint: ${checkpointInstruction}
+3. Do NOT generate remediation.
 
 Return ONLY JSON:
-{"content": "markdown...", "checkpoint_type": "mcq", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": [{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]}`,
+{"content": "markdown...", "checkpoint_type": "${cpType === "pretest" ? "mcq" : cpType}", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": ${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]' : "null"}}`,
       }],
     }).then(({ text }) => {
       const json = extractJSON(text);
@@ -493,13 +515,13 @@ Return ONLY JSON:
       return {
         chunk_index: index,
         content: String(raw.content ?? ""),
-        checkpoint_type: raw.checkpoint_type === "mcq" ? "mcq" as const : null,
+        checkpoint_type: (["mcq", "code", "open", "latex", "fill_blank"].includes(raw.checkpoint_type) ? raw.checkpoint_type : "mcq") as "mcq" | "code" | "open" | "latex" | null,
         checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
         checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
         checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
       } as GeneratedChunk;
-    }).catch(() => null)
-  );
+    }).catch(() => null);
+  });
 
   const results = await Promise.all(chunkPromises);
   const chunks: GeneratedChunk[] = results.filter(c => c !== null);

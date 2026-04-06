@@ -21,7 +21,11 @@ export async function GET(request: Request) {
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // Interleaved practice: shuffle questions so different knowledge points are mixed
+  // Evidence: interleaving produces g=0.42 overall, d=1.05-1.21 in math (Rohrer et al.)
+  const shuffled = [...(data ?? [])].sort(() => Math.random() - 0.5);
+  return NextResponse.json(shuffled);
 }
 
 export async function POST(request: Request) {
