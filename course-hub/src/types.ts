@@ -172,7 +172,7 @@ export interface ExamDate {
 
 export type MasteryLevelV2 = "unseen" | "exposed" | "practiced" | "proficient" | "mastered";
 export type SessionType = "teaching_challenge" | "checkpoint_open" | "study_buddy" | "review";
-export type CheckpointType = "mcq" | "code" | "latex" | "open" | "canvas" | "ordering";
+export type CheckpointType = "mcq" | "code" | "latex" | "open" | "canvas" | "ordering" | "fill_blank";
 export type ConfidenceLevel = "none" | "surface" | "partial" | "solid" | "mastery";
 export type PrerequisiteType = "hard" | "soft";
 
