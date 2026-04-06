@@ -162,3 +162,111 @@ export interface ExamDate {
   knowledge_point_ids: string[];
   created_at: string;
 }
+
+// ─── Learning System V2 Types ───
+
+export type MasteryLevelV2 = "unseen" | "exposed" | "practiced" | "proficient" | "mastered";
+export type SessionType = "teaching_challenge" | "checkpoint_open" | "study_buddy" | "review";
+export type CheckpointType = "mcq" | "code" | "latex" | "open" | "canvas" | "ordering";
+export type ConfidenceLevel = "none" | "surface" | "partial" | "solid" | "mastery";
+export type PrerequisiteType = "hard" | "soft";
+
+export interface ElementMastery {
+  id: string;
+  user_id: string;
+  concept_id: string;
+  element_name: string;
+  times_tested: number;
+  times_correct: number;
+  times_non_mcq: number;
+  times_non_mcq_correct: number;
+  fsrs_stability: number;
+  fsrs_difficulty: number;
+  fsrs_retrievability: number;
+  fsrs_last_review: string | null;
+  current_level: MasteryLevelV2;
+  level_reached_at: string;
+  avg_response_time_ms: number;
+  has_external_practice: boolean;
+  has_non_mcq_correct: boolean;
+  has_cross_concept_correct: boolean;
+  has_transfer_correct: boolean;
+  has_teaching_challenge_pass: boolean;
+  first_contact_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Misconception {
+  id: string;
+  user_id: string;
+  concept_id: string;
+  misconception_description: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  occurrence_count: number;
+  resolved: boolean;
+  resolved_at: string | null;
+  relapsed: boolean;
+  relapse_count: number;
+  related_concepts: string[];
+  created_at: string;
+}
+
+export interface ChallengeLog {
+  id: string;
+  user_id: string;
+  concept_id: string;
+  session_type: SessionType;
+  turns: unknown[];
+  final_confidence: ConfidenceLevel | null;
+  elements_passed: string[];
+  elements_failed: string[];
+  misconceptions_found: string[];
+  student_self_rating: number | null;
+  ai_confidence_rating: string | null;
+  meta_cognition_match: boolean | null;
+  created_at: string;
+}
+
+export interface LessonChunk {
+  id: string;
+  lesson_id: string;
+  chunk_index: number;
+  content: string;
+  widget_code: string | null;
+  widget_description: string | null;
+  widget_challenge: string | null;
+  checkpoint_type: CheckpointType | null;
+  checkpoint_prompt: string | null;
+  checkpoint_answer: string | null;
+  checkpoint_options: { label: string; text: string }[] | null;
+  checkpoint_core_elements: string[] | null;
+  remediation_content: string | null;
+  remediation_question: string | null;
+  remediation_answer: string | null;
+}
+
+export interface LessonProgress {
+  id: string;
+  user_id: string;
+  lesson_id: string;
+  last_chunk_index: number;
+  completed: boolean;
+  checkpoint_results: Record<string, { passed: boolean; attempts: number }>;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface TodayTask {
+  id: string;
+  type: "urgent_study" | "exam_review" | "fsrs_review" | "exam_prep" | "new_content" | "weakness";
+  priority: number;
+  course_id: string;
+  course_title: string;
+  title: string;
+  description: string;
+  estimated_minutes: number;
+  count?: number;
+  color: string;
+}
