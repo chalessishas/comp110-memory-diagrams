@@ -1,5 +1,46 @@
 # CourseHub Status
 
+## [2026-04-07 13:50] Phase 4 — Evidence-Based Optimization (5 commits, all deployed)
+
+Exam in 3 days (Apr 10). Applied evidence-based teaching research to existing architecture.
+
+### SSE Streaming for Lesson Generation
+- `generate-one/route.ts`: New streaming path (`stream: true`), events: outline → lesson → chunk → done
+- `learn/page.tsx`: SSE consumer with `ReadableStream` reader, progressive chunk rendering
+- `ChunkLesson.tsx`: `totalChunks` + `isStreaming` props, loading state between chunks
+- Result: First chunk visible in ~5s vs ~15s full-page blank wait
+
+### FSRS Exam-Day Retrievability Sort
+- `getExamPriorityCards()`: Predicts per-card recall on exam date via `get_retrievability(card, examDate)`
+- Cards sorted ascending (weakest first), new cards (reps===0) get retrieval=0 (highest priority)
+- Cards ≥0.95 predicted recall skipped — time better spent on weak spots
+- UI: per-card exam-day recall badge (red/yellow/green)
+
+### Evidence-Based Interleaving
+- `interleaveByKey()`: Bounded-lookahead greedy (window=5) interleaves cards by knowledge point
+- Preserves FSRS weakest-first priority while avoiding same-KP adjacency
+- Based on Brunmair & Richter 2019 meta-analysis (g=0.42 for interleaving)
+
+### Concreteness Fading Prompts
+- Lesson outline prompt: 4 chunks follow concrete → numerical → symbolic → transfer
+- Per-chunk abstraction level instruction injected into generation prompt
+- Based on Fyfe, McNeil & Borjas 2015
+
+### Bug Fix: Exam Mode Re-sort
+- Split useEffect into fetch (depends `[id]`) + sort (depends `[questions, examActive]`)
+- Toggling exam mode now immediately re-sorts queue without page reload
+
+### Research Produced
+- `docs/research/2026-04-07-exam-countdown.md` — FSRS migration, monitoring, exam strategies
+- `docs/research/2026-04-07-competitor-analysis.md` — 秘塔/NotebookLM/Anti-Gravity/Khanmigo comparison
+- `docs/research/2026-04-07-evidence-based-analysis.md` — Full paper mapping (5 aligned mechanisms, 8 gaps, prioritized actions)
+
+### Known Issues
+- SRS data still in localStorage (Supabase migration deferred to post-exam)
+- No adaptive difficulty (85% rule) — #1 post-exam priority
+- SSE streaming untested with live AI call (build passes, deploy healthy)
+- Vercel Git integration still broken (manual deploy)
+
 ## [2026-04-06 12:50] Phase 3 — Exam Prep Overhaul (11 commits, all deployed)
 
 Calculus II midterm on April 10. Major improvements to learning system for exam readiness.
