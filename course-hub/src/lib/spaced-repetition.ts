@@ -130,6 +130,40 @@ export function getExamDayRetrievability(card: ReviewCard): number | null {
   return getScheduler().get_retrievability(card.card, examDate, false) as number;
 }
 
+// Interleave items so adjacent items have different keys when possible.
+// Uses a bounded lookahead (default 5) to preserve the original priority ordering
+// while avoiding same-key adjacency. If no different-key item is found within the
+// lookahead window, the highest-priority item is taken as-is.
+// Rationale: Brunmair & Richter 2019 meta-analysis found g=0.42 for interleaving;
+// Taylor & Rohrer 2010 found d=1.21 in math classrooms.
+export function interleaveByKey<T>(items: T[], keyFn: (item: T) => string | null | undefined, lookahead = 5): T[] {
+  if (items.length <= 2) return items;
+
+  const result: T[] = [];
+  const remaining = [...items];
+  let lastKey: string | null | undefined = null;
+
+  while (remaining.length > 0) {
+    const searchLen = Math.min(remaining.length, lookahead);
+    let picked = -1;
+
+    for (let i = 0; i < searchLen; i++) {
+      if (keyFn(remaining[i]) !== lastKey || lastKey == null) {
+        picked = i;
+        break;
+      }
+    }
+
+    if (picked === -1) picked = 0;
+
+    const [item] = remaining.splice(picked, 1);
+    result.push(item);
+    lastKey = keyFn(item);
+  }
+
+  return result;
+}
+
 export function getNextReviewDate(cards: ReviewCard[]): Date | null {
   if (cards.length === 0) return null;
   const sorted = [...cards].sort((a, b) => new Date(a.card.due).getTime() - new Date(b.card.due).getTime());

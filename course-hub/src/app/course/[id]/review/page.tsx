@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
-import { getDueCards, getExamPriorityCards, getExamDayRetrievability, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap } from "lucide-react";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
@@ -40,7 +40,16 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     const cards = loadCards();
     const courseQuestionIds = new Set(questions.map((q) => q.id));
     const courseCards = cards.filter((c) => courseQuestionIds.has(c.question_id));
-    setDueCards(examActive ? getExamPriorityCards(courseCards) : getDueCards(courseCards));
+
+    if (examActive) {
+      const prioritized = getExamPriorityCards(courseCards);
+      // Interleave by knowledge point so adjacent cards test different topics
+      // (Brunmair & Richter 2019: interleaving g=0.42 in math)
+      const kpMap = new Map(questions.map((q) => [q.id, q.knowledge_point_id]));
+      setDueCards(interleaveByKey(prioritized, (c) => kpMap.get(c.question_id)));
+    } else {
+      setDueCards(getDueCards(courseCards));
+    }
     setCurrentIndex(0); // reset position when queue changes
   }, [questions, examActive]);
 

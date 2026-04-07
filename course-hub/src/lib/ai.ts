@@ -449,8 +449,11 @@ Return JSON:
 {"chunks_outline": [{"title": "...", "teaching_goal": "..."}]}
 
 Requirements:
-- 4 sub-topics, ordered from foundation to application
-- Last one should be synthesis/application
+- 4 sub-topics following a CONCRETENESS FADING progression (Fyfe et al. 2015):
+  1. Pretest using a concrete real-world scenario (e.g. physical quantities, money, distances)
+  2. Concrete numerical worked example with specific numbers
+  3. Symbolic/formulaic generalization with variables and notation
+  4. Abstract application: a different context that tests transfer
 - Each teaching_goal is one sentence
 ONLY JSON.`,
     }],
@@ -481,6 +484,16 @@ export async function generateSingleLessonChunk(
   const checkpointTypes = ["pretest", "mcq", "fill_blank", "open"] as const;
   const cpType = checkpointTypes[index % checkpointTypes.length];
   const isPretest = cpType === "pretest";
+
+  // Concreteness fading: each chunk has a different abstraction level
+  const abstractionLevels = [
+    "CONCRETE SCENARIO: Use a real-world scenario (physical quantities, money, areas, rates). No abstract symbols yet — only numbers and words.",
+    "CONCRETE EXAMPLE: Use a specific worked example with numbers. Introduce mathematical notation alongside the concrete values.",
+    "SYMBOLIC: Teach the general formula/method using variables. Reference the earlier concrete example to bridge understanding.",
+    "TRANSFER: Apply the concept to a different context than chunks 1-3. The student should recognize the same deep structure in a new surface form.",
+  ] as const;
+
+  const abstractionInstruction = abstractionLevels[index] ?? abstractionLevels[abstractionLevels.length - 1];
 
   const pretestInstruction = isPretest
     ? `IMPORTANT: This is a PRETEST chunk. Structure it as:
@@ -513,9 +526,10 @@ Student level: College sophomore
 ${pretestInstruction}
 
 Requirements:
-1. content: 150-200 words, Markdown with LaTeX math ($...$). Include a concrete example.
-2. checkpoint: ${checkpointInstruction}
-3. Do NOT generate remediation.
+1. content: 150-200 words, Markdown with LaTeX math ($...$).
+2. Abstraction level for this chunk: ${abstractionInstruction}
+3. checkpoint: ${checkpointInstruction}
+4. Do NOT generate remediation.
 
 Return ONLY JSON:
 {"content": "markdown...", "checkpoint_type": "${cpType === "pretest" ? "mcq" : cpType}", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": ${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]' : "null"}}`,
