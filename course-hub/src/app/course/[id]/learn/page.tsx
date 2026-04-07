@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useEffect, useState, useCallback, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { ChunkLesson } from "@/components/ChunkLesson";
 import { BookOpen, ChevronRight, Loader2, Sparkles, Check } from "lucide-react";
@@ -16,9 +16,25 @@ interface KnowledgePointItem {
   lessonId: string | null;
 }
 
+// Parse SSE text stream into individual events
+function parseSSE(text: string): { event: string; data: string }[] {
+  const events: { event: string; data: string }[] = [];
+  const blocks = text.split("\n\n").filter(Boolean);
+  for (const block of blocks) {
+    let event = "message";
+    let data = "";
+    for (const line of block.split("\n")) {
+      if (line.startsWith("event: ")) event = line.slice(7).trim();
+      else if (line.startsWith("data: ")) data = line.slice(6);
+    }
+    if (data) events.push({ event, data });
+  }
+  return events;
+}
+
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
+  const { locale } = useI18n();
   const isZh = locale === "zh";
   const [items, setItems] = useState<KnowledgePointItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +44,10 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   const [generatingForKp, setGeneratingForKp] = useState<string | null>(null);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  // Streaming state
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [totalChunks, setTotalChunks] = useState(0);
+  const [streamedCount, setStreamedCount] = useState(0);
 
   useEffect(() => {
     Promise.all([
@@ -43,7 +63,6 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         (lessons as Lesson[]).map(l => [l.knowledge_point_id, l.id])
       );
 
-      // Show all knowledge_point nodes, mark which have lessons
       const kps = (nodes as { id: string; title: string; type: string }[])
         .filter(n => n.type === "knowledge_point")
         .map(n => ({
@@ -59,44 +78,139 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     });
   }, [id, refreshKey]);
 
+  // Fetch full chunks from server (needed for answers after streaming)
+  const fetchFullChunks = useCallback(async (lessonId: string) => {
+    try {
+      const res = await fetch(`/api/courses/${id}/lessons/${lessonId}/chunks`);
+      const data = res.ok ? await res.json() : [];
+      setChunks(Array.isArray(data) ? data : []);
+    } catch {
+      // Keep whatever chunks we have from streaming
+    }
+  }, [id]);
+
   async function handleKpClick(kp: KnowledgePointItem) {
     if (kp.hasLesson && kp.lessonId) {
-      // Already has lesson — open it
       openLesson(kp.lessonId);
       return;
     }
 
-    // Generate lesson for this KP on-demand
+    // Generate lesson with streaming
     setGeneratingForKp(kp.id);
     setGenerateError(null);
+    setIsStreaming(true);
+    setStreamedCount(0);
+    setTotalChunks(4); // default, updated when outline arrives
+    setChunks([]);
+
     try {
       const res = await fetch(`/api/courses/${id}/lessons/generate-one`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ knowledge_point_id: kp.id }),
+        body: JSON.stringify({ knowledge_point_id: kp.id, stream: true }),
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setItems(prev => prev.map(item =>
-          item.id === kp.id
-            ? { ...item, hasLesson: true, lessonId: data.lesson_id }
-            : item
-        ));
-        openLesson(data.lesson_id);
-      } else {
+      if (!res.ok || !res.body) {
         setGenerateError(isZh ? "生成失败，请稍后重试" : "Generation failed. Please try again.");
+        setIsStreaming(false);
+        setGeneratingForKp(null);
+        return;
+      }
+
+      // Read SSE stream progressively
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let lessonId: string | null = null;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Process complete SSE events (delimited by \n\n)
+        const events = parseSSE(buffer);
+        // Keep only the last incomplete block in buffer
+        const lastDoubleNewline = buffer.lastIndexOf("\n\n");
+        buffer = lastDoubleNewline >= 0 ? buffer.slice(lastDoubleNewline + 2) : buffer;
+
+        for (const { event, data } of events) {
+          try {
+            const parsed = JSON.parse(data);
+
+            if (event === "outline") {
+              setTotalChunks(parsed.total_chunks ?? 4);
+            }
+
+            if (event === "lesson") {
+              lessonId = parsed.lesson_id;
+              setActiveLessonId(lessonId);
+              setItems(prev => prev.map(item =>
+                item.id === kp.id
+                  ? { ...item, hasLesson: true, lessonId: parsed.lesson_id }
+                  : item
+              ));
+            }
+
+            if (event === "chunk") {
+              setStreamedCount(c => c + 1);
+              // Add placeholder chunk for streaming preview
+              // (will be replaced by full fetch with answers)
+              setChunks(prev => {
+                const exists = prev.some(c => c.chunk_index === parsed.chunk_index);
+                if (exists) return prev;
+                const placeholder: LessonChunk = {
+                  id: `stream-${parsed.chunk_index}`,
+                  lesson_id: lessonId ?? "",
+                  chunk_index: parsed.chunk_index,
+                  content: parsed.content,
+                  checkpoint_type: parsed.checkpoint_type,
+                  checkpoint_prompt: parsed.checkpoint_prompt,
+                  checkpoint_answer: null, // not sent in stream for security
+                  checkpoint_options: parsed.checkpoint_options,
+                  widget_code: null, widget_description: null, widget_challenge: null,
+                  checkpoint_core_elements: null,
+                  remediation_content: null, remediation_question: null, remediation_answer: null,
+                };
+                return [...prev, placeholder].sort((a, b) => a.chunk_index - b.chunk_index);
+              });
+            }
+
+            if (event === "done") {
+              if (parsed.cached && parsed.lesson_id) {
+                // Lesson already existed — just open it
+                lessonId = parsed.lesson_id;
+                setActiveLessonId(lessonId);
+                setItems(prev => prev.map(item =>
+                  item.id === kp.id
+                    ? { ...item, hasLesson: true, lessonId: parsed.lesson_id }
+                    : item
+                ));
+              }
+              // Fetch full chunks with answers from DB
+              if (lessonId) await fetchFullChunks(lessonId);
+            }
+
+            if (event === "error") {
+              setGenerateError(parsed.message ?? (isZh ? "生成失败" : "Generation failed"));
+            }
+          } catch {
+            // Skip unparseable events
+          }
+        }
       }
     } catch {
       setGenerateError(isZh ? "网络错误或超时，请重试" : "Network error or timeout. Please retry.");
     }
+
+    setIsStreaming(false);
     setGeneratingForKp(null);
   }
 
   async function openLesson(lessonId: string) {
     setActiveLessonId(lessonId);
     setLoadingChunks(true);
-
     try {
       const res = await fetch(`/api/courses/${id}/lessons/${lessonId}/chunks`);
       const data = res.ok ? await res.json() : [];
@@ -115,6 +229,26 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   );
 
   if (activeLessonId) {
+    // Show streaming progress while generating
+    if (isStreaming && chunks.length === 0) {
+      return (
+        <div>
+          <CourseTabs courseId={id} />
+          <div className="text-center py-16">
+            <Loader2 size={24} className="animate-spin mx-auto mb-4" style={{ color: "var(--accent)" }} />
+            <p className="text-sm font-medium mb-1">
+              {isZh ? "正在生成互动课程..." : "Generating interactive lesson..."}
+            </p>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              {isZh
+                ? `已完成 ${streamedCount}/${totalChunks} 个教学环节`
+                : `${streamedCount}/${totalChunks} sections ready`}
+            </p>
+          </div>
+        </div>
+      );
+    }
+
     if (loadingChunks) {
       return (
         <div>
@@ -133,7 +267,13 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         >
           ← {isZh ? "返回知识点列表" : "Back to topics"}
         </button>
-        <ChunkLesson chunks={chunks} courseId={id} lessonId={activeLessonId} />
+        <ChunkLesson
+          chunks={chunks}
+          courseId={id}
+          lessonId={activeLessonId}
+          totalChunks={isStreaming ? totalChunks : undefined}
+          isStreaming={isStreaming}
+        />
       </div>
     );
   }
@@ -144,7 +284,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
 
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-semibold">{t("tabs.learn")}</h2>
+          <h2 className="text-xl font-semibold">{isZh ? "学习" : "Learn"}</h2>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             {isZh ? "选择一个知识点，AI 会生成互动课程" : "Pick a topic — AI generates an interactive lesson"}
           </p>
@@ -186,7 +326,9 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   <p className="text-sm font-medium truncate">{item.title}</p>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {isGenerating
-                      ? (isZh ? "正在生成互动课程..." : "Generating interactive lesson...")
+                      ? (isZh
+                        ? `正在生成...（${streamedCount}/${totalChunks}）`
+                        : `Generating... (${streamedCount}/${totalChunks})`)
                       : item.hasLesson
                         ? (isZh ? "点击复习" : "Click to review")
                         : (isZh ? "点击生成" : "Click to generate")}

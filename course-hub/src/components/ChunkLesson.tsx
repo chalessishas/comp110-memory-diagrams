@@ -11,6 +11,8 @@ interface ChunkLessonProps {
   chunks: LessonChunk[];
   courseId: string;
   lessonId: string;
+  totalChunks?: number; // from SSE outline, for accurate progress during streaming
+  isStreaming?: boolean; // true while chunks are still arriving
 }
 
 interface CheckpointState {
@@ -31,7 +33,7 @@ const defaultCheckpointState: CheckpointState = {
   showRemediation: false,
 };
 
-export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
+export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreaming }: ChunkLessonProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
@@ -144,7 +146,33 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
     }
   }
 
-  const progress = chunks.length > 0 ? ((currentChunkIndex + 1) / chunks.length) * 100 : 0;
+  const displayTotal = totalChunks ?? chunks.length;
+  const progress = displayTotal > 0 ? ((currentChunkIndex + 1) / displayTotal) * 100 : 0;
+
+  // Streaming: chunk not yet available — show loading
+  if (!chunk && isStreaming) {
+    return (
+      <div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+            <div
+              className="h-full rounded-full transition-all duration-300"
+              style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }}
+            />
+          </div>
+          <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+            {currentChunkIndex + 1}/{displayTotal}
+          </span>
+        </div>
+        <div className="text-center py-12">
+          <Loader2 size={20} className="animate-spin mx-auto mb-3" style={{ color: "var(--accent)" }} />
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            {isZh ? "正在生成下一个教学环节..." : "Generating next section..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
   const canProceed = !chunk.checkpoint_type || state.submitted;
   const activeContent = state.showRemediation && chunk.remediation_content ? chunk.remediation_content : chunk.content;
   const activePrompt = state.showRemediation && chunk.remediation_question ? chunk.remediation_question : chunk.checkpoint_prompt;
@@ -160,7 +188,7 @@ export function ChunkLesson({ chunks, courseId, lessonId }: ChunkLessonProps) {
           />
         </div>
         <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
-          {currentChunkIndex + 1}/{chunks.length}
+          {currentChunkIndex + 1}/{displayTotal}
         </span>
       </div>
 
