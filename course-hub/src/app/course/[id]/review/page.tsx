@@ -21,24 +21,28 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [examDays, setExamDays] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
+  // Load questions once on mount
   useEffect(() => {
-    const examModeActive = isExamMode();
-    setExamActive(examModeActive);
+    setExamActive(isExamMode());
     setExamDays(daysUntilExam());
 
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())
       .then((data: Question[]) => {
         setQuestions(data);
-        const cards = loadCards();
-        const courseQuestionIds = new Set(data.map((q) => q.id));
-        const courseCards = cards.filter((c) => courseQuestionIds.has(c.question_id));
-        // Exam mode: show ALL weak cards sorted by exam-day retrievability (weakest first)
-        // Normal mode: show only due cards sorted by due date
-        setDueCards(examModeActive ? getExamPriorityCards(courseCards) : getDueCards(courseCards));
         setLoading(false);
       });
   }, [id]);
+
+  // Re-sort cards whenever questions load or exam mode changes
+  useEffect(() => {
+    if (questions.length === 0) return;
+    const cards = loadCards();
+    const courseQuestionIds = new Set(questions.map((q) => q.id));
+    const courseCards = cards.filter((c) => courseQuestionIds.has(c.question_id));
+    setDueCards(examActive ? getExamPriorityCards(courseCards) : getDueCards(courseCards));
+    setCurrentIndex(0); // reset position when queue changes
+  }, [questions, examActive]);
 
   function handleSetExamDate(dateStr: string) {
     if (!dateStr) {
@@ -46,9 +50,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setExamActive(false);
       setExamDays(null);
     } else {
-      setExamDate(new Date(dateStr + "T23:59:59"));
+      const d = new Date(dateStr + "T23:59:59");
+      setExamDate(d);
       setExamActive(true);
-      setExamDays(Math.max(1, Math.ceil((new Date(dateStr + "T23:59:59").getTime() - Date.now()) / 86400000)));
+      setExamDays(Math.max(1, Math.ceil((d.getTime() - Date.now()) / 86400000)));
     }
     setShowDatePicker(false);
   }
