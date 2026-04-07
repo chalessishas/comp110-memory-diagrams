@@ -98,6 +98,38 @@ export function getDueCards(cards: ReviewCard[]): ReviewCard[] {
     .sort((a, b) => new Date(a.card.due).getTime() - new Date(b.card.due).getTime());
 }
 
+// Exam-optimized queue: ALL reviewed cards sorted by ascending retrievability on exam day.
+// Cards predicted to be well-remembered (>= 0.95) on exam day are excluded — time is better
+// spent on weak cards. New/unreviewed cards are included at the front.
+export function getExamPriorityCards(cards: ReviewCard[]): ReviewCard[] {
+  const examDate = getExamDate();
+  if (!examDate) return getDueCards(cards);
+
+  const scheduler = getScheduler();
+  const scored: { card: ReviewCard; retrieval: number }[] = [];
+
+  for (const c of cards) {
+    // New cards (never reviewed) get retrieval = 0 — highest priority
+    if (c.card.reps === 0) {
+      scored.push({ card: c, retrieval: 0 });
+      continue;
+    }
+    const r = scheduler.get_retrievability(c.card, examDate, false) as number;
+    if (r < 0.95) scored.push({ card: c, retrieval: r });
+  }
+
+  return scored
+    .sort((a, b) => a.retrieval - b.retrieval)
+    .map(s => s.card);
+}
+
+// Get a card's predicted retrievability on exam day (for UI display)
+export function getExamDayRetrievability(card: ReviewCard): number | null {
+  const examDate = getExamDate();
+  if (!examDate || card.card.reps === 0) return null;
+  return getScheduler().get_retrievability(card.card, examDate, false) as number;
+}
+
 export function getNextReviewDate(cards: ReviewCard[]): Date | null {
   if (cards.length === 0) return null;
   const sorted = [...cards].sort((a, b) => new Date(a.card.due).getTime() - new Date(b.card.due).getTime());

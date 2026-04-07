@@ -3,7 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
-import { getDueCards, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap } from "lucide-react";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
@@ -22,7 +22,8 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
-    setExamActive(isExamMode());
+    const examModeActive = isExamMode();
+    setExamActive(examModeActive);
     setExamDays(daysUntilExam());
 
     fetch(`/api/questions?courseId=${id}`)
@@ -32,7 +33,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         const cards = loadCards();
         const courseQuestionIds = new Set(data.map((q) => q.id));
         const courseCards = cards.filter((c) => courseQuestionIds.has(c.question_id));
-        setDueCards(getDueCards(courseCards));
+        // Exam mode: show ALL weak cards sorted by exam-day retrievability (weakest first)
+        // Normal mode: show only due cards sorted by due date
+        setDueCards(examModeActive ? getExamPriorityCards(courseCards) : getDueCards(courseCards));
         setLoading(false);
       });
   }, [id]);
@@ -88,7 +91,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           <div className="flex items-center gap-2">
             <Zap size={16} style={{ color: "var(--warning)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--warning)" }}>
-              {isZh ? `考试模式 · ${examDays} 天后考试` : `Exam Mode · ${examDays} day${examDays > 1 ? "s" : ""} until exam`}
+              {isZh
+                ? `考试模式 · ${examDays} 天后考试 · 按薄弱程度排序`
+                : `Exam Mode · ${examDays} day${examDays > 1 ? "s" : ""} · weakest first`}
             </span>
           </div>
           <button
@@ -144,9 +149,26 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         </div>
       ) : currentQuestion ? (
         <div>
-          <p className="text-sm mb-3" style={{ color: "var(--text-secondary)" }}>
-            {currentIndex + 1} of {dueCards.length} {t("review.due")}
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {currentIndex + 1} of {dueCards.length} {examActive ? (isZh ? "需复习" : "to review") : t("review.due")}
+            </p>
+            {examActive && dueCards[currentIndex] && (() => {
+              const r = getExamDayRetrievability(dueCards[currentIndex]);
+              return r !== null ? (
+                <span className="text-xs px-2 py-1 rounded-full" style={{
+                  backgroundColor: r < 0.5 ? "rgba(239,68,68,0.1)" : r < 0.8 ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
+                  color: r < 0.5 ? "var(--danger)" : r < 0.8 ? "var(--warning)" : "var(--success)",
+                }}>
+                  {isZh ? `考试日记忆率 ${Math.round(r * 100)}%` : `Exam day recall ${Math.round(r * 100)}%`}
+                </span>
+              ) : (
+                <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)" }}>
+                  {isZh ? "未复习过" : "Not yet reviewed"}
+                </span>
+              );
+            })()}
+          </div>
 
           <QuestionCard
             key={currentQuestion.id}
