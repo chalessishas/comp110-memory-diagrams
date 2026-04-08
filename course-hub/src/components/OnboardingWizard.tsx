@@ -1,23 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ArrowRight, Check, Globe, GraduationCap, Calendar, Target, Sparkles } from "lucide-react";
+import { ArrowRight, Check, Globe, GraduationCap, Calendar, Target, Sparkles, BookOpen, Lightbulb, Users, ClipboardList, PenLine, RefreshCw, BarChart3, BookOpenText } from "lucide-react";
 import { saveOnboarding, type OnboardingPreferences } from "@/lib/onboarding";
 import { useI18n, type Locale } from "@/lib/i18n";
+import type { ReactNode } from "react";
 
-const ROLES = [
-  { key: "college", en: "College Student", zh: "大学生", icon: "🎓" },
-  { key: "highschool", en: "High School", zh: "高中生", icon: "📚" },
-  { key: "selflearner", en: "Self-Learner", zh: "自学者", icon: "💡" },
-  { key: "teacher", en: "Teacher / TA", zh: "教师 / 助教", icon: "👩‍🏫" },
+const ROLES: { key: string; en: string; zh: string; icon: ReactNode }[] = [
+  { key: "college", en: "College Student", zh: "大学生", icon: <GraduationCap size={20} /> },
+  { key: "highschool", en: "High School", zh: "高中生", icon: <BookOpen size={20} /> },
+  { key: "selflearner", en: "Self-Learner", zh: "自学者", icon: <Lightbulb size={20} /> },
+  { key: "teacher", en: "Teacher / TA", zh: "教师 / 助教", icon: <Users size={20} /> },
 ];
 
-const GOALS = [
-  { key: "organize", en: "Organize my courses", zh: "整理课程大纲", icon: "📋" },
-  { key: "practice", en: "Practice with AI questions", zh: "AI 出题练习", icon: "📝" },
-  { key: "review", en: "Spaced repetition review", zh: "间隔重复复习", icon: "🔄" },
-  { key: "progress", en: "Track my mastery", zh: "追踪学习进度", icon: "📊" },
-  { key: "lessons", en: "AI-generated lessons", zh: "AI 生成课程内容", icon: "📖" },
+const GOALS: { key: string; en: string; zh: string; icon: ReactNode }[] = [
+  { key: "organize", en: "Organize my courses", zh: "整理课程大纲", icon: <ClipboardList size={20} /> },
+  { key: "practice", en: "Practice with AI questions", zh: "AI 出题练习", icon: <PenLine size={20} /> },
+  { key: "review", en: "Spaced repetition review", zh: "间隔重复复习", icon: <RefreshCw size={20} /> },
+  { key: "progress", en: "Track my mastery", zh: "追踪学习进度", icon: <BarChart3 size={20} /> },
+  { key: "lessons", en: "AI-generated lessons", zh: "AI 生成课程内容", icon: <BookOpenText size={20} /> },
 ];
 
 interface Props {

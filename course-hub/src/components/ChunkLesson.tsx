@@ -205,7 +205,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
         <div className="ui-panel p-6 mb-4" style={{ borderLeft: `3px solid ${chunk.chunk_index === 0 && !state.submitted ? "var(--warning)" : "var(--accent)"}` }}>
           {chunk.chunk_index === 0 && !state.submitted && (
             <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
-              {"💡 "}{t("learn.pretestHint")}
+              {t("learn.pretestHint")}
             </p>
           )}
           <p className="text-sm font-semibold mb-4">{activePrompt}</p>
