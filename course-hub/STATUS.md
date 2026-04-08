@@ -1,5 +1,22 @@
 # CourseHub Status
 
+## [2026-04-07 22:25] Phase 5 — User-Requested Features (2 of 4 done)
+
+User's 4-feature request during exam prep sprint. Priorities: exam scope filter (done) → term cards (done) → daily report → cross-course org.
+
+### Exam Scope Filter (Feature 1)
+- `/api/courses/[id]/exam-scope/route.ts`: AI matches scope text to course KP IDs
+- `spaced-repetition.ts`: `getExamScope()` / `setExamScope()` — per-course localStorage
+- `review/page.tsx`: Scope banner, textarea input, filtered review queue
+- Zero schema changes — scope stored client-side (temporary by nature)
+
+### Term Explanation Cards (Feature 4)
+- AI prompt updated: each chunk now outputs 2-5 `key_terms: [{term, definition}]`
+- `TermTooltip.tsx`: Click underlined term → popover with definition (auto-positions above/below)
+- `MarkdownRenderer.tsx`: Recursive `highlightTerms()` walks React children, wraps matches, skips code/math
+- `lesson_chunks.key_terms` JSONB column added via migration
+- Works for both CJK and Latin terms (no `\b` word-boundary dependency)
+
 ## [2026-04-07 13:50] Phase 4 — Evidence-Based Optimization (5 commits, all deployed)
 
 Exam in 3 days (Apr 10). Applied evidence-based teaching research to existing architecture.
