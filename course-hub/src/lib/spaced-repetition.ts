@@ -2,6 +2,7 @@ import { createEmptyCard, fsrs, generatorParameters, Rating, type Card, type Rev
 
 const STORAGE_KEY = "coursehub.review-cards";
 const EXAM_DATE_KEY = "coursehub.exam-date";
+const EXAM_SCOPE_KEY = "coursehub.exam-scope"; // per-course: { courseId: string[] (KP IDs) }
 
 function getExamModeParams() {
   if (typeof window === "undefined") return null;
@@ -197,4 +198,34 @@ export function daysUntilExam(): number | null {
   if (!exam) return null;
   const days = Math.ceil((exam.getTime() - Date.now()) / 86400000);
   return days >= 0 ? Math.max(1, days) : null;
+}
+
+// ── Exam Scope: filter content to specific knowledge points ──
+
+export function getExamScope(courseId: string): string[] | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(EXAM_SCOPE_KEY);
+    if (!raw) return null;
+    const scopes: Record<string, string[]> = JSON.parse(raw);
+    return scopes[courseId] ?? null;
+  } catch { return null; }
+}
+
+export function setExamScope(courseId: string, kpIds: string[] | null) {
+  if (typeof window === "undefined") return;
+  try {
+    const raw = localStorage.getItem(EXAM_SCOPE_KEY);
+    const scopes: Record<string, string[]> = raw ? JSON.parse(raw) : {};
+    if (kpIds && kpIds.length > 0) {
+      scopes[courseId] = kpIds;
+    } else {
+      delete scopes[courseId];
+    }
+    localStorage.setItem(EXAM_SCOPE_KEY, JSON.stringify(scopes));
+  } catch { /* ignore */ }
+}
+
+export function hasExamScope(courseId: string): boolean {
+  return (getExamScope(courseId) ?? []).length > 0;
 }

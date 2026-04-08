@@ -3,8 +3,8 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
-import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam } from "@/lib/spaced-repetition";
-import { RotateCcw, Loader2, Check, Calendar, Zap } from "lucide-react";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
+import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -20,11 +20,24 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [examActive, setExamActive] = useState(false);
   const [examDays, setExamDays] = useState<number | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [scopeActive, setScopeActive] = useState(false);
+  const [scopeKpIds, setScopeKpIds] = useState<Set<string>>(new Set());
+  const [showScopeInput, setShowScopeInput] = useState(false);
+  const [scopeText, setScopeText] = useState("");
+  const [scopeLoading, setScopeLoading] = useState(false);
+  const [scopeMatchCount, setScopeMatchCount] = useState<number | null>(null);
 
-  // Load questions once on mount
+  // Load questions + exam scope on mount
   useEffect(() => {
     setExamActive(isExamMode());
     setExamDays(daysUntilExam());
+
+    const scope = getExamScope(id);
+    if (scope && scope.length > 0) {
+      setScopeActive(true);
+      setScopeKpIds(new Set(scope));
+      setScopeMatchCount(scope.length);
+    }
 
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())
@@ -34,24 +47,28 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       });
   }, [id]);
 
-  // Re-sort cards whenever questions load or exam mode changes
+  // Re-sort cards whenever questions load, exam mode, or scope changes
   useEffect(() => {
     if (questions.length === 0) return;
+
+    // Filter questions by exam scope if active
+    const scopedQuestions = scopeActive && scopeKpIds.size > 0
+      ? questions.filter((q) => q.knowledge_point_id && scopeKpIds.has(q.knowledge_point_id))
+      : questions;
+
     const cards = loadCards();
-    const courseQuestionIds = new Set(questions.map((q) => q.id));
-    const courseCards = cards.filter((c) => courseQuestionIds.has(c.question_id));
+    const scopedQuestionIds = new Set(scopedQuestions.map((q) => q.id));
+    const courseCards = cards.filter((c) => scopedQuestionIds.has(c.question_id));
 
     if (examActive) {
       const prioritized = getExamPriorityCards(courseCards);
-      // Interleave by knowledge point so adjacent cards test different topics
-      // (Brunmair & Richter 2019: interleaving g=0.42 in math)
-      const kpMap = new Map(questions.map((q) => [q.id, q.knowledge_point_id]));
+      const kpMap = new Map(scopedQuestions.map((q) => [q.id, q.knowledge_point_id]));
       setDueCards(interleaveByKey(prioritized, (c) => kpMap.get(c.question_id)));
     } else {
       setDueCards(getDueCards(courseCards));
     }
-    setCurrentIndex(0); // reset position when queue changes
-  }, [questions, examActive]);
+    setCurrentIndex(0);
+  }, [questions, examActive, scopeActive, scopeKpIds]);
 
   function handleSetExamDate(dateStr: string) {
     if (!dateStr) {
@@ -65,6 +82,35 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setExamDays(Math.max(1, Math.ceil((d.getTime() - Date.now()) / 86400000)));
     }
     setShowDatePicker(false);
+  }
+
+  async function handleSetScope() {
+    if (!scopeText.trim()) return;
+    setScopeLoading(true);
+    try {
+      const res = await fetch(`/api/courses/${id}/exam-scope`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scope_text: scopeText }),
+      });
+      const data = await res.json();
+      if (data.matched_kp_ids?.length > 0) {
+        setExamScope(id, data.matched_kp_ids);
+        setScopeKpIds(new Set(data.matched_kp_ids));
+        setScopeActive(true);
+        setScopeMatchCount(data.matched_count);
+        setShowScopeInput(false);
+        setScopeText("");
+      }
+    } catch { /* ignore */ }
+    setScopeLoading(false);
+  }
+
+  function handleClearScope() {
+    setExamScope(id, null);
+    setScopeActive(false);
+    setScopeKpIds(new Set());
+    setScopeMatchCount(null);
   }
 
   function handleAnswer(_questionId: string, _answer: string, _isCorrect: boolean) {
@@ -142,6 +188,58 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           <button onClick={() => setShowDatePicker(false)} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
             {isZh ? "取消" : "Cancel"}
           </button>
+        </div>
+      )}
+
+      {/* Exam scope banner */}
+      {scopeActive && scopeMatchCount !== null ? (
+        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+          <div className="flex items-center gap-2">
+            <Target size={16} style={{ color: "var(--accent)" }} />
+            <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+              {isZh
+                ? `考试范围 · ${scopeMatchCount} 个知识点`
+                : `Exam Scope · ${scopeMatchCount} knowledge point${scopeMatchCount > 1 ? "s" : ""}`}
+            </span>
+          </div>
+          <button onClick={handleClearScope} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
+            {isZh ? "清除范围" : "Clear scope"}
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowScopeInput(true)}
+          className="mb-4 px-4 py-3 rounded-xl w-full text-left flex items-center gap-2 cursor-pointer transition-colors"
+          style={{ border: "1px dashed var(--border)", color: "var(--text-secondary)" }}
+        >
+          <Target size={16} />
+          <span className="text-sm">{isZh ? "设置考试范围，只复习考试内容" : "Set exam scope to focus review on tested material"}</span>
+        </button>
+      )}
+
+      {showScopeInput && (
+        <div className="mb-4 p-4 rounded-xl space-y-3" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+          <p className="text-sm font-medium">{isZh ? "粘贴考试范围（如：Chapters 8-10, 级数判别法, Taylor 展开）" : "Paste exam scope (e.g., Chapters 8-10, convergence tests, Taylor series)"}</p>
+          <textarea
+            value={scopeText}
+            onChange={(e) => setScopeText(e.target.value)}
+            placeholder={isZh ? "输入或粘贴考试范围..." : "Type or paste exam scope..."}
+            className="w-full px-3 py-2 rounded-lg text-sm"
+            style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)", minHeight: "80px" }}
+          />
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleSetScope}
+              disabled={scopeLoading || !scopeText.trim()}
+              className="ui-button-primary disabled:opacity-30"
+            >
+              {scopeLoading ? <Loader2 size={14} className="animate-spin" /> : null}
+              {isZh ? "匹配知识点" : "Match knowledge points"}
+            </button>
+            <button onClick={() => { setShowScopeInput(false); setScopeText(""); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
+              {isZh ? "取消" : "Cancel"}
+            </button>
+          </div>
         </div>
       )}
 
