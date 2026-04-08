@@ -6,10 +6,11 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
+import { getExamScope } from "@/lib/spaced-repetition";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -27,12 +28,21 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [examPrepResult, setExamPrepResult] = useState<{ topics_found: number; topics_processed: number; questions_generated: number; topics_failed: string[]; topics: string[] } | null>(null);
   const [examPrepError, setExamPrepError] = useState<string | null>(null);
   const [questionMode, setQuestionMode] = useState<"solving" | "reviewing">("solving");
+  const [scopeKpIds, setScopeKpIds] = useState<Set<string> | null>(null);
 
   useEffect(() => {
+    const scope = getExamScope(id);
+    if (scope && scope.length > 0) setScopeKpIds(new Set(scope));
+
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())
       .then((data) => { setQuestions(data); setLoading(false); });
   }, [id]);
+
+  // Filter by exam scope if active
+  const filteredQuestions = scopeKpIds
+    ? questions.filter((q) => q.knowledge_point_id && scopeKpIds.has(q.knowledge_point_id))
+    : questions;
 
   async function handleExamUpload(result: { storagePath: string }) {
     setGenerating(true);
@@ -56,7 +66,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     setQuestionMode("reviewing");
   }
 
-  const progress = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
+  const progress = filteredQuestions.length > 0 ? ((currentIndex + 1) / filteredQuestions.length) * 100 : 0;
 
   if (loading) {
     return (
@@ -86,6 +96,22 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         Back to Dashboard
       </Link>
       <CourseTabs courseId={id} />
+
+      {scopeKpIds && (
+        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+          <div className="flex items-center gap-2">
+            <Target size={16} style={{ color: "var(--accent)" }} />
+            <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+              {isZh
+                ? `考试范围 · ${filteredQuestions.length} 题`
+                : `Exam Scope · ${filteredQuestions.length} question${filteredQuestions.length !== 1 ? "s" : ""}`}
+            </span>
+          </div>
+          <button onClick={() => setScopeKpIds(null)} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
+            {isZh ? "显示全部" : "Show all"}
+          </button>
+        </div>
+      )}
 
       <div className="ui-panel p-6 md:p-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div>
@@ -218,7 +244,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         </div>
       )}
 
-      {questions.length === 0 ? (
+      {filteredQuestions.length === 0 ? (
         <div className="ui-empty">
           <p className="text-base font-medium mb-2">{t("practice.noQuestions")}</p>
           <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
@@ -265,7 +291,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-sm font-medium">
-                  Question {currentIndex + 1} of {questions.length}
+                  Question {currentIndex + 1} of {filteredQuestions.length}
                 </p>
                 <div className="ui-progress-track mt-3 max-w-xs">
                   <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
@@ -287,10 +313,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                 </button>
                 <button
                   onClick={() => {
-                    setCurrentIndex((i) => Math.min(questions.length - 1, i + 1));
+                    setCurrentIndex((i) => Math.min(filteredQuestions.length - 1, i + 1));
                     setQuestionMode("solving");
                   }}
-                  disabled={currentIndex === questions.length - 1}
+                  disabled={currentIndex === filteredQuestions.length - 1}
                   className="ui-icon-button disabled:opacity-30"
                 >
                   <ChevronRight size={16} />
@@ -301,8 +327,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
 
           <div>
             <QuestionCard
-              key={questions[currentIndex].id}
-              question={questions[currentIndex]}
+              key={filteredQuestions[currentIndex].id}
+              question={filteredQuestions[currentIndex]}
               onAnswer={handleAnswer}
             />
           </div>
