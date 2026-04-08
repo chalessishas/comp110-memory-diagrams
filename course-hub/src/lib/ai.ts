@@ -428,6 +428,7 @@ export interface GeneratedChunk {
   checkpoint_prompt: string | null;
   checkpoint_answer: string | null;
   checkpoint_options: { label: string; text: string }[] | null;
+  key_terms: { term: string; definition: string }[] | null;
 }
 
 // Phase 1: Generate lesson outline (fast, ~2s)
@@ -529,10 +530,11 @@ Requirements:
 1. content: 150-200 words, Markdown with LaTeX math ($...$).
 2. Abstraction level for this chunk: ${abstractionInstruction}
 3. checkpoint: ${checkpointInstruction}
-4. Do NOT generate remediation.
+4. key_terms: Extract 2-5 domain-specific terms from this chunk that a student might not know. For each term, provide a concise definition (1 sentence, ≤30 words). Include technical terms, named theorems, mathematical concepts — not common words.
+5. Do NOT generate remediation.
 
 Return ONLY JSON:
-{"content": "markdown...", "checkpoint_type": "${cpType === "pretest" ? "mcq" : cpType}", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": ${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]' : "null"}}`,
+{"content": "markdown...", "checkpoint_type": "${cpType === "pretest" ? "mcq" : cpType}", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": ${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]' : "null"}, "key_terms": [{"term": "Term Name", "definition": "Brief definition"}]}`,
       }],
     });
 
@@ -546,6 +548,7 @@ Return ONLY JSON:
       checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
       checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
       checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
+      key_terms: Array.isArray(raw.key_terms) ? raw.key_terms.filter((t: unknown) => t && typeof t === "object" && "term" in (t as Record<string, unknown>) && "definition" in (t as Record<string, unknown>)) : null,
     };
   } catch {
     return null;

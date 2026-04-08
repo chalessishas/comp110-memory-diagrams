@@ -169,6 +169,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   checkpoint_prompt: parsed.checkpoint_prompt,
                   checkpoint_answer: null, // not sent in stream for security
                   checkpoint_options: parsed.checkpoint_options,
+                  key_terms: parsed.key_terms ?? null,
                   widget_code: null, widget_description: null, widget_challenge: null,
                   checkpoint_core_elements: null,
                   remediation_content: null, remediation_question: null, remediation_answer: null,

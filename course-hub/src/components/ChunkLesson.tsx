@@ -197,7 +197,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
       {/* Remediation on chunk 0: also show content so student can learn before retry */}
       {(currentChunkIndex > 0 || (currentChunkIndex === 0 && state.showRemediation)) && (
         <div className="ui-panel p-6 mb-4">
-          <MarkdownRenderer content={activeContent} />
+          <MarkdownRenderer content={activeContent} terms={chunk.key_terms} />
         </div>
       )}
 
@@ -345,7 +345,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
           <p className="text-xs font-semibold uppercase tracking-wider mb-3" style={{ color: "var(--accent)" }}>
             {isZh ? "现在来学习" : "Now let's learn"}
           </p>
-          <MarkdownRenderer content={activeContent} />
+          <MarkdownRenderer content={activeContent} terms={chunk.key_terms} />
         </div>
       )}
 

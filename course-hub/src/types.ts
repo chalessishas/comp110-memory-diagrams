@@ -234,6 +234,11 @@ export interface ChallengeLog {
   created_at: string;
 }
 
+export interface TermDefinition {
+  term: string;
+  definition: string;
+}
+
 export interface LessonChunk {
   id: string;
   lesson_id: string;
@@ -250,6 +255,7 @@ export interface LessonChunk {
   remediation_content: string | null;
   remediation_question: string | null;
   remediation_answer: string | null;
+  key_terms: TermDefinition[] | null;
 }
 
 export interface LessonProgress {

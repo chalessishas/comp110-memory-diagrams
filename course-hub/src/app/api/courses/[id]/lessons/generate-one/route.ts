@@ -95,6 +95,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               checkpoint_prompt: chunk.checkpoint_prompt,
               checkpoint_answer: chunk.checkpoint_answer,
               checkpoint_options: chunk.checkpoint_options,
+              key_terms: chunk.key_terms,
               widget_code: null, widget_description: null, widget_challenge: null,
               checkpoint_core_elements: null,
               remediation_content: null, remediation_question: null, remediation_answer: null,
@@ -110,6 +111,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
               checkpoint_type: chunk.checkpoint_type,
               checkpoint_prompt: chunk.checkpoint_prompt,
               checkpoint_options: chunk.checkpoint_options,
+              key_terms: chunk.key_terms,
               // answer deliberately omitted — fetched via GET /chunks which includes it
             });
           })
@@ -165,6 +167,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     checkpoint_prompt: c.checkpoint_prompt,
     checkpoint_answer: c.checkpoint_answer,
     checkpoint_options: c.checkpoint_options,
+    key_terms: c.key_terms,
     widget_code: null, widget_description: null, widget_challenge: null,
     checkpoint_core_elements: null,
     remediation_content: null, remediation_question: null, remediation_answer: null,
