@@ -5,6 +5,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
+import { MistakePatterns } from "@/components/MistakePatterns";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -242,6 +243,8 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           </div>
         </div>
       )}
+
+      <MistakePatterns courseId={id} />
 
       <div className="flex items-center gap-2 mb-6">
         <RotateCcw size={20} style={{ color: "var(--accent)" }} />
