@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/CourseTabs";
 import { TodayView } from "@/components/TodayView";
+import { DailyReport } from "@/components/DailyReport";
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -69,6 +70,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
         )}
       </div>
       <CourseTabs courseId={id} />
+      <DailyReport courseId={id} />
+      <div className="mt-4" />
       <TodayView tasks={tasks} courseId={id} />
     </div>
   );
