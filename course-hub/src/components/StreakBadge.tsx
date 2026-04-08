@@ -34,10 +34,10 @@ export function StreakBadge() {
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
         style={{
-          backgroundColor: data.currentStreak > 0 ? "rgba(245, 158, 11, 0.1)" : "transparent",
+          backgroundColor: data.currentStreak > 0 ? "#fef3c7" : "transparent",
           color: data.currentStreak > 0 ? "#f59e0b" : "var(--text-secondary)",
           border: "1px solid",
-          borderColor: data.currentStreak > 0 ? "rgba(245, 158, 11, 0.3)" : "var(--border)",
+          borderColor: data.currentStreak > 0 ? "#fcd34d" : "var(--border)",
         }}
       >
         <Flame size={14} />
@@ -48,11 +48,10 @@ export function StreakBadge() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-2 w-72 p-5 rounded-2xl z-50"
+            className="absolute right-0 top-full mt-2 w-72 p-5 rounded-md z-50"
             style={{
               backgroundColor: "var(--bg-surface)",
               border: "1px solid var(--border)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
             }}
           >
             {/* Streak count */}
@@ -74,7 +73,7 @@ export function StreakBadge() {
               </div>
               <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="h-full rounded-full"
                   style={{
                     width: `${goalProgress}%`,
                     backgroundColor: goalProgress >= 100 ? "#16a34a" : "var(--accent)",
@@ -95,7 +94,7 @@ export function StreakBadge() {
                         backgroundColor: day.completed
                           ? "#f59e0b"
                           : day.minutes > 0
-                          ? "rgba(245, 158, 11, 0.2)"
+                          ? "#fef3c7"
                           : "var(--bg-muted)",
                         color: day.completed ? "white" : "var(--text-secondary)",
                         fontWeight: day.completed ? 600 : 400,

@@ -57,7 +57,7 @@ export function WrongAnswerNotebook({
           {items.slice(0, 8).map((item) => (
             <div
               key={item.questionId}
-              className="rounded-[24px] px-4 py-4"
+              className="rounded-md px-4 py-4"
               style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
             >
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -88,8 +88,8 @@ export function WrongAnswerNotebook({
 
               <div className="grid gap-3 mt-4 lg:grid-cols-2">
                 <div
-                  className="rounded-[18px] px-4 py-3"
-                  style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                  className="rounded-md px-4 py-3"
+                  style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                     Your Wrong Answer
@@ -98,8 +98,8 @@ export function WrongAnswerNotebook({
                 </div>
 
                 <div
-                  className="rounded-[18px] px-4 py-3"
-                  style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                  className="rounded-md px-4 py-3"
+                  style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                     Correct Answer
@@ -110,8 +110,8 @@ export function WrongAnswerNotebook({
 
               {item.explanation && (
                 <div
-                  className="rounded-[18px] px-4 py-3 mt-3"
-                  style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                  className="rounded-md px-4 py-3 mt-3"
+                  style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
                 >
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                     Why

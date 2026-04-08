@@ -37,7 +37,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer z-50 shadow-lg hover:scale-105 transition-transform"
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer z-50"
         style={{ backgroundColor: "var(--accent)", color: "white" }}
         title="Study Buddy"
       >
@@ -48,11 +48,10 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
 
   return (
     <div
-      className="fixed bottom-6 right-6 w-96 h-[560px] rounded-[24px] flex flex-col z-50 overflow-hidden"
+      className="fixed bottom-6 right-6 w-96 h-[560px] rounded-md flex flex-col z-50 overflow-hidden"
       style={{
         backgroundColor: "var(--bg-surface)",
         border: "1px solid var(--border)",
-        boxShadow: "0 24px 80px rgba(0, 0, 0, 0.15)",
       }}
     >
       {/* Header */}
@@ -108,7 +107,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
                 </div>
               )}
               <div
-                className="max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
+                className="max-w-[80%] px-3.5 py-2.5 rounded-md text-sm leading-relaxed whitespace-pre-wrap"
                 style={{
                   backgroundColor: m.role === "user" ? "var(--accent)" : "var(--bg-muted)",
                   color: m.role === "user" ? "white" : "var(--text-primary)",
@@ -125,7 +124,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
             <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-muted)" }}>
               <Loader2 size={12} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
             </div>
-            <div className="px-3.5 py-2.5 rounded-2xl text-sm" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+            <div className="px-3.5 py-2.5 rounded-md text-sm" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
               Thinking...
             </div>
           </div>

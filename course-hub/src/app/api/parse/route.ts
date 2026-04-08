@@ -6,19 +6,18 @@ import { NextResponse } from "next/server";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  // All parse paths require auth — AI calls cost money
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const ip = user.id;
-  if (!checkRateLimit(ip, 10, 60_000)) {
-    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
-  }
 
   const { storagePath, rawText, parseType, courseId, language } = await request.json();
 
+  // Text-only syllabus parse: allow guests with stricter rate limit (conversion funnel)
   if ((parseType === "syllabus" || !parseType) && typeof rawText === "string" && rawText.trim().length > 0) {
+    const rateLimitKey = user?.id ?? request.headers.get("x-forwarded-for") ?? "anonymous";
+    const maxReqs = user ? 10 : 3;
+    if (!checkRateLimit(rateLimitKey, maxReqs, 60_000)) {
+      return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+    }
     try {
       // Truncate very long text to avoid timeout (keep first 6000 chars which covers course structure)
       const trimmed = rawText.trim();
@@ -29,6 +28,14 @@ export async function POST(request: Request) {
       const message = err instanceof Error ? err.message : "Unknown error";
       return NextResponse.json({ error: `Failed to parse syllabus: ${message}` }, { status: 500 });
     }
+  }
+
+  // File-based parsing requires auth (needs Supabase Storage access)
+  if (!user) return NextResponse.json({ error: "Sign in to upload files" }, { status: 401 });
+
+  const ip = user.id;
+  if (!checkRateLimit(ip, 10, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 
   if (!storagePath) {

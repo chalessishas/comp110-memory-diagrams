@@ -10,7 +10,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem("coursehub.theme");if(t==="dark")document.documentElement.setAttribute("data-theme","midnight");else if(t==="light")document.documentElement.removeAttribute("data-theme");}catch(e){}})()` }} />
+      </head>
       <body>
         <I18nProvider>
           <OnboardingGate>{children}</OnboardingGate>

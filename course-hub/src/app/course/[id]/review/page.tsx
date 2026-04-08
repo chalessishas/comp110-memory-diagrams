@@ -11,8 +11,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [dueCards, setDueCards] = useState<ReviewCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -148,13 +147,11 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
 
       {/* Exam mode banner */}
       {examActive && examDays !== null ? (
-        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(245, 158, 11, 0.08)", border: "1px solid rgba(245, 158, 11, 0.3)" }}>
+        <div className="mb-4 px-4 py-3 rounded-md flex items-center justify-between" style={{ border: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2">
             <Zap size={16} style={{ color: "var(--warning)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--warning)" }}>
-              {isZh
-                ? `考试模式 · ${examDays} 天后考试 · 按薄弱程度排序`
-                : `Exam Mode · ${examDays} day${examDays > 1 ? "s" : ""} · weakest first`}
+              {`${t("review.examMode")} · ${examDays} ${t("review.daysUntilExam")} · ${t("review.weakestFirst")}`}
             </span>
           </div>
           <button
@@ -162,17 +159,17 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             className="text-xs cursor-pointer"
             style={{ color: "var(--text-muted)" }}
           >
-            {isZh ? "关闭" : "Turn off"}
+            {t("review.turnOff")}
           </button>
         </div>
       ) : (
         <button
           onClick={() => setShowDatePicker(true)}
-          className="mb-4 px-4 py-3 rounded-xl w-full text-left flex items-center gap-2 cursor-pointer transition-colors"
+          className="mb-4 px-4 py-3 rounded-md w-full text-left flex items-center gap-2 cursor-pointer"
           style={{ border: "1px dashed var(--border)", color: "var(--text-secondary)" }}
         >
           <Calendar size={16} />
-          <span className="text-sm">{isZh ? "设置考试日期，启用高强度复习" : "Set exam date for intensive review mode"}</span>
+          <span className="text-sm">{t("review.setExamDate")}</span>
         </button>
       )}
 
@@ -187,44 +184,42 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
           />
           <button onClick={() => setShowDatePicker(false)} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
-            {isZh ? "取消" : "Cancel"}
+            {t("review.cancel")}
           </button>
         </div>
       )}
 
       {/* Exam scope banner */}
       {scopeActive && scopeMatchCount !== null ? (
-        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+        <div className="mb-4 px-4 py-3 rounded-md flex items-center justify-between" style={{ border: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2">
             <Target size={16} style={{ color: "var(--accent)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-              {isZh
-                ? `考试范围 · ${scopeMatchCount} 个知识点`
-                : `Exam Scope · ${scopeMatchCount} knowledge point${scopeMatchCount > 1 ? "s" : ""}`}
+              {`${t("review.examScope")} · ${scopeMatchCount} ${t("review.knowledgePoints")}`}
             </span>
           </div>
           <button onClick={handleClearScope} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
-            {isZh ? "清除范围" : "Clear scope"}
+            {t("review.clearScope")}
           </button>
         </div>
       ) : (
         <button
           onClick={() => setShowScopeInput(true)}
-          className="mb-4 px-4 py-3 rounded-xl w-full text-left flex items-center gap-2 cursor-pointer transition-colors"
+          className="mb-4 px-4 py-3 rounded-md w-full text-left flex items-center gap-2 cursor-pointer"
           style={{ border: "1px dashed var(--border)", color: "var(--text-secondary)" }}
         >
           <Target size={16} />
-          <span className="text-sm">{isZh ? "设置考试范围，只复习考试内容" : "Set exam scope to focus review on tested material"}</span>
+          <span className="text-sm">{t("review.setScopeDesc")}</span>
         </button>
       )}
 
       {showScopeInput && (
         <div className="mb-4 p-4 rounded-xl space-y-3" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
-          <p className="text-sm font-medium">{isZh ? "粘贴考试范围（如：Chapters 8-10, 级数判别法, Taylor 展开）" : "Paste exam scope (e.g., Chapters 8-10, convergence tests, Taylor series)"}</p>
+          <p className="text-sm font-medium">{t("review.scopePrompt")}</p>
           <textarea
             value={scopeText}
             onChange={(e) => setScopeText(e.target.value)}
-            placeholder={isZh ? "输入或粘贴考试范围..." : "Type or paste exam scope..."}
+            placeholder={t("review.scopePlaceholder")}
             className="w-full px-3 py-2 rounded-lg text-sm"
             style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)", minHeight: "80px" }}
           />
@@ -235,10 +230,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
               className="ui-button-primary disabled:opacity-30"
             >
               {scopeLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-              {isZh ? "匹配知识点" : "Match knowledge points"}
+              {t("review.matchKp")}
             </button>
             <button onClick={() => { setShowScopeInput(false); setScopeText(""); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
-              {isZh ? "取消" : "Cancel"}
+              {t("review.cancel")}
             </button>
           </div>
         </div>
@@ -255,7 +250,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       </div>
 
       {dueCards.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+        <div className="text-center py-16 rounded-md" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
           <Check size={32} className="mx-auto mb-3" style={{ color: "var(--success)" }} />
           <p className="font-medium mb-1">{t("review.allCaughtUp")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -266,20 +261,19 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {currentIndex + 1} of {dueCards.length} {examActive ? (isZh ? "需复习" : "to review") : t("review.due")}
+              {currentIndex + 1} of {dueCards.length} {examActive ? t("review.toReview") : t("review.due")}
             </p>
             {examActive && dueCards[currentIndex] && (() => {
               const r = getExamDayRetrievability(dueCards[currentIndex]);
               return r !== null ? (
                 <span className="text-xs px-2 py-1 rounded-full" style={{
-                  backgroundColor: r < 0.5 ? "rgba(239,68,68,0.1)" : r < 0.8 ? "rgba(245,158,11,0.1)" : "rgba(16,185,129,0.1)",
                   color: r < 0.5 ? "var(--danger)" : r < 0.8 ? "var(--warning)" : "var(--success)",
                 }}>
-                  {isZh ? `考试日记忆率 ${Math.round(r * 100)}%` : `Exam day recall ${Math.round(r * 100)}%`}
+                  {`${t("review.examDayRecall")} ${Math.round(r * 100)}%`}
                 </span>
               ) : (
-                <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "var(--danger)" }}>
-                  {isZh ? "未复习过" : "Not yet reviewed"}
+                <span className="text-xs px-2 py-1 rounded-full" style={{ color: "var(--danger)" }}>
+                  {t("review.notYetReviewed")}
                 </span>
               );
             })()}
@@ -292,7 +286,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           />
 
           {showRating && (
-            <div className="mt-4 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="mt-4 p-4 rounded-md" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <p className="text-sm font-medium mb-3">{t("review.howWell")}</p>
               <div className="grid grid-cols-4 gap-2">
                 {([
@@ -304,7 +298,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                   <button
                     key={opt.rating}
                     onClick={() => handleRate(opt.rating)}
-                    className="p-3 rounded-xl text-center cursor-pointer hover:opacity-80 transition-opacity"
+                    className="p-3 rounded-md text-center cursor-pointer"
                     style={{ backgroundColor: opt.color, color: "white" }}
                   >
                     <p className="text-sm font-medium">{opt.label}</p>

@@ -19,12 +19,10 @@ function LoginPageFallback() {
   return (
     <div className="min-h-screen px-6 py-10 flex items-center justify-center">
       <div
-        className="max-w-md w-full rounded-[28px] p-8 md:p-10"
+        className="max-w-md w-full rounded-md p-8 md:p-10"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          backgroundColor: "var(--bg-surface)",
           border: "1px solid var(--border)",
-          boxShadow: "0 24px 80px rgba(0, 0, 0, 0.08)",
-          backdropFilter: "blur(8px)",
         }}
       >
         <div
@@ -98,12 +96,10 @@ function LoginPageContent() {
   return (
     <div className="min-h-screen px-6 py-10 flex items-center justify-center">
       <div
-        className="max-w-md w-full rounded-[28px] p-8 md:p-10"
+        className="max-w-md w-full rounded-md p-8 md:p-10"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          backgroundColor: "var(--bg-surface)",
           border: "1px solid var(--border)",
-          boxShadow: "0 24px 80px rgba(0, 0, 0, 0.08)",
-          backdropFilter: "blur(8px)",
         }}
       >
         <div
@@ -123,7 +119,7 @@ function LoginPageContent() {
         </div>
 
         <div
-          className="grid grid-cols-2 gap-1 rounded-2xl p-1 mb-6"
+          className="grid grid-cols-2 gap-1 rounded-md p-1 mb-6"
           style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
         >
           <button
@@ -134,7 +130,7 @@ function LoginPageContent() {
               setError(null);
               setMessage(null);
             }}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
+            className="rounded-md px-4 py-2.5 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: mode === "login" ? "var(--accent)" : "transparent",
               color: mode === "login" ? "white" : "var(--text-secondary)",
@@ -150,7 +146,7 @@ function LoginPageContent() {
               setError(null);
               setMessage(null);
             }}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
+            className="rounded-md px-4 py-2.5 text-sm font-medium cursor-pointer"
             style={{
               backgroundColor: mode === "signup" ? "var(--accent)" : "transparent",
               color: mode === "signup" ? "white" : "var(--text-secondary)",
@@ -170,7 +166,7 @@ function LoginPageContent() {
               setEmail(e.target.value);
             }}
             required
-            className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
+            className="w-full px-4 py-3 rounded-md text-sm outline-none"
             style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
           <input
@@ -183,13 +179,13 @@ function LoginPageContent() {
             }}
             required
             minLength={6}
-            className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
+            className="w-full px-4 py-3 rounded-md text-sm outline-none"
             style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium cursor-pointer disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md font-medium cursor-pointer disabled:opacity-50"
             style={{ backgroundColor: "var(--accent)", color: "white" }}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
@@ -205,8 +201,8 @@ function LoginPageContent() {
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm cursor-pointer"
-          style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "#ffffff" }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-md text-sm cursor-pointer"
+          style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-elevated)" }}
         >
           <LogIn size={16} />
           {t("login.continueGoogle")}
@@ -214,16 +210,16 @@ function LoginPageContent() {
 
         {displayedError && (
           <div
-            className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--danger)", backgroundColor: "rgba(239, 68, 68, 0.06)", color: "var(--danger)" }}
+            className="mt-4 rounded-md px-4 py-3 text-xs"
+            style={{ border: "1px solid var(--danger)", color: "var(--danger)" }}
           >
             {displayedError}
           </div>
         )}
         {message && (
           <div
-            className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--success)", backgroundColor: "rgba(22, 163, 74, 0.06)", color: "var(--success)" }}
+            className="mt-4 rounded-md px-4 py-3 text-xs"
+            style={{ border: "1px solid var(--success)", color: "var(--success)" }}
           >
             {message}
           </div>

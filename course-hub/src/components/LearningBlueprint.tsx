@@ -1,6 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, BookOpenText, PenLine, RotateCcw } from "lucide-react";
 import { masteryColors, masteryLabels } from "@/lib/mastery";
+import { useI18n } from "@/lib/i18n";
 import type { MasteryLevel, TaskType } from "@/types";
 
 interface LearningBlueprintItem {
@@ -23,15 +26,9 @@ const taskIcons = {
   review: RotateCcw,
 };
 
-const taskLabels = {
-  read: "Learn",
-  practice: "Practice",
-  review: "Review",
-};
-
-function rateLabel(rate: number, totalAttempts: number) {
-  if (totalAttempts === 0) return "No attempts yet";
-  return `${Math.round(rate * 100)}% correct`;
+function rateLabel(rate: number, totalAttempts: number, t: (key: string) => string) {
+  if (totalAttempts === 0) return t("blueprint.noAttempts");
+  return `${Math.round(rate * 100)}% ${t("blueprint.correct")}`;
 }
 
 export function LearningBlueprint({
@@ -41,13 +38,15 @@ export function LearningBlueprint({
   courseId: string;
   items: LearningBlueprintItem[];
 }) {
+  const { t } = useI18n();
+
   if (items.length === 0) {
     return (
       <div className="ui-panel p-6 md:p-8">
-        <div className="ui-kicker mb-3">Study Flow</div>
-        <h2 className="text-2xl font-semibold">Learn from the outline.</h2>
+        <div className="ui-kicker mb-3">{t("blueprint.kicker")}</div>
+        <h2 className="text-2xl font-semibold">{t("blueprint.emptyTitle")}</h2>
         <p className="ui-copy mt-2 max-w-2xl">
-          Once the course has outline nodes, tasks, and questions, this page turns them into a concrete study sequence.
+          {t("blueprint.emptyDesc")}
         </p>
       </div>
     );
@@ -59,14 +58,14 @@ export function LearningBlueprint({
     <div className="ui-panel p-6 md:p-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <div className="ui-kicker mb-3">Study Flow</div>
-          <h2 className="text-2xl font-semibold">Learn from the outline, not just look at it.</h2>
+          <div className="ui-kicker mb-3">{t("blueprint.kicker")}</div>
+          <h2 className="text-2xl font-semibold">{t("blueprint.title")}</h2>
           <p className="ui-copy mt-2 max-w-3xl">
-            Each knowledge point turns into a small loop: learn the concept, do reps, review mistakes, then move on.
+            {t("blueprint.desc")}
           </p>
         </div>
         <Link href={`/course/${courseId}/practice`} className="ui-button-secondary">
-          Open Practice
+          {t("blueprint.openPractice")}
           <ArrowRight size={14} />
         </Link>
       </div>
@@ -78,13 +77,13 @@ export function LearningBlueprint({
           return (
             <div
               key={item.id}
-              className="rounded-[28px] p-5"
-              style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+              className="rounded-md p-5"
+              style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-secondary)" }}>
-                    {index === 0 ? "Start Here" : `Step ${index + 1}`}
+                    {index === 0 ? t("blueprint.startHere") : `${t("blueprint.step")} ${index + 1}`}
                   </p>
                   <h3 className="text-lg font-semibold mt-2">{item.title}</h3>
                   {item.content && (
@@ -94,7 +93,7 @@ export function LearningBlueprint({
                   )}
                 </div>
                 <span
-                  className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium"
+                  className="shrink-0 rounded px-3 py-1.5 text-xs font-medium"
                   style={{
                     backgroundColor: "white",
                     color: item.masteryLevel === "mastered" ? "white" : "var(--text-primary)",
@@ -107,18 +106,18 @@ export function LearningBlueprint({
               </div>
 
               <div className="flex flex-wrap gap-2 mt-4">
-                <span className="ui-badge">{item.remainingTaskCount}/{item.taskCount} tasks left</span>
-                <span className="ui-badge">{item.questionCount} questions</span>
-                <span className="ui-badge">{rateLabel(item.masteryRate, item.totalAttempts)}</span>
+                <span className="ui-badge">{item.remainingTaskCount}/{item.taskCount} {t("blueprint.tasksLeft")}</span>
+                <span className="ui-badge">{item.questionCount} {t("blueprint.questions")}</span>
+                <span className="ui-badge">{rateLabel(item.masteryRate, item.totalAttempts, t)}</span>
               </div>
 
               <div
-                className="rounded-[22px] px-4 py-4 mt-4"
+                className="rounded-md px-4 py-4 mt-4"
                 style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
               >
                 <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                   <TaskIcon size={14} />
-                  {item.nextTaskType ? taskLabels[item.nextTaskType] : "Next Move"}
+                  {item.nextTaskType ? t(`studyTask.type${item.nextTaskType[0].toUpperCase()}${item.nextTaskType.slice(1)}`) : t("blueprint.nextMove")}
                 </div>
                 <p className="text-sm mt-2">{item.nextAction}</p>
               </div>

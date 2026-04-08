@@ -49,10 +49,10 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
     <div className="ui-panel p-5 md:p-8">
       <div
         {...getRootProps()}
-        className="rounded-[28px] border-2 border-dashed px-6 py-14 text-center cursor-pointer transition-colors"
+        className="rounded-md border-2 border-dashed px-6 py-14 text-center cursor-pointer transition-colors"
         style={{
           borderColor: isDragActive ? "var(--text-primary)" : "var(--border-strong)",
-          backgroundColor: isDragActive ? "rgba(16, 16, 16, 0.05)" : "rgba(247, 247, 244, 0.9)",
+          backgroundColor: isDragActive ? "var(--bg-muted)" : "var(--bg-surface)",
         }}
       >
         <input {...getInputProps()} />
@@ -67,7 +67,7 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
         ) : (
           <div className="flex flex-col items-center gap-3">
             <div
-              className="flex h-16 w-16 items-center justify-center rounded-[22px]"
+              className="flex h-16 w-16 items-center justify-center rounded-md"
               style={{ backgroundColor: "white", border: "1px solid var(--border)" }}
             >
               {isDragActive ? (
@@ -90,7 +90,7 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
       </div>
       {error && (
         <div
-          className="mt-4 rounded-2xl px-4 py-3 text-sm"
+          className="mt-4 rounded-md px-4 py-3 text-sm"
           style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}
         >
           {error}

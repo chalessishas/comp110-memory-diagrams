@@ -54,8 +54,8 @@ const missingInfoField = z.union([
 ]).default([]);
 
 export const parsedSyllabusSchema = z.object({
-  title: z.string(),
-  description: z.string(),
+  title: z.union([z.string(), z.null()]).transform(v => v ?? "Untitled Course").default("Untitled Course"),
+  description: z.union([z.string(), z.null()]).transform(v => v ?? "").default(""),
   professor: z.string().nullable().default(null),
   semester: z.string().nullable().default(null),
   nodes: parsedOutlineNodeSchema.array(),

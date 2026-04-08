@@ -77,7 +77,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={role.key}
               onClick={() => setPrefs((p) => ({ ...p, role: role.key as OnboardingPreferences["role"] }))}
-              className="p-4 text-left cursor-pointer transition-all"
+              className="p-4 text-left cursor-pointer transition-colors"
               style={{
                 borderRadius: "12px",
                 border: `2px solid ${prefs.role === role.key ? "var(--accent)" : "var(--border)"}`,
@@ -127,7 +127,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={goal.key}
               onClick={() => toggleGoal(goal.key)}
-              className="w-full flex items-center gap-3 p-4 text-left cursor-pointer transition-all"
+              className="w-full flex items-center gap-3 p-4 text-left cursor-pointer transition-colors"
               style={{
                 borderRadius: "12px",
                 border: `2px solid ${prefs.goals.includes(goal.key) ? "var(--accent)" : "var(--border)"}`,
@@ -238,7 +238,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               )}
               <button
                 onClick={handleNext}
-                className="flex items-center gap-2 px-5 py-2.5 font-medium cursor-pointer transition-all"
+                className="flex items-center gap-2 px-5 py-2.5 font-medium cursor-pointer transition-colors"
                 style={{ borderRadius: "10px", backgroundColor: "var(--accent)", color: "white" }}
               >
                 {step === steps.length - 1

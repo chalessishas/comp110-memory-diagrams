@@ -53,7 +53,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   }
 
   async function handleDelete(uploadId: string) {
-    if (!confirm("Delete this file?")) return;
+    if (!confirm(t("library.confirmDelete"))) return;
     setDeleting(uploadId);
     await fetch(`/api/courses/${id}/uploads`, {
       method: "DELETE",
@@ -107,7 +107,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
             return (
               <div key={upload.id}>
                 <div
-                  className="flex items-center gap-3 px-4 py-3 rounded-2xl group"
+                  className="flex items-center gap-3 px-4 py-3 rounded-md group"
                   style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
                 >
                   <Icon size={20} style={{ color: "var(--text-secondary)" }} />
@@ -117,7 +117,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                       {typeLabels[upload.upload_type] ?? "File"} · {formatDate(upload.created_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     {(upload.file_type === "pdf" || upload.file_type === "image") && !upload.parsed_content && (
                       <button
                         onClick={async () => {

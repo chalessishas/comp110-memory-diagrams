@@ -6,7 +6,7 @@ export function CourseCard({ course }: { course: Course }) {
   return (
     <Link
       href={`/course/${course.id}`}
-      className="ui-panel block p-6 transition-all hover:-translate-y-0.5"
+      className="ui-panel block p-6"
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4 min-w-0">

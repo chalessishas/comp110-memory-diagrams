@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-md mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Sparkles size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.pasteAny" /></h2>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-md mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <ShieldCheck size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.saveReady" /></h2>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="flex h-12 w-12 items-center justify-center rounded-md mb-4" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Plus size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.createAnytime" /></h2>
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
       {archivedCourses.length > 0 && (
         <details className="ui-panel mt-10 p-6">
           <summary className="flex items-center gap-3 cursor-pointer text-sm font-semibold list-none">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+            <div className="flex h-10 w-10 items-center justify-center rounded-md" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
               <Archive size={16} />
             </div>
             <div>

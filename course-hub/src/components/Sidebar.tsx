@@ -16,7 +16,7 @@ function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: s
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-all whitespace-nowrap"
+      className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium transition-colors whitespace-nowrap"
       style={{
         borderRadius: "8px",
         backgroundColor: isActive ? "var(--accent-light)" : "transparent",
@@ -56,8 +56,7 @@ export function Sidebar({
     <header
       className="sticky top-0 z-40 ui-sidebar-wrapper"
       style={{
-        backgroundColor: "rgba(250, 249, 247, 0.92)",
-        backdropFilter: "blur(16px)",
+        backgroundColor: "var(--bg-surface)",
         borderBottom: "1px solid var(--border)",
       }}
     >
@@ -83,7 +82,7 @@ export function Sidebar({
             {isAuthenticated ? (
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer transition-all"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm cursor-pointer transition-colors"
                 style={{ borderRadius: "8px", color: "var(--text-secondary)" }}
               >
                 <LogOut size={15} />

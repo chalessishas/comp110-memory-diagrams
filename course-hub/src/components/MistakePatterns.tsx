@@ -33,7 +33,7 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
   if (loading || patterns.length === 0) return null;
 
   return (
-    <div className="mb-6 p-4 rounded-xl" style={{ backgroundColor: "rgba(239, 68, 68, 0.04)", border: "1px solid rgba(239, 68, 68, 0.15)" }}>
+    <div className="mb-6 p-4 rounded-md" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
       <div className="flex items-center gap-2 mb-3">
         <TrendingDown size={16} style={{ color: "var(--danger)" }} />
         <h3 className="text-sm font-semibold" style={{ color: "var(--danger)" }}>
@@ -62,7 +62,7 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
                 </div>
                 <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <div
-                    className="h-full rounded-full transition-all"
+                    className="h-full rounded-full"
                     style={{ width: `${pct}%`, backgroundColor: barColor }}
                   />
                 </div>

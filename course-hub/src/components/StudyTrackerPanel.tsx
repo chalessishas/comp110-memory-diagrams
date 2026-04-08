@@ -78,7 +78,7 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
                 className="w-full rounded-lg"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "#c4c9f8" : "var(--border)",
                   minHeight: "3px",
                 }}
               />
@@ -217,7 +217,7 @@ export function StudyTrackerPanel({
         </div>
         {track && activeMode && (
           <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2"
+            className="inline-flex items-center gap-2 rounded px-4 py-2"
             style={{ border: "1px solid var(--border)", ...modeTone(liveMode) }}
           >
             <LiveIcon size={16} />
@@ -228,8 +228,8 @@ export function StudyTrackerPanel({
 
       <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-[220px_minmax(0,1fr)]">
         <div
-          className="rounded-[24px] px-5 py-5"
-          style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+          className="rounded-md px-5 py-5"
+          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
         >
           <div className="flex items-center gap-2 text-sm font-medium">
             <Activity size={16} />
@@ -245,7 +245,7 @@ export function StudyTrackerPanel({
           {breakdown.map((item) => (
             <div
               key={item.key}
-              className="rounded-[22px] px-4 py-4"
+              className="rounded-md px-4 py-4"
               style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
             >
               <div className="flex items-center justify-between gap-3">

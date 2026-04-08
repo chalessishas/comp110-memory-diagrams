@@ -38,7 +38,7 @@ export function UsagePanel() {
 
   return (
     <div
-      className="rounded-[24px] p-5"
+      className="rounded-md p-5"
       style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
     >
       <div className="flex items-center gap-2 mb-4">
@@ -84,7 +84,7 @@ export function UsagePanel() {
                   backgroundColor: isToday
                     ? "var(--accent)"
                     : day.requests > 0
-                    ? "rgba(91, 108, 240, 0.35)"
+                    ? "#c7ccf9"
                     : "var(--border)",
                   minHeight: "2px",
                 }}

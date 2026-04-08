@@ -15,8 +15,31 @@ const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsin
 const textModel = qwen("qwen3.5-plus"); // 19x faster than qwen-plus (MoE, 17B active params)
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
-// Temporarily disabled AbortSignal — investigating generate failures
-const AI_TIMEOUT_MS = 55_000;
+// Timeout: rely on Vercel maxDuration (60s) — DashScope doesn't handle AbortSignal cleanly
+
+// ─── Shared infrastructure ───
+
+const SYSTEM_JSON = `You are a structured data generator. Output ONLY valid JSON — no markdown fences, no prose, no <think> blocks. If you are unsure about a field, use null rather than omitting it.`;
+
+const SYSTEM_EDUCATOR = `You are an expert course content creator. Write at a college level — clear but not dumbed down. Output ONLY valid JSON.`;
+
+function langSuffix(language?: string): string {
+  if (!language) return "";
+  return language === "zh"
+    ? "\n\nIMPORTANT: Generate ALL content in Chinese (简体中文)."
+    : "\n\nIMPORTANT: Generate ALL content in English.";
+}
+
+// AbortController disabled — DashScope's OpenAI-compatible API doesn't handle abort cleanly
+// Relying on Vercel's maxDuration (60s) as the hard timeout instead
+
+async function withRetry<T>(fn: () => Promise<T>, retries = 1): Promise<T> {
+  try { return await fn(); }
+  catch (err) {
+    if (retries <= 0) throw err;
+    return withRetry(fn, retries - 1);
+  }
+}
 
 // Strip qwen3.5-plus thinking mode leaks (can corrupt JSON output)
 export function stripThinkBlocks(text: string): string {
@@ -46,103 +69,70 @@ export async function parseSyllabus(fileBase64: string, mimeType: string, langua
     throw new Error("File too large for AI processing (max ~15MB). Try a shorter document.");
   }
 
-  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
-
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: visionModel,
-      messages: [
-        {
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: visionModel,
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+        system: SYSTEM_JSON,
+        messages: [{
           role: "user",
           content: [
-            {
-              type: "file",
-              data: `data:${mimeType};base64,${fileBase64}`,
-              mediaType: mimeType as "application/pdf",
-            },
-            {
-              type: "text",
-              text: `Analyze this course syllabus and extract its structure as a NESTED hierarchy.
+            { type: "file", data: `data:${mimeType};base64,${fileBase64}`, mediaType: mimeType as "application/pdf" },
+            { type: "text", text: `Analyze this course syllabus and extract its structure as a NESTED hierarchy.
 
-Return JSON with: title, description, professor (null if not found), semester (null if not found), confidence ("high"/"medium"/"low"), missing_info (array), and nodes.
+Return JSON: { title, description, professor (null if not found), semester (null if not found), confidence ("high"/"medium"/"low"), missing_info (array), nodes }
 
 Each node: { title, type, content (null if obvious), children }
 Types: "week", "chapter", "topic", "knowledge_point"
 
-CRITICAL: Every week/chapter MUST have children. Sub-topics and bullet points become "knowledge_point" children. Do NOT create flat week nodes with empty children. Leaf nodes must be type "knowledge_point".
-
-Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
-            },
+CRITICAL: Every week/chapter MUST have children. Leaf nodes must be type "knowledge_point".${langSuffix(language)}` },
           ],
-        },
-      ],
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      return parsedSyllabusSchema.parse(JSON.parse(jsonStr)) as ParsedSyllabus;
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
-    return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
 }
 
 export async function parseSyllabusText(rawText: string, language?: string): Promise<ParsedSyllabus> {
-  const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
-
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: textModel,
-      messages: [
-        {
-          role: "user",
-          content: `You are analyzing a course syllabus to extract its ACTUAL teaching content as a nested hierarchy. Return ONLY valid JSON (no markdown, no code fences).
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.2,
+        maxOutputTokens: 8192,
 
-CRITICAL RULES:
-1. Only extract topics/knowledge points that are EXPLICITLY mentioned. Do NOT invent topics.
-2. Administrative content (grading, attendance, accommodations) is NOT course content.
-3. EVERY week/chapter MUST have children. Sub-topics and bullet points from the syllabus become children with type "knowledge_point". If a week lists "Integration by parts, Partial fractions", those are TWO separate knowledge_point children.
-4. The hierarchy should be: week/chapter → topic → knowledge_point. Use at least 2 levels. Leaf nodes should be type "knowledge_point".
-5. If the syllabus lacks a detailed topic schedule, set confidence to "low".
+        system: SYSTEM_JSON,
+        messages: [{
+          role: "user",
+          content: `Extract ACTUAL teaching content from this syllabus as a nested hierarchy.
+
+RULES:
+1. Only extract EXPLICITLY mentioned topics. Do NOT invent.
+2. Skip administrative content (grading, attendance).
+3. Every week/chapter MUST have children. "Integration by parts, Partial fractions" = TWO separate knowledge_point children.
+4. Hierarchy: week/chapter → topic → knowledge_point. Leaf = "knowledge_point".
+5. No detailed schedule → confidence: "low".
 
 JSON shape:
-{
-  "title": "course name",
-  "description": "one sentence description",
-  "professor": "name or null",
-  "semester": "e.g. Spring 2026 or null",
-  "confidence": "high|medium|low",
-  "missing_info": [],
-  "nodes": [
-    {
-      "title": "Week 1: Functions",
-      "type": "week",
-      "content": null,
-      "children": [
-        { "title": "Domain and range", "type": "knowledge_point", "content": "Determining domain and range of functions", "children": [] },
-        { "title": "Composition of functions", "type": "knowledge_point", "content": null, "children": [] }
-      ]
-    }
-  ]
-}
-
-IMPORTANT: Do NOT create flat week nodes with empty children. Every week/chapter that lists sub-topics MUST have those sub-topics as knowledge_point children.
+{"title":"...","description":"...","professor":"name or null","semester":"... or null","confidence":"high|medium|low","missing_info":[],"nodes":[{"title":"Week 1: Functions","type":"week","content":null,"children":[{"title":"Domain and range","type":"knowledge_point","content":"Determining domain and range","children":[]}]}]}
 
 Course text:
 """
 ${rawText}
-"""${langInstruction}`,
-        },
-      ],
+"""${langSuffix(language)}`,
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      return parsedSyllabusSchema.parse(JSON.parse(jsonStr)) as ParsedSyllabus;
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
-    return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus text parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -164,42 +154,31 @@ export async function parseExamQuestions(
   });
 
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: visionModel,
-      messages: [
-        {
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: visionModel,
+        temperature: 0.2,
+        maxOutputTokens: 8192,
+        system: SYSTEM_JSON,
+        messages: [{
           role: "user",
           content: [
-            {
-              type: "file",
-              data: `data:${mimeType};base64,${fileBase64}`,
-              mediaType: mimeType as "application/pdf",
-            },
-            {
-              type: "text",
-              text: `Extract all questions from this exam/practice document. For each question return:
-- type: "multiple_choice", "fill_blank", "short_answer", or "true_false"
-- stem: the question text
-- options: array of {label, text} for multiple choice (null otherwise)
-- answer: the correct answer
-- explanation: brief explanation of why this answer is correct
-- difficulty: 1-5 (1=easy, 5=hard)
-- matched_kp_title: which of these knowledge points this question tests: [${kpList}]. Use null if no match.
+            { type: "file", data: `data:${mimeType};base64,${fileBase64}`, mediaType: mimeType as "application/pdf" },
+            { type: "text", text: `Extract all questions from this exam document. Per question:
+- type: "multiple_choice" | "fill_blank" | "short_answer" | "true_false"
+- stem, options ({label,text} array or null), answer, explanation, difficulty (1-5)
+- matched_kp_title: match to one of: [${kpList}], or null
 
-Return ONLY valid JSON (no markdown, no code fences).`,
-            },
+Return {"questions": [...]}` },
           ],
-        },
-      ],
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      const raw = JSON.parse(jsonStr);
+      const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
+      return questionsSchema.parse(wrapped).questions;
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
-    const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
-    const parsed = questionsSchema.parse(wrapped);
-    return parsed.questions;
   } catch (err) {
     throw new Error(`Exam question parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -252,43 +231,34 @@ export async function generateStudyTasks(
   const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
 
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: textModel,
-      messages: [
-        {
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.4,
+        maxOutputTokens: 4096,
+
+        system: SYSTEM_JSON,
+        messages: [{
           role: "user",
-          content: `You are a study planner for the course "${courseTitle}".
+          content: `Study planner for "${courseTitle}".
 
 Knowledge points:
 ${kpSummary}
 
-Generate 1-2 study tasks per knowledge point. Return this EXACT JSON structure:
-{"tasks": [{"knowledge_point_title": "exact KP title", "title": "task title", "description": "what to do", "task_type": "read", "priority": 1}]}
-
-task_type: "read" (learn concept), "practice" (do exercises), or "review" (revisit)
-priority: 1=must-know, 2=should-know, 3=nice-to-know
-
-Return ONLY the JSON object with a "tasks" array. No other format.${langInstruction}`,
-        },
-      ],
+Generate 1-2 tasks per KP. Return:
+{"tasks": [{"knowledge_point_title": "exact KP title", "title": "...", "description": "...", "task_type": "read|practice|review", "priority": 1}]}
+priority: 1=must-know, 2=should-know, 3=nice-to-know${langSuffix(language)}`,
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      const raw = JSON.parse(jsonStr);
+      let tasks: unknown[];
+      if (Array.isArray(raw)) tasks = raw;
+      else if (raw.tasks && Array.isArray(raw.tasks)) tasks = raw.tasks;
+      else tasks = Object.values(raw).flat();
+      return studyTasksSchema.parse({ tasks }).tasks;
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
-    // AI returns various formats: { tasks: [...] }, [...], or { "1": [...], "2": [...] }
-    let tasks: unknown[];
-    if (Array.isArray(raw)) {
-      tasks = raw;
-    } else if (raw.tasks && Array.isArray(raw.tasks)) {
-      tasks = raw.tasks;
-    } else {
-      // Flatten object values: { "1": [task, task], "2": [task] } → flat array
-      tasks = Object.values(raw).flat();
-    }
-    const parsed = studyTasksSchema.parse({ tasks });
-    return parsed.tasks;
   } catch (err) {
     throw new Error(`Study task generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -314,50 +284,40 @@ export async function generateQuestionsFromOutline(
   });
 
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: textModel,
-      messages: [
-        {
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.5,
+        maxOutputTokens: 8192,
+
+        system: SYSTEM_EDUCATOR,
+        messages: [{
           role: "user",
-          content: `You are creating practice questions for the course "${courseTitle}".
+          content: `Create practice questions for "${courseTitle}".
 
 Knowledge points:
 ${kpSummary}
 
-Generate 2-3 practice questions per knowledge point. Mix question types:
-- multiple_choice: 4 options (A/B/C/D), exactly one correct
-- fill_blank: leave a key term blank for the student to fill
-- true_false: 2 options [{label:"True",text:"True"},{label:"False",text:"False"}]
-- short_answer: open-ended, 1-2 sentence answer expected
+Generate 2-3 questions per KP. Mix types:
+- multiple_choice: 4 options (A/B/C/D), one correct
+- fill_blank: key term blanked
+- true_false: [{label:"True",text:"True"},{label:"False",text:"False"}]
+- short_answer: 1-2 sentence answer
 
-Each question must have:
-- A clear, unambiguous stem
-- A correct answer with explanation
-- difficulty 1-5
-- matched_kp_title: exactly matching one of the knowledge point titles listed above
+Per question: stem, options (or null), answer, explanation, difficulty (1-5), matched_kp_title (exact match from list above).
 
-Make questions test understanding, not just memorization.
-
-Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
-        },
-      ],
+Test understanding, not memorization. Return {"questions": [...]}${langSuffix(language)}`,
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      const raw = JSON.parse(jsonStr);
+      let qArr: unknown[];
+      if (Array.isArray(raw)) qArr = raw;
+      else if (raw.questions && Array.isArray(raw.questions)) qArr = raw.questions;
+      else qArr = Object.values(raw).flat();
+      return autoQuizSchema.parse({ questions: qArr }).questions;
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
-    // Handle: { questions: [...] }, [...], or { "1": [...], "2": [...] }
-    let qArr: unknown[];
-    if (Array.isArray(raw)) {
-      qArr = raw;
-    } else if (raw.questions && Array.isArray(raw.questions)) {
-      qArr = raw.questions;
-    } else {
-      qArr = Object.values(raw).flat();
-    }
-    const parsed = autoQuizSchema.parse({ questions: qArr });
-    return parsed.questions;
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -374,41 +334,30 @@ export async function generateLesson(
   const langInstruction = language ? `\n\nIMPORTANT: Generate ALL content in ${language === "zh" ? "Chinese (简体中文)" : "English"}. All titles, descriptions, explanations, and answers must be in ${language === "zh" ? "Chinese" : "English"}.` : "";
 
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: textModel,
-      messages: [
-        {
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.6,
+        maxOutputTokens: 4096,
+
+        system: SYSTEM_EDUCATOR,
+        messages: [{
           role: "user",
-          content: `You are creating a lesson for a college course called "${courseTitle}".
-${courseDescription ? `Course description: ${courseDescription}` : ""}
+          content: `Create a mini-lesson for "${courseTitle}".${courseDescription ? ` (${courseDescription})` : ""}
 
 Topic: ${knowledgePoint.title}
 ${knowledgePoint.content ? `Context: ${knowledgePoint.content}` : ""}
 
-Write a complete mini-lesson that a student can learn from. Return ONLY valid JSON (no markdown fences, no extra text):
+Return JSON:
+{"title": "...", "content": "markdown, 300-600 words, ## headers, code/math examples, analogies, ends with comprehension question", "key_takeaways": ["3-5 points"], "examples": ["1-3 concrete examples"]}
 
-{
-  "title": "Lesson title",
-  "content": "Full lesson content in markdown format. Include:\\n- Clear explanation of the concept (2-3 paragraphs, student-friendly language)\\n- Use ## headers to organize sections\\n- Include code examples in \`\`\`python code blocks if it's a CS/programming topic\\n- Include worked examples with step-by-step solutions if it's math/science\\n- Use analogies and real-world connections\\n- End with a 'Think About It' question to check understanding",
-  "key_takeaways": ["3-5 bullet points summarizing the most important ideas"],
-  "examples": ["1-3 concrete examples or code snippets that illustrate the concept"]
-}
-
-Rules:
-- Write at a college freshman level — clear but not dumbed down
-- The lesson should be self-contained — a student should be able to understand the topic from this lesson alone
-- If it's a programming topic, include runnable code examples
-- Content should be 300-600 words (substantial but not overwhelming)
-- Return ONLY the JSON object${langInstruction}`,
-        },
-      ],
+Self-contained lesson. College level.${langSuffix(language)}`,
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      return generatedLessonSchema.parse(JSON.parse(jsonStr));
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-
-    return generatedLessonSchema.parse(JSON.parse(jsonStr));
   } catch (err) {
     throw new Error(`Lesson generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -431,45 +380,72 @@ export interface GeneratedChunk {
   key_terms: { term: string; definition: string }[] | null;
 }
 
+// Detect course domain to pick appropriate teaching strategy
+function detectCourseType(courseTitle: string): "stem" | "humanities" | "general" {
+  const title = courseTitle.toLowerCase();
+  const stemKeywords = ["calculus", "physics", "chemistry", "math", "statistics", "biology", "engineering", "algorithm", "programming", "cs ", "computer science", "linear algebra", "differential", "organic", "data structure"];
+  const humanitiesKeywords = ["literature", "history", "philosophy", "psychology", "sociology", "political", "economics", "writing", "english", "art ", "music", "language", "communication", "law"];
+  if (stemKeywords.some(k => title.includes(k))) return "stem";
+  if (humanitiesKeywords.some(k => title.includes(k))) return "humanities";
+  return "general";
+}
+
+const TEACHING_STRATEGIES = {
+  stem: `4 sub-topics following CONCRETENESS FADING (Fyfe et al. 2015):
+  1. Pretest: concrete real-world scenario (physical quantities, money, distances)
+  2. Concrete worked example with specific numbers
+  3. Symbolic/formulaic generalization with variables
+  4. Transfer: apply to a different context`,
+  humanities: `4 sub-topics following CASE-BASED REASONING:
+  1. Pretest: opinion/prediction question about a real scenario
+  2. Primary source or case study analysis
+  3. Framework/theory that explains the pattern
+  4. Transfer: apply framework to a new case`,
+  general: `4 sub-topics following PROGRESSIVE COMPLEXITY:
+  1. Pretest: intuition check with everyday example
+  2. Core concept with concrete illustration
+  3. Nuances, exceptions, and deeper analysis
+  4. Transfer: real-world application in different context`,
+} as const;
+
 // Phase 1: Generate lesson outline (fast, ~2s)
 export async function generateLessonOutline(
   courseTitle: string,
   knowledgePoint: { title: string; content: string | null },
 ): Promise<ChunkOutlineItem[]> {
-  const { text: outlineText } = await generateText({
-    model: textModel,
-    messages: [{
-      role: "user",
-      content: `Split this knowledge point into 4 teaching sub-topics for a college Calculus II student.
+  const courseType = detectCourseType(courseTitle);
+  const strategy = TEACHING_STRATEGIES[courseType];
+
+  return withRetry(async () => {
+    const { text: outlineText } = await generateText({
+      model: textModel,
+      temperature: 0.3,
+      maxOutputTokens: 2048,
+      system: SYSTEM_JSON,
+      messages: [{
+        role: "user",
+        content: `Split this knowledge point into 4 teaching sub-topics for a college student.
 
 Knowledge point: ${knowledgePoint.title}
 ${knowledgePoint.content ? `Context: ${knowledgePoint.content}` : ""}
 Course: ${courseTitle}
 
-Return JSON:
-{"chunks_outline": [{"title": "...", "teaching_goal": "..."}]}
+Return: {"chunks_outline": [{"title": "...", "teaching_goal": "one sentence"}]}
 
-Requirements:
-- 4 sub-topics following a CONCRETENESS FADING progression (Fyfe et al. 2015):
-  1. Pretest using a concrete real-world scenario (e.g. physical quantities, money, distances)
-  2. Concrete numerical worked example with specific numbers
-  3. Symbolic/formulaic generalization with variables and notation
-  4. Abstract application: a different context that tests transfer
-- Each teaching_goal is one sentence
-ONLY JSON.`,
-    }],
+Teaching strategy:
+${strategy}`,
+      }],
+    });
+    const outlineJson = extractJSON(outlineText);
+    if (!outlineJson) throw new Error("Failed to generate lesson outline");
+    const outlineRaw = JSON.parse(outlineJson);
+    const outline: ChunkOutlineItem[] = (outlineRaw.chunks_outline ?? []).map((item: { title?: string; teaching_goal?: string }) => ({
+      title: String(item.title ?? ""),
+      teaching_goal: String(item.teaching_goal ?? ""),
+    }));
+    if (outline.length === 0) throw new Error("Empty lesson outline");
+    return outline;
   });
-
-  const outlineJson = extractJSON(outlineText);
-  if (!outlineJson) throw new Error("Failed to generate lesson outline");
-  const outlineRaw = JSON.parse(outlineJson);
-  const outline: ChunkOutlineItem[] = (outlineRaw.chunks_outline ?? []).map((item: { title?: string; teaching_goal?: string }) => ({
-    title: String(item.title ?? ""),
-    teaching_goal: String(item.teaching_goal ?? ""),
-  }));
-
-  if (outline.length === 0) throw new Error("Empty lesson outline");
-  return outline;
 }
 
 // Phase 2: Generate a single lesson chunk
@@ -481,78 +457,85 @@ export async function generateSingleLessonChunk(
   const item = outline[index];
   if (!item) return null;
 
+  const courseType = detectCourseType(courseTitle);
   const outlineSummary = outline.map((o, i) => `${i + 1}. ${o.title}`).join("\n");
   const checkpointTypes = ["pretest", "mcq", "fill_blank", "open"] as const;
   const cpType = checkpointTypes[index % checkpointTypes.length];
   const isPretest = cpType === "pretest";
 
-  // Concreteness fading: each chunk has a different abstraction level
-  const abstractionLevels = [
-    "CONCRETE SCENARIO: Use a real-world scenario (physical quantities, money, areas, rates). No abstract symbols yet — only numbers and words.",
-    "CONCRETE EXAMPLE: Use a specific worked example with numbers. Introduce mathematical notation alongside the concrete values.",
-    "SYMBOLIC: Teach the general formula/method using variables. Reference the earlier concrete example to bridge understanding.",
-    "TRANSFER: Apply the concept to a different context than chunks 1-3. The student should recognize the same deep structure in a new surface form.",
-  ] as const;
+  const ABSTRACTION_LEVELS = {
+    stem: [
+      "CONCRETE SCENARIO: Real-world scenario with physical quantities/money/rates. No abstract symbols — only numbers and words.",
+      "CONCRETE EXAMPLE: Worked example with numbers. Introduce notation alongside concrete values.",
+      "SYMBOLIC: General formula/method with variables. Reference the earlier concrete example.",
+      "TRANSFER: Apply to a different context. Same deep structure, new surface form.",
+    ],
+    humanities: [
+      "HOOK: Engaging question or surprising fact about a real case/event.",
+      "CASE STUDY: Detailed analysis of a primary source, historical event, or real scenario.",
+      "FRAMEWORK: Introduce the theoretical lens or analytical framework that explains the pattern.",
+      "TRANSFER: Apply the framework to a different case or contemporary issue.",
+    ],
+    general: [
+      "INTUITION: Everyday example that builds intuition. No jargon yet.",
+      "CORE CONCEPT: Clear explanation with concrete illustration.",
+      "NUANCE: Deeper analysis — exceptions, edge cases, common misconceptions.",
+      "TRANSFER: Apply to a real-world situation the student might encounter.",
+    ],
+  } as const;
 
-  const abstractionInstruction = abstractionLevels[index] ?? abstractionLevels[abstractionLevels.length - 1];
+  const levels = ABSTRACTION_LEVELS[courseType];
+  const abstractionInstruction = levels[index] ?? levels[levels.length - 1];
 
   const pretestInstruction = isPretest
-    ? `IMPORTANT: This is a PRETEST chunk. Structure it as:
-1. Start with a challenging question the student probably can't answer yet (this is intentional — attempting retrieval before learning enhances memory, even if they get it wrong)
-2. After the checkpoint, provide the teaching content that explains the answer
-The student will see "Don't worry if you don't know this yet — trying first helps you learn better" in the UI.`
+    ? `This is a PRETEST: start with a question the student probably can't answer yet. After checkpoint, provide teaching content. Retrieval attempt before learning enhances memory.`
     : "";
 
   const checkpointInstruction = cpType === "mcq" || cpType === "pretest"
-    ? `checkpoint_type: "mcq" with 4 options. Wrong options based on common misconceptions.`
+    ? `checkpoint_type: "mcq", 4 options, wrong options from common misconceptions.`
     : cpType === "fill_blank"
-    ? `checkpoint_type: "fill_blank". checkpoint_options: null. Answer is a short phrase or number.`
-    : `checkpoint_type: "open". checkpoint_options: null. Answer is 1-2 sentences. checkpoint_answer should contain the key concepts that must appear.`;
+    ? `checkpoint_type: "fill_blank", checkpoint_options: null, answer is short phrase/number.`
+    : `checkpoint_type: "open", checkpoint_options: null, answer 1-2 sentences with key concepts.`;
 
   try {
-    const { text } = await generateText({
-      model: textModel,
-      messages: [{
-        role: "user",
-        content: `You are an interactive course content generator.
+    return await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.5,
+        maxOutputTokens: 2048,
 
-Full lesson outline:
-${outlineSummary}
+        system: SYSTEM_EDUCATOR,
+        messages: [{
+          role: "user",
+          content: `Lesson outline: ${outlineSummary}
 
-Generate part ${index + 1}: "${item.title}"
-Teaching goal: ${item.teaching_goal}
-
+Generate part ${index + 1}: "${item.title}" — ${item.teaching_goal}
 Course: ${courseTitle}
-Student level: College sophomore
 ${pretestInstruction}
 
-Requirements:
-1. content: 150-200 words, Markdown with LaTeX math ($...$).
-2. Abstraction level for this chunk: ${abstractionInstruction}
-3. checkpoint: ${checkpointInstruction}
-4. key_terms: Extract 2-5 domain-specific terms from this chunk that a student might not know. For each term, provide a concise definition (1 sentence, ≤30 words). Include technical terms, named theorems, mathematical concepts — not common words.
-5. Do NOT generate remediation.
+1. content: 150-200 words, Markdown + LaTeX ($...$)
+2. Abstraction: ${abstractionInstruction}
+3. ${checkpointInstruction}
+4. key_terms: 2-5 domain terms with 1-sentence definitions
 
-Return ONLY JSON:
-{"content": "markdown...", "checkpoint_type": "${cpType === "pretest" ? "mcq" : cpType}", "checkpoint_prompt": "?", "checkpoint_answer": "B", "checkpoint_options": ${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},{"label":"B","text":"..."},{"label":"C","text":"..."},{"label":"D","text":"..."}]' : "null"}, "key_terms": [{"term": "Term Name", "definition": "Brief definition"}]}`,
-      }],
+Return JSON:
+{"content":"...","checkpoint_type":"${cpType === "pretest" ? "mcq" : cpType}","checkpoint_prompt":"?","checkpoint_answer":"...","checkpoint_options":${cpType === "mcq" || cpType === "pretest" ? '[{"label":"A","text":"..."},...]' : "null"},"key_terms":[{"term":"...","definition":"..."}]}`,
+        }],
+      });
+      const json = extractJSON(text);
+      if (!json) return null;
+      const raw = JSON.parse(json);
+      return {
+        chunk_index: index,
+        content: String(raw.content ?? ""),
+        checkpoint_type: (["mcq", "code", "open", "latex", "fill_blank"].includes(raw.checkpoint_type) ? raw.checkpoint_type : "mcq") as "mcq" | "code" | "open" | "latex" | null,
+        checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
+        checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
+        checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
+        key_terms: Array.isArray(raw.key_terms) ? raw.key_terms.filter((t: unknown) => t && typeof t === "object" && "term" in (t as Record<string, unknown>) && "definition" in (t as Record<string, unknown>)) : null,
+      };
     });
-
-    const json = extractJSON(text);
-    if (!json) return null;
-    const raw = JSON.parse(json);
-    return {
-      chunk_index: index,
-      content: String(raw.content ?? ""),
-      checkpoint_type: (["mcq", "code", "open", "latex", "fill_blank"].includes(raw.checkpoint_type) ? raw.checkpoint_type : "mcq") as "mcq" | "code" | "open" | "latex" | null,
-      checkpoint_prompt: raw.checkpoint_prompt ? String(raw.checkpoint_prompt) : null,
-      checkpoint_answer: raw.checkpoint_answer ? String(raw.checkpoint_answer) : null,
-      checkpoint_options: Array.isArray(raw.checkpoint_options) ? raw.checkpoint_options : null,
-      key_terms: Array.isArray(raw.key_terms) ? raw.key_terms.filter((t: unknown) => t && typeof t === "object" && "term" in (t as Record<string, unknown>) && "definition" in (t as Record<string, unknown>)) : null,
-    };
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 // Convenience wrapper: generate outline + all chunks (blocking)
@@ -619,50 +602,36 @@ export async function organizeStudyNote({
     : "No clarification answers yet.";
 
   try {
-    const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
-      model: textModel,
-      messages: [
-        {
+    const organized = await withRetry(async () => {
+      const { text } = await generateText({
+        model: textModel,
+        temperature: 0.3,
+        maxOutputTokens: 2048,
+
+        system: SYSTEM_JSON,
+        messages: [{
           role: "user",
-          content: `You are turning a student's spoken course note into a clean study note for the course "${courseTitle}".
+          content: `Organize a student's spoken note for "${courseTitle}".
 
-Knowledge points in this course:
-${kpSummary}
+Knowledge points: ${kpSummary}
+${selectedKnowledgePointTitle ? `Tagged to: ${selectedKnowledgePointTitle}` : "No manual tag."}
 
-${selectedKnowledgePointTitle ? `The student manually tagged this note to: ${selectedKnowledgePointTitle}` : "No manual knowledge point tag was selected."}
-
-Original spoken note:
+Spoken note:
 """
 ${transcript}
 """
 
-Clarification answers so far:
-${clarificationContext}
+Clarifications: ${clarificationContext}
 
-Return a structured note with:
-- title: short and concrete
-- summary: 2-4 sentences
-- key_points: 2-6 bullet-sized takeaways
-- confusing_points: only the parts the student still seems unsure about
-- next_action: one concrete next step or null
-- clarification_questions: 0-3 short follow-up questions only if the meaning is still ambiguous or incomplete
-- matched_kp_title: exactly one title from the knowledge point list above, or null
+Return: {"title":"...","summary":"2-4 sentences","key_points":["2-6 items"],"confusing_points":["unclear parts"],"next_action":"one step or null","clarification_questions":["0-3 if ambiguous"],"matched_kp_title":"exact KP title or null"}
 
-Rules:
-- Preserve the student's meaning. Do not invent facts.
-- If a manual knowledge point was selected, use that as matched_kp_title.
-- If the clarification answers already resolve the ambiguity, reduce or remove the clarification questions.
-- If the note is clear enough, return an empty clarification_questions array.
-
-Return ONLY valid JSON (no markdown, no code fences).`,
-        },
-      ],
+Preserve student's meaning. Don't invent facts. If manual tag exists, use it as matched_kp_title. If answers resolve ambiguity, return empty clarification_questions.`,
+        }],
+      });
+      const jsonStr = extractJSON(text);
+      if (!jsonStr) throw new Error("AI did not return valid JSON");
+      return organizedStudyNoteSchema.parse(JSON.parse(jsonStr));
     });
-
-    const jsonStr = extractJSON(text);
-    if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const organized = organizedStudyNoteSchema.parse(JSON.parse(jsonStr));
 
     return {
       title: organized.title,

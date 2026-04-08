@@ -47,7 +47,8 @@ export function loadCards(): ReviewCard[] {
 
 export function saveCards(cards: ReviewCard[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cards)); }
+  catch { /* storage full — silently degrade, cards stay in memory for this session */ }
 }
 
 export function getOrCreateCard(questionId: string): ReviewCard {

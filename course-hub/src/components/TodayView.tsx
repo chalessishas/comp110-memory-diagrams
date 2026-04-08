@@ -68,7 +68,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         return (
           <div
             key={task.id}
-            className="ui-panel p-5 flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
+            className="ui-panel p-5 flex items-start gap-4 group cursor-pointer overflow-hidden"
           >
             <div
               className="w-10 h-10 flex items-center justify-center shrink-0"

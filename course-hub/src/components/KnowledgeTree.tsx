@@ -21,13 +21,13 @@ interface KnowledgeTreeProps {
 function getNodeStyle(mastery: MasteryLevel) {
   switch (mastery) {
     case "mastered":
-      return { size: 56, bg: "#16a34a", border: "#15803d", glow: "0 0 20px rgba(22, 163, 74, 0.4)", opacity: 1, label: "Mastered" };
+      return { size: 56, bg: "#16a34a", border: "#15803d", opacity: 1, label: "Mastered" };
     case "reviewing":
-      return { size: 44, bg: "#f59e0b", border: "#d97706", glow: "0 0 12px rgba(245, 158, 11, 0.3)", opacity: 1, label: "Reviewing" };
+      return { size: 44, bg: "#f59e0b", border: "#d97706", opacity: 1, label: "Reviewing" };
     case "weak":
-      return { size: 36, bg: "#ef4444", border: "#dc2626", glow: "0 0 10px rgba(239, 68, 68, 0.3)", opacity: 0.9, label: "Weak" };
+      return { size: 36, bg: "#ef4444", border: "#dc2626", opacity: 0.9, label: "Weak" };
     default:
-      return { size: 24, bg: "var(--border)", border: "var(--border-strong)", glow: "none", opacity: 0.5, label: "Not started" };
+      return { size: 24, bg: "var(--border)", border: "var(--border-strong)", opacity: 0.5, label: "Not started" };
   }
 }
 
@@ -37,16 +37,9 @@ function NodeCircle({ node, x, y }: { node: KnowledgeNodeData; x: number; y: num
 
   return (
     <g className="cursor-pointer" style={{ opacity: style.opacity }}>
-      {/* Glow ring for active nodes */}
+      {/* Ring for active nodes */}
       {node.mastery !== "untested" && (
-        <circle cx={x} cy={y} r={r + 4} fill="none" stroke={style.bg} strokeWidth={2} opacity={0.3}>
-          {node.mastery === "mastered" && (
-            <animate attributeName="r" values={`${r + 2};${r + 8};${r + 2}`} dur="3s" repeatCount="indefinite" />
-          )}
-          {node.mastery === "mastered" && (
-            <animate attributeName="opacity" values="0.3;0.1;0.3" dur="3s" repeatCount="indefinite" />
-          )}
-        </circle>
+        <circle cx={x} cy={y} r={r + 4} fill="none" stroke={style.bg} strokeWidth={2} opacity={0.3} />
       )}
 
       {/* Main circle */}
@@ -156,9 +149,9 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
         </div>
         <div className="flex items-center gap-2 ml-auto">
           <span className="text-xs font-medium">{Math.round(overallProgress)}% mastered</span>
-          <div className="w-24 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+          <div className="w-24 h-2 rounded overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
             <div
-              className="h-full rounded-full"
+              className="h-full rounded"
               style={{ width: `${overallProgress}%`, backgroundColor: "#16a34a", transition: "width 500ms ease" }}
             />
           </div>

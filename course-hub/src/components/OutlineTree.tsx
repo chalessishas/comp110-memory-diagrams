@@ -90,7 +90,7 @@ function EditableNode({
   return (
     <div>
       <div
-        className="group flex items-center gap-2 rounded-2xl px-3 py-2 hover:bg-black/5"
+        className="group flex items-center gap-2 rounded-md px-3 py-2 hover:bg-black/5"
         style={{ paddingLeft: `${depth * 24 + 12}px` }}
       >
         {/* Expand/collapse */}
@@ -106,7 +106,7 @@ function EditableNode({
 
         {/* Type badge */}
         <span
-          className="text-[10px] px-2.5 py-1 rounded-full shrink-0 font-semibold uppercase tracking-[0.18em]"
+          className="text-[10px] px-2.5 py-1 rounded shrink-0 font-semibold uppercase tracking-[0.18em]"
           style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
         >
           {typeLabel[node.type] || "?"}
@@ -148,7 +148,7 @@ function EditableNode({
 
         {/* Action buttons (visible on hover) */}
         {!editing && (
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
             <button onClick={startEdit} className="p-1 cursor-pointer" title="Rename">
               <Pencil size={13} style={{ color: "var(--text-secondary)" }} />
             </button>
@@ -268,7 +268,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
       </div>
 
       {dirty && (
-        <div className="mt-4 flex items-center gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+        <div className="mt-4 flex items-center gap-3 p-4 rounded-md" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
           <Sparkles size={16} style={{ color: "var(--text-secondary)" }} />
           <p className="text-sm flex-1" style={{ color: "var(--text-secondary)" }}>
             Outline changed. Regenerate study tasks and practice questions?
@@ -276,7 +276,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
           <button
             onClick={handleRegenerate}
             disabled={regenerating}
-            className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 rounded-md text-sm font-medium cursor-pointer disabled:opacity-50"
             style={{ backgroundColor: "var(--accent)", color: "white" }}
           >
             {regenerating ? <Loader2 size={14} className="animate-spin" /> : "Regenerate"}

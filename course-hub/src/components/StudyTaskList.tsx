@@ -95,7 +95,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
             <span>{doneTasks.length}/{tasks.length}</span>
           </div>
           <div className="ui-progress-track">
-            <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
+            <div className="ui-progress-bar" style={{ width: `${progress}%` }} />
           </div>
         </div>
       </div>
@@ -111,8 +111,8 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
               return (
                 <div
                   key={task.id}
-                  className="flex items-start gap-3 rounded-[24px] px-4 py-4 transition-colors group"
-                  style={{ backgroundColor: "rgba(247, 247, 244, 0.92)", border: "1px solid var(--border)" }}
+                  className="flex items-start gap-3 rounded-md px-4 py-4 group"
+                  style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
                 >
                   <button
                     onClick={() => toggleTask(task.id, task.status)}
@@ -129,7 +129,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
                     <p className="text-sm font-medium">{task.title}</p>
                     <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>{task.description}</p>
                   </div>
-                  <span className="flex items-center gap-1 text-xs shrink-0 px-3 py-1.5 rounded-full"
+                  <span className="flex items-center gap-1 text-xs shrink-0 px-3 py-1.5 rounded"
                     style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}>
                     <Icon size={12} />
                     {typeLabels[task.task_type]}
@@ -150,7 +150,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
             {doneTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-3 rounded-[22px] px-4 py-3"
+                className="flex items-center gap-3 rounded-md px-4 py-3"
                 style={{ backgroundColor: "white", border: "1px solid var(--border)" }}
               >
                 <button onClick={() => toggleTask(task.id, task.status)} className="shrink-0 cursor-pointer rounded-full">

@@ -73,21 +73,21 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
     if (submitted && isAnswer) {
       return {
         borderColor: "var(--success)",
-        backgroundColor: "rgba(22, 163, 74, 0.08)",
+        backgroundColor: "var(--bg-surface)",
       };
     }
 
     if (submitted && isSelected && !isAnswer) {
       return {
         borderColor: "var(--danger)",
-        backgroundColor: "rgba(239, 68, 68, 0.08)",
+        backgroundColor: "var(--bg-surface)",
       };
     }
 
     if (!submitted && isSelected) {
       return {
         borderColor: "var(--accent)",
-        backgroundColor: "rgba(91, 108, 240, 0.08)",
+        backgroundColor: "var(--bg-surface)",
       };
     }
 
@@ -136,7 +136,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-4 py-4 rounded-[22px] text-sm transition-colors cursor-pointer disabled:cursor-default"
+              className="w-full text-left px-4 py-4 rounded-md text-sm transition-colors cursor-pointer disabled:cursor-default"
               style={{
                 border: "1px solid",
                 ...getOptionStyles(opt.label),
@@ -171,9 +171,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
       ) : (
         <div className="mt-4">
           <div
-            className="flex items-start gap-3 rounded-[24px] px-4 py-4 mb-3"
+            className="flex items-start gap-3 rounded-md px-4 py-4 mb-3"
             style={{
-              backgroundColor: isCorrect ? "rgba(22, 163, 74, 0.08)" : "rgba(239, 68, 68, 0.08)",
+              backgroundColor: isCorrect ? "var(--bg-surface)" : "var(--bg-surface)",
               color: isCorrect ? "var(--success)" : "var(--danger)",
               border: `1px solid ${isCorrect ? "var(--success)" : "var(--danger)"}`,
             }}
@@ -194,7 +194,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           </div>
           {revealedExplanation && (
             <p
-              className="text-sm p-4 rounded-[22px]"
+              className="text-sm p-4 rounded-md"
               style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
             >
               {revealedExplanation}
@@ -219,7 +219,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
                   setFeedbackGiven(fb.reason);
                 }}
                 disabled={!!feedbackGiven}
-                className="px-2 py-0.5 rounded-full text-[10px] cursor-pointer disabled:opacity-40"
+                className="px-2 py-0.5 rounded text-[10px] cursor-pointer disabled:opacity-40"
                 style={{
                   border: "1px solid var(--border)",
                   backgroundColor: feedbackGiven === fb.reason ? "var(--bg-muted)" : "transparent",

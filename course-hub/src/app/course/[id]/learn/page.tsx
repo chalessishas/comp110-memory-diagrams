@@ -300,7 +300,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       </div>
 
       {generateError && (
-        <div className="mb-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: "rgba(239,68,68,0.08)", color: "var(--danger)", border: "1px solid var(--danger)" }}>
+        <div className="mb-4 px-4 py-3 rounded-md text-sm" style={{ color: "var(--danger)", border: "1px solid var(--danger)" }}>
           {generateError}
         </div>
       )}
@@ -336,7 +336,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     {inScope && (
-                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(99,102,241,0.1)", color: "var(--accent)" }}>
+                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ color: "var(--accent)" }}>
                         <Target size={8} />
                         {isZh ? "考" : "exam"}
                       </span>
@@ -355,9 +355,9 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 {isGenerating ? (
                   <Loader2 size={16} className="animate-spin shrink-0" style={{ color: "var(--accent)" }} />
                 ) : !item.hasLesson ? (
-                  <Sparkles size={16} className="shrink-0 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "var(--accent)" }} />
+                  <Sparkles size={16} className="shrink-0 opacity-30 group-hover:opacity-100" style={{ color: "var(--accent)" }} />
                 ) : (
-                  <ChevronRight size={16} className="shrink-0 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "var(--text-secondary)" }} />
+                  <ChevronRight size={16} className="shrink-0 opacity-30 group-hover:opacity-100" style={{ color: "var(--text-secondary)" }} />
                 )}
               </button>
             );

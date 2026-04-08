@@ -70,7 +70,8 @@ function readStore(): StudyTrackerStore {
 
 function writeStore(store: StudyTrackerStore) {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); }
+  catch { /* storage full — silently degrade */ }
   window.dispatchEvent(new Event(STUDY_TRACKER_UPDATED_EVENT));
 }
 

@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
 
   // Preferences
   const [semester, setSemester] = useState("");
@@ -57,11 +58,13 @@ export default function SettingsPage() {
     if (newPassword.length < 6) return;
     setChangingPassword(true);
     setPasswordMessage(null);
+    setPasswordSuccess(false);
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       setPasswordMessage(error.message);
     } else {
-      setPasswordMessage("Password updated successfully.");
+      setPasswordSuccess(true);
+      setPasswordMessage(t("settings.passwordSuccess"));
       setNewPassword("");
     }
     setChangingPassword(false);
@@ -105,22 +108,22 @@ export default function SettingsPage() {
   }
 
   function handleClearStudyTracker() {
-    if (!confirm("Clear all study time data? This cannot be undone.")) return;
+    if (!confirm(t("settings.confirmClearStudy"))) return;
     setClearing("tracker");
     localStorage.removeItem("coursehub.study-tracker");
     setTimeout(() => setClearing(null), 1000);
   }
 
   function handleClearReviewCards() {
-    if (!confirm("Clear all spaced repetition progress? This cannot be undone.")) return;
+    if (!confirm(t("settings.confirmClearReview"))) return;
     setClearing("review");
     localStorage.removeItem("coursehub.review-cards");
     setTimeout(() => setClearing(null), 1000);
   }
 
   async function handleDeleteAccount() {
-    if (!confirm("Delete your account and ALL data? This cannot be undone.")) return;
-    if (!confirm("Are you absolutely sure? All courses, questions, and progress will be permanently deleted.")) return;
+    if (!confirm(t("settings.confirmDeleteAccount"))) return;
+    if (!confirm(t("settings.confirmDeleteFinal"))) return;
     const { data: courses } = await supabase.from("courses").select("id");
     if (courses && courses.length > 0) {
       await supabase.from("courses").delete().in("id", courses.map((c) => c.id));
@@ -149,7 +152,7 @@ export default function SettingsPage() {
           <button
             key={s.key}
             onClick={() => setActiveSection(s.key)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap cursor-pointer transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-md text-sm whitespace-nowrap cursor-pointer"
             style={{
               backgroundColor: activeSection === s.key ? "var(--accent)" : "var(--bg-surface)",
               color: activeSection === s.key ? "white" : "var(--text-secondary)",
@@ -176,7 +179,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.displayName")}</label>
                 <div className="flex gap-2">
-                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("settings.namePlaceholder")} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
                   <button onClick={handleSaveName} disabled={savingName} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingName ? <Loader2 size={14} className="animate-spin" /> : nameSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -193,12 +196,12 @@ export default function SettingsPage() {
           <div className="ui-panel p-6">
             <h2 className="text-lg font-semibold mb-4">{t("settings.changePassword")}</h2>
             <div className="flex gap-2">
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={t("settings.passwordPlaceholder")} minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
               <button onClick={handleChangePassword} disabled={changingPassword || newPassword.length < 6} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                 {changingPassword ? <Loader2 size={14} className="animate-spin" /> : t("settings.save")}
               </button>
             </div>
-            {passwordMessage && <p className="text-xs mt-2" style={{ color: passwordMessage.includes("success") ? "var(--success)" : "var(--danger)" }}>{passwordMessage}</p>}
+            {passwordMessage && <p className="text-xs mt-2" style={{ color: passwordSuccess ? "var(--success)" : "var(--danger)" }}>{passwordMessage}</p>}
           </div>
 
           <div className="ui-panel p-6">
@@ -221,7 +224,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.semester")}</label>
                 <div className="flex gap-2">
-                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Fall 2026" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder={t("settings.semesterPlaceholder")} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
                   <button onClick={handleSaveSemester} disabled={savingSemester} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingSemester ? <Loader2 size={14} className="animate-spin" /> : semesterSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -230,7 +233,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.aiModel")}</label>
                 <input value="Qwen3.5-Plus (DashScope)" disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }} />
-                <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>Model selection is managed by the administrator.</p>
+                <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>{t("settings.aiModelManaged")}</p>
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.language")}</label>
@@ -257,6 +260,33 @@ export default function SettingsPage() {
                   >
                     中文
                   </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.theme")}</label>
+                <div className="flex gap-2">
+                  {([["light", "Light"], ["dark", "Dark"], ["system", "System"]] as const).map(([value, label]) => {
+                    const current = typeof window !== "undefined" ? (localStorage.getItem("coursehub.theme") ?? "system") : "system";
+                    return (
+                      <button
+                        key={value}
+                        onClick={() => {
+                          localStorage.setItem("coursehub.theme", value);
+                          if (value === "dark") document.documentElement.setAttribute("data-theme", "midnight");
+                          else document.documentElement.removeAttribute("data-theme");
+                          window.location.reload();
+                        }}
+                        className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer"
+                        style={{
+                          backgroundColor: current === value ? "var(--accent)" : "var(--bg-muted)",
+                          color: current === value ? "white" : "var(--text-secondary)",
+                          border: `1px solid ${current === value ? "var(--accent)" : "var(--border)"}`,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -296,14 +326,14 @@ export default function SettingsPage() {
       {/* About */}
       {activeSection === "about" && (
         <div className="ui-panel p-6">
-          <h2 className="text-lg font-semibold mb-4">About CourseHub</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("settings.aboutTitle")}</h2>
           <div className="space-y-3 text-sm" style={{ color: "var(--text-secondary)" }}>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Version:</span> 1.0.0 (MVP)</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Stack:</span> Next.js 16 + Supabase + Qwen AI</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>AI Model:</span> Qwen3.5-Plus via DashScope</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Storage:</span> Supabase (PostgreSQL + Object Storage)</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.version")}:</span> 1.0.0 (MVP)</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.stack")}:</span> Next.js 16 + Supabase + Qwen AI</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.aiModel")}:</span> Qwen3.5-Plus via DashScope</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.storage")}:</span> Supabase (PostgreSQL + Object Storage)</p>
             <p className="pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-              CourseHub turns your syllabus into a structured learning system — outlines, study tasks, practice questions, and mastery tracking. Built for students who want to study smarter, not harder.
+              {t("settings.aboutDesc")}
             </p>
           </div>
         </div>

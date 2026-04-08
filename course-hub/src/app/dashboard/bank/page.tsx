@@ -16,15 +16,16 @@ export default function QuestionBankPage() {
   const { t } = useI18n();
   const [bookmarks, setBookmarks] = useState<BookmarkItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/bookmarks")
       .then((r) => {
-        if (!r.ok) return [];
+        if (!r.ok) throw new Error(`Failed to load bookmarks (${r.status})`);
         return r.json();
       })
       .then((data) => { setBookmarks(Array.isArray(data) ? data : []); setLoading(false); })
-      .catch(() => { setBookmarks([]); setLoading(false); });
+      .catch((err) => { setError(err.message); setLoading(false); });
   }, []);
 
   async function removeBookmark(questionId: string) {
@@ -52,7 +53,14 @@ export default function QuestionBankPage() {
         {t("bank.subtitle")}
       </p>
 
-      {bookmarks.length === 0 ? (
+      {error ? (
+        <div className="text-center py-16">
+          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{error}</p>
+          <button onClick={() => window.location.reload()} className="ui-button-secondary mt-3 text-sm">
+            {t("bank.retry") || "Retry"}
+          </button>
+        </div>
+      ) : bookmarks.length === 0 ? (
         <div className="text-center py-16">
           <p style={{ color: "var(--text-secondary)" }}>{t("bank.noSaved")}</p>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
@@ -64,7 +72,7 @@ export default function QuestionBankPage() {
           {bookmarks.map((bm) => (
             <div
               key={bm.id}
-              className="p-5 rounded-2xl group"
+              className="p-5 rounded-md group"
               style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
             >
               <div className="flex items-start justify-between gap-3">
@@ -89,7 +97,7 @@ export default function QuestionBankPage() {
                 </div>
                 <button
                   onClick={() => removeBookmark(bm.questions.id)}
-                  className="p-1.5 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-1.5 cursor-pointer opacity-0 group-hover:opacity-100"
                   title="Remove"
                 >
                   <Trash2 size={14} style={{ color: "var(--danger)" }} />

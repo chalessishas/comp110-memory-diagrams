@@ -39,7 +39,7 @@ export function StudyStatsCard() {
 
   return (
     <div
-      className="rounded-[24px] p-6"
+      className="rounded-md p-6"
       style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
     >
       <div className="flex items-center gap-2 mb-4">
@@ -55,10 +55,10 @@ export function StudyStatsCard() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className="w-full rounded-lg transition-all"
+                className="w-full rounded-lg"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "#c4c9f8" : "var(--border)",
                   minHeight: "3px",
                 }}
               />
@@ -90,7 +90,7 @@ export function StudyStatsCard() {
       {allTime.totalMs > 60_000 && (
         <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
           <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>Time Distribution</p>
-          <div className="flex h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+          <div className="flex h-2 rounded overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
             {allTime.byMode.solving > 0 && (
               <div style={{ width: `${(allTime.byMode.solving / allTime.totalMs) * 100}%`, backgroundColor: "var(--accent)" }} />
             )}

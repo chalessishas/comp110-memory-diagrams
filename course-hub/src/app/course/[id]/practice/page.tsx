@@ -98,7 +98,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       <CourseTabs courseId={id} />
 
       {scopeKpIds && (
-        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+        <div className="mb-4 px-4 py-3 rounded-md flex items-center justify-between" style={{ border: "1px solid var(--border)" }}>
           <div className="flex items-center gap-2">
             <Target size={16} style={{ color: "var(--accent)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
@@ -153,13 +153,13 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             disabled={examPrepLoading}
           />
           {examPrepError && (
-            <div className="rounded-[18px] px-4 py-3 mb-4" style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid var(--danger)" }}>
+            <div className="rounded-md px-4 py-3 mb-4" style={{ border: "1px solid var(--danger)" }}>
               <p className="text-sm font-medium" style={{ color: "var(--danger)" }}>{examPrepError}</p>
             </div>
           )}
           {examPrepResult && (
             <div className="space-y-2 mb-4">
-              <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(22, 163, 74, 0.08)", border: "1px solid var(--success)" }}>
+              <div className="rounded-md px-4 py-3" style={{ border: "1px solid var(--success)" }}>
                 <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
                   {isZh
                     ? `从 ${examPrepResult.topics_processed} 个主题生成了 ${examPrepResult.questions_generated} 道题`
@@ -170,7 +170,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                 </p>
               </div>
               {examPrepResult.topics_failed.length > 0 && (
-                <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.5)" }}>
+                <div className="rounded-md px-4 py-3" style={{ border: "1px solid var(--warning)" }}>
                   <p className="text-sm font-medium" style={{ color: "var(--warning)" }}>
                     {isZh
                       ? `${examPrepResult.topics_failed.length} 个主题生成失败，可重试`
@@ -294,7 +294,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   Question {currentIndex + 1} of {filteredQuestions.length}
                 </p>
                 <div className="ui-progress-track mt-3 max-w-xs">
-                  <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
+                  <div className="ui-progress-bar" style={{ width: `${progress}%` }} />
                 </div>
                 <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
                   After you answer, stay on the card to review the explanation, then move with the arrows when you are ready.

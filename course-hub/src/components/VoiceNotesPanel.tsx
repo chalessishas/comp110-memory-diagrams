@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { CourseNote, NoteSource, OrganizedStudyNote } from "@/types";
 import { toCourseNote, toCourseNoteCreatePayload, type CourseNoteRow } from "@/lib/course-notes";
+import { useI18n } from "@/lib/i18n";
 
 type DictationTarget = { type: "transcript" } | { type: "clarification"; index: number };
 
@@ -82,6 +83,7 @@ export function VoiceNotesPanel({
   knowledgePoints: { id: string; title: string }[];
   initialNotes: CourseNote[];
 }) {
+  const { t } = useI18n();
   const [notes, setNotes] = useState<CourseNote[]>(initialNotes);
   const [transcript, setTranscript] = useState("");
   const [draft, setDraft] = useState<OrganizedStudyNote | null>(null);
@@ -285,7 +287,7 @@ export function VoiceNotesPanel({
     setDraft(null);
     setClarificationAnswers([]);
     setSelectedKnowledgePointId("");
-    setStatus("Note saved to this course.");
+    setStatus(t("notes.saved"));
     setSaving(false);
   }
 
@@ -314,7 +316,7 @@ export function VoiceNotesPanel({
         </div>
       </div>
 
-      <div className="rounded-[24px] p-4 mt-6" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}>
+      <div className="rounded-md p-4 mt-6" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium">1. Speak or paste the raw note</p>
@@ -392,20 +394,20 @@ export function VoiceNotesPanel({
       </div>
 
       {error && (
-        <div className="rounded-[20px] px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(0, 0, 0, 0.04)" }}>
+        <div className="rounded-md px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}>
           <p className="text-sm">{error}</p>
         </div>
       )}
 
       {status && (
-        <div className="rounded-[20px] px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+        <div className="rounded-md px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{status}</p>
         </div>
       )}
 
       {draft && (
         <div className="space-y-4 mt-6">
-          <div className="rounded-[24px] p-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+          <div className="rounded-md p-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <div className="ui-kicker mb-3">AI Note Draft</div>
@@ -422,8 +424,8 @@ export function VoiceNotesPanel({
 
             <div className="grid gap-4 mt-5 lg:grid-cols-2">
               <div
-                className="rounded-[20px] px-4 py-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                className="rounded-md px-4 py-4"
+                style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                   Key Points
@@ -438,8 +440,8 @@ export function VoiceNotesPanel({
               </div>
 
               <div
-                className="rounded-[20px] px-4 py-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                className="rounded-md px-4 py-4"
+                style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                   What Still Feels Fuzzy
@@ -462,8 +464,8 @@ export function VoiceNotesPanel({
 
             {draft.next_action && (
               <div
-                className="rounded-[20px] px-4 py-4 mt-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                className="rounded-md px-4 py-4 mt-4"
+                style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
               >
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
                   <BrainCircuit size={14} />
@@ -475,7 +477,7 @@ export function VoiceNotesPanel({
           </div>
 
           {draft.clarification_questions.length > 0 && (
-            <div className="rounded-[24px] p-5" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}>
+            <div className="rounded-md p-5" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}>
               <div className="flex items-center gap-2">
                 <MessageCircleQuestion size={16} />
                 <p className="text-sm font-medium">2. Answer the follow-up questions</p>
@@ -550,7 +552,7 @@ export function VoiceNotesPanel({
             {notes.map((note) => (
               <div
                 key={note.id}
-                className="rounded-[24px] px-4 py-4"
+                className="rounded-md px-4 py-4"
                 style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
               >
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">

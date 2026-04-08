@@ -81,7 +81,6 @@ function GeneratingStatus() {
             style={{
               width: `${progress}%`,
               backgroundColor: "var(--accent)",
-              transition: "width 400ms ease",
             }}
           />
         </div>
@@ -89,7 +88,7 @@ function GeneratingStatus() {
 
       {/* Timeout warning */}
       {elapsed > 30000 && (
-        <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "var(--warning)" }}>
+        <p className="text-xs px-4 py-2 rounded-md" style={{ color: "var(--warning)" }}>
           {t("gen.slowWarning")}
         </p>
       )}
@@ -125,7 +124,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
   }
 
   return (
-    <div className="rounded-[22px] px-5 py-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+    <div className="rounded-md px-5 py-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="ui-badge">{question.type.replaceAll("_", " ")}</span>
         <span className="ui-badge">{question.matched_kp_title}</span>
@@ -139,17 +138,14 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:cursor-default transition-colors"
+              className="w-full text-left px-4 py-2.5 rounded-md text-sm cursor-pointer disabled:cursor-default"
               style={{
                 border: "1px solid",
                 borderColor: submitted
                   ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
                     ? "var(--success)" : selected === opt.label ? "var(--danger)" : "var(--border)"
                   : selected === opt.label ? "var(--accent)" : "var(--border)",
-                backgroundColor: submitted
-                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "rgba(22, 163, 74, 0.08)" : "transparent"
-                  : selected === opt.label ? "rgba(91, 108, 240, 0.08)" : "transparent",
+                backgroundColor: "transparent",
               }}
             >
               <span className="font-medium mr-2">{opt.label}.</span>{opt.text}
@@ -174,7 +170,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
         <button
           onClick={handleSubmit}
           disabled={!userAnswer}
-          className="px-5 py-2 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-30"
+          className="px-5 py-2 rounded-md text-sm font-medium cursor-pointer disabled:opacity-30"
           style={{ backgroundColor: "var(--accent)", color: "white" }}
         >
           Check
@@ -189,7 +185,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
             )}
           </div>
           {question.explanation && (
-            <p className="text-xs p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+            <p className="text-xs p-3 rounded-md" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
               {question.explanation}
             </p>
           )}
@@ -411,10 +407,10 @@ export default function NewCoursePage() {
             return (
               <div
                 key={item.key}
-                className="rounded-[22px] px-4 py-4"
+                className="rounded-md px-4 py-4"
                 style={{
                   border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
-                  backgroundColor: isActive ? "rgba(16, 16, 16, 0.05)" : "rgba(247, 247, 244, 0.9)",
+                  backgroundColor: isActive ? "var(--bg-muted)" : "var(--bg-surface)",
                 }}
               >
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--text-secondary)" }}>
@@ -545,8 +541,7 @@ export default function NewCoursePage() {
 
           {/* Missing info warning */}
           {parsed.confidence && parsed.confidence !== "high" && (
-            <div className="rounded-2xl p-5" style={{
-              backgroundColor: parsed.confidence === "low" ? "rgba(239, 68, 68, 0.06)" : "rgba(245, 158, 11, 0.06)",
+            <div className="rounded-md p-5" style={{
               border: `1px solid ${parsed.confidence === "low" ? "var(--danger)" : "var(--warning)"}`,
             }}>
               <p className="text-sm font-medium mb-2" style={{ color: parsed.confidence === "low" ? "var(--danger)" : "var(--warning)" }}>
@@ -579,7 +574,7 @@ export default function NewCoursePage() {
           <div className="grid gap-6 xl:grid-cols-2">
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                <div className="flex h-11 w-11 items-center justify-center rounded-md" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
                   <BookOpen size={18} />
                 </div>
                 <div>
@@ -600,8 +595,8 @@ export default function NewCoursePage() {
                   {previewTasks.slice(0, 6).map((task, index) => (
                     <div
                       key={`${task.title}-${index}`}
-                      className="rounded-[22px] px-4 py-4"
-                      style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                      className="rounded-md px-4 py-4"
+                      style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-medium">{task.title}</p>
@@ -624,7 +619,7 @@ export default function NewCoursePage() {
 
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                <div className="flex h-11 w-11 items-center justify-center rounded-md" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
                   <BrainCircuit size={18} />
                 </div>
                 <div>

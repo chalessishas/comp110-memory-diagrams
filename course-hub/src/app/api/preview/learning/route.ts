@@ -38,13 +38,13 @@ function collectStudyTargets(nodes: ParsedOutlineNode[]) {
 }
 
 export async function POST(request: Request) {
-  // Guest preview requires auth — unauthenticated AI calls burn API budget
+  // Guest preview allowed — conversion funnel (stricter rate limit for guests)
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Sign in to preview AI-generated content" }, { status: 401 });
 
-  const ip = request.headers.get("x-forwarded-for") ?? user.id;
-  if (!checkRateLimit(ip, 10, 60_000)) {
+  const rateLimitKey = user?.id ?? request.headers.get("x-forwarded-for") ?? "anonymous";
+  const maxReqs = user ? 10 : 3;
+  if (!checkRateLimit(rateLimitKey, maxReqs, 60_000)) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 

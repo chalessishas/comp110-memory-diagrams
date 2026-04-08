@@ -5,13 +5,13 @@ import { NextResponse } from "next/server";
 export const maxDuration = 60;
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const courseId = searchParams.get("courseId");
-  if (!courseId) return NextResponse.json({ error: "courseId required" }, { status: 400 });
-
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { searchParams } = new URL(request.url);
+  const courseId = searchParams.get("courseId");
+  if (!courseId) return NextResponse.json({ error: "courseId required" }, { status: 400 });
 
   // Never send answer/explanation to client — revealed only after attempt submission
   const { data, error } = await supabase

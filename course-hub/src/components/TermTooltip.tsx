@@ -52,7 +52,7 @@ export function TermTooltip({ term, children }: TermTooltipProps) {
       {open && (
         <div
           ref={popRef}
-          className="absolute z-50 px-4 py-3 rounded-xl shadow-lg text-sm max-w-xs"
+          className="absolute z-50 px-4 py-3 rounded-md text-sm max-w-xs"
           style={{
             backgroundColor: "var(--bg-surface)",
             border: "1px solid var(--border)",

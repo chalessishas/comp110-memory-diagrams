@@ -9,13 +9,13 @@ const TYPE_DISPLAY: Record<string, { labelKey: string; color: string; background
   week: {
     labelKey: "outline.week",
     color: "var(--text-primary)",
-    backgroundColor: "rgba(16, 16, 16, 0.06)",
+    backgroundColor: "var(--bg-muted)",
     borderColor: "var(--border-strong)",
   },
   chapter: {
     labelKey: "outline.chapter",
     color: "var(--text-primary)",
-    backgroundColor: "rgba(16, 16, 16, 0.06)",
+    backgroundColor: "var(--bg-muted)",
     borderColor: "var(--border)",
   },
   topic: {
@@ -41,8 +41,8 @@ function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number
   return (
     <div style={{ marginLeft: depth * 18 }}>
       <div
-        className="flex items-center gap-2 rounded-2xl px-3 py-2 cursor-pointer select-none"
-        style={{ backgroundColor: depth === 0 ? "rgba(247, 247, 244, 0.95)" : "transparent" }}
+        className="flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer select-none"
+        style={{ backgroundColor: depth === 0 ? "var(--bg-surface)" : "transparent" }}
         onClick={() => hasChildren && setExpanded(!expanded)}
       >
         {hasChildren ? (
@@ -52,7 +52,7 @@ function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number
           <span className="w-3.5" />
         )}
         <span
-          className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
+          className="inline-flex items-center rounded px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
           style={{
             color: typeDisplay.color,
             backgroundColor: typeDisplay.backgroundColor,
