@@ -1,5 +1,25 @@
 # CourseHub Status
 
+## [2026-04-08 00:03] Phase 5 — Daily Progress Report + 考前功能
+
+### Daily Progress Report（私塾师傅日报）
+- `src/app/api/courses/[id]/daily-report/route.ts` — 聚合 attempts/element_mastery/lesson_progress/misconceptions，输出今日统计 + 7 天历史 + 掌握度分布 + 薄弱点
+- `src/components/DailyReport.tsx` — 可折叠面板，含 3 格统计卡、level-up 庆祝、7 天柱状图（颜色编码正确率）、掌握度分布条、trouble spots
+- 集成到 `src/app/course/[id]/page.tsx`，置于 TodayView 上方，默认折叠
+- commit `e0ed2bb`，已 push 到 `claude/cool-brahmagupta`
+
+### 本阶段其他功能（前 session 完成）
+- **Exam Scope Filter** — AI 解析考试范围 → 匹配 KP → 练习/复习页硬过滤，学习页 badge 标注
+- **Term Explanation Cards** — AI 提取 key_terms → MarkdownRenderer 内联高亮 → click popover 释义
+- **Mistake Pattern Analysis** — 按 KP 聚合错误率，review 页顶部展示 top 5
+
+### 待办
+- [ ] 合并 `claude/cool-brahmagupta` 到 main 并部署
+- [ ] 登录后实测 DailyReport 组件渲染（需有 attempts 数据）
+- [ ] Feature 2: Cross-Course Knowledge Organization（推迟到考后）
+
+---
+
 ## [2026-04-04 06:53] Phase 2 — UI 重构 + 新功能（未提交）
 
 另一个 session 在 MVP 基础上做了大量改进（+2005 行，27 个文件修改，7 个新文件），尚未 commit：
