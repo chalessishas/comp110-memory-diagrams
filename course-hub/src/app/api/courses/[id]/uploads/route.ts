@@ -34,7 +34,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  void params; // course_id unused — RLS scopes uploads to user
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

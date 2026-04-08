@@ -5,7 +5,7 @@ export async function GET(
   _: Request,
   { params }: { params: Promise<{ id: string; lessonId: string }> }
 ) {
-  const { id: _id, lessonId } = await params;
+  const { lessonId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

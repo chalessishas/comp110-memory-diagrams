@@ -128,7 +128,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      let lessonId: string | null = null;
+      const lessonIdRef = { current: null as string | null };
 
       while (true) {
         const { done, value } = await reader.read();
@@ -151,8 +151,8 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
             }
 
             if (event === "lesson") {
-              lessonId = parsed.lesson_id;
-              setActiveLessonId(lessonId);
+              lessonIdRef.current = parsed.lesson_id;
+              setActiveLessonId(parsed.lesson_id);
               setItems(prev => prev.map(item =>
                 item.id === kp.id
                   ? { ...item, hasLesson: true, lessonId: parsed.lesson_id }
@@ -169,7 +169,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 if (exists) return prev;
                 const placeholder: LessonChunk = {
                   id: `stream-${parsed.chunk_index}`,
-                  lesson_id: lessonId ?? "",
+                  lesson_id: lessonIdRef.current ?? "",
                   chunk_index: parsed.chunk_index,
                   content: parsed.content,
                   checkpoint_type: parsed.checkpoint_type,
@@ -188,8 +188,8 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
             if (event === "done") {
               if (parsed.cached && parsed.lesson_id) {
                 // Lesson already existed — just open it
-                lessonId = parsed.lesson_id;
-                setActiveLessonId(lessonId);
+                lessonIdRef.current = parsed.lesson_id;
+                setActiveLessonId(parsed.lesson_id);
                 setItems(prev => prev.map(item =>
                   item.id === kp.id
                     ? { ...item, hasLesson: true, lessonId: parsed.lesson_id }
@@ -197,7 +197,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 ));
               }
               // Fetch full chunks with answers from DB
-              if (lessonId) await fetchFullChunks(lessonId);
+              if (lessonIdRef.current) await fetchFullChunks(lessonIdRef.current);
             }
 
             if (event === "error") {
