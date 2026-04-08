@@ -105,6 +105,7 @@ export function Sidebar({
             onClick={() => setMobileOpen(!mobileOpen)}
             className="md:hidden p-2 cursor-pointer"
             style={{ borderRadius: "8px", color: "var(--text-primary)" }}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
