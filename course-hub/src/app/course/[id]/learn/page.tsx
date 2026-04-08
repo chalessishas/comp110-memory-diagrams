@@ -3,9 +3,10 @@
 import { useEffect, useState, useCallback, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { ChunkLesson } from "@/components/ChunkLesson";
-import { BookOpen, ChevronRight, Loader2, Sparkles, Check } from "lucide-react";
+import { BookOpen, ChevronRight, Loader2, Sparkles, Check, Target } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { levelConfig } from "@/lib/mastery-v2";
+import { getExamScope } from "@/lib/spaced-repetition";
 import type { Lesson, LessonChunk, MasteryLevelV2 } from "@/types";
 
 interface KnowledgePointItem {
@@ -48,6 +49,12 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   const [isStreaming, setIsStreaming] = useState(false);
   const [totalChunks, setTotalChunks] = useState(0);
   const [streamedCount, setStreamedCount] = useState(0);
+  const [scopeKpIds, setScopeKpIds] = useState<Set<string> | null>(null);
+
+  useEffect(() => {
+    const scope = getExamScope(id);
+    if (scope && scope.length > 0) setScopeKpIds(new Set(scope));
+  }, [id]);
 
   useEffect(() => {
     Promise.all([
@@ -310,12 +317,14 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           {items.map((item, i) => {
             const config = levelConfig[item.level];
             const isGenerating = generatingForKp === item.id;
+            const inScope = scopeKpIds?.has(item.id);
             return (
               <button
                 key={item.id}
                 onClick={() => !isGenerating && handleKpClick(item)}
                 disabled={isGenerating}
                 className="w-full ui-panel p-4 flex items-center gap-4 text-left cursor-pointer group disabled:opacity-70"
+                style={scopeKpIds && !inScope ? { opacity: 0.45 } : undefined}
               >
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold"
@@ -324,7 +333,15 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   {item.hasLesson ? <Check size={16} /> : i + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{item.title}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium truncate">{item.title}</p>
+                    {inScope && (
+                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(99,102,241,0.1)", color: "var(--accent)" }}>
+                        <Target size={8} />
+                        {isZh ? "考" : "exam"}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {isGenerating
                       ? (isZh
