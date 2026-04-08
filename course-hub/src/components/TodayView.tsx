@@ -45,12 +45,20 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
 
   if (tasks.length === 0) {
     return (
-      <div className="text-center py-16">
-        <Check size={40} className="mx-auto mb-4" style={{ color: "var(--success)" }} />
-        <h2 className="text-xl font-semibold mb-2">
+      <div className="text-center py-20">
+        <div
+          className="mx-auto mb-5 w-14 h-14 flex items-center justify-center rounded-full"
+          style={{ backgroundColor: "var(--bg-muted)" }}
+        >
+          <Check size={28} strokeWidth={1.8} style={{ color: "var(--success)" }} />
+        </div>
+        <h2
+          className="text-xl font-semibold mb-2"
+          style={{ color: "var(--text-primary)" }}
+        >
           {isZh ? "今天状态很好！" : "You're all caught up!"}
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           {isZh
             ? "没有紧急任务。可以提前预习，或者巩固复习。"
             : "No urgent tasks. Preview next week's content or review for fun."}
@@ -68,31 +76,52 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         return (
           <div
             key={task.id}
-            className="ui-panel p-5 flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
+            className="ui-panel p-5 rounded-[20px] flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
           >
-            <div
-              className="w-10 h-10 flex items-center justify-center shrink-0"
-              style={{ backgroundColor: `${task.color}15`, color: task.color, borderRadius: "var(--radius-md)", border: `2px solid ${task.color}30` }}
-            >
-              <Icon size={18} />
+            {/* Priority dot — left indicator */}
+            <div className="flex flex-col items-center pt-1.5 shrink-0">
+              <div
+                className="w-2.5 h-2.5 rounded-full"
+                style={{ backgroundColor: task.color }}
+              />
             </div>
+
+            {/* Icon */}
+            <div
+              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-xl"
+              style={{ backgroundColor: "var(--bg-muted)", color: task.color }}
+            >
+              <Icon size={16} strokeWidth={1.8} />
+            </div>
+
+            {/* Content */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: task.color }}>
+              <div className="flex items-center gap-2 mb-0.5">
+                <span
+                  className="text-xs font-medium"
+                  style={{ color: task.color }}
+                >
                   {isZh ? label.zh : label.en}
                 </span>
                 {task.count > 1 && (
                   <span className="ui-badge">{task.count}</span>
                 )}
               </div>
-              <p className="text-sm font-medium">{task.title}</p>
-              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
+              <p
+                className="text-sm font-medium leading-snug"
+                style={{ color: "var(--text-primary)" }}
+              >
+                {task.title}
+              </p>
+              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                 {task.description} · {task.estimatedMinutes} {isZh ? "分钟" : "min"}
               </p>
             </div>
+
+            {/* Start button */}
             <button
-              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0"
-              style={{ backgroundColor: task.color, color: "white", borderRadius: "var(--radius-sm)" }}
+              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0 rounded-xl transition-all hover:-translate-y-0.5"
+              style={{ backgroundColor: task.color, color: "white" }}
             >
               {isZh ? "开始" : "Start"}
             </button>
@@ -101,13 +130,13 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
       })}
 
       {/* Quick actions */}
-      <div className="flex items-center gap-2 pt-4 mt-2" style={{ borderTop: "1px solid var(--border)" }}>
+      <div className="flex items-center gap-3 pt-5 mt-3">
         <Link
           href={`/course/${courseId}/library`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs cursor-pointer"
-          style={{ borderRadius: "var(--radius-sm)", border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium cursor-pointer rounded-xl transition-all"
+          style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
         >
-          <Upload size={12} />
+          <Upload size={12} strokeWidth={1.8} />
           Upload material
         </Link>
         <div className="flex-1" />

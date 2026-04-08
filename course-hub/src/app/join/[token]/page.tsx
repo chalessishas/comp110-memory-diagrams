@@ -30,8 +30,7 @@ export default function JoinPage({ params }: { params: Promise<{ token: string }
   return (
     <div className="min-h-screen flex items-center justify-center px-6">
       <div
-        className="max-w-sm w-full p-8 rounded-[28px] text-center"
-        style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", boxShadow: "0 24px 80px rgba(0,0,0,0.08)" }}
+        className="max-w-sm w-full p-8 rounded-[20px] text-center ui-panel"
       >
         <BookOpen size={32} className="mx-auto mb-4" style={{ color: "var(--accent)" }} />
         <h1 className="text-xl font-semibold mb-2">Join Shared Course</h1>

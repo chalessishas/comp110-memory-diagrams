@@ -5,69 +5,67 @@ import { useState } from "react";
 import type { ParsedOutlineNode } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
-const TYPE_DISPLAY: Record<string, { labelKey: string; color: string; backgroundColor: string; borderColor: string }> = {
-  week: {
-    labelKey: "outline.week",
-    color: "var(--text-primary)",
-    backgroundColor: "rgba(16, 16, 16, 0.06)",
-    borderColor: "var(--border-strong)",
-  },
-  chapter: {
-    labelKey: "outline.chapter",
-    color: "var(--text-primary)",
-    backgroundColor: "rgba(16, 16, 16, 0.06)",
-    borderColor: "var(--border)",
-  },
-  topic: {
-    labelKey: "outline.topic",
-    color: "var(--text-secondary)",
-    backgroundColor: "var(--bg-muted)",
-    borderColor: "var(--border)",
-  },
-  knowledge_point: {
-    labelKey: "outline.knowledgePoint",
-    color: "var(--text-muted)",
-    backgroundColor: "white",
-    borderColor: "var(--border)",
-  },
+const TYPE_COLORS: Record<string, string> = {
+  week: "var(--accent)",
+  chapter: "var(--success)",
+  topic: "var(--warning)",
+  knowledge_point: "var(--text-muted)",
 };
 
 function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const hasChildren = node.children && node.children.length > 0;
-  const typeDisplay = TYPE_DISPLAY[node.type] ?? TYPE_DISPLAY.topic;
+
+  const labelKeys: Record<string, string> = {
+    week: "outline.week",
+    chapter: "outline.chapter",
+    topic: "outline.topic",
+    knowledge_point: "outline.knowledgePoint",
+  };
+
+  const badgeColor = TYPE_COLORS[node.type] ?? "var(--text-muted)";
 
   return (
-    <div style={{ marginLeft: depth * 18 }}>
+    <div style={{ marginLeft: depth * 20 }}>
       <div
-        className="flex items-center gap-2 rounded-2xl px-3 py-2 cursor-pointer select-none"
-        style={{ backgroundColor: depth === 0 ? "rgba(247, 247, 244, 0.95)" : "transparent" }}
+        className="flex items-center gap-2.5 rounded-[14px] px-3 py-2 cursor-pointer select-none transition-colors"
+        style={{ backgroundColor: "transparent" }}
         onClick={() => hasChildren && setExpanded(!expanded)}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-muted)")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
       >
-        {hasChildren ? (
-          expanded ? <ChevronDown size={14} style={{ color: "var(--text-secondary)" }} />
-            : <ChevronRight size={14} style={{ color: "var(--text-secondary)" }} />
-        ) : (
-          <span className="w-3.5" />
-        )}
+        <span className="shrink-0 w-4 flex items-center justify-center transition-transform" style={{ transform: hasChildren && expanded ? "rotate(90deg)" : "rotate(0deg)" }}>
+          {hasChildren ? (
+            <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+          ) : (
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--border-strong)" }} />
+          )}
+        </span>
+
         <span
-          className="inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]"
+          className="inline-flex items-center rounded-lg px-2 py-0.5 text-[11px]"
           style={{
-            color: typeDisplay.color,
-            backgroundColor: typeDisplay.backgroundColor,
-            border: `1px solid ${typeDisplay.borderColor}`,
+            fontWeight: 500,
+            color: badgeColor,
+            backgroundColor: "var(--bg-muted)",
           }}
         >
-          {t(typeDisplay.labelKey)}
+          {t(labelKeys[node.type] ?? "outline.topic")}
         </span>
-        <span className="text-sm" style={{ color: "var(--text-primary)", fontWeight: depth < 2 ? 600 : 500 }}>
+
+        <span className="text-sm" style={{ color: "var(--text-primary)", fontWeight: depth < 2 ? 500 : 400 }}>
           {node.title}
         </span>
       </div>
-      {expanded && hasChildren && node.children.map((child, i) => (
-        <TreeNode key={i} node={child} depth={depth + 1} />
-      ))}
+
+      {expanded && hasChildren && (
+        <div className="mt-0.5">
+          {node.children.map((child, i) => (
+            <TreeNode key={i} node={child} depth={depth + 1} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -75,9 +73,11 @@ function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number
 export function OutlinePreview({ nodes }: { nodes: ParsedOutlineNode[] }) {
   return (
     <div className="ui-panel p-5 md:p-6">
-      {nodes.map((node, i) => (
-        <TreeNode key={i} node={node} />
-      ))}
+      <div className="space-y-0.5">
+        {nodes.map((node, i) => (
+          <TreeNode key={i} node={node} />
+        ))}
+      </div>
     </div>
   );
 }

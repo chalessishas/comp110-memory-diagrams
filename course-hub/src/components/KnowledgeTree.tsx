@@ -21,13 +21,13 @@ interface KnowledgeTreeProps {
 function getNodeStyle(mastery: MasteryLevel) {
   switch (mastery) {
     case "mastered":
-      return { size: 56, bg: "#16a34a", border: "#15803d", glow: "0 0 20px rgba(22, 163, 74, 0.4)", opacity: 1, label: "Mastered" };
+      return { size: 56, bg: "var(--mastery-mastered)", border: "var(--success)", opacity: 1, label: "Mastered" };
     case "reviewing":
-      return { size: 44, bg: "#f59e0b", border: "#d97706", glow: "0 0 12px rgba(245, 158, 11, 0.3)", opacity: 1, label: "Reviewing" };
+      return { size: 44, bg: "var(--mastery-practiced)", border: "var(--warning)", opacity: 1, label: "Reviewing" };
     case "weak":
-      return { size: 36, bg: "#ef4444", border: "#dc2626", glow: "0 0 10px rgba(239, 68, 68, 0.3)", opacity: 0.9, label: "Weak" };
+      return { size: 36, bg: "var(--mastery-exposed)", border: "var(--danger)", opacity: 0.9, label: "Weak" };
     default:
-      return { size: 24, bg: "var(--border)", border: "var(--border-strong)", glow: "none", opacity: 0.5, label: "Not started" };
+      return { size: 24, bg: "var(--mastery-unseen)", border: "var(--border-strong)", opacity: 0.5, label: "Not started" };
   }
 }
 
@@ -37,51 +37,45 @@ function NodeCircle({ node, x, y }: { node: KnowledgeNodeData; x: number; y: num
 
   return (
     <g className="cursor-pointer" style={{ opacity: style.opacity }}>
-      {/* Glow ring for active nodes */}
       {node.mastery !== "untested" && (
-        <circle cx={x} cy={y} r={r + 4} fill="none" stroke={style.bg} strokeWidth={2} opacity={0.3}>
+        <circle cx={x} cy={y} r={r + 4} fill="none" stroke={style.bg} strokeWidth={1.5} opacity={0.2}>
           {node.mastery === "mastered" && (
-            <animate attributeName="r" values={`${r + 2};${r + 8};${r + 2}`} dur="3s" repeatCount="indefinite" />
+            <animate attributeName="r" values={`${r + 2};${r + 6};${r + 2}`} dur="4s" repeatCount="indefinite" />
           )}
           {node.mastery === "mastered" && (
-            <animate attributeName="opacity" values="0.3;0.1;0.3" dur="3s" repeatCount="indefinite" />
+            <animate attributeName="opacity" values="0.2;0.08;0.2" dur="4s" repeatCount="indefinite" />
           )}
         </circle>
       )}
 
-      {/* Main circle */}
-      <circle cx={x} cy={y} r={r} fill={style.bg} stroke={style.border} strokeWidth={2} />
+      <circle cx={x} cy={y} r={r} fill={style.bg} stroke={style.border} strokeWidth={1.5} />
 
-      {/* Progress ring for partial mastery */}
       {(node.mastery === "reviewing" || node.mastery === "weak") && (
         <circle
           cx={x}
           cy={y}
           r={r - 3}
           fill="none"
-          stroke="white"
-          strokeWidth={2}
+          stroke="var(--bg-surface)"
+          strokeWidth={1.5}
           strokeDasharray={`${2 * Math.PI * (r - 3) * node.rate} ${2 * Math.PI * (r - 3)}`}
           strokeLinecap="round"
           transform={`rotate(-90 ${x} ${y})`}
-          opacity={0.5}
+          opacity={0.4}
         />
       )}
 
-      {/* Mastery percentage for active nodes */}
       {node.mastery !== "untested" && (
-        <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="central" fill="white" fontSize={r > 18 ? 11 : 9} fontWeight={600}>
+        <text x={x} y={y + 1} textAnchor="middle" dominantBaseline="central" fill="var(--bg-surface)" fontSize={r > 18 ? 11 : 9} fontWeight={500}>
           {Math.round(node.rate * 100)}%
         </text>
       )}
 
-      {/* Title below */}
-      <text x={x} y={y + r + 14} textAnchor="middle" fontSize={10} fontWeight={500} fill="var(--text-primary)">
+      <text x={x} y={y + r + 14} textAnchor="middle" fontSize={10} fontWeight={400} fill="var(--text-primary)">
         {node.title.length > 18 ? node.title.slice(0, 16) + "..." : node.title}
       </text>
 
-      {/* Mastery label */}
-      <text x={x} y={y + r + 26} textAnchor="middle" fontSize={8} fill="var(--text-secondary)">
+      <text x={x} y={y + r + 26} textAnchor="middle" fontSize={8} fill="var(--text-muted)">
         {style.label}{node.totalAttempts > 0 ? ` (${node.totalAttempts})` : ""}
       </text>
     </g>
@@ -134,41 +128,38 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
 
   return (
     <div>
-      {/* Stats bar */}
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#16a34a" }} />
-            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Mastered ({mastered})</span>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-mastered)" }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Mastered ({mastered})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#f59e0b" }} />
-            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Reviewing ({reviewing})</span>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-practiced)" }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Reviewing ({reviewing})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "#ef4444" }} />
-            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Weak ({weak})</span>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-exposed)" }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Weak ({weak})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--border)" }} />
-            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>Not started ({untested})</span>
+            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-unseen)" }} />
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Not started ({untested})</span>
           </div>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <span className="text-xs font-medium">{Math.round(overallProgress)}% mastered</span>
-          <div className="w-24 h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{Math.round(overallProgress)}% mastered</span>
+          <div className="ui-progress-track w-24">
             <div
-              className="h-full rounded-full"
-              style={{ width: `${overallProgress}%`, backgroundColor: "#16a34a", transition: "width 500ms ease" }}
+              className="ui-progress-bar"
+              style={{ width: `${overallProgress}%`, backgroundColor: "var(--mastery-mastered)", transition: "width 500ms ease" }}
             />
           </div>
         </div>
       </div>
 
-      {/* Tree canvas */}
       <div className="ui-panel p-4 overflow-x-auto">
         <svg width={svgWidth} height={svgHeight} viewBox={`0 0 ${svgWidth} ${svgHeight}`}>
-          {/* Dashed connection lines between adjacent nodes */}
           {layout.map((item, i) => {
             if (i === 0) return null;
             const prev = layout[i - 1];
@@ -181,13 +172,12 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
                 y2={item.y}
                 stroke="var(--border)"
                 strokeWidth={1}
-                opacity={0.4}
+                opacity={0.3}
                 strokeDasharray="4 4"
               />
             );
           })}
 
-          {/* Nodes */}
           {layout.map((item) => (
             <NodeCircle key={item.node.id} node={item.node} x={item.x} y={item.y} />
           ))}

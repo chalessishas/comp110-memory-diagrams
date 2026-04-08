@@ -52,7 +52,7 @@ export default async function CourseNotesPage({ params }: { params: Promise<{ id
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <div className="ui-kicker mb-4">Notes</div>
-            <h1 className="text-4xl font-semibold tracking-tight">Talk your way into clearer notes.</h1>
+            <h1 className="text-4xl font-semibold tracking-wide">Talk your way into clearer notes.</h1>
             <p className="ui-copy mt-3 max-w-3xl">
               CourseHub captures your spoken understanding, cleans it up, and pushes back when the explanation is still vague.
             </p>

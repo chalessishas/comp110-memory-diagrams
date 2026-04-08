@@ -29,9 +29,9 @@ const MODE_ICONS: Record<StudyMode, typeof Brain> = {
 };
 
 function modeTone(mode: StudyMode) {
-  if (mode === "solving") return { backgroundColor: "var(--accent)", color: "white" };
-  if (mode === "reviewing") return { backgroundColor: "var(--warning)", color: "white" };
-  if (mode === "studying") return { backgroundColor: "var(--success)", color: "white" };
+  if (mode === "solving") return { backgroundColor: "var(--accent)", color: "var(--bg-surface)" };
+  if (mode === "reviewing") return { backgroundColor: "var(--warning)", color: "var(--bg-surface)" };
+  if (mode === "studying") return { backgroundColor: "var(--success)", color: "var(--bg-surface)" };
   return { backgroundColor: "var(--bg-muted)", color: "var(--text-primary)" };
 }
 
@@ -78,18 +78,18 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
                 className="w-full rounded-lg"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "var(--accent-muted)" : "var(--bg-muted)",
                   minHeight: "3px",
                 }}
               />
-              <span className="text-[9px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-secondary)" }}>
+              <span className="text-[9px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-muted)" }}>
                 {dayName}
               </span>
             </div>
           );
         })}
       </div>
-      <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+      <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
         Week total: {formatDuration(weekTotal)}
       </p>
     </div>
@@ -212,13 +212,13 @@ export function StudyTrackerPanel({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="ui-kicker mb-3">Time Track</div>
-          <h3 className="text-2xl font-semibold">{title}</h3>
+          <h3 className="text-2xl" style={{ fontWeight: 600 }}>{title}</h3>
           <p className="ui-copy mt-2 max-w-2xl">{description}</p>
         </div>
         {track && activeMode && (
           <div
-            className="inline-flex items-center gap-2 rounded-full px-4 py-2"
-            style={{ border: "1px solid var(--border)", ...modeTone(liveMode) }}
+            className="inline-flex items-center gap-2 rounded-xl px-4 py-2"
+            style={modeTone(liveMode)}
           >
             <LiveIcon size={16} />
             <span className="text-sm font-medium">{MODE_LABELS[liveMode]}</span>
@@ -228,15 +228,15 @@ export function StudyTrackerPanel({
 
       <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-[220px_minmax(0,1fr)]">
         <div
-          className="rounded-[24px] px-5 py-5"
-          style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+          className="rounded-[20px] px-5 py-5"
+          style={{ backgroundColor: "var(--bg-muted)" }}
         >
-          <div className="flex items-center gap-2 text-sm font-medium">
+          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
             <Activity size={16} />
             Today
           </div>
-          <p className="text-4xl font-semibold tracking-tight mt-3">{formatDuration(summary.totalMs)}</p>
-          <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-4xl tracking-tight mt-3" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formatDuration(summary.totalMs)}</p>
+          <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
             Recorded on this device today.
           </p>
         </div>
@@ -245,13 +245,13 @@ export function StudyTrackerPanel({
           {breakdown.map((item) => (
             <div
               key={item.key}
-              className="rounded-[22px] px-4 py-4"
-              style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
+              className="rounded-[16px] px-4 py-4"
+              style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-sm)" }}
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium">{item.label}</p>
-                  <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.label}</p>
+                  <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                     {formatDuration(item.value)}
                   </p>
                 </div>
@@ -268,9 +268,8 @@ export function StudyTrackerPanel({
         </div>
       </div>
 
-      {/* Weekly trend */}
-      <div className="mt-6 pt-5" style={{ borderTop: "1px solid var(--border)" }}>
-        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-secondary)" }}>This Week</p>
+      <div className="mt-6 pt-5">
+        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>This Week</p>
         <WeeklyMiniChart courseId={courseId} />
       </div>
     </div>

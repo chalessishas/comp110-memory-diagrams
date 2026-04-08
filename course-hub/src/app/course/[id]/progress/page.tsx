@@ -60,7 +60,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
 
       <div>
         <div className="ui-kicker mb-3">Progress</div>
-        <h2 className="text-3xl font-semibold">See what is sticking.</h2>
+        <h2 className="text-3xl font-semibold tracking-wide">See what is sticking.</h2>
         <p className="ui-copy mt-3 max-w-2xl">
           CourseHub groups your recent attempts into a quiet mastery map so the weak spots are easy to spot.
         </p>

@@ -294,10 +294,11 @@ export function VoiceNotesPanel({
 
   return (
     <div className="ui-panel p-5 md:p-6">
+      {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="ui-kicker mb-3">Voice Notes</div>
-          <h3 className="text-2xl font-semibold">Talk it out. We will turn it into study notes.</h3>
+          <h3 className="text-2xl font-semibold tracking-wide">Talk it out. We will turn it into study notes.</h3>
           <p className="ui-copy mt-2 max-w-2xl">
             Speak your understanding out loud, let AI clean it up, then answer a couple of follow-up questions if the idea is still fuzzy.
           </p>
@@ -314,7 +315,8 @@ export function VoiceNotesPanel({
         </div>
       </div>
 
-      <div className="rounded-[24px] p-4 mt-6" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}>
+      {/* Recording area */}
+      <div className="rounded-[20px] p-5 mt-6" style={{ backgroundColor: "var(--bg-muted)" }}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium">1. Speak or paste the raw note</p>
@@ -349,7 +351,7 @@ export function VoiceNotesPanel({
 
         <div className="grid gap-3 mt-4 lg:grid-cols-[220px_minmax(0,1fr)]">
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+            <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
               Knowledge Point
             </label>
             <select
@@ -367,7 +369,7 @@ export function VoiceNotesPanel({
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+            <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
               Transcript
             </label>
             <textarea
@@ -391,25 +393,28 @@ export function VoiceNotesPanel({
         </div>
       </div>
 
+      {/* Error */}
       {error && (
-        <div className="rounded-[20px] px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(0, 0, 0, 0.04)" }}>
-          <p className="text-sm">{error}</p>
+        <div className="rounded-[20px] px-5 py-3 mt-4" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>
         </div>
       )}
 
+      {/* Status */}
       {status && (
-        <div className="rounded-[20px] px-4 py-3 mt-4" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+        <div className="rounded-[20px] px-5 py-3 mt-4" style={{ backgroundColor: "var(--bg-surface)" }}>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{status}</p>
         </div>
       )}
 
+      {/* Draft */}
       {draft && (
         <div className="space-y-4 mt-6">
-          <div className="rounded-[24px] p-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+          <div className="ui-panel p-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
                 <div className="ui-kicker mb-3">AI Note Draft</div>
-                <h4 className="text-xl font-semibold">{draft.title}</h4>
+                <h4 className="text-xl font-semibold tracking-wide">{draft.title}</h4>
                 <p className="ui-copy mt-2 max-w-3xl">{draft.summary}</p>
               </div>
               {draft.matched_knowledge_point_title && (
@@ -421,35 +426,25 @@ export function VoiceNotesPanel({
             </div>
 
             <div className="grid gap-4 mt-5 lg:grid-cols-2">
-              <div
-                className="rounded-[20px] px-4 py-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+              <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   Key Points
                 </p>
                 <div className="space-y-2 mt-3">
                   {draft.key_points.map((item) => (
-                    <p key={item} className="text-sm">
-                      {item}
-                    </p>
+                    <p key={item} className="text-sm leading-relaxed">{item}</p>
                   ))}
                 </div>
               </div>
 
-              <div
-                className="rounded-[20px] px-4 py-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
-              >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+              <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   What Still Feels Fuzzy
                 </p>
                 <div className="space-y-2 mt-3">
                   {draft.confusing_points.length > 0 ? (
                     draft.confusing_points.map((item) => (
-                      <p key={item} className="text-sm">
-                        {item}
-                      </p>
+                      <p key={item} className="text-sm leading-relaxed">{item}</p>
                     ))
                   ) : (
                     <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
@@ -461,23 +456,21 @@ export function VoiceNotesPanel({
             </div>
 
             {draft.next_action && (
-              <div
-                className="rounded-[20px] px-4 py-4 mt-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
-              >
-                <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+              <div className="rounded-[20px] p-5 mt-4" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   <BrainCircuit size={14} />
                   Next Action
                 </div>
-                <p className="text-sm mt-2">{draft.next_action}</p>
+                <p className="text-sm mt-2 leading-relaxed">{draft.next_action}</p>
               </div>
             )}
           </div>
 
+          {/* Clarification questions */}
           {draft.clarification_questions.length > 0 && (
-            <div className="rounded-[24px] p-5" style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}>
+            <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
               <div className="flex items-center gap-2">
-                <MessageCircleQuestion size={16} />
+                <MessageCircleQuestion size={16} style={{ color: "var(--accent)" }} />
                 <p className="text-sm font-medium">2. Answer the follow-up questions</p>
               </div>
               <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
@@ -521,6 +514,7 @@ export function VoiceNotesPanel({
             </div>
           )}
 
+          {/* Save / Refine buttons */}
           <div className="flex flex-wrap gap-2">
             <button onClick={handleSave} disabled={saving} className="ui-button-primary">
               <Save size={14} />
@@ -536,8 +530,9 @@ export function VoiceNotesPanel({
         </div>
       )}
 
-      <div className="mt-6">
-        <div className="ui-kicker mb-3">Saved Notes</div>
+      {/* Saved notes list */}
+      <div className="mt-8">
+        <div className="ui-kicker mb-4">Saved Notes</div>
         {notes.length === 0 ? (
           <div className="ui-empty">
             <p className="text-base font-medium mb-2">No notes yet</p>
@@ -548,11 +543,7 @@ export function VoiceNotesPanel({
         ) : (
           <div className="space-y-3">
             {notes.map((note) => (
-              <div
-                key={note.id}
-                className="rounded-[24px] px-4 py-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
-              >
+              <div key={note.id} className="ui-panel px-5 py-4">
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                   <div>
                     <div className="flex flex-wrap gap-2">
@@ -562,26 +553,24 @@ export function VoiceNotesPanel({
                       </span>
                       {note.knowledge_point_title && <span className="ui-badge">{note.knowledge_point_title}</span>}
                     </div>
-                    <h4 className="text-base font-semibold mt-3">{note.title}</h4>
-                    <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+                    <h4 className="text-base font-medium mt-3">{note.title}</h4>
+                    <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                       {note.summary}
                     </p>
                   </div>
-                  <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
                     {formatNoteDate(note.created_at)}
                   </p>
                 </div>
 
                 <div className="space-y-2 mt-4">
                   {note.key_points.map((item) => (
-                    <p key={item} className="text-sm">
-                      {item}
-                    </p>
+                    <p key={item} className="text-sm leading-relaxed">{item}</p>
                   ))}
                 </div>
 
                 {note.next_action && (
-                  <p className="text-sm mt-4">
+                  <p className="text-sm mt-4 leading-relaxed">
                     <span className="font-medium">Next:</span> {note.next_action}
                   </p>
                 )}

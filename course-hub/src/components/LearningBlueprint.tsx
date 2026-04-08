@@ -45,7 +45,7 @@ export function LearningBlueprint({
     return (
       <div className="ui-panel p-6 md:p-8">
         <div className="ui-kicker mb-3">Study Flow</div>
-        <h2 className="text-2xl font-semibold">Learn from the outline.</h2>
+        <h2 className="text-2xl" style={{ fontWeight: 600 }}>Learn from the outline.</h2>
         <p className="ui-copy mt-2 max-w-2xl">
           Once the course has outline nodes, tasks, and questions, this page turns them into a concrete study sequence.
         </p>
@@ -60,7 +60,7 @@ export function LearningBlueprint({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="ui-kicker mb-3">Study Flow</div>
-          <h2 className="text-2xl font-semibold">Learn from the outline, not just look at it.</h2>
+          <h2 className="text-2xl" style={{ fontWeight: 600 }}>Learn from the outline, not just look at it.</h2>
           <p className="ui-copy mt-2 max-w-3xl">
             Each knowledge point turns into a small loop: learn the concept, do reps, review mistakes, then move on.
           </p>
@@ -78,15 +78,15 @@ export function LearningBlueprint({
           return (
             <div
               key={item.id}
-              className="rounded-[28px] p-5"
-              style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+              className="rounded-[20px] p-5"
+              style={{ backgroundColor: "var(--bg-muted)", boxShadow: "var(--shadow-sm)" }}
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.22em]" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                     {index === 0 ? "Start Here" : `Step ${index + 1}`}
                   </p>
-                  <h3 className="text-lg font-semibold mt-2">{item.title}</h3>
+                  <h3 className="text-lg mt-2" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{item.title}</h3>
                   {item.content && (
                     <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
                       {item.content}
@@ -94,12 +94,13 @@ export function LearningBlueprint({
                   )}
                 </div>
                 <span
-                  className="shrink-0 rounded-full px-3 py-1.5 text-xs font-medium"
+                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium"
                   style={{
-                    backgroundColor: "white",
-                    color: item.masteryLevel === "mastered" ? "white" : "var(--text-primary)",
-                    border: `1px solid ${item.masteryLevel === "mastered" ? masteryColors[item.masteryLevel] : "var(--border)"}`,
-                    ...(item.masteryLevel === "mastered" ? { backgroundColor: masteryColors[item.masteryLevel] } : {}),
+                    backgroundColor: item.masteryLevel === "mastered"
+                      ? masteryColors[item.masteryLevel]
+                      : "var(--bg-surface)",
+                    color: item.masteryLevel === "mastered" ? "var(--bg-surface)" : "var(--text-primary)",
+                    boxShadow: "var(--shadow-sm)",
                   }}
                 >
                   {masteryLabels[item.masteryLevel]}
@@ -113,14 +114,14 @@ export function LearningBlueprint({
               </div>
 
               <div
-                className="rounded-[22px] px-4 py-4 mt-4"
-                style={{ border: "1px solid var(--border)", backgroundColor: "white" }}
+                className="rounded-[16px] px-4 py-4 mt-4"
+                style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-sm)" }}
               >
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: "var(--text-secondary)" }}>
+                <div className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
                   <TaskIcon size={14} />
                   {item.nextTaskType ? taskLabels[item.nextTaskType] : "Next Move"}
                 </div>
-                <p className="text-sm mt-2">{item.nextAction}</p>
+                <p className="text-sm mt-2" style={{ color: "var(--text-primary)" }}>{item.nextAction}</p>
               </div>
             </div>
           );

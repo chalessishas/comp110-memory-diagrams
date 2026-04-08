@@ -38,25 +38,27 @@ export function TermTooltip({ term, children }: TermTooltipProps) {
 
   return (
     <span ref={ref} className="relative inline">
+      {/* Trigger — dotted underline in accent color */}
       <span
         onClick={() => setOpen(!open)}
-        className="cursor-pointer border-b border-dotted transition-colors"
+        className="cursor-pointer transition-colors"
         style={{
-          borderColor: "var(--accent)",
+          borderBottom: "1.5px dotted var(--accent)",
           color: "inherit",
         }}
       >
         {children}
       </span>
 
+      {/* Popup — bg-surface, rounded-xl, subtle shadow, no border */}
       {open && (
         <div
           ref={popRef}
-          className="absolute z-50 px-4 py-3 rounded-xl shadow-lg text-sm max-w-xs"
+          className="absolute z-50 px-5 py-4 rounded-xl text-sm max-w-xs"
           style={{
             backgroundColor: "var(--bg-surface)",
-            border: "1px solid var(--border)",
-            [above ? "bottom" : "top"]: "calc(100% + 6px)",
+            boxShadow: "0 4px 16px var(--accent-light), 0 1px 4px var(--accent-light)",
+            [above ? "bottom" : "top"]: "calc(100% + 8px)",
             left: "50%",
             transform: "translateX(-50%)",
             minWidth: "200px",
@@ -64,22 +66,18 @@ export function TermTooltip({ term, children }: TermTooltipProps) {
         >
           {/* Arrow */}
           <div
-            className="absolute w-2 h-2 rotate-45"
+            className="absolute w-2.5 h-2.5 rotate-45"
             style={{
               backgroundColor: "var(--bg-surface)",
-              borderRight: above ? "1px solid var(--border)" : "none",
-              borderBottom: above ? "1px solid var(--border)" : "none",
-              borderLeft: above ? "none" : "1px solid var(--border)",
-              borderTop: above ? "none" : "1px solid var(--border)",
               [above ? "bottom" : "top"]: "-5px",
               left: "50%",
               transform: "translateX(-50%) rotate(45deg)",
             }}
           />
-          <p className="font-semibold text-xs mb-1" style={{ color: "var(--accent)" }}>
+          <p className="font-semibold text-xs mb-1.5" style={{ color: "var(--accent)" }}>
             {term.term}
           </p>
-          <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
             {term.definition}
           </p>
         </div>

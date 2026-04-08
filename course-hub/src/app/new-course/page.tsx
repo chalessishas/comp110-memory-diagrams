@@ -89,7 +89,7 @@ function GeneratingStatus() {
 
       {/* Timeout warning */}
       {elapsed > 30000 && (
-        <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "rgba(245, 158, 11, 0.1)", color: "var(--warning)" }}>
+        <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--warning)" }}>
           {t("gen.slowWarning")}
         </p>
       )}
@@ -125,7 +125,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
   }
 
   return (
-    <div className="rounded-[22px] px-5 py-5" style={{ border: "1px solid var(--border)", backgroundColor: "white" }}>
+    <div className="ui-panel px-5 py-5">
       <div className="flex flex-wrap gap-2 mb-3">
         <span className="ui-badge">{question.type.replaceAll("_", " ")}</span>
         <span className="ui-badge">{question.matched_kp_title}</span>
@@ -148,8 +148,8 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
                   : selected === opt.label ? "var(--accent)" : "var(--border)",
                 backgroundColor: submitted
                   ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "rgba(22, 163, 74, 0.08)" : "transparent"
-                  : selected === opt.label ? "rgba(91, 108, 240, 0.08)" : "transparent",
+                    ? "var(--bg-muted)" : "transparent"
+                  : selected === opt.label ? "var(--accent-light)" : "transparent",
               }}
             >
               <span className="font-medium mr-2">{opt.label}.</span>{opt.text}
@@ -166,7 +166,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
           disabled={submitted}
           placeholder="Type your answer..."
           className="w-full px-4 py-2.5 rounded-xl text-sm mb-3 outline-none"
-          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
         />
       )}
 
@@ -411,16 +411,15 @@ export default function NewCoursePage() {
             return (
               <div
                 key={item.key}
-                className="rounded-[22px] px-4 py-4"
+                className="rounded-[20px] px-4 py-4"
                 style={{
-                  border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
-                  backgroundColor: isActive ? "rgba(16, 16, 16, 0.05)" : "rgba(247, 247, 244, 0.9)",
+                  backgroundColor: isActive ? "var(--accent-light)" : "var(--bg-muted)",
                 }}
               >
-                <p className="text-[11px] font-semibold uppercase tracking-[0.24em]" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)" }}>
                   {t("newCourse.step")}
                 </p>
-                <p className="text-base font-medium mt-2">{item.label}</p>
+                <p className="text-base font-medium mt-2" style={{ color: isActive ? "var(--accent)" : "var(--text-primary)" }}>{item.label}</p>
               </div>
             );
           })}
@@ -545,9 +544,8 @@ export default function NewCoursePage() {
 
           {/* Missing info warning */}
           {parsed.confidence && parsed.confidence !== "high" && (
-            <div className="rounded-2xl p-5" style={{
-              backgroundColor: parsed.confidence === "low" ? "rgba(239, 68, 68, 0.06)" : "rgba(245, 158, 11, 0.06)",
-              border: `1px solid ${parsed.confidence === "low" ? "var(--danger)" : "var(--warning)"}`,
+            <div className="rounded-[20px] p-5" style={{
+              backgroundColor: "var(--bg-muted)",
             }}>
               <p className="text-sm font-medium mb-2" style={{ color: parsed.confidence === "low" ? "var(--danger)" : "var(--warning)" }}>
                 {parsed.confidence === "low" ? t("newCourse.missingLow") : t("newCourse.missingMed")}
@@ -579,7 +577,7 @@ export default function NewCoursePage() {
           <div className="grid gap-6 xl:grid-cols-2">
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <BookOpen size={18} />
                 </div>
                 <div>
@@ -600,8 +598,8 @@ export default function NewCoursePage() {
                   {previewTasks.slice(0, 6).map((task, index) => (
                     <div
                       key={`${task.title}-${index}`}
-                      className="rounded-[22px] px-4 py-4"
-                      style={{ border: "1px solid var(--border)", backgroundColor: "rgba(247, 247, 244, 0.92)" }}
+                      className="rounded-[20px] px-4 py-4"
+                      style={{ backgroundColor: "var(--bg-muted)" }}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-medium">{task.title}</p>
@@ -624,7 +622,7 @@ export default function NewCoursePage() {
 
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <BrainCircuit size={18} />
                 </div>
                 <div>

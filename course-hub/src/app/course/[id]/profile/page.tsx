@@ -48,7 +48,7 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const kpMap = new Map((kps ?? []).map(k => [k.id, k.title]));
 
   return (
-    <div>
+    <div className="space-y-6">
       <CourseTabs courseId={id} />
       <ProfileView
         courseTitle={course.title}

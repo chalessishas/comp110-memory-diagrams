@@ -290,17 +290,17 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
     <div>
       <CourseTabs courseId={id} />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-xl font-semibold">{isZh ? "学习" : "Learn"}</h2>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          <h2 className="text-xl font-semibold tracking-wide">{isZh ? "学习" : "Learn"}</h2>
+          <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
             {isZh ? "选择一个知识点，AI 会生成互动课程" : "Pick a topic — AI generates an interactive lesson"}
           </p>
         </div>
       </div>
 
       {generateError && (
-        <div className="mb-4 px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: "rgba(239,68,68,0.08)", color: "var(--danger)", border: "1px solid var(--danger)" }}>
+        <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}>
           {generateError}
         </div>
       )}
@@ -327,7 +327,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 style={scopeKpIds && !inScope ? { opacity: 0.45 } : undefined}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-bold"
+                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-semibold"
                   style={{ backgroundColor: config.bgColor, color: config.color, border: `1px solid ${config.color}20` }}
                 >
                   {item.hasLesson ? <Check size={16} /> : i + 1}
@@ -336,7 +336,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     {inScope && (
-                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "rgba(99,102,241,0.1)", color: "var(--accent)" }}>
+                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-light)", color: "var(--accent)" }}>
                         <Target size={8} />
                         {isZh ? "考" : "exam"}
                       </span>

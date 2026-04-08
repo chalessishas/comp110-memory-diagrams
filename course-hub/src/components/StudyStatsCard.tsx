@@ -39,15 +39,14 @@ export function StudyStatsCard() {
 
   return (
     <div
-      className="rounded-[24px] p-6"
-      style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+      className="rounded-[20px] p-6"
+      style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-card)" }}
     >
       <div className="flex items-center gap-2 mb-4">
-        <Clock3 size={16} style={{ color: "var(--text-secondary)" }} />
-        <h3 className="text-sm font-medium">Study Time</h3>
+        <Clock3 size={16} style={{ color: "var(--text-muted)" }} />
+        <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Study Time</h3>
       </div>
 
-      {/* Weekly bar chart */}
       <div className="flex items-end gap-1.5 h-20 mb-3">
         {weekly.map((day, i) => {
           const height = day.totalMs > 0 ? Math.max((day.totalMs / maxMs) * 100, 8) : 4;
@@ -58,11 +57,11 @@ export function StudyStatsCard() {
                 className="w-full rounded-lg transition-all"
                 style={{
                   height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "rgba(91, 108, 240, 0.35)" : "var(--border)",
+                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "var(--accent-muted)" : "var(--bg-muted)",
                   minHeight: "3px",
                 }}
               />
-              <span className="text-[10px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-secondary)" }}>
+              <span className="text-[10px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-muted)" }}>
                 {formatShortDate(day.day)}
               </span>
             </div>
@@ -70,45 +69,43 @@ export function StudyStatsCard() {
         })}
       </div>
 
-      {/* Stats row */}
       <div className="grid grid-cols-3 gap-3 mt-4">
         <div>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Today</p>
-          <p className="text-lg font-semibold">{formatDuration(todayMs)}</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Today</p>
+          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(todayMs)}</p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>This Week</p>
-          <p className="text-lg font-semibold">{formatDuration(weekly.reduce((s, d) => s + d.totalMs, 0))}</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>This Week</p>
+          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(weekly.reduce((s, d) => s + d.totalMs, 0))}</p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Daily Avg</p>
-          <p className="text-lg font-semibold">{formatDuration(allTime.avgPerDay)}</p>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Daily Avg</p>
+          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(allTime.avgPerDay)}</p>
         </div>
       </div>
 
-      {/* Mode breakdown (all time, compact) */}
       {allTime.totalMs > 60_000 && (
-        <div className="mt-4 pt-4" style={{ borderTop: "1px solid var(--border)" }}>
-          <p className="text-xs mb-2" style={{ color: "var(--text-secondary)" }}>Time Distribution</p>
-          <div className="flex h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+        <div className="mt-5 pt-4">
+          <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Time Distribution</p>
+          <div className="ui-progress-track">
             {allTime.byMode.solving > 0 && (
-              <div style={{ width: `${(allTime.byMode.solving / allTime.totalMs) * 100}%`, backgroundColor: "var(--accent)" }} />
+              <div style={{ width: `${(allTime.byMode.solving / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--accent)", display: "inline-block" }} />
             )}
             {allTime.byMode.reviewing > 0 && (
-              <div style={{ width: `${(allTime.byMode.reviewing / allTime.totalMs) * 100}%`, backgroundColor: "var(--warning)" }} />
+              <div style={{ width: `${(allTime.byMode.reviewing / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--warning)", display: "inline-block" }} />
             )}
             {allTime.byMode.studying > 0 && (
-              <div style={{ width: `${(allTime.byMode.studying / allTime.totalMs) * 100}%`, backgroundColor: "var(--success)" }} />
+              <div style={{ width: `${(allTime.byMode.studying / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--success)", display: "inline-block" }} />
             )}
           </div>
           <div className="flex gap-3 mt-2">
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--accent)" }} /> Solving
             </span>
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--warning)" }} /> Reviewing
             </span>
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
               <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--success)" }} /> Studying
             </span>
           </div>

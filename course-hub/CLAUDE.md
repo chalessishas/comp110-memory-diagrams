@@ -1,74 +1,66 @@
-# CourseHub — AI Course Management Tool
+# CourseHub — AI 驱动的课程学习平台
 
-## Architecture
-- **Framework:** Next.js 16 (App Router)
-- **Database:** Supabase (PostgreSQL + RLS, project: `zubvbcexqaiauyptsyby`)
-- **Auth:** Supabase Auth (Email/Password + Google OAuth)
-- **AI:** Qwen3.5-Plus via DashScope (OpenAI-compatible, `@ai-sdk/openai` + `createOpenAI`)
-- **State:** Server Components (primary), client hooks for interactive panels
-- **Styling:** Tailwind CSS v4 + globals.css custom properties, minimal black/gray palette, frosted glass cards
-- **Icons:** Lucide React (no emoji)
+## 快速概览
 
-## Key Files
-- `src/lib/ai.ts` — Qwen AI wrapper: parseSyllabus, parseExamQuestions, generateStudyTasks, generateQuestionsFromOutline
-- `src/lib/schemas.ts` — Zod schemas for all entities + AI structured output
-- `src/lib/mastery.ts` — Mastery calculation (last 10 attempts, 3-tier: mastered/reviewing/weak)
-- `src/lib/course-notes.ts` — CourseNote data layer (row ↔ domain model conversion)
-- `src/lib/study-tracker.ts` — localStorage-based study timer (by mode: solving/reviewing/studying/idle)
-- `supabase/migrations/001_initial_schema.sql` — courses, outline_nodes, uploads, questions, attempts + RLS
-- `supabase/migrations/002_study_tasks.sql` — study_tasks table + RLS
+| 维度 | 值 |
+|------|-----|
+| 框架 | Next.js 16 (App Router) + React 19 + TypeScript |
+| 数据库 | Supabase PostgreSQL (项目: `zubvbcexqaiauyptsyby`) |
+| 认证 | Supabase Auth (Email/密码 + Google OAuth + 游客模式) |
+| AI | Qwen 3.5-Plus via DashScope (`@ai-sdk/openai` 适配) |
+| 样式 | Tailwind CSS v4 + CSS 变量 + `ui-*` 自定义类 |
+| 图标 | Lucide React (描边风格，不用 emoji) |
+| 间隔重复 | ts-fsrs |
+| i18n | 自定义 Context (EN/ZH) |
+| 部署 | Vercel (60s API timeout) |
 
-## Data Model
-- Course → OutlineNodes (adjacency list tree, parent_id self-ref)
-- Course → Uploads → Questions (AI-generated from exam/practice files)
-- Course → StudyTasks (auto-generated from outline)
-- Course → Questions (also auto-generated from outline, no exam needed)
-- Course → CourseNotes (voice notes, linked to knowledge points)
-- User → Attempts → mastery aggregation per knowledge point
+## 框架手册索引
 
-## Auto-Pipeline
-On course creation, `POST /api/courses/[id]/generate` fires (non-blocking):
-1. Filters outline nodes of type `knowledge_point`
-2. Runs `generateStudyTasks` + `generateQuestionsFromOutline` in parallel via Qwen
-3. Inserts results into `study_tasks` and `questions` tables
+| 手册 | 路径 | 职责 |
+|------|------|------|
+| 架构手册 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 技术栈、目录结构、路由、数据流、认证、AI 集成 |
+| API 参考 | [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) | 全部 33 个 API 端点的方法、参数、响应、错误码 |
+| 组件手册 | [`docs/COMPONENTS.md`](docs/COMPONENTS.md) | 全部 31 个组件的 Props、依赖、状态、使用示例 |
+| 设计系统 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | CSS 变量、ui-* 类、颜色语义、字体、间距、组件视觉规范 |
+| 编码规范 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | 命名、导入顺序、组件模式、样式、错误处理、禁止事项 |
 
-## Pages & Routes
-| Route | What |
-|-------|------|
-| `/login` | Email/password + Google OAuth, guest preview support |
-| `/dashboard` | Course grid (active + archived), new course button |
-| `/new-course` | Upload/paste syllabus → AI parse → preview tasks + questions → create |
-| `/course/[id]` | Outline tab (tree + study tasks + learning blueprint) |
-| `/course/[id]/practice` | Quiz cards (MC/fill/short/TF), upload exam for more |
-| `/course/[id]/progress` | Mastery heatmap + wrong answer notebook |
-| `/course/[id]/notes` | Voice notes (speech-to-text) + AI organize |
+> **规则：** 具体规范查手册，CLAUDE.md 只做索引。不在此文件中重复手册内容。
 
-## API Routes
-| Route | Method | What |
-|-------|--------|------|
-| `/api/courses` | GET/POST | List/create courses |
-| `/api/courses/[id]` | GET/PATCH/DELETE | Single course CRUD |
-| `/api/courses/[id]/outline` | GET/PUT | Outline tree CRUD |
-| `/api/courses/[id]/generate` | POST | Auto-generate tasks + questions from outline |
-| `/api/courses/[id]/notes` | GET/POST | Course notes CRUD |
-| `/api/courses/[id]/notes/organize` | POST | AI organize notes |
-| `/api/upload` | POST | File upload to Supabase Storage |
-| `/api/parse` | POST | AI parse file (syllabus or exam) |
-| `/api/questions` | GET/POST | Questions CRUD + AI exam extraction |
-| `/api/attempts` | POST | Record answer + auto-grade |
-| `/api/study-tasks/[id]` | PATCH | Toggle task status (todo/done) |
-| `/api/preview/learning` | POST | Guest preview of AI-generated content |
+## 数据模型 (核心关系)
 
-## Components (48 files total)
-**Core:** Sidebar, CourseCard, CourseTabs, FileDropzone, OutlineTree, OutlinePreview
-**Practice:** QuestionCard, ProgressGrid, WrongAnswerNotebook
-**Study:** StudyTaskList, LearningBlueprint, StudyTrackerPanel
-**Notes:** VoiceNotesPanel (browser SpeechRecognition → AI organize)
-**Auth:** ArchiveButton (archive/restore/delete)
+```
+User
+ └── Course
+      ├── OutlineNode (adjacency list tree, parent_id 自引用)
+      │    └── knowledge_point → ElementMastery (FSRS 掌握度追踪)
+      ├── Question → Attempt (答题 + 自动批改)
+      │    └── QuestionBookmark
+      ├── StudyTask (AI 生成的学习任务)
+      ├── Lesson → LessonChunk (AI 生成的分块课程)
+      │    └── LessonProgress
+      ├── ExamDate (考试日期 + 关联知识点)
+      ├── Upload (文件上传 → AI 内容提取)
+      ├── CourseNote (语音笔记 → AI 整理)
+      ├── Misconception (错误概念追踪)
+      └── ShareToken (课程分享链接)
+```
 
-## Conventions
-- All API routes validate with Zod before DB operations
-- RLS on every table — user_id ownership, child tables via FK joins
-- Minimal palette: #101010 accent, #efefeb background, frosted glass surfaces
-- No emoji in UI — Lucide icons only
-- File uploads → Supabase Storage (`course-files` bucket, private)
+## 关键入口文件
+
+| 文件 | 职责 |
+|------|------|
+| `src/app/globals.css` | 全部 CSS 变量 + ui-* 类定义 (设计系统的唯一真相源) |
+| `src/types.ts` | 全部 TypeScript 类型定义 |
+| `src/lib/ai.ts` | AI 调用入口 (Qwen wrapper) |
+| `src/lib/schemas.ts` | Zod schema (AI 输出校验) |
+| `src/lib/mastery-v2.ts` | FSRS 掌握度计算 |
+| `src/lib/i18n.tsx` | i18n Context + 翻译表 |
+
+## 已知约束和坑
+
+- **Vercel 60s timeout**: AI 生成类 API 必须控制批次大小 (如 generate-questions 每次最多 5 个 KP)
+- **localStorage 数据**: 打卡、学习时间、复习卡片状态存在 localStorage，换设备会丢失
+- **暗色模式**: 设计规范中有定义但项目未实现，不要引入 `data-theme` 相关代码
+- **DM Sans**: 设计规范历史遗留，实际使用 Inter 系统字体栈
+- **拖拽排序**: OutlineTree 有视觉提示但未接入实际 drag-drop
+- **Web Speech API**: VoiceNotesPanel 仅 Chrome/Edge 完全支持

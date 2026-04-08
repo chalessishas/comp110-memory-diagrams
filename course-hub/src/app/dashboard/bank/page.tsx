@@ -44,16 +44,16 @@ export default function QuestionBankPage() {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-3 mb-3">
         <Bookmark size={20} style={{ color: "var(--accent)" }} />
-        <h1 className="text-2xl font-semibold">{t("bank.title")}</h1>
+        <h1 className="text-2xl font-semibold tracking-wide">{t("bank.title")}</h1>
       </div>
-      <p className="mb-6 text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="mb-8 text-sm" style={{ color: "var(--text-secondary)" }}>
         {t("bank.subtitle")}
       </p>
 
       {bookmarks.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="ui-empty">
           <p style={{ color: "var(--text-secondary)" }}>{t("bank.noSaved")}</p>
           <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
             {t("bank.noSavedDesc")}
@@ -64,8 +64,7 @@ export default function QuestionBankPage() {
           {bookmarks.map((bm) => (
             <div
               key={bm.id}
-              className="p-5 rounded-2xl group"
-              style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+              className="ui-panel p-5 group"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
@@ -74,7 +73,7 @@ export default function QuestionBankPage() {
                   </p>
                   <p className="text-sm">{bm.questions.stem}</p>
                   <div className="mt-2 flex items-center gap-2">
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+                    <span className="ui-badge">
                       {bm.questions.type.replace("_", " ")}
                     </span>
                     <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
@@ -82,7 +81,7 @@ export default function QuestionBankPage() {
                     </span>
                   </div>
                   {bm.questions.explanation && (
-                    <p className="text-xs mt-2 p-2 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+                    <p className="text-xs mt-3 p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
                       {bm.questions.explanation}
                     </p>
                   )}

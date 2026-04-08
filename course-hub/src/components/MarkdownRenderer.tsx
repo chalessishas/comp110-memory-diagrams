@@ -72,29 +72,47 @@ function buildComponents(terms: TermDefinition[]) {
   const wrap = (node: ReactNode) => terms.length > 0 ? highlightTerms(node, terms) : node;
 
   return {
-    h2: ({ children }: { children?: ReactNode }) => <h3 className="text-lg font-semibold mt-6 mb-2">{wrap(children)}</h3>,
-    h3: ({ children }: { children?: ReactNode }) => <h4 className="text-base font-semibold mt-4 mb-1">{wrap(children)}</h4>,
-    p: ({ children }: { children?: ReactNode }) => <p className="text-sm leading-relaxed mb-3">{wrap(children)}</p>,
-    ul: ({ children }: { children?: ReactNode }) => <ul className="text-sm space-y-1 mb-3 ml-4 list-disc">{children}</ul>,
-    ol: ({ children }: { children?: ReactNode }) => <ol className="text-sm space-y-1 mb-3 ml-4 list-decimal">{children}</ol>,
-    li: ({ children }: { children?: ReactNode }) => <li>{wrap(children)}</li>,
+    h2: ({ children }: { children?: ReactNode }) => (
+      <h3 className="text-lg font-semibold mt-8 mb-3 tracking-wide" style={{ color: "var(--text-primary)" }}>{wrap(children)}</h3>
+    ),
+    h3: ({ children }: { children?: ReactNode }) => (
+      <h4 className="text-base font-semibold mt-6 mb-2" style={{ color: "var(--text-primary)" }}>{wrap(children)}</h4>
+    ),
+    p: ({ children }: { children?: ReactNode }) => (
+      <p className="text-sm leading-[1.7] mb-4" style={{ color: "var(--text-secondary)" }}>{wrap(children)}</p>
+    ),
+    ul: ({ children }: { children?: ReactNode }) => <ul className="text-sm space-y-1.5 mb-4 ml-5 list-disc" style={{ color: "var(--text-secondary)" }}>{children}</ul>,
+    ol: ({ children }: { children?: ReactNode }) => <ol className="text-sm space-y-1.5 mb-4 ml-5 list-decimal" style={{ color: "var(--text-secondary)" }}>{children}</ol>,
+    li: ({ children }: { children?: ReactNode }) => <li className="leading-relaxed">{wrap(children)}</li>,
+    a: ({ href, children }: { href?: string; children?: ReactNode }) => (
+      <a href={href} className="no-underline hover:underline transition-colors" style={{ color: "var(--accent)" }}>{children}</a>
+    ),
     code: ({ className, children, ...props }: { className?: string; children?: ReactNode }) => {
       const isBlock = className?.includes("language-");
       if (isBlock) {
         return (
-          <pre className="p-4 rounded-xl overflow-x-auto text-xs mb-3" style={{ backgroundColor: "#1a1a2e", color: "#e2e8f0" }}>
+          <pre
+            className="p-5 rounded-xl overflow-x-auto text-xs mb-4 leading-relaxed"
+            style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-primary)" }}
+          >
             <code className={className} {...props}>{children}</code>
           </pre>
         );
       }
       return (
-        <code className="px-1.5 py-0.5 rounded text-xs font-mono" style={{ backgroundColor: "var(--bg-muted)" }}>
+        <code
+          className="px-1.5 py-0.5 rounded-md text-xs font-mono"
+          style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-primary)" }}
+        >
           {children}
         </code>
       );
     },
     blockquote: ({ children }: { children?: ReactNode }) => (
-      <blockquote className="border-l-3 pl-4 my-3 text-sm" style={{ borderColor: "var(--accent)", color: "var(--text-secondary)" }}>
+      <blockquote
+        className="pl-5 my-4 text-sm"
+        style={{ borderLeft: "3px solid var(--accent)", color: "var(--text-muted)" }}
+      >
         {wrap(children)}
       </blockquote>
     ),

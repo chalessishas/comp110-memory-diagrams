@@ -98,7 +98,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       <CourseTabs courseId={id} />
 
       {scopeKpIds && (
-        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "rgba(99, 102, 241, 0.08)", border: "1px solid rgba(99, 102, 241, 0.3)" }}>
+        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "var(--bg-muted)" }}>
           <div className="flex items-center gap-2">
             <Target size={16} style={{ color: "var(--accent)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
@@ -153,13 +153,13 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             disabled={examPrepLoading}
           />
           {examPrepError && (
-            <div className="rounded-[18px] px-4 py-3 mb-4" style={{ backgroundColor: "rgba(239,68,68,0.08)", border: "1px solid var(--danger)" }}>
+            <div className="rounded-[20px] px-4 py-3 mb-4" style={{ backgroundColor: "var(--bg-muted)" }}>
               <p className="text-sm font-medium" style={{ color: "var(--danger)" }}>{examPrepError}</p>
             </div>
           )}
           {examPrepResult && (
             <div className="space-y-2 mb-4">
-              <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(22, 163, 74, 0.08)", border: "1px solid var(--success)" }}>
+              <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                 <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
                   {isZh
                     ? `从 ${examPrepResult.topics_processed} 个主题生成了 ${examPrepResult.questions_generated} 道题`
@@ -170,7 +170,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                 </p>
               </div>
               {examPrepResult.topics_failed.length > 0 && (
-                <div className="rounded-[18px] px-4 py-3" style={{ backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.5)" }}>
+                <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-sm font-medium" style={{ color: "var(--warning)" }}>
                     {isZh
                       ? `${examPrepResult.topics_failed.length} 个主题生成失败，可重试`

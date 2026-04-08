@@ -21,9 +21,9 @@ function LoginPageFallback() {
       <div
         className="max-w-md w-full rounded-[28px] p-8 md:p-10"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          backgroundColor: "color-mix(in srgb, var(--bg-surface) 92%, transparent)",
           border: "1px solid var(--border)",
-          boxShadow: "0 24px 80px rgba(0, 0, 0, 0.08)",
+          boxShadow: "var(--shadow-lg)",
           backdropFilter: "blur(8px)",
         }}
       >
@@ -100,9 +100,9 @@ function LoginPageContent() {
       <div
         className="max-w-md w-full rounded-[28px] p-8 md:p-10"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.92)",
+          backgroundColor: "color-mix(in srgb, var(--bg-surface) 92%, transparent)",
           border: "1px solid var(--border)",
-          boxShadow: "0 24px 80px rgba(0, 0, 0, 0.08)",
+          boxShadow: "var(--shadow-lg)",
           backdropFilter: "blur(8px)",
         }}
       >
@@ -124,7 +124,7 @@ function LoginPageContent() {
 
         <div
           className="grid grid-cols-2 gap-1 rounded-2xl p-1 mb-6"
-          style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
+          style={{ backgroundColor: "var(--bg-muted)" }}
         >
           <button
             type="button"
@@ -206,7 +206,7 @@ function LoginPageContent() {
         <button
           onClick={signInWithGoogle}
           className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm cursor-pointer"
-          style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "#ffffff" }}
+          style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-surface)" }}
         >
           <LogIn size={16} />
           {t("login.continueGoogle")}
@@ -215,7 +215,7 @@ function LoginPageContent() {
         {displayedError && (
           <div
             className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--danger)", backgroundColor: "rgba(239, 68, 68, 0.06)", color: "var(--danger)" }}
+            style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}
           >
             {displayedError}
           </div>
@@ -223,7 +223,7 @@ function LoginPageContent() {
         {message && (
           <div
             className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ border: "1px solid var(--success)", backgroundColor: "rgba(22, 163, 74, 0.06)", color: "var(--success)" }}
+            style={{ backgroundColor: "var(--bg-muted)", color: "var(--success)" }}
           >
             {message}
           </div>

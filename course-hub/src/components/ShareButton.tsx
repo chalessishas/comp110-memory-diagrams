@@ -28,15 +28,18 @@ export function ShareButton({ courseId }: { courseId: string }) {
 
   if (shareUrl) {
     return (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1.5">
         <input
           readOnly
           value={shareUrl}
-          className="text-[11px] px-2 py-1 rounded-lg w-48"
-          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+          className="ui-input !text-[11px] !px-2.5 !py-1.5 w-48"
         />
-        <button onClick={handleCopy} className="p-1.5 cursor-pointer" title="Copy link">
-          {copied ? <Check size={14} style={{ color: "var(--success)" }} /> : <Copy size={14} style={{ color: "var(--text-secondary)" }} />}
+        <button
+          onClick={handleCopy}
+          className="ui-icon-button"
+          title="Copy link"
+        >
+          {copied ? <Check size={14} style={{ color: "var(--success)" }} /> : <Copy size={14} />}
         </button>
       </div>
     );
@@ -46,8 +49,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
     <button
       onClick={handleShare}
       disabled={loading}
-      className="p-2 rounded-lg cursor-pointer"
-      style={{ color: "var(--text-secondary)" }}
+      className="ui-icon-button"
       title="Share course"
     >
       {loading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}

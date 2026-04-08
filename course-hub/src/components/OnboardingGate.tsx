@@ -15,7 +15,6 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Don't render anything until mounted (avoid hydration mismatch)
   if (!mounted) return <>{children}</>;
 
   if (showOnboarding) {

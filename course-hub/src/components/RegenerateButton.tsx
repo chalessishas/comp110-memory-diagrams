@@ -27,8 +27,7 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
     <button
       onClick={handleRegenerate}
       disabled={loading || done}
-      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium cursor-pointer disabled:opacity-50 transition-colors"
-      style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+      className="ui-button-secondary !text-xs disabled:opacity-50"
       title={locale === "zh" ? "用中文重新生成所有内容" : "Regenerate all content in English"}
     >
       {loading ? (

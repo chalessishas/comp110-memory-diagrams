@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, RotateCcw } from "lucide-react";
+import { User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, RotateCcw, Palette } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { THEMES, getSavedTheme, setTheme } from "@/lib/theme";
+import type { ThemeId } from "@/lib/theme";
 
 type Section = "profile" | "account" | "preferences" | "data" | "about";
 
@@ -31,6 +33,9 @@ export default function SettingsPage() {
   const [savingSemester, setSavingSemester] = useState(false);
   const [semesterSaved, setSemesterSaved] = useState(false);
 
+  // Theme
+  const [currentTheme, setCurrentTheme] = useState<ThemeId>("spring");
+
   // Data
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState<string | null>(null);
@@ -41,6 +46,7 @@ export default function SettingsPage() {
       setEmail(user.email ?? "");
       setDisplayName(user.user_metadata?.display_name ?? "");
       setSemester(user.user_metadata?.semester ?? "");
+      setCurrentTheme(getSavedTheme());
       setLoading(false);
     });
   }, []);
@@ -144,16 +150,15 @@ export default function SettingsPage() {
       <h1 className="text-3xl font-semibold mb-8">{t("settings.title")}</h1>
 
       {/* Section nav */}
-      <div className="flex gap-1 mb-8 overflow-x-auto pb-2">
+      <div className="flex gap-1.5 mb-8 overflow-x-auto pb-2">
         {sections.map((s) => (
           <button
             key={s.key}
             onClick={() => setActiveSection(s.key)}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm whitespace-nowrap cursor-pointer transition-colors"
             style={{
-              backgroundColor: activeSection === s.key ? "var(--accent)" : "var(--bg-surface)",
+              backgroundColor: activeSection === s.key ? "var(--accent)" : "var(--bg-muted)",
               color: activeSection === s.key ? "white" : "var(--text-secondary)",
-              border: `1px solid ${activeSection === s.key ? "var(--accent)" : "var(--border)"}`,
               fontWeight: activeSection === s.key ? 600 : 400,
             }}
           >
@@ -171,12 +176,12 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.email")}</label>
-                <input value={email} disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }} />
+                <input value={email} disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} />
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.displayName")}</label>
                 <div className="flex gap-2">
-                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
                   <button onClick={handleSaveName} disabled={savingName} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingName ? <Loader2 size={14} className="animate-spin" /> : nameSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -193,7 +198,7 @@ export default function SettingsPage() {
           <div className="ui-panel p-6">
             <h2 className="text-lg font-semibold mb-4">{t("settings.changePassword")}</h2>
             <div className="flex gap-2">
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
               <button onClick={handleChangePassword} disabled={changingPassword || newPassword.length < 6} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                 {changingPassword ? <Loader2 size={14} className="animate-spin" /> : t("settings.save")}
               </button>
@@ -204,7 +209,7 @@ export default function SettingsPage() {
           <div className="ui-panel p-6">
             <h2 className="text-lg font-semibold mb-2" style={{ color: "var(--danger)" }}>{t("settings.deleteAccount")}</h2>
             <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>{t("settings.deleteWarning")}</p>
-            <button onClick={handleDeleteAccount} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer" style={{ border: "1px solid var(--danger)", color: "var(--danger)" }}>
+            <button onClick={handleDeleteAccount} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer" style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}>
               <Trash2 size={14} className="inline mr-1.5" />
               {t("settings.deleteAccount")}
             </button>
@@ -215,13 +220,65 @@ export default function SettingsPage() {
       {/* Preferences */}
       {activeSection === "preferences" && (
         <div className="space-y-6">
+          {/* Theme Picker */}
+          <div className="ui-panel p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Palette size={18} style={{ color: "var(--accent)" }} />
+              <h2 className="text-lg font-semibold">{locale === "zh" ? "色彩主题" : "Color Theme"}</h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+              {THEMES.map((theme) => {
+                const isActive = currentTheme === theme.id;
+                return (
+                  <button
+                    key={theme.id}
+                    onClick={() => {
+                      setTheme(theme.id);
+                      setCurrentTheme(theme.id);
+                    }}
+                    className="flex flex-col items-center gap-2 p-3 rounded-xl cursor-pointer transition-all"
+                    style={{
+                      backgroundColor: isActive ? "var(--accent-light)" : "var(--bg-muted)",
+                      transform: isActive ? "scale(1.05)" : "scale(1)",
+                      boxShadow: isActive ? "0 0 0 2px var(--accent)" : "none",
+                    }}
+                  >
+                    {/* Color preview circles */}
+                    <div className="flex gap-1">
+                      {theme.preview.map((color, i) => (
+                        <div
+                          key={i}
+                          className="rounded-full"
+                          style={{
+                            width: i === 2 ? 20 : 14,
+                            height: i === 2 ? 20 : 14,
+                            backgroundColor: color,
+                            border: "1px solid var(--border)",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="text-center">
+                      <div className="text-xs font-semibold" style={{ color: isActive ? "var(--accent)" : "var(--text-primary)" }}>
+                        {theme.name}
+                      </div>
+                      <div className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        {theme.nameEn}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           <div className="ui-panel p-6">
             <h2 className="text-lg font-semibold mb-4">{t("settings.preferences")}</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.semester")}</label>
                 <div className="flex gap-2">
-                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Fall 2026" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }} />
+                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Fall 2026" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
                   <button onClick={handleSaveSemester} disabled={savingSemester} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingSemester ? <Loader2 size={14} className="animate-spin" /> : semesterSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -229,7 +286,7 @@ export default function SettingsPage() {
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.aiModel")}</label>
-                <input value="Qwen3.5-Plus (DashScope)" disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }} />
+                <input value="Qwen3.5-Plus (DashScope)" disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} />
                 <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>Model selection is managed by the administrator.</p>
               </div>
               <div>
@@ -241,7 +298,6 @@ export default function SettingsPage() {
                     style={{
                       backgroundColor: locale === "en" ? "var(--accent)" : "var(--bg-muted)",
                       color: locale === "en" ? "white" : "var(--text-secondary)",
-                      border: `1px solid ${locale === "en" ? "var(--accent)" : "var(--border)"}`,
                     }}
                   >
                     English
@@ -252,7 +308,6 @@ export default function SettingsPage() {
                     style={{
                       backgroundColor: locale === "zh" ? "var(--accent)" : "var(--bg-muted)",
                       color: locale === "zh" ? "white" : "var(--text-secondary)",
-                      border: `1px solid ${locale === "zh" ? "var(--accent)" : "var(--border)"}`,
                     }}
                   >
                     中文
@@ -280,11 +335,11 @@ export default function SettingsPage() {
             <h2 className="text-lg font-semibold mb-4">{t("settings.clearLocal")}</h2>
             <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>{t("settings.clearLocalDesc")}</p>
             <div className="flex flex-wrap gap-2">
-              <button onClick={handleClearStudyTracker} disabled={clearing === "tracker"} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm cursor-pointer" style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+              <button onClick={handleClearStudyTracker} disabled={clearing === "tracker"} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm cursor-pointer" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
                 {clearing === "tracker" ? <Check size={14} style={{ color: "var(--success)" }} /> : <RotateCcw size={14} />}
                 {t("settings.clearStudy")}
               </button>
-              <button onClick={handleClearReviewCards} disabled={clearing === "review"} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm cursor-pointer" style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}>
+              <button onClick={handleClearReviewCards} disabled={clearing === "review"} className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm cursor-pointer" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
                 {clearing === "review" ? <Check size={14} style={{ color: "var(--success)" }} /> : <RotateCcw size={14} />}
                 {t("settings.clearReview")}
               </button>
@@ -302,7 +357,7 @@ export default function SettingsPage() {
             <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Stack:</span> Next.js 16 + Supabase + Qwen AI</p>
             <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>AI Model:</span> Qwen3.5-Plus via DashScope</p>
             <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Storage:</span> Supabase (PostgreSQL + Object Storage)</p>
-            <p className="pt-3" style={{ borderTop: "1px solid var(--border)" }}>
+            <p className="pt-3 mt-3" style={{ opacity: 0.8 }}>
               CourseHub turns your syllabus into a structured learning system — outlines, study tasks, practice questions, and mastery tracking. Built for students who want to study smarter, not harder.
             </p>
           </div>

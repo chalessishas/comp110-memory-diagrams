@@ -26,19 +26,18 @@ export function ArchiveButton({ courseId, status }: { courseId: string; status: 
     <div className="flex flex-wrap justify-end gap-2">
       <button
         onClick={toggleArchive}
-        className="ui-button-secondary !px-4 !py-3 !text-sm"
+        className="ui-button-secondary"
         title={status === "active" ? "Archive" : "Restore"}
       >
-        {status === "active" ? <Archive size={16} /> : <ArchiveRestore size={16} />}
+        {status === "active" ? <Archive size={14} /> : <ArchiveRestore size={14} />}
         {status === "active" ? "Archive" : "Restore"}
       </button>
       <button
         onClick={deleteCourse}
-        className="ui-button-secondary !px-4 !py-3 !text-sm"
-        style={{ color: "var(--text-secondary)" }}
+        className="ui-button-ghost"
         title="Delete"
       >
-        <Trash2 size={16} />
+        <Trash2 size={14} />
         Delete
       </button>
     </div>

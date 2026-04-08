@@ -37,8 +37,12 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
     return (
       <button
         onClick={() => setOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer z-50 shadow-lg hover:scale-105 transition-transform"
-        style={{ backgroundColor: "var(--accent)", color: "white" }}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center cursor-pointer z-50 hover:scale-105 transition-transform"
+        style={{
+          backgroundColor: "var(--accent)",
+          color: "var(--bg-surface)",
+          boxShadow: "0 2px 12px var(--accent-muted)",
+        }}
         title="Study Buddy"
       >
         <MessageCircle size={24} />
@@ -48,24 +52,32 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
 
   return (
     <div
-      className="fixed bottom-6 right-6 w-96 h-[560px] rounded-[24px] flex flex-col z-50 overflow-hidden"
+      className="fixed bottom-6 right-6 w-96 h-[560px] rounded-[20px] flex flex-col z-50 overflow-hidden"
       style={{
         backgroundColor: "var(--bg-surface)",
-        border: "1px solid var(--border)",
-        boxShadow: "0 24px 80px rgba(0, 0, 0, 0.15)",
+        boxShadow: "0 8px 40px var(--accent-light), 0 2px 8px var(--accent-light)",
       }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--border)" }}>
-        <div className="flex items-center gap-2">
-          <Bot size={18} style={{ color: "var(--accent)" }} />
+      {/* Header — clean, no bottom border, just subtle gap */}
+      <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div
+            className="w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: "var(--accent-light)" }}
+          >
+            <Bot size={16} style={{ color: "var(--accent)" }} />
+          </div>
           <div>
-            <p className="text-sm font-medium">Study Buddy</p>
-            <p className="text-[11px]" style={{ color: "var(--text-secondary)" }}>{courseTitle}</p>
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Study Buddy</p>
+            <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{courseTitle}</p>
           </div>
         </div>
-        <button onClick={() => setOpen(false)} className="p-1 cursor-pointer rounded-lg hover:bg-black/5">
-          <X size={16} style={{ color: "var(--text-secondary)" }} />
+        <button
+          onClick={() => setOpen(false)}
+          className="p-2 cursor-pointer rounded-xl transition-colors"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <X size={16} />
         </button>
       </div>
 
@@ -73,17 +85,17 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
       <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.length === 0 && (
           <div className="text-center py-8">
-            <Bot size={32} className="mx-auto mb-3" style={{ color: "var(--border)" }} />
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            <Bot size={32} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
+            <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
               Ask me anything about this course
             </p>
-            <div className="mt-4 space-y-2">
+            <div className="space-y-2">
               {["What are the key topics?", "Explain the hardest concept", "Help me prepare for the exam"].map((q) => (
                 <button
                   key={q}
                   onClick={() => submitQuickQuestion(q)}
-                  className="block w-full text-left px-3 py-2 rounded-xl text-xs cursor-pointer"
-                  style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+                  className="block w-full text-left px-4 py-2.5 rounded-[12px] text-xs cursor-pointer transition-colors"
+                  style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
                 >
                   {q}
                 </button>
@@ -103,15 +115,18 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
           return (
             <div key={m.id} className={`flex gap-2 ${m.role === "user" ? "justify-end" : ""}`}>
               {m.role === "assistant" && (
-                <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1" style={{ backgroundColor: "var(--bg-muted)" }}>
-                  <Bot size={12} style={{ color: "var(--text-secondary)" }} />
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1"
+                  style={{ backgroundColor: "var(--accent-light)" }}
+                >
+                  <Bot size={12} style={{ color: "var(--accent)" }} />
                 </div>
               )}
               <div
-                className="max-w-[80%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap"
+                className="max-w-[80%] px-4 py-3 rounded-[16px] text-sm leading-relaxed whitespace-pre-wrap"
                 style={{
-                  backgroundColor: m.role === "user" ? "var(--accent)" : "var(--bg-muted)",
-                  color: m.role === "user" ? "white" : "var(--text-primary)",
+                  backgroundColor: m.role === "user" ? "var(--accent-light)" : "var(--bg-muted)",
+                  color: m.role === "user" ? "var(--accent)" : "var(--text-primary)",
                 }}
               >
                 {textContent}
@@ -122,10 +137,16 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
 
         {isLoading && (
           <div className="flex gap-2">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <Loader2 size={12} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center shrink-0"
+              style={{ backgroundColor: "var(--accent-light)" }}
+            >
+              <Loader2 size={12} className="animate-spin" style={{ color: "var(--accent)" }} />
             </div>
-            <div className="px-3.5 py-2.5 rounded-2xl text-sm" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+            <div
+              className="px-4 py-3 rounded-[16px] text-sm"
+              style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}
+            >
               Thinking...
             </div>
           </div>
@@ -134,24 +155,24 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
-      <form
-        onSubmit={handleSubmit}
-        className="px-4 py-3 flex gap-2"
-        style={{ borderTop: "1px solid var(--border)" }}
-      >
+      {/* Input — clean, rounded, at bottom */}
+      <form onSubmit={handleSubmit} className="px-4 py-3 flex gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about this course..."
-          className="flex-1 px-3.5 py-2.5 rounded-xl text-sm outline-none"
-          style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}
+          className="flex-1 px-4 py-2.5 rounded-[12px] text-sm outline-none"
+          style={{
+            backgroundColor: "var(--bg-surface)",
+            border: "1px solid var(--border)",
+            color: "var(--text-primary)",
+          }}
         />
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="p-2.5 rounded-xl cursor-pointer disabled:opacity-30"
-          style={{ backgroundColor: "var(--accent)", color: "white" }}
+          className="p-2.5 rounded-[12px] cursor-pointer disabled:opacity-30 transition-colors"
+          style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}
         >
           <Send size={16} />
         </button>

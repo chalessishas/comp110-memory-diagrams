@@ -90,31 +90,28 @@ function EditableNode({
   return (
     <div>
       <div
-        className="group flex items-center gap-2 rounded-2xl px-3 py-2 hover:bg-black/5"
-        style={{ paddingLeft: `${depth * 24 + 12}px` }}
+        className="group flex items-center gap-2 rounded-[14px] px-3 py-2 transition-colors"
+        style={{
+          paddingLeft: `${depth * 24 + 12}px`,
+          backgroundColor: "transparent",
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-muted)")}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
       >
-        {/* Expand/collapse */}
         <button
           onClick={() => setExpanded(!expanded)}
           className="shrink-0 cursor-pointer w-4"
         >
           {hasChildren ? (
-            expanded ? <ChevronDown size={14} style={{ color: "var(--text-secondary)" }} />
-              : <ChevronRight size={14} style={{ color: "var(--text-secondary)" }} />
+            expanded ? <ChevronDown size={14} style={{ color: "var(--text-muted)" }} />
+              : <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
           ) : <span className="w-3.5" />}
         </button>
 
-        {/* Type badge */}
-        <span
-          className="text-[10px] px-2.5 py-1 rounded-full shrink-0 font-semibold uppercase tracking-[0.18em]"
-          style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
-        >
-          {typeLabel[node.type] || "?"}
-        </span>
+        <span className="ui-badge shrink-0">{typeLabel[node.type] || "?"}</span>
 
-        {/* Title (editable) */}
         {editing ? (
-          <div className="flex items-center gap-1 flex-1">
+          <div className="flex items-center gap-1.5 flex-1">
             <input
               ref={inputRef}
               value={editValue}
@@ -123,37 +120,45 @@ function EditableNode({
                 if (e.key === "Enter") handleSave();
                 if (e.key === "Escape") { setEditing(false); setEditValue(node.name); }
               }}
-              className="flex-1 text-sm px-2 py-1 rounded-lg outline-none"
-              style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+              className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none transition-shadow"
+              style={{
+                border: "1px solid var(--border)",
+                backgroundColor: "var(--bg-surface)",
+              }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
               disabled={saving}
             />
             {saving ? (
-              <Loader2 size={14} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+              <Loader2 size={14} className="animate-spin" style={{ color: "var(--text-muted)" }} />
             ) : (
               <>
-                <button onClick={handleSave} className="cursor-pointer p-1"><Check size={14} style={{ color: "var(--success)" }} /></button>
-                <button onClick={() => { setEditing(false); setEditValue(node.name); }} className="cursor-pointer p-1"><X size={14} style={{ color: "var(--text-secondary)" }} /></button>
+                <button onClick={handleSave} className="cursor-pointer p-1 rounded-lg transition-colors" style={{ color: "var(--success)" }}>
+                  <Check size={14} />
+                </button>
+                <button onClick={() => { setEditing(false); setEditValue(node.name); }} className="cursor-pointer p-1 rounded-lg" style={{ color: "var(--text-muted)" }}>
+                  <X size={14} />
+                </button>
               </>
             )}
           </div>
         ) : (
           <span
             className="text-sm truncate flex-1 cursor-pointer"
-            style={{ fontWeight: depth < 2 ? 500 : 400 }}
+            style={{ fontWeight: depth < 2 ? 500 : 400, color: "var(--text-primary)" }}
             onDoubleClick={startEdit}
           >
             {node.name}
           </span>
         )}
 
-        {/* Action buttons (visible on hover) */}
         {!editing && (
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={startEdit} className="p-1 cursor-pointer" title="Rename">
-              <Pencil size={13} style={{ color: "var(--text-secondary)" }} />
+            <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Rename" style={{ color: "var(--text-muted)" }}>
+              <Pencil size={13} />
             </button>
-            <button onClick={() => onAdd(node.id)} className="p-1 cursor-pointer" title="Add child">
-              <Plus size={13} style={{ color: "var(--text-secondary)" }} />
+            <button onClick={() => onAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Add child" style={{ color: "var(--text-muted)" }}>
+              <Plus size={13} />
             </button>
             <button
               onClick={() => {
@@ -162,16 +167,16 @@ function EditableNode({
                   : `Delete "${node.name}"?`;
                 if (confirm(msg)) onDelete(node.id);
               }}
-              className="p-1 cursor-pointer"
+              className="p-1.5 rounded-lg cursor-pointer transition-colors"
               title="Delete"
+              style={{ color: "var(--danger)" }}
             >
-              <Trash2 size={13} style={{ color: "var(--danger)" }} />
+              <Trash2 size={13} />
             </button>
           </div>
         )}
       </div>
 
-      {/* Children */}
       {expanded && node.children.map((child) => (
         <EditableNode
           key={child.id}
@@ -200,7 +205,6 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
 
   const handleDelete = useCallback(async (id: string) => {
     await fetch(`/api/outline-nodes/${id}`, { method: "DELETE" });
-    // Remove node and all descendants
     const toRemove = new Set<string>();
     function collectChildren(nodeId: string) {
       toRemove.add(nodeId);
@@ -248,12 +252,10 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
 
   return (
     <div>
-      <div className="ui-panel p-4 md:p-6">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            Double-click to rename. Hover for add/delete.
-          </p>
-        </div>
+      <div className="ui-panel p-5 md:p-6">
+        <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+          Double-click to rename. Hover for add/delete.
+        </p>
         {treeData.map((node) => (
           <EditableNode
             key={node.id}
@@ -268,16 +270,19 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
       </div>
 
       {dirty && (
-        <div className="mt-4 flex items-center gap-3 p-4 rounded-2xl" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
-          <Sparkles size={16} style={{ color: "var(--text-secondary)" }} />
+        <div
+          className="mt-4 flex items-center gap-3 p-5 rounded-[20px]"
+          style={{ backgroundColor: "var(--bg-muted)" }}
+        >
+          <Sparkles size={16} style={{ color: "var(--text-muted)" }} />
           <p className="text-sm flex-1" style={{ color: "var(--text-secondary)" }}>
             Outline changed. Regenerate study tasks and practice questions?
           </p>
           <button
             onClick={handleRegenerate}
             disabled={regenerating}
-            className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50"
-            style={{ backgroundColor: "var(--accent)", color: "white" }}
+            className="px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50 transition-transform"
+            style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}
           >
             {regenerating ? <Loader2 size={14} className="animate-spin" /> : "Regenerate"}
           </button>

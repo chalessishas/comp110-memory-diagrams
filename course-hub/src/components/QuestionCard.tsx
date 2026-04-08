@@ -71,30 +71,18 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
     const isSelected = selected === optionLabel;
 
     if (submitted && isAnswer) {
-      return {
-        borderColor: "var(--success)",
-        backgroundColor: "rgba(22, 163, 74, 0.08)",
-      };
+      return { backgroundColor: "var(--accent-light)", color: "var(--success)" };
     }
 
     if (submitted && isSelected && !isAnswer) {
-      return {
-        borderColor: "var(--danger)",
-        backgroundColor: "rgba(239, 68, 68, 0.08)",
-      };
+      return { backgroundColor: "var(--bg-muted)", color: "var(--danger)" };
     }
 
     if (!submitted && isSelected) {
-      return {
-        borderColor: "var(--accent)",
-        backgroundColor: "rgba(91, 108, 240, 0.08)",
-      };
+      return { backgroundColor: "var(--accent-light)", color: "var(--text-primary)" };
     }
 
-    return {
-      borderColor: "var(--border)",
-      backgroundColor: "white",
-    };
+    return { backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" };
   }
 
   async function handleBookmarkToggle() {
@@ -117,49 +105,53 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
   return (
     <div className="ui-panel p-6 md:p-8 relative">
+      {/* Bookmark */}
       <button
         onClick={handleBookmarkToggle}
-        className="absolute top-4 right-4 p-1.5 cursor-pointer rounded-lg hover:bg-black/5"
+        className="absolute top-5 right-5 p-2 cursor-pointer rounded-xl transition-colors"
+        style={{ color: "var(--accent)" }}
         title={isBookmarked ? "Remove from bank" : "Save to question bank"}
       >
-        <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} style={{ color: "var(--accent)" }} />
+        <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} />
       </button>
-      <div className="mb-6">
+
+      {/* Question stem */}
+      <div className="mb-8">
         <div className="ui-kicker mb-3">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
-        <p className="text-lg font-medium leading-8">{question.stem}</p>
+        <p className="text-lg font-medium leading-relaxed" style={{ color: "var(--text-primary)" }}>{question.stem}</p>
       </div>
 
+      {/* MCQ / T-F options — pill-shaped, no border */}
       {(question.type === "multiple_choice" || question.type === "true_false") && question.options && (
-        <div className="space-y-3 mb-5">
+        <div className="space-y-3 mb-6">
           {question.options.map((opt) => (
             <button
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-4 py-4 rounded-[22px] text-sm transition-colors cursor-pointer disabled:cursor-default"
-              style={{
-                border: "1px solid",
-                ...getOptionStyles(opt.label),
-              }}
+              className="w-full text-left px-5 py-4 rounded-[20px] text-sm transition-all cursor-pointer disabled:cursor-default"
+              style={getOptionStyles(opt.label)}
             >
-              <span className="inline-flex min-w-8 font-semibold mr-2">{opt.label}.</span>
+              <span className="inline-flex min-w-8 font-semibold mr-2" style={{ color: "var(--accent)" }}>{opt.label}.</span>
               {opt.text}
             </button>
           ))}
         </div>
       )}
 
+      {/* Fill-blank / short-answer */}
       {(question.type === "fill_blank" || question.type === "short_answer") && (
         <textarea
           value={textAnswer}
           onChange={(e) => !submitted && setTextAnswer(e.target.value)}
           disabled={submitted}
           placeholder={t("questionCard.typeAnswer")}
-          className="ui-textarea text-sm mb-5"
+          className="ui-textarea text-sm mb-6"
           rows={question.type === "short_answer" ? 4 : 1}
         />
       )}
 
+      {/* Submit or feedback */}
       {!submitted ? (
         <button
           onClick={handleSubmit}
@@ -169,13 +161,13 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           {submitting ? <Loader2 size={16} className="animate-spin" /> : t("practice.submit")}
         </button>
       ) : (
-        <div className="mt-4">
+        <div className="mt-6 space-y-4">
+          {/* Correct / wrong feedback — soft bg, no harsh border */}
           <div
-            className="flex items-start gap-3 rounded-[24px] px-4 py-4 mb-3"
+            className="flex items-center gap-3 rounded-[20px] px-5 py-4"
             style={{
-              backgroundColor: isCorrect ? "rgba(22, 163, 74, 0.08)" : "rgba(239, 68, 68, 0.08)",
+              backgroundColor: isCorrect ? "var(--accent-light)" : "var(--bg-muted)",
               color: isCorrect ? "var(--success)" : "var(--danger)",
-              border: `1px solid ${isCorrect ? "var(--success)" : "var(--danger)"}`,
             }}
           >
             {isCorrect ? (
@@ -192,16 +184,24 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               </>
             )}
           </div>
+
+          {/* Explanation — subtle left accent bar */}
           {revealedExplanation && (
-            <p
-              className="text-sm p-4 rounded-[22px]"
-              style={{ backgroundColor: "white", color: "var(--text-secondary)", border: "1px solid var(--border)" }}
+            <div
+              className="text-sm py-4 px-5 rounded-[16px]"
+              style={{
+                backgroundColor: "var(--bg-muted)",
+                color: "var(--text-secondary)",
+                borderLeft: "3px solid var(--accent)",
+              }}
             >
               {revealedExplanation}
-            </p>
+            </div>
           )}
-          <div className="mt-3 flex items-center gap-1">
-            <span className="text-[10px] mr-1" style={{ color: "var(--text-secondary)" }}>{t("questionCard.report")}</span>
+
+          {/* Feedback pills */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] mr-1" style={{ color: "var(--text-muted)" }}>{t("questionCard.report")}</span>
             {[
               { reason: "wrong_answer", label: t("questionCard.reportWrong") },
               { reason: "unclear", label: t("questionCard.reportUnclear") },
@@ -219,11 +219,10 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
                   setFeedbackGiven(fb.reason);
                 }}
                 disabled={!!feedbackGiven}
-                className="px-2 py-0.5 rounded-full text-[10px] cursor-pointer disabled:opacity-40"
+                className="px-2.5 py-1 rounded-lg text-[11px] cursor-pointer disabled:opacity-40 transition-colors"
                 style={{
-                  border: "1px solid var(--border)",
-                  backgroundColor: feedbackGiven === fb.reason ? "var(--bg-muted)" : "transparent",
-                  color: "var(--text-secondary)",
+                  backgroundColor: feedbackGiven === fb.reason ? "var(--accent-light)" : "var(--bg-muted)",
+                  color: "var(--text-muted)",
                 }}
               >
                 {fb.label}

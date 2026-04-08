@@ -75,12 +75,11 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
     <div>
       <CourseTabs courseId={id} />
 
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-medium">{t("library.title")}</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-lg font-semibold tracking-wide">{t("library.title")}</h2>
         <button
           onClick={() => setShowUpload(!showUpload)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm cursor-pointer"
-          style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          className="ui-button-secondary"
         >
           <UploadIcon size={14} />
           {t("library.uploadFile")}
@@ -94,7 +93,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
       )}
 
       {uploads.length === 0 ? (
-        <div className="text-center py-16">
+        <div className="ui-empty">
           <p className="mb-2" style={{ color: "var(--text-secondary)" }}>{t("library.noFiles")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             {t("library.noFilesDesc")}
@@ -107,8 +106,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
             return (
               <div key={upload.id}>
                 <div
-                  className="flex items-center gap-3 px-4 py-3 rounded-2xl group"
-                  style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-[20px] group ui-panel"
                 >
                   <Icon size={20} style={{ color: "var(--text-secondary)" }} />
                   <div className="flex-1 min-w-0">
@@ -136,7 +134,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                           setExtracting(null);
                         }}
                         disabled={extracting === upload.id}
-                        className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                        className="p-2 cursor-pointer rounded-lg hover:opacity-80"
                         title="Extract key content with AI"
                       >
                         {extracting === upload.id ? (
@@ -151,7 +149,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                         href={upload.download_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                        className="p-2 cursor-pointer rounded-lg hover:opacity-80"
                         title="Download"
                       >
                         <Download size={15} style={{ color: "var(--text-secondary)" }} />
@@ -160,7 +158,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                     <button
                       onClick={() => handleDelete(upload.id)}
                       disabled={deleting === upload.id}
-                      className="p-2 cursor-pointer rounded-lg hover:bg-black/5"
+                      className="p-2 cursor-pointer rounded-lg hover:opacity-80"
                       title="Delete"
                     >
                       {deleting === upload.id ? (
@@ -174,13 +172,13 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                 {upload.parsed_content != null && (
                   <div className="mt-2 ml-9 space-y-2">
                     {(upload.parsed_content as any).sections?.map((section: any, i: number) => (
-                      <div key={i} className="p-3 rounded-xl text-xs" style={{ backgroundColor: "var(--bg-muted)", border: "1px solid var(--border)" }}>
+                      <div key={i} className="p-3 rounded-xl text-xs" style={{ backgroundColor: "var(--bg-muted)" }}>
                         <p className="font-medium">{section.title}</p>
                         <p className="mt-1" style={{ color: "var(--text-secondary)" }}>{section.summary}</p>
                         {section.key_concepts?.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {section.key_concepts.map((c: string, j: number) => (
-                              <span key={j} className="px-2 py-0.5 rounded-full" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+                              <span key={j} className="ui-badge">
                                 {c}
                               </span>
                             ))}

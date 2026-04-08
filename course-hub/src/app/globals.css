@@ -1,56 +1,220 @@
 @import "tailwindcss";
 
-:root {
-  /* Backgrounds — subtle warm, no gradient */
-  --bg-primary: #faf9f7;
-  --bg-surface: #ffffff;
-  --bg-muted: #f3f2ef;
-  --bg-elevated: #ffffff;
+/* ═══════════════════════════════════════════════
+   CourseHub 2.0 — 五套水彩风色系
+   切换方式：<html data-theme="spring|sea|dusk|sakura|ink">
+   默认：spring（春晓）
+   ═══════════════════════════════════════════════ */
 
-  /* Text — high contrast, warm black */
-  --text-primary: #111111;
-  --text-secondary: #555555;
-  --text-muted: #999999;
+/* ── Theme 1: 春晓 Spring Dawn (default) ────── */
+/* 暖杏 + 鼠尾草绿 + 桃粉 · 参考色卡 #F0DEC6 #BDCDB0 #FBDED0 #D1E5D9 #F9F1E4 */
+:root,
+[data-theme="spring"] {
+  --bg-primary: #F9F1E4;
+  --bg-surface: #FEFCF8;
+  --bg-muted: #F0E6D6;
+  --bg-elevated: #FEFCF8;
 
-  /* Accent — deeper, richer indigo */
-  --accent: #4f46e5;
-  --accent-hover: #4338ca;
-  --accent-light: rgba(79, 70, 229, 0.08);
-  --accent-muted: rgba(79, 70, 229, 0.15);
+  --text-primary: #2E2A25;
+  --text-secondary: #5C5550;
+  --text-muted: #9C9490;
 
-  /* Semantic */
-  --success: #059669;
-  --warning: #d97706;
-  --danger: #dc2626;
+  --accent: #8FA882;
+  --accent-hover: #7A9670;
+  --accent-light: rgba(143, 168, 130, 0.10);
+  --accent-muted: rgba(143, 168, 130, 0.18);
 
-  /* Borders */
-  --border: #e5e5e5;
-  --border-strong: #d4d4d4;
+  --success: #6B9E6B;
+  --warning: #C4935A;
+  --danger: #C07070;
 
-  /* Shadows — layered depth */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.08);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+  --border: #E5DDD0;
+  --border-strong: #D5CBBC;
 
-  /* Border radius — 3 sizes only */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(46, 42, 37, 0.04);
+  --shadow-md: 0 4px 12px rgba(46, 42, 37, 0.06);
+  --shadow-lg: 0 12px 40px rgba(46, 42, 37, 0.08);
+  --shadow-card: 0 1px 3px rgba(46, 42, 37, 0.04), 0 4px 12px rgba(46, 42, 37, 0.03);
+
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 24px;
+
+  color-scheme: light;
 }
 
+/* ── Theme 2: 海雾 Sea Mist ─────────────────── */
+/* 灰蓝 + 薰衣草 + 淡青 */
+[data-theme="sea"] {
+  --bg-primary: #EEF2F7;
+  --bg-surface: #F8FAFC;
+  --bg-muted: #E1E7EF;
+  --bg-elevated: #F8FAFC;
+
+  --text-primary: #1F2937;
+  --text-secondary: #4B5563;
+  --text-muted: #94A3B8;
+
+  --accent: #6B8CAE;
+  --accent-hover: #587A9C;
+  --accent-light: rgba(107, 140, 174, 0.10);
+  --accent-muted: rgba(107, 140, 174, 0.18);
+
+  --success: #5A9E6F;
+  --warning: #C49A5A;
+  --danger: #C47070;
+
+  --border: #D4DCE8;
+  --border-strong: #C0CAD8;
+
+  --shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.04);
+  --shadow-md: 0 4px 12px rgba(31, 41, 55, 0.06);
+  --shadow-lg: 0 12px 40px rgba(31, 41, 55, 0.08);
+  --shadow-card: 0 1px 3px rgba(31, 41, 55, 0.04), 0 4px 12px rgba(31, 41, 55, 0.03);
+
+  color-scheme: light;
+}
+
+/* ── Theme 3: 暮色 Dusk ─────────────────────── */
+/* 暖炭底 + 琥珀金 accent · 深色但不刺眼 */
+[data-theme="dusk"] {
+  --bg-primary: #1C1917;
+  --bg-surface: #252220;
+  --bg-muted: #302C28;
+  --bg-elevated: #2A2724;
+
+  --text-primary: #E7E0D8;
+  --text-secondary: #B0A89E;
+  --text-muted: #78716C;
+
+  --accent: #D4A574;
+  --accent-hover: #C49464;
+  --accent-light: rgba(212, 165, 116, 0.12);
+  --accent-muted: rgba(212, 165, 116, 0.20);
+
+  --success: #7AAE7A;
+  --warning: #D4A040;
+  --danger: #D08080;
+
+  --border: #3D3835;
+  --border-strong: #4A4540;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.40);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.20), 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  color-scheme: dark;
+}
+
+/* ── Theme 4: 樱花 Sakura ───────────────────── */
+/* 腮红粉 + 玫瑰 + 奶油 */
+[data-theme="sakura"] {
+  --bg-primary: #FDF5F3;
+  --bg-surface: #FFFAFA;
+  --bg-muted: #F5E8E4;
+  --bg-elevated: #FFFAFA;
+
+  --text-primary: #2D2424;
+  --text-secondary: #5C4E4E;
+  --text-muted: #A09090;
+
+  --accent: #B8847E;
+  --accent-hover: #A6726C;
+  --accent-light: rgba(184, 132, 126, 0.10);
+  --accent-muted: rgba(184, 132, 126, 0.18);
+
+  --success: #6B9E6B;
+  --warning: #C4935A;
+  --danger: #C07070;
+
+  --border: #EAD8D4;
+  --border-strong: #DCC8C2;
+
+  --shadow-sm: 0 1px 2px rgba(45, 36, 36, 0.04);
+  --shadow-md: 0 4px 12px rgba(45, 36, 36, 0.06);
+  --shadow-lg: 0 12px 40px rgba(45, 36, 36, 0.08);
+  --shadow-card: 0 1px 3px rgba(45, 36, 36, 0.04), 0 4px 12px rgba(45, 36, 36, 0.03);
+
+  color-scheme: light;
+}
+
+/* ── Theme 5: 墨石 Ink Stone ────────────────── */
+/* 冷蓝灰底 + 灰蓝 accent · 静谧冷调暗色 */
+[data-theme="ink"] {
+  --bg-primary: #18191E;
+  --bg-surface: #1F2128;
+  --bg-muted: #282A32;
+  --bg-elevated: #22242C;
+
+  --text-primary: #E0E2E8;
+  --text-secondary: #9498A4;
+  --text-muted: #5C6070;
+
+  --accent: #8B9DC3;
+  --accent-hover: #7B8DB3;
+  --accent-light: rgba(139, 157, 195, 0.12);
+  --accent-muted: rgba(139, 157, 195, 0.20);
+
+  --success: #5AAE7A;
+  --warning: #C4A040;
+  --danger: #D08080;
+
+  --border: #2E3040;
+  --border-strong: #3A3C4A;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.18);
+
+  color-scheme: dark;
+}
+
+/* ═══ Mastery Colors (all themes) ═══ */
+:root {
+  --mastery-unseen: #D4D4D4;
+  --mastery-exposed: #F87171;
+  --mastery-practiced: #FBBF24;
+  --mastery-proficient: #34D399;
+  --mastery-mastered: #10B981;
+
+  --priority-urgent: #DC2626;
+  --priority-review: #D97706;
+  --priority-exam: #EA580C;
+  --priority-new: var(--accent);
+  --priority-weakness: #7C3AED;
+}
+/* Dark themes: slightly muted mastery colors */
+[data-theme="dusk"],
+[data-theme="ink"] {
+  --mastery-unseen: #555555;
+  --mastery-exposed: #E06060;
+  --mastery-practiced: #D4A830;
+  --mastery-proficient: #40B888;
+  --mastery-mastered: #20A880;
+
+  --priority-urgent: #E06060;
+  --priority-review: #D4A040;
+  --priority-exam: #D48040;
+  --priority-weakness: #9070D0;
+}
+
+/* ═══ Global Reset ═══ */
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  background: #faf9f7;
+  background: var(--bg-primary);
   color: var(--text-primary);
   font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
   line-height: 1.5;
   letter-spacing: -0.01em;
   min-height: 100vh;
+  transition: background-color 300ms ease, color 300ms ease;
 }
 
 a {
@@ -65,17 +229,26 @@ select {
   font: inherit;
 }
 
+/* ═══ Layout ═══ */
 .ui-shell {
   width: min(1160px, 100%);
   margin: 0 auto;
   padding: 1.5rem;
 }
 
+/* ═══ 2.0 Components — 水彩柔和 ═══ */
+
 .ui-panel {
+  border: none;
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.02);
+}
+/* Dark themes: shadow invisible, use subtle border instead */
+[data-theme="dusk"] .ui-panel,
+[data-theme="ink"] .ui-panel {
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: var(--shadow-card);
+  box-shadow: none;
 }
 
 .ui-panel-muted {
@@ -85,22 +258,24 @@ select {
 .ui-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  border: 1px solid var(--border);
+  gap: 0.4rem;
+  border: none;
   border-radius: 999px;
-  padding: 0.4rem 0.75rem;
+  padding: 0.3rem 0.7rem;
+  background: var(--bg-muted);
   color: var(--text-secondary);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .ui-copy {
   color: var(--text-secondary);
   font-size: 0.9375rem;
+  line-height: 1.6;
 }
 
+/* ── Buttons (2.0: softer, wider padding, 12px radius) ── */
 .ui-button-primary,
 .ui-button-secondary,
 .ui-button-ghost,
@@ -109,60 +284,54 @@ select {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
   transition:
-    background-color 160ms ease,
-    color 160ms ease,
-    border-color 160ms ease,
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    opacity 160ms ease;
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    opacity 200ms ease;
   cursor: pointer;
 }
 
 .ui-button-primary {
-  border: 1px solid var(--accent);
+  border: none;
   background: var(--accent);
   color: white;
-  padding: 0.6rem 1.1rem;
+  padding: 0.55rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 600;
 }
 
 .ui-button-primary:hover {
   background: var(--accent-hover);
-  border-color: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .ui-button-primary:active {
   transform: translateY(0);
-  box-shadow: none;
 }
 
 .ui-button-secondary {
   border: 1px solid var(--border);
   background: var(--bg-surface);
   color: var(--text-primary);
-  padding: 0.6rem 1.1rem;
+  padding: 0.55rem 1.25rem;
   font-size: 0.875rem;
-  font-weight: 500;
 }
 
 .ui-button-secondary:hover {
-  border-color: var(--border-strong);
   background: var(--bg-muted);
   transform: translateY(-1px);
 }
 
 .ui-button-ghost {
-  border: 1px solid transparent;
+  border: none;
   background: transparent;
   color: var(--text-secondary);
-  padding: 0.55rem 0.9rem;
+  padding: 0.5rem 1rem;
   font-size: 0.875rem;
-  font-weight: 500;
 }
 
 .ui-button-ghost:hover {
@@ -173,33 +342,33 @@ select {
 .ui-icon-button {
   width: 2.5rem;
   height: 2.5rem;
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
+  border: none;
+  background: var(--bg-muted);
   color: var(--text-secondary);
 }
 
 .ui-icon-button:hover {
-  border-color: var(--border-strong);
-  background: var(--bg-muted);
+  background: var(--accent-light);
+  color: var(--accent);
   transform: translateY(-1px);
 }
 
+/* ── Forms (2.0: cleaner, bg-surface default) ── */
 .ui-input,
 .ui-textarea {
   width: 100%;
   border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--bg-muted);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
   color: var(--text-primary);
-  padding: 0.65rem 0.85rem;
+  padding: 0.6rem 0.9rem;
   outline: none;
-  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
 
 .ui-input:focus,
 .ui-textarea:focus {
   border-color: var(--accent);
-  background: white;
   box-shadow: 0 0 0 3px var(--accent-light);
 }
 
@@ -207,37 +376,38 @@ select {
   resize: vertical;
 }
 
+/* ── Tags (2.0: no border, softer) ── */
 .ui-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  border-radius: 6px;
-  border: 1px solid var(--border);
+  gap: 0.3rem;
+  border-radius: var(--radius-sm);
+  border: none;
   background: var(--bg-muted);
-  padding: 0.2rem 0.5rem;
+  padding: 0.2rem 0.55rem;
   color: var(--text-secondary);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 500;
 }
 
+/* ── Empty state (2.0: no dashed border) ── */
 .ui-empty {
-  border: 1px dashed var(--border-strong);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--bg-muted);
   padding: 3rem 1.5rem;
   text-align: center;
 }
 
+/* ── Divider ── */
 .ui-divider-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-weight: 500;
+  letter-spacing: 0.04em;
 }
 
 .ui-divider-label::before,
@@ -248,10 +418,11 @@ select {
   background: var(--border);
 }
 
+/* ── Progress (2.0: 6px height, softer track) ── */
 .ui-progress-track {
-  height: 4px;
+  height: 6px;
   border-radius: 999px;
-  background: var(--border);
+  background: var(--bg-muted);
   overflow: hidden;
 }
 
@@ -262,14 +433,15 @@ select {
   transition: width 300ms ease;
 }
 
+/* ── Segmented Control ── */
 .ui-segmented {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.25rem;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--radius-md);
   background: var(--bg-muted);
-  padding: 0.25rem;
+  padding: 0.3rem;
 }
 
 .ui-segment {
@@ -277,21 +449,23 @@ select {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-secondary);
-  padding: 0.65rem 0.85rem;
+  padding: 0.6rem 0.85rem;
   font-size: 0.875rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 .ui-segment-active {
   background: var(--accent);
   color: white;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
+/* ── Tabs (2.0: pill style, no border) ── */
 .ui-tab-row {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   overflow-x: auto;
   padding-bottom: 0.25rem;
 }
@@ -299,31 +473,30 @@ select {
 .ui-tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   white-space: nowrap;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  color: var(--text-secondary);
-  padding: 0.5rem 0.85rem;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0.45rem 0.85rem;
   font-size: 0.8125rem;
-  font-weight: 600;
-  transition: all 160ms ease;
+  font-weight: 500;
+  transition: all 200ms ease;
   cursor: pointer;
 }
 
 .ui-tab:hover {
-  border-color: var(--border-strong);
   background: var(--bg-muted);
+  color: var(--text-secondary);
 }
 
 .ui-tab-active {
-  border-color: var(--accent);
   background: var(--accent-light);
   color: var(--accent);
 }
 
-/* ── Page transitions ── */
+/* ═══ Page transitions ═══ */
 
 @keyframes page-enter {
   from {
@@ -341,7 +514,6 @@ main > .ui-shell {
   animation: page-enter 200ms ease-out both;
 }
 
-/* View Transitions API (Chrome/Edge) */
 ::view-transition-old(root) {
   animation: 150ms ease-out both fade-out;
 }
@@ -363,7 +535,6 @@ main > .ui-shell {
   }
 }
 
-/* Shared element: sidebar stays put during transitions */
 .ui-sidebar-wrapper {
   view-transition-name: sidebar;
 }
@@ -373,11 +544,8 @@ main > .ui-shell {
   animation: none;
 }
 
-/* Smooth transitions for interactive elements */
+/* ═══ Smooth transitions for theme switching ═══ */
 .ui-panel,
-.ui-button-primary,
-.ui-button-secondary,
-.ui-tab,
 .ui-badge {
   transition:
     background-color 200ms ease,
@@ -388,9 +556,16 @@ main > .ui-shell {
     opacity 200ms ease;
 }
 
-/* Card hover — subtle lift */
 .ui-panel:hover {
-  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+}
+
+[data-theme="dusk"] .ui-panel:hover,
+[data-theme="ink"] .ui-panel:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: none;
 }
 
 @media (min-width: 768px) {

@@ -17,16 +17,22 @@ export function CourseTabs({ courseId }: { courseId: string }) {
   ];
 
   return (
-    <div className="ui-tab-row mb-6">
+    <div className="flex gap-1.5 mb-6 rounded-2xl p-1" style={{ backgroundColor: "var(--bg-muted)" }}>
       {tabs.map((tab) => {
         const isActive = tab.exact ? pathname === tab.href : pathname.startsWith(tab.href);
         return (
           <Link
             key={tab.href}
             href={tab.href}
-            className={`ui-tab ${isActive ? "ui-tab-active" : ""}`}
+            className={`flex items-center gap-2 px-4 py-2 text-sm rounded-xl transition-all whitespace-nowrap ${
+              isActive ? "font-semibold" : "font-medium"
+            }`}
+            style={{
+              backgroundColor: isActive ? "var(--accent-light)" : "transparent",
+              color: isActive ? "var(--accent)" : "var(--text-muted)",
+            }}
           >
-            <tab.icon size={15} />
+            <tab.icon size={15} strokeWidth={isActive ? 2.2 : 1.8} />
             {tab.label}
           </Link>
         );

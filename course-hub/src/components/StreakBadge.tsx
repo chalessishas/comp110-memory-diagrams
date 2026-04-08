@@ -32,12 +32,10 @@ export function StreakBadge() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-colors"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors"
         style={{
-          backgroundColor: data.currentStreak > 0 ? "rgba(245, 158, 11, 0.1)" : "transparent",
-          color: data.currentStreak > 0 ? "#f59e0b" : "var(--text-secondary)",
-          border: "1px solid",
-          borderColor: data.currentStreak > 0 ? "rgba(245, 158, 11, 0.3)" : "var(--border)",
+          backgroundColor: data.currentStreak > 0 ? "var(--accent-light)" : "transparent",
+          color: data.currentStreak > 0 ? "var(--warning)" : "var(--text-muted)",
         }}
       >
         <Flame size={14} />
@@ -48,42 +46,38 @@ export function StreakBadge() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-2 w-72 p-5 rounded-2xl z-50"
+            className="absolute right-0 top-full mt-2 w-72 p-5 rounded-[20px] z-50"
             style={{
               backgroundColor: "var(--bg-surface)",
-              border: "1px solid var(--border)",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.12)",
+              boxShadow: "var(--shadow-lg)",
             }}
           >
-            {/* Streak count */}
             <div className="text-center mb-4">
-              <Flame size={28} className="mx-auto mb-2" style={{ color: "#f59e0b" }} />
-              <p className="text-3xl font-bold">{data.currentStreak}</p>
-              <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+              <Flame size={28} className="mx-auto mb-2" style={{ color: "var(--warning)" }} />
+              <p className="text-3xl" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{data.currentStreak}</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                 {t("streak.dayStreak")}{data.longestStreak > data.currentStreak ? ` (${t("streak.best")} ${data.longestStreak})` : ""}
               </p>
             </div>
 
-            {/* Daily goal progress */}
-            <div className="mb-4 p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <div className="flex items-center justify-between text-xs mb-2">
+            <div className="mb-4 p-3 rounded-[14px]" style={{ backgroundColor: "var(--bg-muted)" }}>
+              <div className="flex items-center justify-between text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
                 <span className="flex items-center gap-1">
                   <Target size={12} /> {t("streak.dailyGoal")}
                 </span>
                 <span>{data.todayMinutes}/{data.dailyGoal} min</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+              <div className="ui-progress-track">
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="ui-progress-bar transition-all"
                   style={{
                     width: `${goalProgress}%`,
-                    backgroundColor: goalProgress >= 100 ? "#16a34a" : "var(--accent)",
+                    backgroundColor: goalProgress >= 100 ? "var(--success)" : "var(--accent)",
                   }}
                 />
               </div>
             </div>
 
-            {/* Week view */}
             <div className="flex justify-between">
               {week.map((day) => {
                 const d = new Date(day.day + "T12:00:00");
@@ -93,17 +87,17 @@ export function StreakBadge() {
                       className="w-7 h-7 rounded-full flex items-center justify-center text-[10px]"
                       style={{
                         backgroundColor: day.completed
-                          ? "#f59e0b"
+                          ? "var(--accent)"
                           : day.minutes > 0
-                          ? "rgba(245, 158, 11, 0.2)"
+                          ? "var(--accent-muted)"
                           : "var(--bg-muted)",
-                        color: day.completed ? "white" : "var(--text-secondary)",
+                        color: day.completed ? "var(--bg-surface)" : "var(--text-muted)",
                         fontWeight: day.completed ? 600 : 400,
                       }}
                     >
-                      {day.completed ? "✓" : ""}
+                      {day.completed ? "\u2713" : ""}
                     </div>
-                    <span className="text-[9px]" style={{ color: "var(--text-secondary)" }}>
+                    <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
                       {DAY_NAMES[d.getDay()]}
                     </span>
                   </div>
@@ -111,10 +105,9 @@ export function StreakBadge() {
               })}
             </div>
 
-            {/* Freeze status */}
             <div
               className="mt-3 pt-3 flex items-center gap-2 text-[10px]"
-              style={{ borderTop: "1px solid var(--border)", color: "var(--text-secondary)" }}
+              style={{ color: "var(--text-muted)" }}
             >
               <Shield size={11} />
               {data.freezeAvailable ? t("streak.freezeAvailable") : t("streak.freezeUsed")}
