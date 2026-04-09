@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 
@@ -7,6 +8,9 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await checkRateLimit(`fork:${user.id}`, 5, 60_000)) {
+    return NextResponse.json({ error: "Too many forks. Try again in a minute." }, { status: 429 });
+  }
 
   const { token } = await request.json();
   if (!token) return NextResponse.json({ error: "token required" }, { status: 400 });
