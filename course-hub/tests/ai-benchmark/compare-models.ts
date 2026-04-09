@@ -140,7 +140,7 @@ async function main() {
 
   if (selected.length === 0) {
     console.error("\n  ❌ No models available. Set at least one API key:");
-    console.error("     DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, or ANTHROPIC_API_KEY");
+    console.error("     DASHSCOPE_API_KEY, DEEPSEEK_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, ANTHROPIC_API_KEY, or ZHIPU_API_KEY");
     process.exit(1);
   }
 

@@ -9,6 +9,7 @@
 // Usage:
 //   DASHSCOPE_API_KEY=xxx DEEPSEEK_API_KEY=yyy OPENAI_API_KEY=zzz \
 //   GEMINI_API_KEY=aaa ANTHROPIC_API_KEY=bbb \
+//   ZHIPU_API_KEY=ccc \
 //   npx tsx tests/ai-benchmark/compare-models.ts
 
 import { createOpenAI } from "@ai-sdk/openai";
@@ -190,6 +191,19 @@ export const MODELS: ModelConfig[] = [
 
   // ────────── Tier 3: Mid-range (quality reference) ──────────
   {
+    id: "glm-5",
+    name: "GLM-5 (智谱)",
+    provider: "Zhipu AI",
+    pricePerMInput: 0.72,
+    pricePerMOutput: 2.30,
+    envKey: "ZHIPU_API_KEY",
+    baseURL: "https://open.bigmodel.cn/api/paas/v4",
+    modelId: "glm-5",
+    available: false,
+    tier: "mid-range",
+    notes: "744B MoE (40B active), 205K context. Chinese AI flagship (Feb 2026)",
+  },
+  {
     id: "gpt-5.4-mini",
     name: "GPT-5.4 Mini",
     provider: "OpenAI",
@@ -227,6 +241,19 @@ export const MODELS: ModelConfig[] = [
     available: false,
     tier: "mid-range",
     notes: "1M context, GA stable, strong reasoning/math/science",
+  },
+  {
+    id: "glm-5.1",
+    name: "GLM-5.1 (智谱) 🆕 Apr 7",
+    provider: "Zhipu AI",
+    pricePerMInput: 1.40,
+    pricePerMOutput: 4.40,
+    envKey: "ZHIPU_API_KEY",
+    baseURL: "https://open.bigmodel.cn/api/paas/v4",
+    modelId: "glm-5.1",
+    available: false,
+    tier: "mid-range",
+    notes: "NEWEST (Apr 7, 2026). 754B MoE, agentic engineering. Chinese AI cutting edge",
   },
   {
     id: "claude-sonnet-4.6",
