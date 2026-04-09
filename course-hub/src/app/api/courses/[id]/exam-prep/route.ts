@@ -3,6 +3,7 @@ import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { parsedQuestionSchema } from "@/lib/schemas";
 import { stripThinkBlocks } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
@@ -21,6 +22,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await checkRateLimit(`exam-prep:${user.id}`, 5, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
 
   const { scope_text } = await request.json();
   if (!scope_text || typeof scope_text !== "string") {
