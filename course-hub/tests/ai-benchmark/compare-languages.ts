@@ -392,7 +392,7 @@ async function main() {
         console.log(`  ${icon} ${kp.id} [${lang.toUpperCase()}] ${data.title.padEnd(30)} → ${score.toFixed(1)}/100 (${questions.length} Qs, ${(elapsed / 1000).toFixed(1)}s)`);
       } catch (err) {
         const elapsed = Date.now() - startMs;
-        results.push({ lang, kpId: kp.id, subject: kp.subject, totalScore: 0, questionCount: 0, latencyMs: elapsed, error: (err as Error).message.slice(0, 80) });
+        results.push({ lang, kpId: kp.id, subject: kp.subject, totalScore: 0, questionCount: 0, latencyMs: elapsed, bloomDistribution: {}, error: (err as Error).message.slice(0, 80) });
         console.log(`  ❌ ${kp.id} [${lang.toUpperCase()}] Error: ${(err as Error).message.slice(0, 60)}`);
       }
     }

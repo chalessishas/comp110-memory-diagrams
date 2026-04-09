@@ -300,11 +300,16 @@ export function getModelsByTier(tier: ModelConfig["tier"]): ModelConfig[] {
 
 // Create a generation function for a specific model
 export function createModelGenerator(config: ModelConfig) {
+  // Non-OpenAI providers only support /chat/completions, not /responses.
+  // @ai-sdk/openai v3 defaults to /responses for OpenAI, so we use
+  // compatibility: "compatible" + .chat() for all third-party providers.
+  const isOpenAI = config.envKey === "OPENAI_API_KEY";
   const provider = createOpenAI({
     baseURL: config.baseURL,
     apiKey: process.env[config.envKey] ?? "",
+    ...(isOpenAI ? {} : { compatibility: "compatible" }),
   });
-  const model = provider(config.modelId);
+  const model = isOpenAI ? provider(config.modelId) : provider.chat(config.modelId);
 
   return async function generate(
     courseTitle: string,
