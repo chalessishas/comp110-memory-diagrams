@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: "Sign in to preview AI-generated content" }, { status: 401 });
 
   const ip = request.headers.get("x-forwarded-for") ?? user.id;
-  if (!checkRateLimit(ip, 10, 60_000)) {
+  if (!await checkRateLimit(ip, 10, 60_000)) {
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 

@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!checkRateLimit(`chat:${user.id}`, 20, 60_000)) {
+  if (!await checkRateLimit(`chat:${user.id}`, 20, 60_000)) {
     return NextResponse.json({ error: "Too many messages. Slow down." }, { status: 429 });
   }
 
