@@ -65,7 +65,7 @@ export function OnboardingWizard({ onComplete }: Props) {
   const steps = [
     // Step 1: Role
     {
-      icon: <GraduationCap size={28} style={{ color: "var(--accent)" }} />,
+      icon: <GraduationCap size={28} />,
       title: "What describes you best?",
       titleZh: "你是哪类学习者？",
       subtitle: "This helps us customize your experience.",
@@ -77,13 +77,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={role.key}
               onClick={() => setPrefs((p) => ({ ...p, role: role.key as OnboardingPreferences["role"] }))}
-              className="p-4 text-left cursor-pointer transition-all rounded-[20px]"
-              style={{
-                backgroundColor: prefs.role === role.key ? "var(--accent-light)" : "var(--bg-surface)",
-                boxShadow: prefs.role === role.key
-                  ? "inset 0 0 0 2px var(--accent)"
-                  : "0 1px 4px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.02)",
-              }}
+              className="p-4 text-left cursor-pointer -[20px]"
             >
               <span className="text-2xl">{role.icon}</span>
               <p className="text-sm font-medium mt-2">{isZh ? role.zh : role.en}</p>
@@ -94,7 +88,7 @@ export function OnboardingWizard({ onComplete }: Props) {
     },
     // Step 2: Semester
     {
-      icon: <Calendar size={28} style={{ color: "var(--accent)" }} />,
+      icon: <Calendar size={28} />,
       title: "What semester are you in?",
       titleZh: "你现在是哪个学期？",
       subtitle: "We'll organize your dashboard around this.",
@@ -113,7 +107,7 @@ export function OnboardingWizard({ onComplete }: Props) {
     },
     // Step 3: Goals
     {
-      icon: <Target size={28} style={{ color: "var(--accent)" }} />,
+      icon: <Target size={28} />,
       title: "What matters most to you?",
       titleZh: "你最看重什么功能？",
       subtitle: "Pick 1-3. We'll highlight these features for you.",
@@ -125,18 +119,12 @@ export function OnboardingWizard({ onComplete }: Props) {
             <button
               key={goal.key}
               onClick={() => toggleGoal(goal.key)}
-              className="w-full flex items-center gap-3 p-4 text-left cursor-pointer transition-all rounded-[20px]"
-              style={{
-                backgroundColor: prefs.goals.includes(goal.key) ? "var(--accent-light)" : "var(--bg-surface)",
-                boxShadow: prefs.goals.includes(goal.key)
-                  ? "inset 0 0 0 2px var(--accent)"
-                  : "0 1px 4px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.02)",
-              }}
+              className="w-full flex items-center gap-3 p-4 text-left cursor-pointer -[20px]"
             >
               <span className="text-xl">{goal.icon}</span>
               <span className="text-sm font-medium">{isZh ? goal.zh : goal.en}</span>
               {prefs.goals.includes(goal.key) && (
-                <Check size={16} className="ml-auto" style={{ color: "var(--accent)" }} />
+                <Check size={16} className="ml-auto" />
               )}
             </button>
           ))}
@@ -145,7 +133,7 @@ export function OnboardingWizard({ onComplete }: Props) {
     },
     // Step 4: Ready
     {
-      icon: <Sparkles size={28} style={{ color: "var(--accent)" }} />,
+      icon: <Sparkles size={28} />,
       title: "You're all set!",
       titleZh: "设置完成！",
       subtitle: "Here's what we've configured for you.",
@@ -153,25 +141,25 @@ export function OnboardingWizard({ onComplete }: Props) {
       canSkip: false,
       content: (
         <div className="mt-6 space-y-3">
-          <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-            <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "语言" : "Language"}</p>
+          <div className="p-4 -[16px]">
+            <p className="text-xs font-medium mb-2">{isZh ? "语言" : "Language"}</p>
             <p className="text-sm font-medium">{prefs.language === "zh" ? "中文" : "English"}</p>
           </div>
           {prefs.role && (
-            <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "身份" : "Role"}</p>
+            <div className="p-4 -[16px]">
+              <p className="text-xs font-medium mb-2">{isZh ? "身份" : "Role"}</p>
               <p className="text-sm font-medium">{ROLES.find((r) => r.key === prefs.role)?.[isZh ? "zh" : "en"]}</p>
             </div>
           )}
           {prefs.semester && (
-            <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "学期" : "Semester"}</p>
+            <div className="p-4 -[16px]">
+              <p className="text-xs font-medium mb-2">{isZh ? "学期" : "Semester"}</p>
               <p className="text-sm font-medium">{prefs.semester}</p>
             </div>
           )}
           {prefs.goals.length > 0 && (
-            <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "学习目标" : "Goals"}</p>
+            <div className="p-4 -[16px]">
+              <p className="text-xs font-medium mb-2">{isZh ? "学习目标" : "Goals"}</p>
               <div className="flex flex-wrap gap-2">
                 {prefs.goals.map((g) => (
                   <span key={g} className="ui-badge">{GOALS.find((gl) => gl.key === g)?.[isZh ? "zh" : "en"]}</span>
@@ -188,17 +176,14 @@ export function OnboardingWizard({ onComplete }: Props) {
   const progress = ((step + 1) / steps.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ backgroundColor: "var(--bg-primary)" }}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
       <div className="w-full max-w-md">
         {/* Progress indicators */}
         <div className="flex items-center gap-2 mb-8">
           {steps.map((_, i) => (
             <div
               key={i}
-              className="flex-1 h-[6px] rounded-full transition-all"
-              style={{
-                backgroundColor: i <= step ? "var(--accent)" : "var(--bg-muted)",
-              }}
+              className="flex-1 h-[6px]"
             />
           ))}
         </div>
@@ -211,7 +196,7 @@ export function OnboardingWizard({ onComplete }: Props) {
           <h1 className="text-2xl font-semibold mt-4 tracking-wide">
             {isZh ? currentStep.titleZh : currentStep.title}
           </h1>
-          <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mt-2">
             {isZh ? currentStep.subtitleZh : currentStep.subtitle}
           </p>
 
@@ -224,7 +209,6 @@ export function OnboardingWizard({ onComplete }: Props) {
                 <button
                   onClick={() => setStep(step - 1)}
                   className="text-sm cursor-pointer"
-                  style={{ color: "var(--text-secondary)" }}
                 >
                   {isZh ? "上一步" : "Back"}
                 </button>
@@ -235,7 +219,6 @@ export function OnboardingWizard({ onComplete }: Props) {
                 <button
                   onClick={handleNext}
                   className="text-sm cursor-pointer"
-                  style={{ color: "var(--text-secondary)" }}
                 >
                   {isZh ? "跳过" : "Skip"}
                 </button>
@@ -258,7 +241,6 @@ export function OnboardingWizard({ onComplete }: Props) {
           <button
             onClick={handleSkipAll}
             className="w-full text-center text-xs mt-5 cursor-pointer"
-            style={{ color: "var(--text-muted)" }}
           >
             {isZh ? "跳过设置，直接开始" : "Skip setup, go straight to the app"}
           </button>

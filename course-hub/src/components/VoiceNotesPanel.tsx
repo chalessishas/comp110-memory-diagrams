@@ -316,11 +316,11 @@ export function VoiceNotesPanel({
       </div>
 
       {/* Recording area */}
-      <div className="rounded-[20px] p-5 mt-6" style={{ backgroundColor: "var(--bg-muted)" }}>
+      <div className="-[20px] p-5 mt-6">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm font-medium">1. Speak or paste the raw note</p>
-            <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-xs mt-1">
               Use the mic for the main note, then use the smaller mic buttons below if AI asks you to clarify something.
             </p>
           </div>
@@ -344,14 +344,14 @@ export function VoiceNotesPanel({
         </div>
 
         {!speechSupported && (
-          <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-xs mt-3">
             Browser speech recognition is not available here, so this panel falls back to typed notes.
           </p>
         )}
 
         <div className="grid gap-3 mt-4 lg:grid-cols-[220px_minmax(0,1fr)]">
           <div>
-            <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+            <label className="text-[11px] font-medium tracking-wide">
               Knowledge Point
             </label>
             <select
@@ -369,7 +369,7 @@ export function VoiceNotesPanel({
           </div>
 
           <div>
-            <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+            <label className="text-[11px] font-medium tracking-wide">
               Transcript
             </label>
             <textarea
@@ -385,7 +385,7 @@ export function VoiceNotesPanel({
               placeholder="Explain the concept in your own words, say what is confusing, or dictate what the teacher emphasized."
             />
             {isRecording && recordingTarget.type === "transcript" && interimText && (
-              <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-xs mt-2">
                 Listening: {interimText}
               </p>
             )}
@@ -395,15 +395,15 @@ export function VoiceNotesPanel({
 
       {/* Error */}
       {error && (
-        <div className="rounded-[20px] px-5 py-3 mt-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-          <p className="text-sm" style={{ color: "var(--danger)" }}>{error}</p>
+        <div className="-[20px] px-5 py-3 mt-4">
+          <p className="text-sm">{error}</p>
         </div>
       )}
 
       {/* Status */}
       {status && (
-        <div className="rounded-[20px] px-5 py-3 mt-4" style={{ backgroundColor: "var(--bg-surface)" }}>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{status}</p>
+        <div className="-[20px] px-5 py-3 mt-4">
+          <p className="text-sm">{status}</p>
         </div>
       )}
 
@@ -426,8 +426,8 @@ export function VoiceNotesPanel({
             </div>
 
             <div className="grid gap-4 mt-5 lg:grid-cols-2">
-              <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
-                <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+              <div className="-[20px] p-5">
+                <p className="text-[11px] font-medium tracking-wide">
                   Key Points
                 </p>
                 <div className="space-y-2 mt-3">
@@ -437,8 +437,8 @@ export function VoiceNotesPanel({
                 </div>
               </div>
 
-              <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
-                <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+              <div className="-[20px] p-5">
+                <p className="text-[11px] font-medium tracking-wide">
                   What Still Feels Fuzzy
                 </p>
                 <div className="space-y-2 mt-3">
@@ -447,7 +447,7 @@ export function VoiceNotesPanel({
                       <p key={item} className="text-sm leading-relaxed">{item}</p>
                     ))
                   ) : (
-                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    <p className="text-sm">
                       AI thinks your explanation is already fairly clear.
                     </p>
                   )}
@@ -456,8 +456,8 @@ export function VoiceNotesPanel({
             </div>
 
             {draft.next_action && (
-              <div className="rounded-[20px] p-5 mt-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-                <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+              <div className="-[20px] p-5 mt-4">
+                <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide">
                   <BrainCircuit size={14} />
                   Next Action
                 </div>
@@ -468,12 +468,12 @@ export function VoiceNotesPanel({
 
           {/* Clarification questions */}
           {draft.clarification_questions.length > 0 && (
-            <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="-[20px] p-5">
               <div className="flex items-center gap-2">
-                <MessageCircleQuestion size={16} style={{ color: "var(--accent)" }} />
+                <MessageCircleQuestion size={16} />
                 <p className="text-sm font-medium">2. Answer the follow-up questions</p>
               </div>
-              <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-xs mt-2">
                 If you do not want to type, click the mic beside a question and answer it out loud.
               </p>
 
@@ -504,7 +504,7 @@ export function VoiceNotesPanel({
                       </button>
                     </div>
                     {isRecording && recordingTarget.type === "clarification" && recordingTarget.index === index && interimText && (
-                      <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
+                      <p className="text-xs mt-2">
                         Listening: {interimText}
                       </p>
                     )}
@@ -536,7 +536,7 @@ export function VoiceNotesPanel({
         {notes.length === 0 ? (
           <div className="ui-empty">
             <p className="text-base font-medium mb-2">No notes yet</p>
-            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-sm">
               Save a voice note and it will stay attached to this course.
             </p>
           </div>
@@ -554,11 +554,11 @@ export function VoiceNotesPanel({
                       {note.knowledge_point_title && <span className="ui-badge">{note.knowledge_point_title}</span>}
                     </div>
                     <h4 className="text-base font-medium mt-3">{note.title}</h4>
-                    <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                    <p className="text-sm mt-2 leading-relaxed">
                       {note.summary}
                     </p>
                   </div>
-                  <p className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs shrink-0">
                     {formatNoteDate(note.created_at)}
                   </p>
                 </div>

@@ -72,7 +72,7 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
       <CourseTabs courseId={id} />
       <div className="mb-6">
         <h2 className="text-xl font-semibold tracking-wide"><T k="tree.title" /></h2>
-        <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm mt-2">
           <T k="tree.desc" />
         </p>
       </div>

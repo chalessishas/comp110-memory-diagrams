@@ -19,24 +19,17 @@ function LoginPageFallback() {
   return (
     <div className="min-h-screen px-6 py-10 flex items-center justify-center">
       <div
-        className="max-w-md w-full rounded-[28px] p-8 md:p-10"
-        style={{
-          backgroundColor: "color-mix(in srgb, var(--bg-surface) 92%, transparent)",
-          border: "1px solid var(--border)",
-          boxShadow: "var(--shadow-lg)",
-          backdropFilter: "blur(8px)",
-        }}
+        className="max-w-md w-full -[28px] p-8 md:p-10"
       >
         <div
-          className="inline-flex items-center rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.28em] mb-6"
-          style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          className="inline-flex items-center px-3 py-1 text-[11px] uppercase tracking-[0.28em] mb-6"
         >
           CourseHub
         </div>
-        <h1 className="text-3xl font-semibold leading-tight mb-3" style={{ color: "var(--text-primary)" }}>
+        <h1 className="text-3xl font-semibold leading-tight mb-3">
           Study without the setup.
         </h1>
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm">
           Upload your syllabus, build your course map, and keep your semester in one place.
         </p>
       </div>
@@ -98,33 +91,25 @@ function LoginPageContent() {
   return (
     <div className="min-h-screen px-6 py-10 flex items-center justify-center">
       <div
-        className="max-w-md w-full rounded-[28px] p-8 md:p-10"
-        style={{
-          backgroundColor: "color-mix(in srgb, var(--bg-surface) 92%, transparent)",
-          border: "1px solid var(--border)",
-          boxShadow: "var(--shadow-lg)",
-          backdropFilter: "blur(8px)",
-        }}
+        className="max-w-md w-full -[28px] p-8 md:p-10"
       >
         <div
-          className="inline-flex items-center rounded-full px-3 py-1 text-[11px] uppercase tracking-[0.28em] mb-6"
-          style={{ border: "1px solid var(--border)", color: "var(--text-secondary)" }}
+          className="inline-flex items-center px-3 py-1 text-[11px] uppercase tracking-[0.28em] mb-6"
         >
           CourseHub
         </div>
 
         <div className="mb-6">
-          <h1 className="text-3xl font-semibold leading-tight mb-3" style={{ color: "var(--text-primary)" }}>
+          <h1 className="text-3xl font-semibold leading-tight mb-3">
             {mode === "login" ? t("login.welcome") : t("login.create")}
           </h1>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm">
             {mode === "login" ? t("login.signInDesc") : t("login.createDesc")}
           </p>
         </div>
 
         <div
-          className="grid grid-cols-2 gap-1 rounded-2xl p-1 mb-6"
-          style={{ backgroundColor: "var(--bg-muted)" }}
+          className="grid grid-cols-2 gap-1 p-1 mb-6"
         >
           <button
             type="button"
@@ -134,11 +119,7 @@ function LoginPageContent() {
               setError(null);
               setMessage(null);
             }}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-            style={{
-              backgroundColor: mode === "login" ? "var(--accent)" : "transparent",
-              color: mode === "login" ? "white" : "var(--text-secondary)",
-            }}
+            className="px-4 py-2.5 text-sm font-medium cursor-pointer"
           >
             {t("login.signIn")}
           </button>
@@ -150,11 +131,7 @@ function LoginPageContent() {
               setError(null);
               setMessage(null);
             }}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer"
-            style={{
-              backgroundColor: mode === "signup" ? "var(--accent)" : "transparent",
-              color: mode === "signup" ? "white" : "var(--text-secondary)",
-            }}
+            className="px-4 py-2.5 text-sm font-medium cursor-pointer"
           >
             {t("login.createAccount")}
           </button>
@@ -170,8 +147,7 @@ function LoginPageContent() {
               setEmail(e.target.value);
             }}
             required
-            className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+            className="w-full px-4 py-3 text-sm outline-none"
           />
           <input
             type="password"
@@ -183,14 +159,12 @@ function LoginPageContent() {
             }}
             required
             minLength={6}
-            className="w-full px-4 py-3 rounded-2xl text-sm outline-none"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-muted)" }}
+            className="w-full px-4 py-3 text-sm outline-none"
           />
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium cursor-pointer disabled:opacity-50"
-            style={{ backgroundColor: "var(--accent)", color: "white" }}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 font-medium cursor-pointer disabled:opacity-50"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
             {mode === "login" ? t("login.signIn") : t("login.createAccount")}
@@ -198,15 +172,14 @@ function LoginPageContent() {
         </form>
 
         <div className="flex items-center gap-3 mb-4">
-          <div className="flex-1 h-px" style={{ backgroundColor: "var(--border)" }} />
-          <span className="text-[11px] uppercase tracking-[0.28em]" style={{ color: "var(--text-secondary)" }}>{t("misc.or")}</span>
-          <div className="flex-1 h-px" style={{ backgroundColor: "var(--border)" }} />
+          <div className="flex-1 h-px" />
+          <span className="text-[11px] uppercase tracking-[0.28em]">{t("misc.or")}</span>
+          <div className="flex-1 h-px" />
         </div>
 
         <button
           onClick={signInWithGoogle}
-          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-2xl text-sm cursor-pointer"
-          style={{ border: "1px solid var(--border)", color: "var(--text-primary)", backgroundColor: "var(--bg-surface)" }}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 text-sm cursor-pointer"
         >
           <LogIn size={16} />
           {t("login.continueGoogle")}
@@ -214,23 +187,21 @@ function LoginPageContent() {
 
         {displayedError && (
           <div
-            className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}
+            className="mt-4 px-4 py-3 text-xs"
           >
             {displayedError}
           </div>
         )}
         {message && (
           <div
-            className="mt-4 rounded-2xl px-4 py-3 text-xs"
-            style={{ backgroundColor: "var(--bg-muted)", color: "var(--success)" }}
+            className="mt-4 px-4 py-3 text-xs"
           >
             {message}
           </div>
         )}
 
         <div className="mt-6 space-y-3">
-          <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-xs">
             {t("login.bottomNote")}
           </p>
           <Link href="/dashboard" className="ui-button-ghost w-full !justify-center">

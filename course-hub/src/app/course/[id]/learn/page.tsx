@@ -232,7 +232,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
   if (loading) return (
     <div>
       <CourseTabs courseId={id} />
-      <Loader2 className="animate-spin mx-auto mt-16" style={{ color: "var(--accent)" }} />
+      <Loader2 className="animate-spin mx-auto mt-16" />
     </div>
   );
 
@@ -243,11 +243,11 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         <div>
           <CourseTabs courseId={id} />
           <div className="text-center py-16">
-            <Loader2 size={24} className="animate-spin mx-auto mb-4" style={{ color: "var(--accent)" }} />
+            <Loader2 size={24} className="animate-spin mx-auto mb-4" />
             <p className="text-sm font-medium mb-1">
               {isZh ? "正在生成互动课程..." : "Generating interactive lesson..."}
             </p>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            <p className="text-xs">
               {isZh
                 ? `已完成 ${streamedCount}/${totalChunks} 个教学环节`
                 : `${streamedCount}/${totalChunks} sections ready`}
@@ -261,7 +261,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       return (
         <div>
           <CourseTabs courseId={id} />
-          <Loader2 className="animate-spin mx-auto mt-16" style={{ color: "var(--accent)" }} />
+          <Loader2 className="animate-spin mx-auto mt-16" />
         </div>
       );
     }
@@ -293,22 +293,22 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       <div className="flex items-center justify-between mb-8">
         <div>
           <h2 className="text-xl font-semibold tracking-wide">{isZh ? "学习" : "Learn"}</h2>
-          <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mt-2">
             {isZh ? "选择一个知识点，AI 会生成互动课程" : "Pick a topic — AI generates an interactive lesson"}
           </p>
         </div>
       </div>
 
       {generateError && (
-        <div className="mb-4 px-4 py-3 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}>
+        <div className="mb-4 px-4 py-3 text-sm">
           {generateError}
         </div>
       )}
 
       {items.length === 0 ? (
         <div className="ui-empty">
-          <BookOpen size={32} className="mx-auto mb-3" style={{ color: "var(--border)" }} />
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <BookOpen size={32} className="mx-auto mb-3" />
+          <p className="text-sm">
             {isZh ? "还没有知识点。先创建课程大纲。" : "No knowledge points yet. Create a course outline first."}
           </p>
         </div>
@@ -327,8 +327,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                 style={scopeKpIds && !inScope ? { opacity: 0.45 } : undefined}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-xs font-semibold"
-                  style={{ backgroundColor: config.bgColor, color: config.color, border: `1px solid ${config.color}20` }}
+                  className="w-10 h-10 flex items-center justify-center shrink-0 text-xs font-semibold"
                 >
                   {item.hasLesson ? <Check size={16} /> : i + 1}
                 </div>
@@ -336,13 +335,13 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium truncate">{item.title}</p>
                     {inScope && (
-                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-light)", color: "var(--accent)" }}>
+                      <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5">
                         <Target size={8} />
                         {isZh ? "考" : "exam"}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs mt-0.5">
                     {isGenerating
                       ? (isZh
                         ? `正在生成...（${streamedCount}/${totalChunks}）`
@@ -353,11 +352,11 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   </p>
                 </div>
                 {isGenerating ? (
-                  <Loader2 size={16} className="animate-spin shrink-0" style={{ color: "var(--accent)" }} />
+                  <Loader2 size={16} className="animate-spin shrink-0" />
                 ) : !item.hasLesson ? (
-                  <Sparkles size={16} className="shrink-0 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "var(--accent)" }} />
+                  <Sparkles size={16} className="shrink-0 opacity-30 group-hover:opacity-100" />
                 ) : (
-                  <ChevronRight size={16} className="shrink-0 opacity-30 group-hover:opacity-100 transition-opacity" style={{ color: "var(--text-secondary)" }} />
+                  <ChevronRight size={16} className="shrink-0 opacity-30 group-hover:opacity-100" />
                 )}
               </button>
             );

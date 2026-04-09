@@ -90,11 +90,7 @@ function EditableNode({
   return (
     <div>
       <div
-        className="group flex items-center gap-2 rounded-[14px] px-3 py-2 transition-colors"
-        style={{
-          paddingLeft: `${depth * 24 + 12}px`,
-          backgroundColor: "transparent",
-        }}
+        className="group flex items-center gap-2 -[14px] px-3 py-2"
         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-muted)")}
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
       >
@@ -103,8 +99,8 @@ function EditableNode({
           className="shrink-0 cursor-pointer w-4"
         >
           {hasChildren ? (
-            expanded ? <ChevronDown size={14} style={{ color: "var(--text-muted)" }} />
-              : <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+            expanded ? <ChevronDown size={14} />
+              : <ChevronRight size={14} />
           ) : <span className="w-3.5" />}
         </button>
 
@@ -120,23 +116,19 @@ function EditableNode({
                 if (e.key === "Enter") handleSave();
                 if (e.key === "Escape") { setEditing(false); setEditValue(node.name); }
               }}
-              className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none transition-shadow"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--bg-surface)",
-              }}
+              className="flex-1 text-sm px-3 py-1.5 outline-none transition-"
               onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
               onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
               disabled={saving}
             />
             {saving ? (
-              <Loader2 size={14} className="animate-spin" style={{ color: "var(--text-muted)" }} />
+              <Loader2 size={14} className="animate-spin" />
             ) : (
               <>
-                <button onClick={handleSave} className="cursor-pointer p-1 rounded-lg transition-colors" style={{ color: "var(--success)" }}>
+                <button onClick={handleSave} className="cursor-pointer p-1">
                   <Check size={14} />
                 </button>
-                <button onClick={() => { setEditing(false); setEditValue(node.name); }} className="cursor-pointer p-1 rounded-lg" style={{ color: "var(--text-muted)" }}>
+                <button onClick={() => { setEditing(false); setEditValue(node.name); }} className="cursor-pointer p-1">
                   <X size={14} />
                 </button>
               </>
@@ -145,7 +137,6 @@ function EditableNode({
         ) : (
           <span
             className="text-sm truncate flex-1 cursor-pointer"
-            style={{ fontWeight: depth < 2 ? 500 : 400, color: "var(--text-primary)" }}
             onDoubleClick={startEdit}
           >
             {node.name}
@@ -153,11 +144,11 @@ function EditableNode({
         )}
 
         {!editing && (
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Rename" style={{ color: "var(--text-muted)" }}>
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100">
+            <button onClick={startEdit} className="p-1.5 cursor-pointer" title="Rename">
               <Pencil size={13} />
             </button>
-            <button onClick={() => onAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Add child" style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => onAdd(node.id)} className="p-1.5 cursor-pointer" title="Add child">
               <Plus size={13} />
             </button>
             <button
@@ -167,9 +158,8 @@ function EditableNode({
                   : `Delete "${node.name}"?`;
                 if (confirm(msg)) onDelete(node.id);
               }}
-              className="p-1.5 rounded-lg cursor-pointer transition-colors"
+              className="p-1.5 cursor-pointer"
               title="Delete"
-              style={{ color: "var(--danger)" }}
             >
               <Trash2 size={13} />
             </button>
@@ -243,7 +233,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
   if (treeData.length === 0) {
     return (
       <div className="ui-empty">
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm">
           No outline yet. Upload a syllabus to generate one.
         </p>
       </div>
@@ -253,7 +243,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
   return (
     <div>
       <div className="ui-panel p-5 md:p-6">
-        <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
+        <p className="text-xs mb-4">
           Double-click to rename. Hover for add/delete.
         </p>
         {treeData.map((node) => (
@@ -271,18 +261,16 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
 
       {dirty && (
         <div
-          className="mt-4 flex items-center gap-3 p-5 rounded-[20px]"
-          style={{ backgroundColor: "var(--bg-muted)" }}
+          className="mt-4 flex items-center gap-3 p-5 -[20px]"
         >
-          <Sparkles size={16} style={{ color: "var(--text-muted)" }} />
-          <p className="text-sm flex-1" style={{ color: "var(--text-secondary)" }}>
+          <Sparkles size={16} />
+          <p className="text-sm flex-1">
             Outline changed. Regenerate study tasks and practice questions?
           </p>
           <button
             onClick={handleRegenerate}
             disabled={regenerating}
-            className="px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50 transition-transform"
-            style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}
+            className="px-5 py-2.5 text-sm font-medium cursor-pointer disabled:opacity-50"
           >
             {regenerating ? <Loader2 size={14} className="animate-spin" /> : "Regenerate"}
           </button>

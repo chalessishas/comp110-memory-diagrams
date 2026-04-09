@@ -48,7 +48,7 @@ export function WrongAnswerNotebook({
       {items.length === 0 ? (
         <div className="ui-empty mt-6">
           <p className="text-base font-medium mb-2">No wrong answers yet</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm">
             Once you start doing practice, the questions you miss will collect here for review.
           </p>
         </div>
@@ -61,18 +61,15 @@ export function WrongAnswerNotebook({
                   <div className="flex flex-wrap gap-2">
                     <span
                       className="ui-badge"
-                      style={{
-                        backgroundColor: item.status === "needs_redo" ? "var(--danger-light, var(--bg-muted))" : "var(--success-light, var(--bg-muted))",
-                      }}
                     >
                       {item.status === "needs_redo" ? (
                         <>
-                          <AlertCircle size={12} style={{ color: "var(--danger)" }} />
+                          <AlertCircle size={12} />
                           Needs Redo
                         </>
                       ) : (
                         <>
-                          <CheckCircle2 size={12} style={{ color: "var(--success)" }} />
+                          <CheckCircle2 size={12} />
                           Fixed Once
                         </>
                       )}
@@ -82,21 +79,21 @@ export function WrongAnswerNotebook({
                   </div>
                   <p className="text-sm font-medium mt-3">{item.stem}</p>
                 </div>
-                <p className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
+                <p className="text-xs shrink-0">
                   Last miss: {formatShortDate(item.lastWrongAt)}
                 </p>
               </div>
 
               <div className="grid gap-3 mt-4 lg:grid-cols-2">
-                <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+                <div className="-[20px] p-4">
+                  <p className="text-[11px] font-medium tracking-wide">
                     Your Wrong Answer
                   </p>
                   <p className="text-sm mt-2 leading-relaxed">{item.lastWrongAnswer || "No answer recorded"}</p>
                 </div>
 
-                <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+                <div className="-[20px] p-4">
+                  <p className="text-[11px] font-medium tracking-wide">
                     Correct Answer
                   </p>
                   <p className="text-sm mt-2 leading-relaxed">{item.correctAnswer}</p>
@@ -104,11 +101,11 @@ export function WrongAnswerNotebook({
               </div>
 
               {item.explanation && (
-                <div className="rounded-[20px] p-4 mt-3" style={{ backgroundColor: "var(--bg-muted)" }}>
-                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+                <div className="-[20px] p-4 mt-3">
+                  <p className="text-[11px] font-medium tracking-wide">
                     Why
                   </p>
-                  <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm mt-2 leading-relaxed">
                     {item.explanation}
                   </p>
                 </div>

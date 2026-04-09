@@ -47,18 +47,16 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
     return (
       <div className="text-center py-20">
         <div
-          className="mx-auto mb-5 w-14 h-14 flex items-center justify-center rounded-full"
-          style={{ backgroundColor: "var(--bg-muted)" }}
+          className="mx-auto mb-5 w-14 h-14 flex items-center justify-center"
         >
-          <Check size={28} strokeWidth={1.8} style={{ color: "var(--success)" }} />
+          <Check size={28} strokeWidth={1.8} />
         </div>
         <h2
           className="text-xl font-semibold mb-2"
-          style={{ color: "var(--text-primary)" }}
         >
           {isZh ? "今天状态很好！" : "You're all caught up!"}
         </h2>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm">
           {isZh
             ? "没有紧急任务。可以提前预习，或者巩固复习。"
             : "No urgent tasks. Preview next week's content or review for fun."}
@@ -76,20 +74,18 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         return (
           <div
             key={task.id}
-            className="ui-panel p-5 rounded-[20px] flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
+            className="ui-panel p-5 -[20px] flex items-start gap-4 group cursor-pointer overflow-hidden"
           >
             {/* Priority dot — left indicator */}
             <div className="flex flex-col items-center pt-1.5 shrink-0">
               <div
-                className="w-2.5 h-2.5 rounded-full"
-                style={{ backgroundColor: task.color }}
+                className="w-2.5 h-2.5"
               />
             </div>
 
             {/* Icon */}
             <div
-              className="w-9 h-9 flex items-center justify-center shrink-0 rounded-xl"
-              style={{ backgroundColor: "var(--bg-muted)", color: task.color }}
+              className="w-9 h-9 flex items-center justify-center shrink-0"
             >
               <Icon size={16} strokeWidth={1.8} />
             </div>
@@ -99,7 +95,6 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
               <div className="flex items-center gap-2 mb-0.5">
                 <span
                   className="text-xs font-medium"
-                  style={{ color: task.color }}
                 >
                   {isZh ? label.zh : label.en}
                 </span>
@@ -109,19 +104,17 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
               </div>
               <p
                 className="text-sm font-medium leading-snug"
-                style={{ color: "var(--text-primary)" }}
               >
                 {task.title}
               </p>
-              <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+              <p className="text-xs mt-1">
                 {task.description} · {task.estimatedMinutes} {isZh ? "分钟" : "min"}
               </p>
             </div>
 
             {/* Start button */}
             <button
-              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0 rounded-xl transition-all hover:-translate-y-0.5"
-              style={{ backgroundColor: task.color, color: "white" }}
+              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0 hover:-translate-y-0.5"
             >
               {isZh ? "开始" : "Start"}
             </button>
@@ -133,8 +126,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
       <div className="flex items-center gap-3 pt-5 mt-3">
         <Link
           href={`/course/${courseId}/library`}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium cursor-pointer rounded-xl transition-all"
-          style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
+          className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium cursor-pointer"
         >
           <Upload size={12} strokeWidth={1.8} />
           Upload material

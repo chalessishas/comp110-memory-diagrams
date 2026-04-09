@@ -38,29 +38,29 @@ export function UsagePanel() {
   return (
     <div className="ui-panel p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Activity size={16} style={{ color: "var(--text-muted)" }} />
+        <Activity size={16} />
         <h3 className="text-sm font-medium">AI Usage</h3>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-5">
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Today</p>
+          <p className="text-xs">Today</p>
           <p className="text-base font-semibold mt-0.5">{today.requests} calls</p>
-          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[10px]">
             {formatTokens(today.inputTokens + today.outputTokens)} tokens
           </p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>This Week</p>
+          <p className="text-xs">This Week</p>
           <p className="text-base font-semibold mt-0.5">{weeklyTotal.requests} calls</p>
-          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+          <p className="text-[10px]">
             {formatTokens(weeklyTotal.inputTokens + weeklyTotal.outputTokens)} tokens
           </p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Est. Cost</p>
+          <p className="text-xs">Est. Cost</p>
           <p className="text-base font-semibold mt-0.5">${weeklyCost.toFixed(3)}</p>
-          <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>this week</p>
+          <p className="text-[10px]">this week</p>
         </div>
       </div>
 
@@ -74,16 +74,7 @@ export function UsagePanel() {
           return (
             <div key={day.date} className="flex-1">
               <div
-                className="w-full rounded-full"
-                style={{
-                  height: `${height}%`,
-                  backgroundColor: isToday
-                    ? "var(--accent)"
-                    : day.requests > 0
-                    ? "var(--accent-light)"
-                    : "var(--bg-muted)",
-                  minHeight: "2px",
-                }}
+                className="w-full"
               />
             </div>
           );

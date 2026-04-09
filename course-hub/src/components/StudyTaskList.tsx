@@ -59,7 +59,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
           A focused checklist generated from the course outline.
         </p>
         <div className="ui-empty mt-6">
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm">
             No study tasks yet. Generate the course content first and they will show up here.
           </p>
         </div>
@@ -87,19 +87,19 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
           </p>
         </div>
         <div className="min-w-[190px]">
-          <div className="flex items-center justify-between text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
+          <div className="flex items-center justify-between text-xs mb-2">
             <span>Progress</span>
             <span>{doneTasks.length}/{tasks.length}</span>
           </div>
           <div className="ui-progress-track">
-            <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
+            <div className="ui-progress-bar" />
           </div>
         </div>
       </div>
 
       {byPriority.map((group) => (
         <div key={group.priority} className="mb-5 last:mb-0">
-          <p className="text-[11px] font-medium tracking-wide mb-3" style={{ color: priorityColors[group.priority] }}>
+          <p className="text-[11px] font-medium tracking-wide mb-3">
             {priorityLabels[group.priority]}
           </p>
           <div className="space-y-2">
@@ -108,8 +108,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
               return (
                 <div
                   key={task.id}
-                  className="flex items-start gap-3 rounded-[20px] px-5 py-4 transition-colors group"
-                  style={{ backgroundColor: "var(--bg-surface)" }}
+                  className="flex items-start gap-3 -[20px] px-5 py-4 group"
                 >
                   <button
                     onClick={() => toggleTask(task.id, task.status)}
@@ -117,20 +116,19 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
                     className="mt-0.5 shrink-0 cursor-pointer"
                   >
                     {toggling === task.id ? (
-                      <Loader2 size={16} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+                      <Loader2 size={16} className="animate-spin" />
                     ) : (
                       <div className="flex items-center gap-0">
                         <span
-                          className="inline-block w-[6px] h-[6px] rounded-full mr-2"
-                          style={{ backgroundColor: priorityColors[task.priority as 1 | 2 | 3] }}
+                          className="inline-block w-[6px] h-[6px] mr-2"
                         />
-                        <Circle size={18} className="rounded-md" style={{ color: "var(--border)" }} />
+                        <Circle size={18} className="" />
                       </div>
                     )}
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{task.title}</p>
-                    <p className="text-sm mt-1 leading-relaxed" style={{ color: "var(--text-secondary)" }}>{task.description}</p>
+                    <p className="text-sm mt-1 leading-relaxed">{task.description}</p>
                   </div>
                   <span className="ui-badge shrink-0">
                     <Icon size={12} />
@@ -145,20 +143,19 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
 
       {doneTasks.length > 0 && (
         <details className="mt-6">
-          <summary className="text-[11px] cursor-pointer font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+          <summary className="text-[11px] cursor-pointer font-medium tracking-wide">
             Completed ({doneTasks.length})
           </summary>
           <div className="space-y-2 mt-3 opacity-60">
             {doneTasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-3 rounded-[20px] px-5 py-3"
-                style={{ backgroundColor: "var(--bg-surface)" }}
+                className="flex items-center gap-3 -[20px] px-5 py-3"
               >
                 <button onClick={() => toggleTask(task.id, task.status)} className="shrink-0 cursor-pointer">
-                  <Check size={16} style={{ color: "var(--success)" }} />
+                  <Check size={16} />
                 </button>
-                <p className="text-sm line-through" style={{ color: "var(--text-muted)" }}>{task.title}</p>
+                <p className="text-sm line-through">{task.title}</p>
               </div>
             ))}
           </div>

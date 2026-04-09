@@ -39,7 +39,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
           className="ui-icon-button"
           title="Copy link"
         >
-          {copied ? <Check size={14} style={{ color: "var(--success)" }} /> : <Copy size={14} />}
+          {copied ? <Check size={14} /> : <Copy size={14} />}
         </button>
       </div>
     );

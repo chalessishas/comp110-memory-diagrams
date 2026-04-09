@@ -1,575 +1,155 @@
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════
-   CourseHub 2.0 — 五套水彩风色系
-   切换方式：<html data-theme="spring|sea|dusk|sakura|ink">
-   默认：spring（春晓）
-   ═══════════════════════════════════════════════ */
+/* ═══ Terminal Skeleton ═══
+   Pure text. No decoration. Monospace.
+   All ui-* classes kept as no-ops so components don't break.
+*/
 
-/* ── Theme 1: 春晓 Spring Dawn (default) ────── */
-/* 暖杏 + 鼠尾草绿 + 桃粉 · 参考色卡 #F0DEC6 #BDCDB0 #FBDED0 #D1E5D9 #F9F1E4 */
-:root,
-[data-theme="spring"] {
-  --bg-primary: #F9F1E4;
-  --bg-surface: #FEFCF8;
-  --bg-muted: #F0E6D6;
-  --bg-elevated: #FEFCF8;
-
-  --text-primary: #2E2A25;
-  --text-secondary: #5C5550;
-  --text-muted: #9C9490;
-
-  --accent: #8FA882;
-  --accent-hover: #7A9670;
-  --accent-light: rgba(143, 168, 130, 0.10);
-  --accent-muted: rgba(143, 168, 130, 0.18);
-
-  --success: #6B9E6B;
-  --warning: #C4935A;
-  --danger: #C07070;
-
-  --border: #E5DDD0;
-  --border-strong: #D5CBBC;
-
-  --shadow-sm: 0 1px 2px rgba(46, 42, 37, 0.04);
-  --shadow-md: 0 4px 12px rgba(46, 42, 37, 0.06);
-  --shadow-lg: 0 12px 40px rgba(46, 42, 37, 0.08);
-  --shadow-card: 0 1px 3px rgba(46, 42, 37, 0.04), 0 4px 12px rgba(46, 42, 37, 0.03);
-
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 24px;
-
-  color-scheme: light;
-}
-
-/* ── Theme 2: 海雾 Sea Mist ─────────────────── */
-/* 灰蓝 + 薰衣草 + 淡青 */
-[data-theme="sea"] {
-  --bg-primary: #EEF2F7;
-  --bg-surface: #F8FAFC;
-  --bg-muted: #E1E7EF;
-  --bg-elevated: #F8FAFC;
-
-  --text-primary: #1F2937;
-  --text-secondary: #4B5563;
-  --text-muted: #94A3B8;
-
-  --accent: #6B8CAE;
-  --accent-hover: #587A9C;
-  --accent-light: rgba(107, 140, 174, 0.10);
-  --accent-muted: rgba(107, 140, 174, 0.18);
-
-  --success: #5A9E6F;
-  --warning: #C49A5A;
-  --danger: #C47070;
-
-  --border: #D4DCE8;
-  --border-strong: #C0CAD8;
-
-  --shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.04);
-  --shadow-md: 0 4px 12px rgba(31, 41, 55, 0.06);
-  --shadow-lg: 0 12px 40px rgba(31, 41, 55, 0.08);
-  --shadow-card: 0 1px 3px rgba(31, 41, 55, 0.04), 0 4px 12px rgba(31, 41, 55, 0.03);
-
-  color-scheme: light;
-}
-
-/* ── Theme 3: 暮色 Dusk ─────────────────────── */
-/* 暖炭底 + 琥珀金 accent · 深色但不刺眼 */
-[data-theme="dusk"] {
-  --bg-primary: #1C1917;
-  --bg-surface: #252220;
-  --bg-muted: #302C28;
-  --bg-elevated: #2A2724;
-
-  --text-primary: #E7E0D8;
-  --text-secondary: #B0A89E;
-  --text-muted: #78716C;
-
-  --accent: #D4A574;
-  --accent-hover: #C49464;
-  --accent-light: rgba(212, 165, 116, 0.12);
-  --accent-muted: rgba(212, 165, 116, 0.20);
-
-  --success: #7AAE7A;
-  --warning: #D4A040;
-  --danger: #D08080;
-
-  --border: #3D3835;
-  --border-strong: #4A4540;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.40);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.20), 0 4px 12px rgba(0, 0, 0, 0.15);
-
-  color-scheme: dark;
-}
-
-/* ── Theme 4: 樱花 Sakura ───────────────────── */
-/* 腮红粉 + 玫瑰 + 奶油 */
-[data-theme="sakura"] {
-  --bg-primary: #FDF5F3;
-  --bg-surface: #FFFAFA;
-  --bg-muted: #F5E8E4;
-  --bg-elevated: #FFFAFA;
-
-  --text-primary: #2D2424;
-  --text-secondary: #5C4E4E;
-  --text-muted: #A09090;
-
-  --accent: #B8847E;
-  --accent-hover: #A6726C;
-  --accent-light: rgba(184, 132, 126, 0.10);
-  --accent-muted: rgba(184, 132, 126, 0.18);
-
-  --success: #6B9E6B;
-  --warning: #C4935A;
-  --danger: #C07070;
-
-  --border: #EAD8D4;
-  --border-strong: #DCC8C2;
-
-  --shadow-sm: 0 1px 2px rgba(45, 36, 36, 0.04);
-  --shadow-md: 0 4px 12px rgba(45, 36, 36, 0.06);
-  --shadow-lg: 0 12px 40px rgba(45, 36, 36, 0.08);
-  --shadow-card: 0 1px 3px rgba(45, 36, 36, 0.04), 0 4px 12px rgba(45, 36, 36, 0.03);
-
-  color-scheme: light;
-}
-
-/* ── Theme 5: 墨石 Ink Stone ────────────────── */
-/* 冷蓝灰底 + 灰蓝 accent · 静谧冷调暗色 */
-[data-theme="ink"] {
-  --bg-primary: #18191E;
-  --bg-surface: #1F2128;
-  --bg-muted: #282A32;
-  --bg-elevated: #22242C;
-
-  --text-primary: #E0E2E8;
-  --text-secondary: #9498A4;
-  --text-muted: #5C6070;
-
-  --accent: #8B9DC3;
-  --accent-hover: #7B8DB3;
-  --accent-light: rgba(139, 157, 195, 0.12);
-  --accent-muted: rgba(139, 157, 195, 0.20);
-
-  --success: #5AAE7A;
-  --warning: #C4A040;
-  --danger: #D08080;
-
-  --border: #2E3040;
-  --border-strong: #3A3C4A;
-
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.18);
-
-  color-scheme: dark;
-}
-
-/* ═══ Mastery Colors (all themes) ═══ */
 :root {
-  --mastery-unseen: #D4D4D4;
-  --mastery-exposed: #F87171;
-  --mastery-practiced: #FBBF24;
-  --mastery-proficient: #34D399;
-  --mastery-mastered: #10B981;
-
-  --priority-urgent: #DC2626;
-  --priority-review: #D97706;
-  --priority-exam: #EA580C;
-  --priority-new: var(--accent);
-  --priority-weakness: #7C3AED;
+  --bg-primary: #0a0a0a;
+  --bg-surface: #0a0a0a;
+  --bg-muted: #0a0a0a;
+  --bg-elevated: #0a0a0a;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666;
+  --accent: #e0e0e0;
+  --accent-hover: #fff;
+  --accent-light: transparent;
+  --accent-muted: transparent;
+  --success: #e0e0e0;
+  --warning: #e0e0e0;
+  --danger: #e0e0e0;
+  --border: #333;
+  --border-strong: #555;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-card: none;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --mastery-unseen: #444;
+  --mastery-exposed: #888;
+  --mastery-practiced: #aaa;
+  --mastery-proficient: #ccc;
+  --mastery-mastered: #eee;
+  color-scheme: dark;
 }
-/* Dark themes: slightly muted mastery colors */
-[data-theme="dusk"],
-[data-theme="ink"] {
-  --mastery-unseen: #555555;
-  --mastery-exposed: #E06060;
-  --mastery-practiced: #D4A830;
-  --mastery-proficient: #40B888;
-  --mastery-mastered: #20A880;
 
-  --priority-urgent: #E06060;
-  --priority-review: #D4A040;
-  --priority-exam: #D48040;
-  --priority-weakness: #9070D0;
-}
-
-/* ═══ Global Reset ═══ */
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
-  line-height: 1.5;
-  letter-spacing: -0.01em;
-  min-height: 100vh;
-  transition: background-color 300ms ease, color 300ms ease;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-/* ═══ Layout ═══ */
-.ui-shell {
-  width: min(1160px, 100%);
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-/* ═══ 2.0 Components — 水彩柔和 ═══ */
-
-.ui-panel {
-  border: none;
-  border-radius: var(--radius-xl);
-  background: var(--bg-surface);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.02);
-}
-/* Dark themes: shadow invisible, use subtle border instead */
-[data-theme="dusk"] .ui-panel,
-[data-theme="ink"] .ui-panel {
-  border: 1px solid var(--border);
-  box-shadow: none;
-}
-
-.ui-panel-muted {
-  background: var(--bg-muted);
-}
-
-.ui-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  border: none;
-  border-radius: 999px;
-  padding: 0.3rem 0.7rem;
-  background: var(--bg-muted);
-  color: var(--text-secondary);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
-.ui-copy {
-  color: var(--text-secondary);
-  font-size: 0.9375rem;
+  background: #0a0a0a;
+  color: #e0e0e0;
+  font-family: "SF Mono", "JetBrains Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
+  font-size: 13px;
   line-height: 1.6;
+  min-height: 100vh;
 }
 
-/* ── Buttons (2.0: softer, wider padding, 12px radius) ── */
-.ui-button-primary,
-.ui-button-secondary,
-.ui-button-ghost,
-.ui-icon-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  transition:
-    background-color 200ms ease,
-    color 200ms ease,
-    border-color 200ms ease,
-    transform 200ms ease,
-    box-shadow 200ms ease,
-    opacity 200ms ease;
+a { color: #e0e0e0; text-decoration: underline; }
+a:hover { color: #fff; }
+button, input, textarea, select { font: inherit; }
+
+/* layout */
+.ui-shell { max-width: 900px; margin: 0 auto; padding: 1rem; }
+
+/* all panels = nothing */
+.ui-panel, .ui-panel-muted { background: none; border: none; border-radius: 0; box-shadow: none; }
+.ui-panel:hover { transform: none; box-shadow: none; }
+
+/* buttons = plain text with brackets */
+.ui-button-primary, .ui-button-secondary, .ui-button-ghost, .ui-icon-button {
+  display: inline;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: #e0e0e0;
+  padding: 0;
+  font: inherit;
   cursor: pointer;
+  text-decoration: underline;
+  transition: none;
+}
+.ui-button-primary:hover, .ui-button-secondary:hover, .ui-button-ghost:hover, .ui-icon-button:hover {
+  color: #fff;
+  background: none;
+  transform: none;
 }
 
-.ui-button-primary {
-  border: none;
-  background: var(--accent);
-  color: white;
-  padding: 0.55rem 1.25rem;
-  font-size: 0.875rem;
-}
-
-.ui-button-primary:hover {
-  background: var(--accent-hover);
-  transform: translateY(-2px);
-}
-
-.ui-button-primary:active {
-  transform: translateY(0);
-}
-
-.ui-button-secondary {
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  padding: 0.55rem 1.25rem;
-  font-size: 0.875rem;
-}
-
-.ui-button-secondary:hover {
-  background: var(--bg-muted);
-  transform: translateY(-1px);
-}
-
-.ui-button-ghost {
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-}
-
-.ui-button-ghost:hover {
-  background: var(--bg-muted);
-  color: var(--text-primary);
-}
-
-.ui-icon-button {
-  width: 2.5rem;
-  height: 2.5rem;
-  border: none;
-  background: var(--bg-muted);
-  color: var(--text-secondary);
-}
-
-.ui-icon-button:hover {
-  background: var(--accent-light);
-  color: var(--accent);
-  transform: translateY(-1px);
-}
-
-/* ── Forms (2.0: cleaner, bg-surface default) ── */
-.ui-input,
-.ui-textarea {
+/* inputs = bottom border only */
+.ui-input, .ui-textarea {
   width: 100%;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-surface);
-  color: var(--text-primary);
-  padding: 0.6rem 0.9rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #333;
+  border-radius: 0;
+  color: #e0e0e0;
+  padding: 0.3rem 0;
   outline: none;
-  transition: border-color 200ms ease, box-shadow 200ms ease;
 }
-
-.ui-input:focus,
-.ui-textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-light);
-}
-
-.ui-textarea {
-  resize: vertical;
-}
-
-/* ── Tags (2.0: no border, softer) ── */
-.ui-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  border-radius: var(--radius-sm);
-  border: none;
-  background: var(--bg-muted);
-  padding: 0.2rem 0.55rem;
-  color: var(--text-secondary);
-  font-size: 0.6875rem;
-  font-weight: 500;
-}
-
-/* ── Empty state (2.0: no dashed border) ── */
-.ui-empty {
-  border: none;
-  border-radius: var(--radius-lg);
-  background: var(--bg-muted);
-  padding: 3rem 1.5rem;
-  text-align: center;
-}
-
-/* ── Divider ── */
-.ui-divider-label {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  color: var(--text-muted);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-}
-
-.ui-divider-label::before,
-.ui-divider-label::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* ── Progress (2.0: 6px height, softer track) ── */
-.ui-progress-track {
-  height: 6px;
-  border-radius: 999px;
-  background: var(--bg-muted);
-  overflow: hidden;
-}
-
-.ui-progress-bar {
-  height: 100%;
-  border-radius: inherit;
-  background: var(--accent);
-  transition: width 300ms ease;
-}
-
-/* ── Segmented Control ── */
-.ui-segmented {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.25rem;
-  border: none;
-  border-radius: var(--radius-md);
-  background: var(--bg-muted);
-  padding: 0.3rem;
-}
-
-.ui-segment {
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-secondary);
-  padding: 0.6rem 0.85rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 200ms ease, color 200ms ease;
-}
-
-.ui-segment-active {
-  background: var(--accent);
-  color: white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-}
-
-/* ── Tabs (2.0: pill style, no border) ── */
-.ui-tab-row {
-  display: flex;
-  gap: 0.4rem;
-  overflow-x: auto;
-  padding-bottom: 0.25rem;
-}
-
-.ui-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-  border: none;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-muted);
-  padding: 0.45rem 0.85rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.ui-tab:hover {
-  background: var(--bg-muted);
-  color: var(--text-secondary);
-}
-
-.ui-tab-active {
-  background: var(--accent-light);
-  color: var(--accent);
-}
-
-/* ═══ Page transitions ═══ */
-
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.ui-shell > *,
-main > .ui-shell {
-  animation: page-enter 200ms ease-out both;
-}
-
-::view-transition-old(root) {
-  animation: 150ms ease-out both fade-out;
-}
-
-::view-transition-new(root) {
-  animation: 200ms ease-out both fade-in-up;
-}
-
-@keyframes fade-out {
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-}
-
-.ui-sidebar-wrapper {
-  view-transition-name: sidebar;
-}
-
-::view-transition-old(sidebar),
-::view-transition-new(sidebar) {
-  animation: none;
-}
-
-/* ═══ Smooth transitions for theme switching ═══ */
-.ui-panel,
-.ui-badge {
-  transition:
-    background-color 200ms ease,
-    border-color 200ms ease,
-    color 200ms ease,
-    box-shadow 200ms ease,
-    transform 200ms ease,
-    opacity 200ms ease;
-}
-
-.ui-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
-}
-
-[data-theme="dusk"] .ui-panel:hover,
-[data-theme="ink"] .ui-panel:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
+.ui-input:focus, .ui-textarea:focus {
+  border-bottom-color: #888;
   box-shadow: none;
 }
 
-@media (min-width: 768px) {
-  .ui-shell {
-    padding: 2rem;
-  }
+/* tags/badges = plain */
+.ui-badge, .ui-kicker {
+  display: inline;
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: #888;
+  font-size: inherit;
 }
+
+/* tabs = text with marker */
+.ui-tab-row { display: flex; gap: 1rem; border-bottom: 1px solid #333; }
+.ui-tab {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: #888;
+  padding: 0.3rem 0;
+  font: inherit;
+  cursor: pointer;
+}
+.ui-tab:hover { color: #e0e0e0; background: none; }
+.ui-tab-active { color: #fff; border-bottom: 1px solid #fff; }
+
+/* segmented = tabs */
+.ui-segmented { display: flex; gap: 1rem; background: none; border: none; border-radius: 0; padding: 0; }
+.ui-segment {
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: #888;
+  padding: 0.3rem 0;
+  font: inherit;
+  cursor: pointer;
+}
+.ui-segment-active { color: #fff; text-decoration: underline; box-shadow: none; }
+
+/* progress = text-based */
+.ui-progress-track { height: 4px; background: #222; border-radius: 0; overflow: hidden; }
+.ui-progress-bar { height: 100%; background: #888; border-radius: 0; transition: width 200ms; }
+
+/* divider = just a line */
+.ui-divider-label { color: #666; font-size: inherit; }
+.ui-divider-label::before, .ui-divider-label::after { background: #333; }
+
+/* empty state */
+.ui-empty { background: none; border: none; border-radius: 0; padding: 1rem 0; }
+
+/* no transitions, no animations */
+.ui-panel, .ui-badge { transition: none; }
+.ui-shell > *, main > .ui-shell { animation: none; }
+::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+
+/* force override any leftover decoration */
+[data-theme] { /* ignore all themes */ }

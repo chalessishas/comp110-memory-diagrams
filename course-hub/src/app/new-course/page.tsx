@@ -62,34 +62,29 @@ function GeneratingStatus() {
     <div className="ui-panel p-10 md:p-14 flex flex-col items-center text-center gap-6">
       {/* Spinner */}
       <div className="relative">
-        <Loader2 size={36} className="animate-spin" style={{ color: "var(--accent)" }} />
+        <Loader2 size={36} className="animate-spin" />
       </div>
 
       {/* Current step text */}
       <div>
-        <p className="text-lg font-medium" style={{ minHeight: "1.8em" }}>{step.text}</p>
-        <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+        <p className="text-lg font-medium">{step.text}</p>
+        <p className="text-xs mt-2">
           {Math.floor(elapsed / 1000)}s {t("gen.elapsed")}
         </p>
       </div>
 
       {/* Progress bar */}
       <div className="w-full max-w-sm">
-        <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: "var(--border)" }}>
+        <div className="h-2 overflow-hidden">
           <div
-            className="h-full rounded-full"
-            style={{
-              width: `${progress}%`,
-              backgroundColor: "var(--accent)",
-              transition: "width 400ms ease",
-            }}
+            className="h-full"
           />
         </div>
       </div>
 
       {/* Timeout warning */}
       {elapsed > 30000 && (
-        <p className="text-xs px-4 py-2 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--warning)" }}>
+        <p className="text-xs px-4 py-2">
           {t("gen.slowWarning")}
         </p>
       )}
@@ -97,13 +92,13 @@ function GeneratingStatus() {
       {/* Step log (like game world gen) */}
       <div className="w-full max-w-sm text-left space-y-1.5 mt-2">
         {steps.slice(0, currentStep + 1).map((s, i) => (
-          <div key={i} className="flex items-center gap-2 text-xs" style={{ color: i < currentStep ? "var(--success)" : "var(--text-primary)" }}>
+          <div key={i} className="flex items-center gap-2 text-xs">
             {i < currentStep ? (
-              <Check size={12} style={{ color: "var(--success)" }} />
+              <Check size={12} />
             ) : (
-              <Loader2 size={12} className="animate-spin" style={{ color: "var(--accent)" }} />
+              <Loader2 size={12} className="animate-spin" />
             )}
-            <span style={{ opacity: i < currentStep ? 0.6 : 1 }}>{s.text}</span>
+            <span>{s.text}</span>
           </div>
         ))}
       </div>
@@ -139,18 +134,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-4 py-2.5 rounded-xl text-sm cursor-pointer disabled:cursor-default transition-colors"
-              style={{
-                border: "1px solid",
-                borderColor: submitted
-                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "var(--success)" : selected === opt.label ? "var(--danger)" : "var(--border)"
-                  : selected === opt.label ? "var(--accent)" : "var(--border)",
-                backgroundColor: submitted
-                  ? opt.label.toLowerCase() === question.answer.trim().toLowerCase()
-                    ? "var(--bg-muted)" : "transparent"
-                  : selected === opt.label ? "var(--accent-light)" : "transparent",
-              }}
+              className="w-full text-left px-4 py-2.5 text-sm cursor-pointer disabled:cursor-default"
             >
               <span className="font-medium mr-2">{opt.label}.</span>{opt.text}
             </button>
@@ -165,8 +149,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           disabled={submitted}
           placeholder="Type your answer..."
-          className="w-full px-4 py-2.5 rounded-xl text-sm mb-3 outline-none"
-          style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+          className="w-full px-4 py-2.5 text-sm mb-3 outline-none"
         />
       )}
 
@@ -174,8 +157,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
         <button
           onClick={handleSubmit}
           disabled={!userAnswer}
-          className="px-5 py-2 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-30"
-          style={{ backgroundColor: "var(--accent)", color: "white" }}
+          className="px-5 py-2 text-sm font-medium cursor-pointer disabled:opacity-30"
         >
           Check
         </button>
@@ -183,13 +165,13 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
         <div className="mt-2">
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
-              <><Check size={14} style={{ color: "var(--success)" }} /><span className="text-sm font-medium" style={{ color: "var(--success)" }}>Correct</span></>
+              <><Check size={14} /><span className="text-sm font-medium">Correct</span></>
             ) : (
-              <><span className="text-sm font-medium" style={{ color: "var(--danger)" }}>Answer: {question.answer}</span></>
+              <><span className="text-sm font-medium">Answer: {question.answer}</span></>
             )}
           </div>
           {question.explanation && (
-            <p className="text-xs p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+            <p className="text-xs p-3">
               {question.explanation}
             </p>
           )}
@@ -411,15 +393,12 @@ export default function NewCoursePage() {
             return (
               <div
                 key={item.key}
-                className="rounded-[20px] px-4 py-4"
-                style={{
-                  backgroundColor: isActive ? "var(--accent-light)" : "var(--bg-muted)",
-                }}
+                className="-[20px] px-4 py-4"
               >
-                <p className="text-[11px] font-medium uppercase tracking-[0.06em]" style={{ color: isActive ? "var(--accent)" : "var(--text-secondary)" }}>
+                <p className="text-[11px] font-medium uppercase tracking-[0.06em]">
                   {t("newCourse.step")}
                 </p>
-                <p className="text-base font-medium mt-2" style={{ color: isActive ? "var(--accent)" : "var(--text-primary)" }}>{item.label}</p>
+                <p className="text-base font-medium mt-2">{item.label}</p>
               </div>
             );
           })}
@@ -477,7 +456,7 @@ export default function NewCoursePage() {
               />
 
               <div className="flex flex-col gap-4 mt-5 md:flex-row md:items-center md:justify-between">
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-sm">
                   {rawText.trim().length} {t("newCourse.charCount")}
                 </p>
                 <button
@@ -494,8 +473,8 @@ export default function NewCoursePage() {
             <FileDropzone onFileUploaded={handleFileUploaded} />
           ) : authState === "loading" ? (
             <div className="ui-panel p-8 text-center">
-              <Loader2 size={24} className="animate-spin mx-auto" style={{ color: "var(--accent)" }} />
-              <p className="text-sm mt-3" style={{ color: "var(--text-secondary)" }}>
+              <Loader2 size={24} className="animate-spin mx-auto" />
+              <p className="text-sm mt-3">
                 Checking your session...
               </p>
             </div>
@@ -534,7 +513,7 @@ export default function NewCoursePage() {
           <div className="ui-panel p-6 md:p-8">
             <div className="ui-kicker mb-4">Preview</div>
             <h2 className="text-3xl font-semibold">{parsed.title}</h2>
-            <p className="text-sm mt-3 max-w-2xl" style={{ color: "var(--text-secondary)" }}>{parsed.description}</p>
+            <p className="text-sm mt-3 max-w-2xl">{parsed.description}</p>
             <div className="flex flex-wrap gap-2 mt-5">
               {parsed.professor && <span className="ui-badge">Instructor: {parsed.professor}</span>}
               {parsed.semester && <span className="ui-badge">{parsed.semester}</span>}
@@ -544,20 +523,18 @@ export default function NewCoursePage() {
 
           {/* Missing info warning */}
           {parsed.confidence && parsed.confidence !== "high" && (
-            <div className="rounded-[20px] p-5" style={{
-              backgroundColor: "var(--bg-muted)",
-            }}>
-              <p className="text-sm font-medium mb-2" style={{ color: parsed.confidence === "low" ? "var(--danger)" : "var(--warning)" }}>
+            <div className="-[20px] p-5">
+              <p className="text-sm font-medium mb-2">
                 {parsed.confidence === "low" ? t("newCourse.missingLow") : t("newCourse.missingMed")}
               </p>
               {parsed.missing_info && parsed.missing_info.length > 0 && (
-                <ul className="text-xs space-y-1" style={{ color: "var(--text-secondary)" }}>
+                <ul className="text-xs space-y-1">
                   {parsed.missing_info.map((info, i) => (
                     <li key={i}>- {info}</li>
                   ))}
                 </ul>
               )}
-              <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
+              <p className="text-xs mt-3">
                 {t("newCourse.missingTip")}
               </p>
             </div>
@@ -577,7 +554,7 @@ export default function NewCoursePage() {
           <div className="grid gap-6 xl:grid-cols-2">
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <div className="flex h-11 w-11 items-center justify-center">
                   <BookOpen size={18} />
                 </div>
                 <div>
@@ -588,8 +565,8 @@ export default function NewCoursePage() {
 
               {previewLoading ? (
                 <div className="ui-empty">
-                  <Loader2 size={22} className="animate-spin mx-auto" style={{ color: "var(--accent)" }} />
-                  <p className="text-sm mt-3" style={{ color: "var(--text-secondary)" }}>
+                  <Loader2 size={22} className="animate-spin mx-auto" />
+                  <p className="text-sm mt-3">
                     {t("newCourse.buildingTasks")}
                   </p>
                 </div>
@@ -598,14 +575,13 @@ export default function NewCoursePage() {
                   {previewTasks.slice(0, 6).map((task, index) => (
                     <div
                       key={`${task.title}-${index}`}
-                      className="rounded-[20px] px-4 py-4"
-                      style={{ backgroundColor: "var(--bg-muted)" }}
+                      className="-[20px] px-4 py-4"
                     >
                       <div className="flex items-center justify-between gap-3">
                         <p className="text-sm font-medium">{task.title}</p>
                         <span className="ui-badge">{task.task_type}</span>
                       </div>
-                      <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+                      <p className="text-sm mt-2">
                         {task.description}
                       </p>
                     </div>
@@ -613,7 +589,7 @@ export default function NewCoursePage() {
                 </div>
               ) : (
                 <div className="ui-empty">
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm">
                     Study-task preview is not ready yet.
                   </p>
                 </div>
@@ -622,7 +598,7 @@ export default function NewCoursePage() {
 
             <div className="ui-panel p-5 md:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <div className="flex h-11 w-11 items-center justify-center">
                   <BrainCircuit size={18} />
                 </div>
                 <div>
@@ -633,8 +609,8 @@ export default function NewCoursePage() {
 
               {previewLoading ? (
                 <div className="ui-empty">
-                  <Loader2 size={22} className="animate-spin mx-auto" style={{ color: "var(--accent)" }} />
-                  <p className="text-sm mt-3" style={{ color: "var(--text-secondary)" }}>
+                  <Loader2 size={22} className="animate-spin mx-auto" />
+                  <p className="text-sm mt-3">
                     {t("newCourse.generatingQuestions")}
                   </p>
                 </div>
@@ -646,7 +622,7 @@ export default function NewCoursePage() {
                 </div>
               ) : (
                 <div className="ui-empty">
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm">
                     {t("newCourse.questionPreviewEmpty")}
                   </p>
                 </div>
@@ -655,7 +631,7 @@ export default function NewCoursePage() {
           </div>
 
           {previewError && (
-            <div className="ui-panel ui-panel-muted p-4 text-sm" style={{ color: "var(--danger)" }}>
+            <div className="ui-panel ui-panel-muted p-4 text-sm">
               {previewError}
             </div>
           )}
@@ -665,7 +641,7 @@ export default function NewCoursePage() {
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="ui-kicker mb-3">{t("newCourse.guestMode")}</div>
-                  <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-sm">
                     {t("newCourse.guestReady")}
                   </p>
                 </div>
@@ -712,20 +688,20 @@ export default function NewCoursePage() {
       )}
 
       {guestNotice && (
-        <div className="ui-panel ui-panel-muted p-4 text-sm" style={{ color: "var(--text-secondary)" }}>
+        <div className="ui-panel ui-panel-muted p-4 text-sm">
           {guestNotice}
         </div>
       )}
 
       {creating && saveStage && (
         <div className="ui-panel p-5 flex items-center gap-3">
-          <Loader2 size={16} className="animate-spin shrink-0" style={{ color: "var(--accent)" }} />
-          <span className="text-sm" style={{ color: "var(--text-secondary)" }}>{saveStage}</span>
+          <Loader2 size={16} className="animate-spin shrink-0" />
+          <span className="text-sm">{saveStage}</span>
         </div>
       )}
 
       {error && (
-        <div className="ui-panel ui-panel-muted p-4 text-sm" style={{ color: "var(--danger)" }}>
+        <div className="ui-panel ui-panel-muted p-4 text-sm">
           {error}
         </div>
       )}

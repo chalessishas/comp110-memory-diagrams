@@ -32,11 +32,7 @@ export function StreakBadge() {
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-colors"
-        style={{
-          backgroundColor: data.currentStreak > 0 ? "var(--accent-light)" : "transparent",
-          color: data.currentStreak > 0 ? "var(--warning)" : "var(--text-muted)",
-        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium cursor-pointer"
       >
         <Flame size={14} />
         {data.currentStreak}
@@ -46,22 +42,18 @@ export function StreakBadge() {
         <>
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
-            className="absolute right-0 top-full mt-2 w-72 p-5 rounded-[20px] z-50"
-            style={{
-              backgroundColor: "var(--bg-surface)",
-              boxShadow: "var(--shadow-lg)",
-            }}
+            className="absolute right-0 top-full mt-2 w-72 p-5 -[20px] z-50"
           >
             <div className="text-center mb-4">
-              <Flame size={28} className="mx-auto mb-2" style={{ color: "var(--warning)" }} />
-              <p className="text-3xl" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{data.currentStreak}</p>
-              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              <Flame size={28} className="mx-auto mb-2" />
+              <p className="text-3xl">{data.currentStreak}</p>
+              <p className="text-xs">
                 {t("streak.dayStreak")}{data.longestStreak > data.currentStreak ? ` (${t("streak.best")} ${data.longestStreak})` : ""}
               </p>
             </div>
 
-            <div className="mb-4 p-3 rounded-[14px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <div className="flex items-center justify-between text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
+            <div className="mb-4 p-3 -[14px]">
+              <div className="flex items-center justify-between text-xs mb-2">
                 <span className="flex items-center gap-1">
                   <Target size={12} /> {t("streak.dailyGoal")}
                 </span>
@@ -69,11 +61,7 @@ export function StreakBadge() {
               </div>
               <div className="ui-progress-track">
                 <div
-                  className="ui-progress-bar transition-all"
-                  style={{
-                    width: `${goalProgress}%`,
-                    backgroundColor: goalProgress >= 100 ? "var(--success)" : "var(--accent)",
-                  }}
+                  className="ui-progress-bar"
                 />
               </div>
             </div>
@@ -84,20 +72,11 @@ export function StreakBadge() {
                 return (
                   <div key={day.day} className="flex flex-col items-center gap-1">
                     <div
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[10px]"
-                      style={{
-                        backgroundColor: day.completed
-                          ? "var(--accent)"
-                          : day.minutes > 0
-                          ? "var(--accent-muted)"
-                          : "var(--bg-muted)",
-                        color: day.completed ? "var(--bg-surface)" : "var(--text-muted)",
-                        fontWeight: day.completed ? 600 : 400,
-                      }}
+                      className="w-7 h-7 flex items-center justify-center text-[10px]"
                     >
                       {day.completed ? "\u2713" : ""}
                     </div>
-                    <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
+                    <span className="text-[9px]">
                       {DAY_NAMES[d.getDay()]}
                     </span>
                   </div>
@@ -107,7 +86,6 @@ export function StreakBadge() {
 
             <div
               className="mt-3 pt-3 flex items-center gap-2 text-[10px]"
-              style={{ color: "var(--text-muted)" }}
             >
               <Shield size={11} />
               {data.freezeAvailable ? t("streak.freezeAvailable") : t("streak.freezeUsed")}

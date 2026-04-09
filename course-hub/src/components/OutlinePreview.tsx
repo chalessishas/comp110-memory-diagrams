@@ -27,34 +27,28 @@ function TreeNode({ node, depth = 0 }: { node: ParsedOutlineNode; depth?: number
   const badgeColor = TYPE_COLORS[node.type] ?? "var(--text-muted)";
 
   return (
-    <div style={{ marginLeft: depth * 20 }}>
+    <div>
       <div
-        className="flex items-center gap-2.5 rounded-[14px] px-3 py-2 cursor-pointer select-none transition-colors"
-        style={{ backgroundColor: "transparent" }}
+        className="flex items-center gap-2.5 -[14px] px-3 py-2 cursor-pointer select-none"
         onClick={() => hasChildren && setExpanded(!expanded)}
         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "var(--bg-muted)")}
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
       >
-        <span className="shrink-0 w-4 flex items-center justify-center transition-transform" style={{ transform: hasChildren && expanded ? "rotate(90deg)" : "rotate(0deg)" }}>
+        <span className="shrink-0 w-4 flex items-center justify-center">
           {hasChildren ? (
-            <ChevronRight size={14} style={{ color: "var(--text-muted)" }} />
+            <ChevronRight size={14} />
           ) : (
-            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: "var(--border-strong)" }} />
+            <span className="w-1.5 h-1.5" />
           )}
         </span>
 
         <span
-          className="inline-flex items-center rounded-lg px-2 py-0.5 text-[11px]"
-          style={{
-            fontWeight: 500,
-            color: badgeColor,
-            backgroundColor: "var(--bg-muted)",
-          }}
+          className="inline-flex items-center px-2 py-0.5 text-[11px]"
         >
           {t(labelKeys[node.type] ?? "outline.topic")}
         </span>
 
-        <span className="text-sm" style={{ color: "var(--text-primary)", fontWeight: depth < 2 ? 500 : 400 }}>
+        <span className="text-sm">
           {node.title}
         </span>
       </div>

@@ -55,19 +55,18 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
         {/* Progress bar */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+            <span className="text-sm">
               {isZh ? `${Math.round(overallProgress)}% 已掌握` : `${Math.round(overallProgress)}% mastered`}
             </span>
           </div>
-          <div className="h-[6px] rounded-full overflow-hidden flex" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <div className="h-[6px] overflow-hidden flex">
             {(["mastered", "proficient", "practiced", "exposed"] as MasteryLevelV2[]).map(level => {
               const pct = totalKps > 0 ? (counts[level] / totalKps) * 100 : 0;
               if (pct === 0) return null;
               return (
                 <div
                   key={level}
-                  style={{ width: `${pct}%`, backgroundColor: levelConfig[level].color }}
-                  className="h-full transition-all"
+                  className="h-full"
                 />
               );
             })}
@@ -77,9 +76,9 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
         {/* Level counts */}
         <div className="grid grid-cols-5 gap-2">
           {(["mastered", "proficient", "practiced", "exposed", "unseen"] as MasteryLevelV2[]).map(level => (
-            <div key={level} className="text-center p-3 rounded-[12px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-lg font-semibold" style={{ color: levelConfig[level].color }}>{counts[level]}</p>
-              <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+            <div key={level} className="text-center p-3 -[12px]">
+              <p className="text-lg font-semibold">{counts[level]}</p>
+              <p className="text-[10px]">
                 {isZh ? levelConfig[level].labelZh : levelConfig[level].label}
               </p>
             </div>
@@ -91,19 +90,18 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       {active.length > 0 && (
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
-            <AlertTriangle size={18} style={{ color: "var(--warning)" }} />
+            <AlertTriangle size={18} />
             {isZh ? "持续性弱点" : "Persistent Weaknesses"}
           </h2>
           <div className="space-y-3">
             {active.map(m => (
-              <div key={m.id} className="p-4 rounded-[16px] flex gap-3" style={{ backgroundColor: "var(--bg-muted)" }}>
+              <div key={m.id} className="p-4 -[16px] flex gap-3">
                 <div
-                  className="w-1 shrink-0 rounded-full"
-                  style={{ backgroundColor: "var(--warning)" }}
+                  className="w-1 shrink-0"
                 />
                 <div>
                   <p className="text-sm font-medium">{m.misconception_description}</p>
-                  <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-xs mt-1">
                     {isZh ? `出现 ${m.occurrence_count} 次` : `Occurred ${m.occurrence_count} times`}
                     {m.relapsed && (isZh ? " · 已复发" : " · Relapsed")}
                   </p>
@@ -118,13 +116,13 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       {resolved.length > 0 && (
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
-            <Check size={18} style={{ color: "var(--success)" }} />
+            <Check size={18} />
             {isZh ? "已克服" : "Overcome"}
           </h2>
           <div className="space-y-2">
             {resolved.map(m => (
-              <div key={m.id} className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
-                <Check size={14} style={{ color: "var(--success)" }} />
+              <div key={m.id} className="flex items-center gap-2 text-sm">
+                <Check size={14} />
                 <span>{m.misconception_description}</span>
               </div>
             ))}
@@ -136,11 +134,11 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       {metacognitionAccuracy !== null && (
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2 tracking-wide">
-            <Brain size={18} style={{ color: "var(--accent)" }} />
+            <Brain size={18} />
             {isZh ? "元认知准确度" : "Self-assessment Accuracy"}
           </h2>
           <p className="text-3xl font-semibold">{metacognitionAccuracy}%</p>
-          <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-xs mt-1">
             {isZh
               ? `你说"不确定"的题中，${metacognitionAccuracy}% 确实答错了。说明你对自己的判断相当准确。`
               : `Your self-assessment matched reality ${metacognitionAccuracy}% of the time.`}
@@ -151,18 +149,18 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       {/* Weekly summary */}
       <div className="ui-panel p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
-          <Activity size={18} style={{ color: "var(--accent)" }} />
+          <Activity size={18} />
           {isZh ? "本周学习" : "This Week"}
         </h2>
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-[16px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <div className="-[16px] p-4">
+            <p className="text-xs">
               {isZh ? "答题次数" : "Questions Answered"}
             </p>
             <p className="text-2xl font-semibold mt-1">{weeklyAttempts}</p>
           </div>
-          <div className="rounded-[16px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <div className="-[16px] p-4">
+            <p className="text-xs">
               {isZh ? "掌握的知识点" : "Concepts Proficient+"}
             </p>
             <p className="text-2xl font-semibold mt-1">{counts.proficient + counts.mastered}</p>

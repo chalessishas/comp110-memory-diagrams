@@ -55,13 +55,12 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
     <div className="ui-panel p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Calendar size={16} style={{ color: "var(--accent)" }} />
-          <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("exam.upcoming")}</h3>
+          <Calendar size={16} />
+          <h3 className="text-sm font-medium">{t("exam.upcoming")}</h3>
         </div>
         <button
           onClick={() => setAdding(!adding)}
-          className="p-1.5 rounded-xl cursor-pointer transition-colors"
-          style={{ color: "var(--text-muted)" }}
+          className="p-1.5 cursor-pointer"
         >
           <Plus size={14} />
         </button>
@@ -73,8 +72,7 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("exam.namePlaceholder")}
-            className="flex-1 px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+            className="flex-1 px-3 py-2 text-xs outline-none transition-"
             onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
             onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
           />
@@ -82,19 +80,18 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+            className="px-3 py-2 text-xs outline-none transition-"
             onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
             onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
           />
-          <button onClick={handleAdd} className="px-4 py-2 rounded-xl text-xs font-medium cursor-pointer" style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}>
+          <button onClick={handleAdd} className="px-4 py-2 text-xs font-medium cursor-pointer">
             {t("exam.add")}
           </button>
         </div>
       )}
 
       {upcoming.length === 0 ? (
-        <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("exam.noUpcoming")}</p>
+        <p className="text-xs">{t("exam.noUpcoming")}</p>
       ) : (
         <div className="space-y-2">
           {upcoming.map((exam) => {
@@ -103,22 +100,20 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
             return (
               <div
                 key={exam.id}
-                className="flex items-center justify-between px-3.5 py-3 rounded-[14px] group transition-colors"
-                style={{ backgroundColor: "var(--bg-muted)" }}
+                className="flex items-center justify-between px-3.5 py-3 -[14px] group"
               >
                 <div className="flex items-center gap-2.5">
-                  {days <= 3 && <AlertTriangle size={12} style={{ color: style.color }} />}
-                  <span className="text-xs font-medium" style={{ color: "var(--text-primary)" }}>{exam.title}</span>
+                  {days <= 3 && <AlertTriangle size={12} />}
+                  <span className="text-xs font-medium">{exam.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className="text-xs font-medium px-2 py-0.5 rounded-lg"
-                    style={{ color: style.color, backgroundColor: days <= 7 ? "var(--bg-surface)" : "transparent" }}
+                    className="text-xs font-medium px-2 py-0.5"
                   >
                     {days === 0 ? t("exam.today") : days === 1 ? t("exam.tomorrow") : `${days} ${t("exam.days")}`}
                   </span>
-                  <button onClick={() => handleDelete(exam.id)} className="opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
-                    <Trash2 size={11} style={{ color: "var(--danger)" }} />
+                  <button onClick={() => handleDelete(exam.id)} className="opacity-0 group-hover:opacity-100 cursor-pointer">
+                    <Trash2 size={11} />
                   </button>
                 </div>
               </div>

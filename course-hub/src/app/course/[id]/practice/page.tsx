@@ -77,10 +77,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         </Link>
         <CourseTabs courseId={id} />
         <div className="ui-panel p-10 md:p-14 flex flex-col items-center gap-4 text-center">
-          <Loader2 className="animate-spin" size={30} style={{ color: "var(--accent)" }} />
+          <Loader2 className="animate-spin" size={30} />
           <div>
             <p className="text-lg font-medium">{t("practice.loadingQuestions")}</p>
-            <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+            <p className="text-sm mt-2">
               {t("practice.loadingDesc")}
             </p>
           </div>
@@ -98,16 +98,16 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       <CourseTabs courseId={id} />
 
       {scopeKpIds && (
-        <div className="mb-4 px-4 py-3 rounded-xl flex items-center justify-between" style={{ backgroundColor: "var(--bg-muted)" }}>
+        <div className="mb-4 px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Target size={16} style={{ color: "var(--accent)" }} />
-            <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
+            <Target size={16} />
+            <span className="text-sm font-medium">
               {isZh
                 ? `考试范围 · ${filteredQuestions.length} 题`
                 : `Exam Scope · ${filteredQuestions.length} question${filteredQuestions.length !== 1 ? "s" : ""}`}
             </span>
           </div>
-          <button onClick={() => setScopeKpIds(null)} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
+          <button onClick={() => setScopeKpIds(null)} className="text-xs cursor-pointer">
             {isZh ? "显示全部" : "Show all"}
           </button>
         </div>
@@ -153,30 +153,30 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             disabled={examPrepLoading}
           />
           {examPrepError && (
-            <div className="rounded-[20px] px-4 py-3 mb-4" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-sm font-medium" style={{ color: "var(--danger)" }}>{examPrepError}</p>
+            <div className="-[20px] px-4 py-3 mb-4">
+              <p className="text-sm font-medium">{examPrepError}</p>
             </div>
           )}
           {examPrepResult && (
             <div className="space-y-2 mb-4">
-              <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
-                <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
+              <div className="-[20px] px-4 py-3">
+                <p className="text-sm font-medium">
                   {isZh
                     ? `从 ${examPrepResult.topics_processed} 个主题生成了 ${examPrepResult.questions_generated} 道题`
                     : `Generated ${examPrepResult.questions_generated} questions from ${examPrepResult.topics_processed} topics`}
                 </p>
-                <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-xs mt-1">
                   {examPrepResult.topics.join(", ")}
                 </p>
               </div>
               {examPrepResult.topics_failed.length > 0 && (
-                <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
-                  <p className="text-sm font-medium" style={{ color: "var(--warning)" }}>
+                <div className="-[20px] px-4 py-3">
+                  <p className="text-sm font-medium">
                     {isZh
                       ? `${examPrepResult.topics_failed.length} 个主题生成失败，可重试`
                       : `${examPrepResult.topics_failed.length} topic${examPrepResult.topics_failed.length > 1 ? "s" : ""} failed — try again`}
                   </p>
-                  <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-xs mt-1">
                     {examPrepResult.topics_failed.join(", ")}
                   </p>
                 </div>
@@ -235,8 +235,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         <div>
           {generating ? (
             <div className="ui-panel p-10 flex items-center gap-3 justify-center">
-              <Loader2 size={20} className="animate-spin" style={{ color: "var(--accent)" }} />
-              <p className="text-sm" style={{ color: "var(--text-secondary)" }}>{t("practice.converting")}</p>
+              <Loader2 size={20} className="animate-spin" />
+              <p className="text-sm">{t("practice.converting")}</p>
             </div>
           ) : (
             <FileDropzone onFileUploaded={handleExamUpload} courseId={id} />
@@ -247,7 +247,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       {filteredQuestions.length === 0 ? (
         <div className="ui-empty">
           <p className="text-base font-medium mb-2">{t("practice.noQuestions")}</p>
-          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mb-4">
             {t("practice.noQuestionsDesc")}
           </p>
           <button
@@ -294,9 +294,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   Question {currentIndex + 1} of {filteredQuestions.length}
                 </p>
                 <div className="ui-progress-track mt-3 max-w-xs">
-                  <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
+                  <div className="ui-progress-bar" />
                 </div>
-                <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
+                <p className="text-xs mt-3">
                   After you answer, stay on the card to review the explanation, then move with the arrows when you are ready.
                 </p>
               </div>

@@ -68,7 +68,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
   if (chunks.length === 0) {
     return (
       <div className="text-center py-16">
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        <p className="text-sm">
           {isZh ? "课程内容加载失败，请重试。" : "Lesson content failed to load. Please try again."}
         </p>
       </div>
@@ -78,9 +78,9 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
   if (isComplete) {
     return (
       <div className="text-center py-16 space-y-3">
-        <Check size={40} className="mx-auto" style={{ color: "var(--success)" }} />
-        <h2 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{isZh ? "课程完成！" : "Lesson Complete!"}</h2>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+        <Check size={40} className="mx-auto" />
+        <h2 className="text-xl font-semibold">{isZh ? "课程完成！" : "Lesson Complete!"}</h2>
+        <p className="text-sm">
           {isZh ? "做得好。这节课的内容已经学完了。" : "Well done. You've completed this lesson."}
         </p>
       </div>
@@ -155,19 +155,18 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
       <div className="space-y-8">
         {/* Progress bar */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <div className="flex-1 h-1.5 overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-300"
-              style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }}
+              className="h-full duration-300"
             />
           </div>
-          <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+          <span className="text-xs font-medium">
             {currentChunkIndex + 1}/{displayTotal}
           </span>
         </div>
         <div className="text-center py-12">
-          <Loader2 size={20} className="animate-spin mx-auto mb-3" style={{ color: "var(--accent)" }} />
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          <Loader2 size={20} className="animate-spin mx-auto mb-3" />
+          <p className="text-sm">
             {isZh ? "正在生成下一个教学环节..." : "Generating next section..."}
           </p>
         </div>
@@ -182,13 +181,12 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
     <div className="space-y-6">
       {/* Progress bar — thicker, muted track */}
       <div className="flex items-center gap-3">
-        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-muted)" }}>
+        <div className="flex-1 h-1.5 overflow-hidden">
           <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{ width: `${progress}%`, backgroundColor: "var(--accent)" }}
+            className="h-full duration-300"
           />
         </div>
-        <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+        <span className="text-xs font-medium">
           {currentChunkIndex + 1}/{displayTotal}
         </span>
       </div>
@@ -203,23 +201,18 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
       {/* Checkpoint area — subtle muted background */}
       {chunk.checkpoint_type && activePrompt && (
         <div
-          className="rounded-[20px] p-6 md:p-8 space-y-5"
-          style={{
-            backgroundColor: "var(--bg-muted)",
-            borderLeft: `3px solid ${chunk.chunk_index === 0 && !state.submitted ? "var(--warning)" : "var(--accent)"}`,
-          }}
+          className="-[20px] p-6 md:p-8 space-y-5"
         >
           {/* Pretest hint */}
           {chunk.chunk_index === 0 && !state.submitted && (
             <p
-              className="text-xs px-4 py-2.5 rounded-xl"
-              style={{ backgroundColor: "var(--bg-surface)", color: "var(--text-muted)" }}
+              className="text-xs px-4 py-2.5"
             >
               {isZh ? "💡 先试试看——答错没关系，尝试本身就能帮助学习" : "💡 Try first -- getting it wrong is fine, the attempt itself helps you learn"}
             </p>
           )}
 
-          <p className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{activePrompt}</p>
+          <p className="text-sm font-semibold">{activePrompt}</p>
 
           {/* MCQ options — pill-shaped, no border */}
           {chunk.checkpoint_type === "mcq" && chunk.checkpoint_options && (
@@ -247,10 +240,9 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
                     key={opt.label}
                     onClick={() => !state.submitted && updateState({ selected: opt.label })}
                     disabled={state.submitted}
-                    className="w-full text-left px-5 py-3.5 rounded-[16px] text-sm cursor-pointer disabled:cursor-default transition-all"
-                    style={{ backgroundColor: bgColor, color: textColor }}
+                    className="w-full text-left px-5 py-3.5 -[16px] text-sm cursor-pointer disabled:cursor-default"
                   >
-                    <span className="font-medium mr-2" style={{ color: "var(--accent)" }}>{opt.label}.</span>{opt.text}
+                    <span className="font-medium mr-2">{opt.label}.</span>{opt.text}
                   </button>
                 );
               })}
@@ -285,7 +277,6 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
                 <button
                   onClick={() => setCurrentChunkIndex(i => i + 1)}
                   className="ui-button-ghost text-xs"
-                  style={{ color: "var(--text-muted)" }}
                 >
                   {isZh ? "跳过，继续" : "Skip, move on"}
                 </button>
@@ -296,14 +287,14 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
               <div className="flex items-center gap-2 flex-wrap">
                 {state.correct ? (
                   <>
-                    <Check size={16} style={{ color: "var(--success)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--success)" }}>
+                    <Check size={16} />
+                    <span className="text-sm font-medium">
                       {isZh ? "正确" : "Correct"}
                     </span>
                   </>
                 ) : chunk.checkpoint_type === "open" ? (
                   <div className="space-y-2">
-                    <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                    <span className="text-sm">
                       {isZh ? "参考答案：" : "Expected answer:"} <span className="font-semibold">{chunk.checkpoint_answer}</span>
                     </span>
                     {!state.correct && (
@@ -311,14 +302,12 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
                         <button
                           onClick={() => updateState({ correct: true })}
                           className="ui-button-ghost text-xs"
-                          style={{ color: "var(--success)" }}
                         >
                           {isZh ? "我答对了" : "I got it right"}
                         </button>
                         <button
                           onClick={() => updateState({ showRemediation: true, submitted: false, textAnswer: "" })}
                           className="ui-button-ghost text-xs"
-                          style={{ color: "var(--text-muted)" }}
                         >
                           {isZh ? "我需要复习" : "I need to review"}
                         </button>
@@ -327,8 +316,8 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
                   </div>
                 ) : (
                   <>
-                    <X size={16} style={{ color: "var(--danger)" }} />
-                    <span className="text-sm font-medium" style={{ color: "var(--danger)" }}>
+                    <X size={16} />
+                    <span className="text-sm font-medium">
                       {isZh ? "不太对" : "Not quite"} -- {chunk.checkpoint_answer}
                     </span>
                   </>
@@ -337,8 +326,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
 
               {!state.correct && state.attempts >= 3 && (
                 <div
-                  className="p-4 rounded-[16px] text-xs"
-                  style={{ backgroundColor: "var(--bg-surface)", color: "var(--text-muted)" }}
+                  className="p-4 -[16px] text-xs"
                 >
                   {isZh
                     ? "没关系，继续前进。这个知识点会在后续复习中重新出现。"
@@ -353,7 +341,7 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
       {/* Pretest: show content AFTER checkpoint submission */}
       {chunk.chunk_index === 0 && state.submitted && (
         <div className="ui-panel p-6 md:p-8">
-          <p className="ui-kicker mb-4" style={{ color: "var(--accent)" }}>
+          <p className="ui-kicker mb-4">
             {isZh ? "现在来学习" : "Now let's learn"}
           </p>
           <MarkdownRenderer content={activeContent} terms={chunk.key_terms} />

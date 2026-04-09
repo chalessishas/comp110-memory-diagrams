@@ -75,21 +75,16 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className="w-full rounded-lg"
-                style={{
-                  height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "var(--accent-muted)" : "var(--bg-muted)",
-                  minHeight: "3px",
-                }}
+                className="w-full"
               />
-              <span className="text-[9px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-muted)" }}>
+              <span className="text-[9px]">
                 {dayName}
               </span>
             </div>
           );
         })}
       </div>
-      <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+      <p className="text-xs mt-2">
         Week total: {formatDuration(weekTotal)}
       </p>
     </div>
@@ -212,12 +207,12 @@ export function StudyTrackerPanel({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <div className="ui-kicker mb-3">Time Track</div>
-          <h3 className="text-2xl" style={{ fontWeight: 600 }}>{title}</h3>
+          <h3 className="text-2xl">{title}</h3>
           <p className="ui-copy mt-2 max-w-2xl">{description}</p>
         </div>
         {track && activeMode && (
           <div
-            className="inline-flex items-center gap-2 rounded-xl px-4 py-2"
+            className="inline-flex items-center gap-2 px-4 py-2"
             style={modeTone(liveMode)}
           >
             <LiveIcon size={16} />
@@ -228,15 +223,14 @@ export function StudyTrackerPanel({
 
       <div className="grid grid-cols-1 gap-4 mt-6 md:grid-cols-[220px_minmax(0,1fr)]">
         <div
-          className="rounded-[20px] px-5 py-5"
-          style={{ backgroundColor: "var(--bg-muted)" }}
+          className="-[20px] px-5 py-5"
         >
-          <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
+          <div className="flex items-center gap-2 text-sm font-medium">
             <Activity size={16} />
             Today
           </div>
-          <p className="text-4xl tracking-tight mt-3" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formatDuration(summary.totalMs)}</p>
-          <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
+          <p className="text-4xl tracking-tight mt-3">{formatDuration(summary.totalMs)}</p>
+          <p className="text-xs mt-2">
             Recorded on this device today.
           </p>
         </div>
@@ -245,13 +239,12 @@ export function StudyTrackerPanel({
           {breakdown.map((item) => (
             <div
               key={item.key}
-              className="rounded-[16px] px-4 py-4"
-              style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-sm)" }}
+              className="-[16px] px-4 py-4"
             >
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{item.label}</p>
-                  <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-sm font-medium">{item.label}</p>
+                  <p className="text-xs mt-1">
                     {formatDuration(item.value)}
                   </p>
                 </div>
@@ -260,7 +253,6 @@ export function StudyTrackerPanel({
               <div className="ui-progress-track mt-3">
                 <div
                   className="ui-progress-bar"
-                  style={{ width: `${percent(summary.totalMs, item.value)}%`, backgroundColor: modeTone(item.key).backgroundColor }}
                 />
               </div>
             </div>
@@ -269,7 +261,7 @@ export function StudyTrackerPanel({
       </div>
 
       <div className="mt-6 pt-5">
-        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>This Week</p>
+        <p className="text-xs font-medium mb-3">This Week</p>
         <WeeklyMiniChart courseId={courseId} />
       </div>
     </div>

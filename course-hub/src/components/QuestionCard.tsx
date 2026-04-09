@@ -108,8 +108,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
       {/* Bookmark */}
       <button
         onClick={handleBookmarkToggle}
-        className="absolute top-5 right-5 p-2 cursor-pointer rounded-xl transition-colors"
-        style={{ color: "var(--accent)" }}
+        className="absolute top-5 right-5 p-2 cursor-pointer"
         title={isBookmarked ? "Remove from bank" : "Save to question bank"}
       >
         <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} />
@@ -118,7 +117,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
       {/* Question stem */}
       <div className="mb-8">
         <div className="ui-kicker mb-3">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
-        <p className="text-lg font-medium leading-relaxed" style={{ color: "var(--text-primary)" }}>{question.stem}</p>
+        <p className="text-lg font-medium leading-relaxed">{question.stem}</p>
       </div>
 
       {/* MCQ / T-F options — pill-shaped, no border */}
@@ -129,10 +128,10 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               key={opt.label}
               onClick={() => !submitted && setSelected(opt.label)}
               disabled={submitted}
-              className="w-full text-left px-5 py-4 rounded-[20px] text-sm transition-all cursor-pointer disabled:cursor-default"
+              className="w-full text-left px-5 py-4 -[20px] text-sm cursor-pointer disabled:cursor-default"
               style={getOptionStyles(opt.label)}
             >
-              <span className="inline-flex min-w-8 font-semibold mr-2" style={{ color: "var(--accent)" }}>{opt.label}.</span>
+              <span className="inline-flex min-w-8 font-semibold mr-2">{opt.label}.</span>
               {opt.text}
             </button>
           ))}
@@ -164,11 +163,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
         <div className="mt-6 space-y-4">
           {/* Correct / wrong feedback — soft bg, no harsh border */}
           <div
-            className="flex items-center gap-3 rounded-[20px] px-5 py-4"
-            style={{
-              backgroundColor: isCorrect ? "var(--accent-light)" : "var(--bg-muted)",
-              color: isCorrect ? "var(--success)" : "var(--danger)",
-            }}
+            className="flex items-center gap-3 -[20px] px-5 py-4"
           >
             {isCorrect ? (
               <>
@@ -188,12 +183,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           {/* Explanation — subtle left accent bar */}
           {revealedExplanation && (
             <div
-              className="text-sm py-4 px-5 rounded-[16px]"
-              style={{
-                backgroundColor: "var(--bg-muted)",
-                color: "var(--text-secondary)",
-                borderLeft: "3px solid var(--accent)",
-              }}
+              className="text-sm py-4 px-5 -[16px]"
             >
               {revealedExplanation}
             </div>
@@ -201,7 +191,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
           {/* Feedback pills */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] mr-1" style={{ color: "var(--text-muted)" }}>{t("questionCard.report")}</span>
+            <span className="text-[11px] mr-1">{t("questionCard.report")}</span>
             {[
               { reason: "wrong_answer", label: t("questionCard.reportWrong") },
               { reason: "unclear", label: t("questionCard.reportUnclear") },
@@ -219,11 +209,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
                   setFeedbackGiven(fb.reason);
                 }}
                 disabled={!!feedbackGiven}
-                className="px-2.5 py-1 rounded-lg text-[11px] cursor-pointer disabled:opacity-40 transition-colors"
-                style={{
-                  backgroundColor: feedbackGiven === fb.reason ? "var(--accent-light)" : "var(--bg-muted)",
-                  color: "var(--text-muted)",
-                }}
+                className="px-2.5 py-1 text-[11px] cursor-pointer disabled:opacity-40"
               >
                 {fb.label}
               </button>

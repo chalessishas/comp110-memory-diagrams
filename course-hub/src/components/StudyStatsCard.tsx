@@ -39,12 +39,11 @@ export function StudyStatsCard() {
 
   return (
     <div
-      className="rounded-[20px] p-6"
-      style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-card)" }}
+      className="-[20px] p-6"
     >
       <div className="flex items-center gap-2 mb-4">
-        <Clock3 size={16} style={{ color: "var(--text-muted)" }} />
-        <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Study Time</h3>
+        <Clock3 size={16} />
+        <h3 className="text-sm font-medium">Study Time</h3>
       </div>
 
       <div className="flex items-end gap-1.5 h-20 mb-3">
@@ -54,14 +53,9 @@ export function StudyStatsCard() {
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
               <div
-                className="w-full rounded-lg transition-all"
-                style={{
-                  height: `${height}%`,
-                  backgroundColor: isToday ? "var(--accent)" : day.totalMs > 0 ? "var(--accent-muted)" : "var(--bg-muted)",
-                  minHeight: "3px",
-                }}
+                className="w-full"
               />
-              <span className="text-[10px]" style={{ color: isToday ? "var(--text-primary)" : "var(--text-muted)" }}>
+              <span className="text-[10px]">
                 {formatShortDate(day.day)}
               </span>
             </div>
@@ -71,42 +65,42 @@ export function StudyStatsCard() {
 
       <div className="grid grid-cols-3 gap-3 mt-4">
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Today</p>
-          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(todayMs)}</p>
+          <p className="text-xs">Today</p>
+          <p className="text-lg">{formatDuration(todayMs)}</p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>This Week</p>
-          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(weekly.reduce((s, d) => s + d.totalMs, 0))}</p>
+          <p className="text-xs">This Week</p>
+          <p className="text-lg">{formatDuration(weekly.reduce((s, d) => s + d.totalMs, 0))}</p>
         </div>
         <div>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>Daily Avg</p>
-          <p className="text-lg" style={{ fontWeight: 600 }}>{formatDuration(allTime.avgPerDay)}</p>
+          <p className="text-xs">Daily Avg</p>
+          <p className="text-lg">{formatDuration(allTime.avgPerDay)}</p>
         </div>
       </div>
 
       {allTime.totalMs > 60_000 && (
         <div className="mt-5 pt-4">
-          <p className="text-xs mb-2" style={{ color: "var(--text-muted)" }}>Time Distribution</p>
+          <p className="text-xs mb-2">Time Distribution</p>
           <div className="ui-progress-track">
             {allTime.byMode.solving > 0 && (
-              <div style={{ width: `${(allTime.byMode.solving / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--accent)", display: "inline-block" }} />
+              <div />
             )}
             {allTime.byMode.reviewing > 0 && (
-              <div style={{ width: `${(allTime.byMode.reviewing / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--warning)", display: "inline-block" }} />
+              <div />
             )}
             {allTime.byMode.studying > 0 && (
-              <div style={{ width: `${(allTime.byMode.studying / allTime.totalMs) * 100}%`, height: "100%", backgroundColor: "var(--success)", display: "inline-block" }} />
+              <div />
             )}
           </div>
           <div className="flex gap-3 mt-2">
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--accent)" }} /> Solving
+            <span className="text-[10px] flex items-center gap-1">
+              <span className="w-2 h-2" /> Solving
             </span>
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--warning)" }} /> Reviewing
+            <span className="text-[10px] flex items-center gap-1">
+              <span className="w-2 h-2" /> Reviewing
             </span>
-            <span className="text-[10px] flex items-center gap-1" style={{ color: "var(--text-muted)" }}>
-              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: "var(--success)" }} /> Studying
+            <span className="text-[10px] flex items-center gap-1">
+              <span className="w-2 h-2" /> Studying
             </span>
           </div>
         </div>

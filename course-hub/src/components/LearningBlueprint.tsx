@@ -45,7 +45,7 @@ export function LearningBlueprint({
     return (
       <div className="ui-panel p-6 md:p-8">
         <div className="ui-kicker mb-3">Study Flow</div>
-        <h2 className="text-2xl" style={{ fontWeight: 600 }}>Learn from the outline.</h2>
+        <h2 className="text-2xl">Learn from the outline.</h2>
         <p className="ui-copy mt-2 max-w-2xl">
           Once the course has outline nodes, tasks, and questions, this page turns them into a concrete study sequence.
         </p>
@@ -60,7 +60,7 @@ export function LearningBlueprint({
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="ui-kicker mb-3">Study Flow</div>
-          <h2 className="text-2xl" style={{ fontWeight: 600 }}>Learn from the outline, not just look at it.</h2>
+          <h2 className="text-2xl">Learn from the outline, not just look at it.</h2>
           <p className="ui-copy mt-2 max-w-3xl">
             Each knowledge point turns into a small loop: learn the concept, do reps, review mistakes, then move on.
           </p>
@@ -78,30 +78,22 @@ export function LearningBlueprint({
           return (
             <div
               key={item.id}
-              className="rounded-[20px] p-5"
-              style={{ backgroundColor: "var(--bg-muted)", boxShadow: "var(--shadow-sm)" }}
+              className="-[20px] p-5"
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
+                  <p className="text-[11px] font-medium tracking-wide">
                     {index === 0 ? "Start Here" : `Step ${index + 1}`}
                   </p>
-                  <h3 className="text-lg mt-2" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{item.title}</h3>
+                  <h3 className="text-lg mt-2">{item.title}</h3>
                   {item.content && (
-                    <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
+                    <p className="text-sm mt-2">
                       {item.content}
                     </p>
                   )}
                 </div>
                 <span
-                  className="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium"
-                  style={{
-                    backgroundColor: item.masteryLevel === "mastered"
-                      ? masteryColors[item.masteryLevel]
-                      : "var(--bg-surface)",
-                    color: item.masteryLevel === "mastered" ? "var(--bg-surface)" : "var(--text-primary)",
-                    boxShadow: "var(--shadow-sm)",
-                  }}
+                  className="shrink-0 px-3 py-1.5 text-xs font-medium"
                 >
                   {masteryLabels[item.masteryLevel]}
                 </span>
@@ -114,14 +106,13 @@ export function LearningBlueprint({
               </div>
 
               <div
-                className="rounded-[16px] px-4 py-4 mt-4"
-                style={{ backgroundColor: "var(--bg-surface)", boxShadow: "var(--shadow-sm)" }}
+                className="-[16px] px-4 py-4 mt-4"
               >
-                <div className="flex items-center gap-2 text-xs font-medium" style={{ color: "var(--text-muted)" }}>
+                <div className="flex items-center gap-2 text-xs font-medium">
                   <TaskIcon size={14} />
                   {item.nextTaskType ? taskLabels[item.nextTaskType] : "Next Move"}
                 </div>
-                <p className="text-sm mt-2" style={{ color: "var(--text-primary)" }}>{item.nextAction}</p>
+                <p className="text-sm mt-2">{item.nextAction}</p>
               </div>
             </div>
           );

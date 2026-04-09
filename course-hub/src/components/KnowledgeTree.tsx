@@ -36,7 +36,7 @@ function NodeCircle({ node, x, y }: { node: KnowledgeNodeData; x: number; y: num
   const r = style.size / 2;
 
   return (
-    <g className="cursor-pointer" style={{ opacity: style.opacity }}>
+    <g className="cursor-pointer">
       {node.mastery !== "untested" && (
         <circle cx={x} cy={y} r={r + 4} fill="none" stroke={style.bg} strokeWidth={1.5} opacity={0.2}>
           {node.mastery === "mastered" && (
@@ -108,7 +108,7 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
   if (nodes.length === 0) {
     return (
       <div className="ui-empty">
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm">
           No knowledge points yet. Create a course to grow your tree.
         </p>
       </div>
@@ -131,28 +131,27 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
       <div className="flex items-center gap-4 mb-4 flex-wrap">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-mastered)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Mastered ({mastered})</span>
+            <div className="w-3 h-3" />
+            <span className="text-xs">Mastered ({mastered})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-practiced)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Reviewing ({reviewing})</span>
+            <div className="w-3 h-3" />
+            <span className="text-xs">Reviewing ({reviewing})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-exposed)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Weak ({weak})</span>
+            <div className="w-3 h-3" />
+            <span className="text-xs">Weak ({weak})</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-unseen)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Not started ({untested})</span>
+            <div className="w-3 h-3" />
+            <span className="text-xs">Not started ({untested})</span>
           </div>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{Math.round(overallProgress)}% mastered</span>
+          <span className="text-xs font-medium">{Math.round(overallProgress)}% mastered</span>
           <div className="ui-progress-track w-24">
             <div
               className="ui-progress-bar"
-              style={{ width: `${overallProgress}%`, backgroundColor: "var(--mastery-mastered)", transition: "width 500ms ease" }}
             />
           </div>
         </div>

@@ -33,10 +33,10 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
   if (loading || patterns.length === 0) return null;
 
   return (
-    <div className="mb-6 p-5 rounded-[20px]" style={{ backgroundColor: "var(--bg-muted)" }}>
+    <div className="mb-6 p-5 -[20px]">
       <div className="flex items-center gap-2 mb-4">
-        <TrendingDown size={16} style={{ color: "var(--danger)" }} />
-        <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
+        <TrendingDown size={16} />
+        <h3 className="text-sm font-medium">
           {isZh ? "\u8584\u5f31\u77e5\u8bc6\u70b9" : "Weak Spots"}
         </h3>
       </div>
@@ -50,12 +50,12 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
             <div key={p.kp_id} className="flex items-center gap-3">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-xs truncate font-medium" style={{ color: "var(--text-primary)" }}>
+                  <p className="text-xs truncate font-medium">
                     {p.kp_title}
                   </p>
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                    {pct >= 50 && <AlertTriangle size={10} style={{ color: "var(--danger)" }} />}
-                    <span className="text-[10px]" style={{ color: pct >= 50 ? "var(--danger)" : "var(--text-muted)", fontFamily: "inherit" }}>
+                    {pct >= 50 && <AlertTriangle size={10} />}
+                    <span className="text-[10px]">
                       {p.wrong_attempts}/{p.total_attempts}
                     </span>
                   </div>
@@ -63,11 +63,10 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
                 <div className="ui-progress-track">
                   <div
                     className="ui-progress-bar"
-                    style={{ width: `${pct}%`, backgroundColor: barColor }}
                   />
                 </div>
               </div>
-              <span className="text-xs font-medium w-10 text-right" style={{ color: barColor }}>
+              <span className="text-xs font-medium w-10 text-right">
                 {pct}%
               </span>
             </div>
@@ -75,7 +74,7 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
         })}
       </div>
 
-      <p className="text-[10px] mt-4" style={{ color: "var(--text-muted)" }}>
+      <p className="text-[10px] mt-4">
         {isZh ? "\u9519\u8bef\u7387 = \u7b54\u9519\u6b21\u6570 / \u603b\u7b54\u9898\u6b21\u6570\uff0c\u6309\u77e5\u8bc6\u70b9\u805a\u5408" : "Error rate = wrong / total attempts, grouped by knowledge point"}
       </p>
     </div>

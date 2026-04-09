@@ -38,24 +38,24 @@ export default function QuestionBankPage() {
 
   if (loading) return (
     <div className="p-8">
-      <Loader2 className="animate-spin mx-auto mt-16" style={{ color: "var(--text-secondary)" }} />
+      <Loader2 className="animate-spin mx-auto mt-16" />
     </div>
   );
 
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">
-        <Bookmark size={20} style={{ color: "var(--accent)" }} />
+        <Bookmark size={20} />
         <h1 className="text-2xl font-semibold tracking-wide">{t("bank.title")}</h1>
       </div>
-      <p className="mb-8 text-sm" style={{ color: "var(--text-secondary)" }}>
+      <p className="mb-8 text-sm">
         {t("bank.subtitle")}
       </p>
 
       {bookmarks.length === 0 ? (
         <div className="ui-empty">
-          <p style={{ color: "var(--text-secondary)" }}>{t("bank.noSaved")}</p>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          <p>{t("bank.noSaved")}</p>
+          <p className="text-sm mt-1">
             {t("bank.noSavedDesc")}
           </p>
         </div>
@@ -68,7 +68,7 @@ export default function QuestionBankPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
-                  <p className="text-xs mb-2 font-medium" style={{ color: "var(--text-secondary)" }}>
+                  <p className="text-xs mb-2 font-medium">
                     {bm.questions.courses?.title || "Unknown course"}
                   </p>
                   <p className="text-sm">{bm.questions.stem}</p>
@@ -76,22 +76,22 @@ export default function QuestionBankPage() {
                     <span className="ui-badge">
                       {bm.questions.type.replace("_", " ")}
                     </span>
-                    <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                    <span className="text-xs">
                       {t("bank.answer")} {bm.questions.answer}
                     </span>
                   </div>
                   {bm.questions.explanation && (
-                    <p className="text-xs mt-3 p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+                    <p className="text-xs mt-3 p-3">
                       {bm.questions.explanation}
                     </p>
                   )}
                 </div>
                 <button
                   onClick={() => removeBookmark(bm.questions.id)}
-                  className="p-1.5 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-1.5 cursor-pointer opacity-0 group-hover:opacity-100"
                   title="Remove"
                 >
-                  <Trash2 size={14} style={{ color: "var(--danger)" }} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             </div>

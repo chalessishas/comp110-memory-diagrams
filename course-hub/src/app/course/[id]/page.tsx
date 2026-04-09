@@ -65,7 +65,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
       <div className="mb-8">
         <h1 className="text-2xl font-semibold tracking-wide">{course.title}</h1>
         {course.professor && (
-          <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>{course.professor}</p>
+          <p className="text-sm mt-2">{course.professor}</p>
         )}
       </div>
       <CourseTabs courseId={id} />

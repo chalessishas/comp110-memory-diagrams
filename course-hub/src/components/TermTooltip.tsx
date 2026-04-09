@@ -41,43 +41,25 @@ export function TermTooltip({ term, children }: TermTooltipProps) {
       {/* Trigger — dotted underline in accent color */}
       <span
         onClick={() => setOpen(!open)}
-        className="cursor-pointer transition-colors"
-        style={{
-          borderBottom: "1.5px dotted var(--accent)",
-          color: "inherit",
-        }}
+        className="cursor-pointer"
       >
         {children}
       </span>
 
-      {/* Popup — bg-surface, rounded-xl, subtle shadow, no border */}
+      {/* Popup — bg-surface, , subtle , no border */}
       {open && (
         <div
           ref={popRef}
-          className="absolute z-50 px-5 py-4 rounded-xl text-sm max-w-xs"
-          style={{
-            backgroundColor: "var(--bg-surface)",
-            boxShadow: "0 4px 16px var(--accent-light), 0 1px 4px var(--accent-light)",
-            [above ? "bottom" : "top"]: "calc(100% + 8px)",
-            left: "50%",
-            transform: "translateX(-50%)",
-            minWidth: "200px",
-          }}
+          className="absolute z-50 px-5 py-4 text-sm max-w-xs"
         >
           {/* Arrow */}
           <div
             className="absolute w-2.5 h-2.5 rotate-45"
-            style={{
-              backgroundColor: "var(--bg-surface)",
-              [above ? "bottom" : "top"]: "-5px",
-              left: "50%",
-              transform: "translateX(-50%) rotate(45deg)",
-            }}
           />
-          <p className="font-semibold text-xs mb-1.5" style={{ color: "var(--accent)" }}>
+          <p className="font-semibold text-xs mb-1.5">
             {term.term}
           </p>
-          <p className="text-xs leading-relaxed" style={{ color: "var(--text-muted)" }}>
+          <p className="text-xs leading-relaxed">
             {term.definition}
           </p>
         </div>

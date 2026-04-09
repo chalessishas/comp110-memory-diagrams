@@ -67,7 +67,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   if (loading) return (
     <div>
       <CourseTabs courseId={id} />
-      <Loader2 className="animate-spin mx-auto mt-16" style={{ color: "var(--text-secondary)" }} />
+      <Loader2 className="animate-spin mx-auto mt-16" />
     </div>
   );
 
@@ -94,8 +94,8 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
 
       {uploads.length === 0 ? (
         <div className="ui-empty">
-          <p className="mb-2" style={{ color: "var(--text-secondary)" }}>{t("library.noFiles")}</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="mb-2">{t("library.noFiles")}</p>
+          <p className="text-sm">
             {t("library.noFilesDesc")}
           </p>
         </div>
@@ -106,16 +106,16 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
             return (
               <div key={upload.id}>
                 <div
-                  className="flex items-center gap-3 px-4 py-3.5 rounded-[20px] group ui-panel"
+                  className="flex items-center gap-3 px-4 py-3.5 -[20px] group ui-panel"
                 >
-                  <Icon size={20} style={{ color: "var(--text-secondary)" }} />
+                  <Icon size={20} />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{upload.file_name}</p>
-                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+                    <p className="text-xs">
                       {typeLabels[upload.upload_type] ?? "File"} · {formatDate(upload.created_at)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
                     {(upload.file_type === "pdf" || upload.file_type === "image") && !upload.parsed_content && (
                       <button
                         onClick={async () => {
@@ -134,13 +134,13 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                           setExtracting(null);
                         }}
                         disabled={extracting === upload.id}
-                        className="p-2 cursor-pointer rounded-lg hover:opacity-80"
+                        className="p-2 cursor-pointer hover:opacity-80"
                         title="Extract key content with AI"
                       >
                         {extracting === upload.id ? (
-                          <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+                          <Loader2 size={15} className="animate-spin" />
                         ) : (
-                          <Sparkles size={15} style={{ color: "var(--accent)" }} />
+                          <Sparkles size={15} />
                         )}
                       </button>
                     )}
@@ -149,22 +149,22 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                         href={upload.download_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 cursor-pointer rounded-lg hover:opacity-80"
+                        className="p-2 cursor-pointer hover:opacity-80"
                         title="Download"
                       >
-                        <Download size={15} style={{ color: "var(--text-secondary)" }} />
+                        <Download size={15} />
                       </a>
                     )}
                     <button
                       onClick={() => handleDelete(upload.id)}
                       disabled={deleting === upload.id}
-                      className="p-2 cursor-pointer rounded-lg hover:opacity-80"
+                      className="p-2 cursor-pointer hover:opacity-80"
                       title="Delete"
                     >
                       {deleting === upload.id ? (
-                        <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
+                        <Loader2 size={15} className="animate-spin" />
                       ) : (
-                        <Trash2 size={15} style={{ color: "var(--danger)" }} />
+                        <Trash2 size={15} />
                       )}
                     </button>
                   </div>
@@ -172,9 +172,9 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                 {upload.parsed_content != null && (
                   <div className="mt-2 ml-9 space-y-2">
                     {(upload.parsed_content as any).sections?.map((section: any, i: number) => (
-                      <div key={i} className="p-3 rounded-xl text-xs" style={{ backgroundColor: "var(--bg-muted)" }}>
+                      <div key={i} className="p-3 text-xs">
                         <p className="font-medium">{section.title}</p>
-                        <p className="mt-1" style={{ color: "var(--text-secondary)" }}>{section.summary}</p>
+                        <p className="mt-1">{section.summary}</p>
                         {section.key_concepts?.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
                             {section.key_concepts.map((c: string, j: number) => (

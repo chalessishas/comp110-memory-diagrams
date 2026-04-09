@@ -16,13 +16,9 @@ function NavLink({ href, label, icon: Icon, pathname }: { href: string; label: s
   return (
     <Link
       href={href}
-      className={`flex items-center gap-2 px-3.5 py-1.5 text-sm transition-all whitespace-nowrap rounded-xl ${
+      className={`flex items-center gap-2 px-3.5 py-1.5 text-sm whitespace-nowrap ${
         isActive ? "font-semibold" : "font-medium"
       }`}
-      style={{
-        backgroundColor: isActive ? "var(--accent-light)" : "transparent",
-        color: isActive ? "var(--accent)" : "var(--text-muted)",
-      }}
     >
       <Icon size={15} strokeWidth={isActive ? 2.2 : 1.8} />
       {label}
@@ -55,11 +51,6 @@ export function Sidebar({
   return (
     <header
       className="sticky top-0 z-40 ui-sidebar-wrapper"
-      style={{
-        backgroundColor: "color-mix(in srgb, var(--bg-surface) 85%, transparent)",
-        backdropFilter: "blur(20px) saturate(1.2)",
-        WebkitBackdropFilter: "blur(20px) saturate(1.2)",
-      }}
     >
       <div className="max-w-7xl mx-auto px-5 md:px-8">
         {/* Main bar */}
@@ -68,14 +59,13 @@ export function Sidebar({
           <Link href="/dashboard" className="flex items-center gap-2.5 shrink-0">
             <span
               className="text-base font-semibold"
-              style={{ color: "var(--text-primary)", letterSpacing: "-0.01em" }}
             >
               CourseHub
             </span>
           </Link>
 
           {/* Desktop nav — center pills */}
-          <nav className="hidden md:flex items-center gap-1 rounded-2xl px-1.5 py-1" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <nav className="hidden md:flex items-center gap-1 px-1.5 py-1">
             <NavLink href="/dashboard" label={t("nav.dashboard")} icon={LayoutDashboard} pathname={pathname} />
             <NavLink href="/new-course" label={t("nav.newCourse")} icon={Plus} pathname={pathname} />
             <NavLink href="/dashboard/bank" label={t("nav.questionBank")} icon={Bookmark} pathname={pathname} />
@@ -88,8 +78,7 @@ export function Sidebar({
             {isAuthenticated ? (
               <button
                 onClick={handleSignOut}
-                className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium cursor-pointer transition-all rounded-xl"
-                style={{ color: "var(--text-muted)" }}
+                className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium cursor-pointer"
               >
                 <LogOut size={15} strokeWidth={1.8} />
                 {t("nav.signOut")}
@@ -97,8 +86,7 @@ export function Sidebar({
             ) : (
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-5 py-1.5 text-sm font-medium rounded-xl transition-all"
-                style={{ backgroundColor: "var(--accent)", color: "white" }}
+                className="flex items-center gap-2 px-5 py-1.5 text-sm font-medium"
               >
                 <LogIn size={15} />
                 {t("nav.signIn")}
@@ -109,8 +97,7 @@ export function Sidebar({
           {/* Mobile hamburger */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 cursor-pointer rounded-xl transition-colors"
-            style={{ color: "var(--text-primary)" }}
+            className="md:hidden p-2 cursor-pointer"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -130,16 +117,14 @@ export function Sidebar({
               {isAuthenticated ? (
                 <button
                   onClick={handleSignOut}
-                  className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium cursor-pointer rounded-xl"
-                  style={{ color: "var(--text-muted)" }}
+                  className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium cursor-pointer"
                 >
                   <LogOut size={15} strokeWidth={1.8} /> {t("nav.signOut")}
                 </button>
               ) : (
                 <Link
                   href="/login"
-                  className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium rounded-xl"
-                  style={{ color: "var(--accent)" }}
+                  className="flex items-center gap-2 px-3.5 py-1.5 text-sm font-medium"
                 >
                   <LogIn size={15} /> {t("nav.signIn")}
                 </Link>

@@ -14,7 +14,7 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
   if (data.length === 0) {
     return (
       <div className="ui-empty">
-        <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+        <p className="text-sm">
           No knowledge points to track yet.
         </p>
       </div>
@@ -32,7 +32,7 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
     <div className="ui-panel p-5 md:p-6">
       <div className="mb-6">
         <div className="ui-kicker mb-3">Progress</div>
-        <h3 className="text-2xl" style={{ fontWeight: 600 }}>Knowledge Point Mastery</h3>
+        <h3 className="text-2xl">Knowledge Point Mastery</h3>
         <p className="ui-copy mt-2">
           A grayscale map of what feels solid, shaky, or still untouched.
         </p>
@@ -42,11 +42,10 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
         {(["mastered", "reviewing", "weak", "untested"] as MasteryLevel[]).map((level) => (
           <div
             key={level}
-            className="flex items-center gap-2 rounded-xl px-3 py-2"
-            style={{ backgroundColor: "var(--bg-muted)" }}
+            className="flex items-center gap-2 px-3 py-2"
           >
-            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: masteryColors[level] }} />
-            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
+            <div className="w-3 h-3" />
+            <span className="text-xs">
               {masteryLabels[level]} ({grouped[level].length})
             </span>
           </div>
@@ -57,12 +56,10 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
         {data.map((item) => (
           <div key={item.node.id} className="relative group">
             <div
-              className="w-12 h-12 rounded-xl transition-transform hover:scale-105"
-              style={{ backgroundColor: masteryColors[item.level] }}
+              className="w-12 h-12"
             />
             <div
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 rounded-xl text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10"
-              style={{ backgroundColor: "var(--bg-surface)", color: "var(--text-primary)", boxShadow: "var(--shadow-md)" }}
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-3 py-2 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10"
             >
               {item.node.title}
               {item.total > 0 && ` · ${Math.round(item.rate * 100)}% (${item.total} attempts)`}

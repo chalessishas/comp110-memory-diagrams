@@ -47,7 +47,7 @@ export default async function DashboardPage() {
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="flex h-12 w-12 items-center justify-center mb-4">
               <Sparkles size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.pasteAny" /></h2>
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="flex h-12 w-12 items-center justify-center mb-4">
               <ShieldCheck size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.saveReady" /></h2>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
             </p>
           </div>
           <div className="ui-panel p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl mb-4" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="flex h-12 w-12 items-center justify-center mb-4">
               <Plus size={20} />
             </div>
             <h2 className="text-lg font-semibold"><T k="dashboard.createAnytime" /></h2>
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
       {activeCourses.length === 0 ? (
         <div className="ui-empty">
           <p className="text-lg font-medium mb-2"><T k="dashboard.noCourses" /></p>
-          <p className="mb-6" style={{ color: "var(--text-secondary)" }}>
+          <p className="mb-6">
             <T k="dashboard.uploadToStart" />
           </p>
           <Link
@@ -131,12 +131,12 @@ export default async function DashboardPage() {
       {archivedCourses.length > 0 && (
         <details className="ui-panel mt-10 p-6">
           <summary className="flex items-center gap-3 cursor-pointer text-sm font-semibold list-none">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="flex h-10 w-10 items-center justify-center">
               <Archive size={16} />
             </div>
             <div>
               <span className="block"><T k="dashboard.archived" /></span>
-              <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+              <span className="text-xs font-medium">
                 {archivedCourses.length} <T k="dashboard.archivedCount" />
               </span>
             </div>
