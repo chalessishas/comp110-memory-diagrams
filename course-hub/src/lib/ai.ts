@@ -30,13 +30,33 @@ function extractJSON(text: string): string | null {
     .replace(/<think>[\s\S]*?<\/think>/g, "")
     .replace(/```(?:json)?\s*/g, "")
     .replace(/```\s*/g, "");
-  // Try to find JSON object
-  const objMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (objMatch) return objMatch[0];
-  // Try array
-  const arrMatch = cleaned.match(/\[[\s\S]*\]/);
-  if (arrMatch) return arrMatch[0];
-  return null;
+
+  // Balanced-brace extraction: find the first { or [ and match to its closing pair
+  const start = cleaned.search(/[{\[]/);
+  if (start === -1) return null;
+
+  const open = cleaned[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (escape) { escape = false; continue; }
+    if (ch === "\\") { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === open || ch === (open === "{" ? "[" : "{")) depth++;
+    if (ch === close || ch === (close === "}" ? "]" : "}")) depth--;
+    if (depth === 0) return cleaned.slice(start, i + 1);
+  }
+
+  // Fallback: greedy regex (last resort)
+  const fallback = open === "{"
+    ? cleaned.match(/\{[\s\S]*\}/)
+    : cleaned.match(/\[[\s\S]*\]/);
+  return fallback?.[0] ?? null;
 }
 
 // ─── Pipeline 1: Syllabus → Course Outline ───
