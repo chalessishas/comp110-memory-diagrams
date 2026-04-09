@@ -107,6 +107,18 @@ const optionsField = z.any().transform((val) => {
   return null;
 }).nullable().default(null);
 
+// Lenient bloom_level: normalize AI output to valid Bloom category, default "understand"
+const bloomLevelField = z.string().transform((val) => {
+  const v = val.toLowerCase();
+  if (v.includes("create")) return "create" as const;
+  if (v.includes("evaluat")) return "evaluate" as const;
+  if (v.includes("analyz") || v.includes("analyse")) return "analyze" as const;
+  if (v.includes("apply")) return "apply" as const;
+  if (v.includes("understand")) return "understand" as const;
+  if (v.includes("remember") || v.includes("recall")) return "remember" as const;
+  return "understand" as const;
+}).default("understand");
+
 export const parsedQuestionSchema = z.object({
   type: questionType,
   stem: z.string().min(1),
@@ -114,6 +126,7 @@ export const parsedQuestionSchema = z.object({
   answer: z.string().min(1),
   explanation: z.string().nullable().default(null),
   difficulty: difficultyField,
+  bloom_level: bloomLevelField,
 });
 
 export const attemptCreateSchema = z.object({

@@ -51,6 +51,8 @@ export interface Question {
   stem: string;
   options: { label: string; text: string }[] | null;
   difficulty: number;
+  flagged: boolean;
+  flagged_reason: string | null;
   created_at: string;
 }
 
@@ -86,6 +88,8 @@ export interface ParsedOutlineNode {
   children: ParsedOutlineNode[];
 }
 
+export type BloomLevel = "remember" | "understand" | "apply" | "analyze" | "evaluate" | "create";
+
 export interface ParsedQuestion {
   type: QuestionType;
   stem: string;
@@ -93,6 +97,7 @@ export interface ParsedQuestion {
   answer: string;
   explanation: string | null;
   difficulty: number;
+  bloom_level: BloomLevel;
 }
 
 export type TaskType = "read" | "practice" | "review";

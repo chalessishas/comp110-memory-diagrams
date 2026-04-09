@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+const AUTO_FLAG_THRESHOLD = 2; // flag after N independent "wrong_answer" reports
+
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
@@ -20,5 +22,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+
+  // Auto-flag: if "wrong_answer" reports reach threshold, flag the question immediately
+  if (reason === "wrong_answer") {
+    const { count } = await supabase
+      .from("question_feedback")
+      .select("id", { count: "exact", head: true })
+      .eq("question_id", id)
+      .eq("reason", "wrong_answer");
+
+    if (count && count >= AUTO_FLAG_THRESHOLD) {
+      await supabase
+        .from("questions")
+        .update({
+          flagged: true,
+          flagged_reason: `${count} users reported wrong answer`,
+          flagged_at: new Date().toISOString(),
+        })
+        .eq("id", id)
+        .eq("flagged", false); // idempotent: only flag if not already flagged
+    }
+  }
+
+  return NextResponse.json({ ...data, auto_flagged: reason === "wrong_answer" });
 }

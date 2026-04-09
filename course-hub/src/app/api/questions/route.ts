@@ -14,10 +14,12 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Never send answer/explanation to client — revealed only after attempt submission
+  // Exclude flagged questions (reported wrong / auto-detected anomalies)
   const { data, error } = await supabase
     .from("questions")
-    .select("id, course_id, source_upload_id, knowledge_point_id, type, stem, options, difficulty, created_at")
+    .select("id, course_id, source_upload_id, knowledge_point_id, type, stem, options, difficulty, flagged, flagged_reason, created_at")
     .eq("course_id", courseId)
+    .eq("flagged", false)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
