@@ -38,8 +38,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     // No body is fine — fire-and-forget calls don't send body
   }
 
-  // Dedup: max 1 generate per course per 30s
-  if (!await checkRateLimit(`generate:${id}`, 1, 30_000)) {
+  // Dedup: max 1 generate per user per course per 30s
+  if (!await checkRateLimit(`generate:${user.id}:${id}`, 1, 30_000)) {
     return NextResponse.json({ error: "Generation already in progress" }, { status: 429 });
   }
 
