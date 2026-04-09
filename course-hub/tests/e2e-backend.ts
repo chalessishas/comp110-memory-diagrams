@@ -45,20 +45,26 @@ function cookie() {
   return chunks.map((c, i) => `${key}.${i}=${c}`).join("; ");
 }
 
-async function api(method: string, path: string, body?: unknown) {
+async function api(method: string, path: string, body?: unknown, timeoutMs = 300_000) {
   const url = `${BASE}${path}`;
-  const res = await fetch(url, {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: cookie(),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const text = await res.text();
-  let data: unknown;
-  try { data = JSON.parse(text); } catch { data = text; }
-  return { status: res.status, data, ok: res.ok };
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookie(),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    const text = await res.text();
+    let data: unknown;
+    try { data = JSON.parse(text); } catch { data = text; }
+    return { status: res.status, data, ok: res.ok };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return { status: 0, data: { error: `fetch failed: ${msg}` }, ok: false };
+  }
 }
 
 function log(label: string, result: { status: number; data: unknown; ok: boolean }) {
