@@ -51,6 +51,10 @@
 
 STATUS.md 格式和规则见全局 CLAUDE.md 的「文档三层架构」。不要在这里重复定义。
 
+## 踩坑经验
+
+所有跨项目的踩坑教训集中记录在 [`docs/experience.md`](docs/experience.md)。新对话开始前扫一遍，踩到新坑立即追加。
+
 ## Research 规则
 
 ### 执行前必须调研
