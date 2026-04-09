@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { stripThinkBlocks } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 const qwen = createOpenAI({
@@ -18,6 +19,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await checkRateLimit(`exam-scope:${user.id}`, 5, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
 
   const { scope_text } = await request.json();
   if (!scope_text || typeof scope_text !== "string") {

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { generateText, Output } from "ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 
@@ -24,6 +25,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await checkRateLimit(`extract:${user.id}`, 10, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
 
   const { storagePath } = await request.json();
   if (!storagePath) return NextResponse.json({ error: "storagePath required" }, { status: 400 });

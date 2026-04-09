@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateStudyTasks, generateQuestionsFromOutline, stripThinkBlocks } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -7,6 +8,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!await checkRateLimit(`regenerate:${user.id}`, 3, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
+  }
 
   const { language } = await request.json();
   const lang = language === "zh" ? "zh" : "en";
