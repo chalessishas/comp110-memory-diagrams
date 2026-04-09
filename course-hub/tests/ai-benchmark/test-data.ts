@@ -32,7 +32,7 @@ export type BloomLevel =
   | "evaluate"    // justify, critique
   | "create";     // design, construct
 
-export type Subject = "calculus" | "physics" | "cs" | "economics" | "psychology" | "biology";
+export type Subject = "calculus" | "physics" | "cs" | "economics" | "psychology" | "biology" | "cn_history" | "cn_literature";
 
 // ─── Subject 1: Calculus II ───────────────────────────────────
 
@@ -906,6 +906,307 @@ const biology: TestKnowledgePoint[] = [
   },
 ];
 
+// ─── Subject 7: 中国近现代史 (Chinese-only subject) ────────────
+// Tests Chinese-specific domain knowledge and Chinese output quality
+
+const cn_history: TestKnowledgePoint[] = [
+  {
+    id: "cnhist-001",
+    subject: "cn_history",
+    courseTitle: "中国近现代史纲要",
+    title: "鸦片战争与《南京条约》",
+    content: "鸦片战争背景、经过、《南京条约》内容及其对中国社会的影响",
+    groundTruth: {
+      correctFacts: [
+        "鸦片战争时间：1840-1842年",
+        "《南京条约》是中国近代史上第一个不平等条约",
+        "割让香港岛（非九龙、非新界）",
+        "开放广州、厦门、福州、宁波、上海五口通商",
+        "赔款2100万银元",
+        "协定关税：中国丧失关税自主权",
+      ],
+      commonMisconceptions: [
+        "鸦片战争割让了整个香港（只割让了香港岛，九龙半岛是1860年《北京条约》）",
+        "林则徐虎门销烟是战争的唯一原因（更深层是贸易逆差和市场开放需求）",
+        "《南京条约》包含领事裁判权（领事裁判权是后续《虎门条约》的内容）",
+      ],
+      expectedDifficulty: 2,
+      bloomLevels: ["remember", "understand", "analyze"],
+      keyTerms: ["不平等条约", "五口通商", "协定关税", "割让香港岛", "2100万银元"],
+    },
+    knownAITraps: [
+      "AI 可能混淆香港岛与整个香港的割让时间",
+      "AI 可能将领事裁判权归入《南京条约》（实为《虎门条约》附件）",
+    ],
+  },
+  {
+    id: "cnhist-002",
+    subject: "cn_history",
+    courseTitle: "中国近现代史纲要",
+    title: "辛亥革命与中华民国建立",
+    content: "同盟会、武昌起义、中华民国临时政府、《临时约法》、袁世凯窃国",
+    groundTruth: {
+      correctFacts: [
+        "武昌起义时间：1911年10月10日",
+        "孙中山于1912年1月1日就任中华民国临时大总统",
+        "《中华民国临时约法》确立了三权分立的共和政体",
+        "清帝溥仪于1912年2月12日退位",
+        "袁世凯就任临时大总统后逐步走向独裁",
+        "辛亥革命推翻了两千多年的封建帝制",
+      ],
+      commonMisconceptions: [
+        "辛亥革命彻底改变了中国社会性质（没有，中国仍是半殖民地半封建社会）",
+        "孙中山领导了武昌起义（起义时孙中山在海外，事后被推举为临时大总统）",
+        "辛亥革命是资产阶级革命的成功（推翻帝制成功，但民主共和遭袁世凯破坏）",
+      ],
+      expectedDifficulty: 3,
+      bloomLevels: ["remember", "understand", "evaluate"],
+      keyTerms: ["武昌起义", "临时约法", "三权分立", "封建帝制", "半殖民地半封建"],
+    },
+    knownAITraps: [
+      "AI 可能说孙中山直接领导了武昌起义（他当时不在国内）",
+      "AI 可能夸大辛亥革命的社会变革深度",
+    ],
+  },
+  {
+    id: "cnhist-003",
+    subject: "cn_history",
+    courseTitle: "中国近现代史纲要",
+    title: "五四运动",
+    content: "巴黎和会、学生示威、新文化运动的延续、马克思主义传播",
+    groundTruth: {
+      correctFacts: [
+        "1919年5月4日爆发于北京",
+        "直接导火索：巴黎和会上中国外交失败（山东问题）",
+        "口号：「外争主权，内除国贼」",
+        "前期以学生为主力，后期工人阶级登上历史舞台",
+        "五四运动是中国新民主主义革命的开端",
+        "促进了马克思主义在中国的广泛传播",
+      ],
+      commonMisconceptions: [
+        "五四运动 = 新文化运动（五四运动是新文化运动的延续和发展，但不等同）",
+        "五四运动只是学生运动（后期工人罢工、商人罢市成为主力）",
+        "五四运动的目标完全实现了（中国代表最终未在和约上签字，但山东问题未立即解决）",
+      ],
+      expectedDifficulty: 2,
+      bloomLevels: ["remember", "understand", "analyze"],
+      keyTerms: ["巴黎和会", "新民主主义", "工人阶级", "马克思主义", "新文化运动"],
+    },
+    knownAITraps: [
+      "AI 可能将五四运动与新文化运动完全等同",
+      "AI 可能忽略工人阶级在五四后期的核心作用",
+    ],
+  },
+  {
+    id: "cnhist-004",
+    subject: "cn_history",
+    courseTitle: "中国近现代史纲要",
+    title: "抗日战争",
+    content: "七七事变、正面战场与敌后战场、持久战、抗战胜利",
+    groundTruth: {
+      correctFacts: [
+        "全面抗战开始：1937年7月7日（卢沟桥事变/七七事变）",
+        "正面战场由国民党军队承担主要作战任务",
+        "敌后战场由共产党领导八路军、新四军开展游击战",
+        "毛泽东《论持久战》提出战略防御→战略相持→战略反攻三阶段",
+        "抗日战争胜利日：1945年8月15日（日本宣布无条件投降）",
+        "抗日战争是中国人民第一次取得完全胜利的反侵略战争",
+      ],
+      commonMisconceptions: [
+        "抗日战争只有共产党或只有国民党在打（两个战场都有重要贡献）",
+        "南京大屠杀发生在全面抗战开始之前（1937年12月，在七七事变之后）",
+        "抗战八年（从七七事变算是8年，从九一八算是14年）",
+      ],
+      expectedDifficulty: 3,
+      bloomLevels: ["remember", "understand", "evaluate"],
+      keyTerms: ["七七事变", "正面战场", "敌后战场", "论持久战", "战略相持"],
+    },
+    knownAITraps: [
+      "AI 可能片面强调某一方的抗战贡献",
+      "AI 可能混淆14年抗战与8年全面抗战的区分",
+    ],
+  },
+  {
+    id: "cnhist-005",
+    subject: "cn_history",
+    courseTitle: "中国近现代史纲要",
+    title: "改革开放",
+    content: "十一届三中全会、家庭联产承包责任制、经济特区、社会主义市场经济",
+    groundTruth: {
+      correctFacts: [
+        "1978年十一届三中全会确立改革开放的方针",
+        "农村改革：家庭联产承包责任制（安徽凤阳小岗村首创）",
+        "1980年设立深圳、珠海、汕头、厦门四个经济特区",
+        "1992年邓小平南巡讲话推动改革深化",
+        "1992年中共十四大确立社会主义市场经济体制目标",
+        "2001年中国加入世界贸易组织（WTO）",
+      ],
+      commonMisconceptions: [
+        "改革开放是突然的政策转向（实际经过了长期的思想解放讨论）",
+        "经济特区是完全的资本主义（是社会主义制度下的特殊经济政策区域）",
+        "海南是最初的四个经济特区之一（海南是1988年设立的第五个经济特区）",
+      ],
+      expectedDifficulty: 2,
+      bloomLevels: ["remember", "understand", "analyze"],
+      keyTerms: ["十一届三中全会", "家庭联产承包责任制", "经济特区", "南巡讲话", "社会主义市场经济"],
+    },
+    knownAITraps: [
+      "AI 可能将海南列入最初四个经济特区",
+      "AI 可能错误描述社会主义市场经济的正式确立时间",
+    ],
+  },
+];
+
+// ─── Subject 8: 大学语文 (Chinese Literature — Chinese-only) ──
+
+const cn_literature: TestKnowledgePoint[] = [
+  {
+    id: "cnlit-001",
+    subject: "cn_literature",
+    courseTitle: "大学语文",
+    title: "唐诗格律与意象",
+    content: "律诗与绝句的格律规则、平仄、对仗、常见意象（月、雁、柳等）",
+    groundTruth: {
+      correctFacts: [
+        "律诗：八句，分首联、颔联、颈联、尾联；颔联和颈联必须对仗",
+        "绝句：四句，不要求对仗",
+        "平仄规则：一三五不论，二四六分明（简化版）",
+        "「月」意象常寄托思乡之情（如李白《静夜思》）",
+        "「柳」与「留」谐音，常表送别之意（如王维《送元二使安西》）",
+        "「雁」意象常与书信、思归相关（鸿雁传书）",
+      ],
+      commonMisconceptions: [
+        "所有律诗都是五言或七言（也有六言律诗，极少见）",
+        "绝句是律诗的一半（虽然形式上四句，但绝句有独立的艺术规律）",
+        "「一三五不论」是绝对规则（实际有「孤平」等禁忌需要遵守）",
+      ],
+      expectedDifficulty: 2,
+      bloomLevels: ["remember", "understand", "apply"],
+      keyTerms: ["律诗", "绝句", "平仄", "对仗", "意象"],
+    },
+    knownAITraps: [
+      "AI 可能过度简化平仄规则，不提孤平禁忌",
+      "AI 可能混淆近体诗与古体诗的格律要求",
+    ],
+  },
+  {
+    id: "cnlit-002",
+    subject: "cn_literature",
+    courseTitle: "大学语文",
+    title: "鲁迅小说的叙事手法",
+    content: "《狂人日记》《阿Q正传》的叙事视角、讽刺手法、国民性批判",
+    groundTruth: {
+      correctFacts: [
+        "《狂人日记》是中国现代文学史上第一篇白话小说（1918年）",
+        "《狂人日记》采用第一人称内视角，以精神病患者视角揭露封建礼教",
+        "「吃人」是对封建礼教压迫的隐喻",
+        "《阿Q正传》通过「精神胜利法」讽刺国民劣根性",
+        "阿Q是一个典型的文学形象，代表精神麻木的底层民众",
+        "鲁迅的创作目的是「揭出病苦，引起疗救的注意」",
+      ],
+      commonMisconceptions: [
+        "《狂人日记》的「狂人」真的是精神病人（是以精神病为叙事策略的象征手法）",
+        "鲁迅只写批判性作品（也有《朝花夕拾》等抒情回忆散文）",
+        "「精神胜利法」是阿Q个人的问题（鲁迅用它指向更广泛的国民性）",
+      ],
+      expectedDifficulty: 3,
+      bloomLevels: ["understand", "analyze", "evaluate"],
+      keyTerms: ["白话小说", "叙事视角", "精神胜利法", "国民性批判", "象征手法"],
+    },
+    knownAITraps: [
+      "AI 可能将《狂人日记》简单归类为精神病题材小说",
+      "AI 可能不准确描述「精神胜利法」的深层社会含义",
+    ],
+  },
+  {
+    id: "cnlit-003",
+    subject: "cn_literature",
+    courseTitle: "大学语文",
+    title: "《红楼梦》的人物塑造",
+    content: "贾宝玉、林黛玉、薛宝钗的性格对比，判词与人物命运",
+    groundTruth: {
+      correctFacts: [
+        "贾宝玉：反封建叛逆者，厌恶仕途经济，尊重女性",
+        "林黛玉：才华出众，多愁善感，代表真情与个性解放",
+        "薛宝钗：温柔敦厚，恪守封建道德规范，代表传统理想女性",
+        "金陵十二钗判词暗示了各人物的最终命运",
+        "「木石前盟」（宝黛）vs「金玉良缘」（宝钗）是全书核心冲突",
+        "作者曹雪芹，前八十回为原作，后四十回一般认为是高鹗续写",
+      ],
+      commonMisconceptions: [
+        "《红楼梦》全书120回都是曹雪芹写的（后40回续作者有争议）",
+        "薛宝钗是反面人物（曹雪芹笔下她有正面品质，非简单二元对立）",
+        "贾宝玉只是纨绔子弟（他有深刻的反封建思想和人文关怀）",
+      ],
+      expectedDifficulty: 3,
+      bloomLevels: ["understand", "analyze", "evaluate"],
+      keyTerms: ["金陵十二钗", "木石前盟", "金玉良缘", "叛逆", "封建礼教"],
+    },
+    knownAITraps: [
+      "AI 可能简单化贾宝玉为「不学无术」",
+      "AI 可能将薛宝钗塑造为纯反面角色",
+    ],
+  },
+  {
+    id: "cnlit-004",
+    subject: "cn_literature",
+    courseTitle: "大学语文",
+    title: "先秦诸子思想",
+    content: "儒家（孔子、孟子）、道家（老子、庄子）、法家（韩非子）核心主张对比",
+    groundTruth: {
+      correctFacts: [
+        "孔子核心思想：仁、礼、中庸；强调君子人格和社会等级秩序",
+        "孟子主张性善论、仁政、民贵君轻",
+        "老子：道法自然、无为而治、祸福相依",
+        "庄子：逍遥游、齐物论、追求精神自由",
+        "韩非子：法家集大成者，主张以法治国、术势结合",
+        "百家争鸣发生在春秋战国时期（约公元前770-前221年）",
+      ],
+      commonMisconceptions: [
+        "道家的「无为」是什么都不做（是不妄为，顺应自然规律而为）",
+        "法家只讲严刑峻法（还强调「术」和「势」的综合运用）",
+        "孔子反对社会变革（他主张恢复周礼，但也有革新思想）",
+      ],
+      expectedDifficulty: 3,
+      bloomLevels: ["remember", "understand", "analyze"],
+      keyTerms: ["仁", "道法自然", "无为而治", "性善论", "法术势"],
+    },
+    knownAITraps: [
+      "AI 可能过度简化「无为」为消极不作为",
+      "AI 可能混淆孔子和孟子的具体主张",
+    ],
+  },
+  {
+    id: "cnlit-005",
+    subject: "cn_literature",
+    courseTitle: "大学语文",
+    title: "宋词流派与风格",
+    content: "豪放派（苏轼、辛弃疾）与婉约派（柳永、李清照）的风格对比",
+    groundTruth: {
+      correctFacts: [
+        "豪放派代表：苏轼、辛弃疾；题材广阔，意境开阔",
+        "婉约派代表：柳永、李清照；题材以爱情离别为主，语言精致",
+        "苏轼《念奴娇·赤壁怀古》是豪放词的典范",
+        "李清照被誉为「千古第一才女」，早期词清新婉丽，晚期词悲凉沉郁",
+        "辛弃疾：南宋爱国词人，词中多抒发报国壮志和壮志难酬之悲",
+        "词牌名规定了词的格律（如《水调歌头》《声声慢》），不等于词的内容",
+      ],
+      commonMisconceptions: [
+        "苏轼只写豪放词（他也有婉约词如《江城子·十年生死两茫茫》）",
+        "婉约派 = 女性化/低级（婉约词有高度的艺术成就）",
+        "词牌名就是词的标题（词牌规定格式，题目另取或不取）",
+      ],
+      expectedDifficulty: 2,
+      bloomLevels: ["remember", "understand", "analyze"],
+      keyTerms: ["豪放派", "婉约派", "词牌", "苏轼", "李清照", "辛弃疾"],
+    },
+    knownAITraps: [
+      "AI 可能将苏轼简单归类为纯豪放派",
+      "AI 可能混淆词牌名和词的标题",
+    ],
+  },
+];
+
 // ─── Export all test data ────────────────────────────────────
 
 export const ALL_TEST_KPS: TestKnowledgePoint[] = [
@@ -915,6 +1216,8 @@ export const ALL_TEST_KPS: TestKnowledgePoint[] = [
   ...economics,
   ...psychology,
   ...biology,
+  ...cn_history,
+  ...cn_literature,
 ];
 
 export const TEST_SUBJECTS: Record<Subject, TestKnowledgePoint[]> = {
@@ -924,6 +1227,8 @@ export const TEST_SUBJECTS: Record<Subject, TestKnowledgePoint[]> = {
   economics,
   psychology,
   biology,
+  cn_history,
+  cn_literature,
 };
 
 export const SUBJECT_LABELS: Record<Subject, string> = {
@@ -933,4 +1238,6 @@ export const SUBJECT_LABELS: Record<Subject, string> = {
   economics: "Microeconomics (微观经济学)",
   psychology: "Cognitive Psychology (认知心理学)",
   biology: "Molecular Biology (分子生物学)",
+  cn_history: "中国近现代史纲要",
+  cn_literature: "大学语文",
 };

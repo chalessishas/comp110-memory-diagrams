@@ -1,8 +1,8 @@
 {
-  "timestamp": "2026-04-09T11:54:17.005Z",
-  "totalKPs": 30,
-  "totalQuestions": 60,
-  "overallScore": 72.3156862745098,
+  "timestamp": "2026-04-09T12:00:15.164Z",
+  "totalKPs": 40,
+  "totalQuestions": 80,
+  "overallScore": 72.69191176470586,
   "bySubject": {
     "calculus": {
       "avgScore": 71.66470588235293,
@@ -27,6 +27,14 @@
     "biology": {
       "avgScore": 72.31764705882354,
       "questionCount": 10
+    },
+    "cn_history": {
+      "avgScore": 74.16470588235295,
+      "questionCount": 10
+    },
+    "cn_literature": {
+      "avgScore": 73.4764705882353,
+      "questionCount": 10
     }
   },
   "byDimension": {
@@ -35,7 +43,7 @@
       "distribution": [
         0,
         0,
-        60,
+        80,
         0,
         0
       ]
@@ -44,40 +52,40 @@
       "avgScore": 2,
       "distribution": [
         0,
-        30,
+        40,
         0,
         0,
         0
       ]
     },
     "kpAlignment": {
-      "avgScore": 4.5,
+      "avgScore": 4.4,
       "distribution": [
         0,
         0,
         0,
-        30,
-        30
+        48,
+        32
       ]
     },
     "difficultyCal": {
-      "avgScore": 4.366666666666666,
+      "avgScore": 4.4,
       "distribution": [
         0,
         0,
         4,
-        30,
-        26
+        40,
+        36
       ]
     },
     "bloomLevel": {
-      "avgScore": 4.033333333333333,
+      "avgScore": 4.225,
       "distribution": [
         0,
         0,
         16,
-        26,
-        18
+        30,
+        34
       ]
     },
     "stemClarity": {
@@ -86,17 +94,17 @@
         0,
         0,
         0,
-        60,
+        80,
         0
       ]
     },
     "explanationQuality": {
       "avgScore": 2.5,
       "distribution": [
-        30,
+        40,
         0,
         0,
-        30,
+        40,
         0
       ]
     },
@@ -106,7 +114,7 @@
         0,
         0,
         0,
-        60,
+        80,
         0
       ]
     }
@@ -4609,6 +4617,1506 @@
         }
       ],
       "totalScore": 70.58823529411765,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnhist-001",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 鸦片战争与《南京条约》?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 2, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 39 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 56, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 72,
+      "flags": []
+    },
+    {
+      "testKpId": "cnhist-001",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 鸦片战争与《南京条约》 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 2, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 43 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 76.47058823529412,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnhist-002",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 辛亥革命与中华民国建立?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 3, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 39 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 56, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74,
+      "flags": []
+    },
+    {
+      "testKpId": "cnhist-002",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 辛亥革命与中华民国建立 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 3, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 43 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74.11764705882354,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnhist-003",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 五四运动?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 2, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 32 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 49, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 72,
+      "flags": []
+    },
+    {
+      "testKpId": "cnhist-003",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 五四运动 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 2, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 36 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 76.47058823529412,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnhist-004",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 抗日战争?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 3, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 32 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 49, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74,
+      "flags": []
+    },
+    {
+      "testKpId": "cnhist-004",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 抗日战争 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 3, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 36 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74.11764705882354,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnhist-005",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 改革开放?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 2, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 32 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 49, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 72,
+      "flags": []
+    },
+    {
+      "testKpId": "cnhist-005",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 改革开放 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 2, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 36 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 76.47058823529412,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnlit-001",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 唐诗格律与意象?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [意象] (1/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 2, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, apply]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 35 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 52, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 75,
+      "flags": []
+    },
+    {
+      "testKpId": "cnlit-001",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 唐诗格律与意象 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [意象] (1/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 2, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, apply]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 39 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 80,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnlit-002",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 鲁迅小说的叙事手法?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 3, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [understand, analyze, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 37 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 54, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 71,
+      "flags": []
+    },
+    {
+      "testKpId": "cnlit-002",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 鲁迅小说的叙事手法 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 3, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [understand, analyze, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 41 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 70.58823529411765,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnlit-003",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 《红楼梦》的人物塑造?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 3, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [understand, analyze, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 38 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 55, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 71,
+      "flags": []
+    },
+    {
+      "testKpId": "cnlit-003",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 《红楼梦》的人物塑造 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 3, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [understand, analyze, evaluate]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 42 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 70.58823529411765,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnlit-004",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 先秦诸子思想?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 3, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 34 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 51, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74,
+      "flags": []
+    },
+    {
+      "testKpId": "cnlit-004",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 先秦诸子思想 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/5)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 3, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 38 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 74.11764705882354,
+      "flags": [
+        "Missing explanation"
+      ]
+    },
+    {
+      "testKpId": "cnlit-005",
+      "questionIndex": 0,
+      "questionType": "multiple_choice",
+      "stem": "What is the key concept in 宋词流派与风格?",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 2,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "0 misconception keywords found in distractors (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/6)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 3, Expected: 2, Δ=1",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 35 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "Length: 52, Has 'why': true (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 72,
+      "flags": []
+    },
+    {
+      "testKpId": "cnlit-005",
+      "questionIndex": 1,
+      "questionType": "fill_blank",
+      "stem": "The formula for 宋词流派与风格 involves _____.",
+      "dimensions": [
+        {
+          "dimension": "answerCorrectness",
+          "score": 3,
+          "maxScore": 5,
+          "weight": 25,
+          "details": "Low fact overlap — needs human verification",
+          "automated": true
+        },
+        {
+          "dimension": "distractorQuality",
+          "score": 0,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Awaiting human review",
+          "automated": false
+        },
+        {
+          "dimension": "kpAlignment",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Key terms found: [] (0/6)",
+          "automated": true
+        },
+        {
+          "dimension": "difficultyCal",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "AI: 2, Expected: 2, Δ=0",
+          "automated": true
+        },
+        {
+          "dimension": "bloomLevel",
+          "score": 5,
+          "maxScore": 5,
+          "weight": 15,
+          "details": "Detected: remember, Expected: [remember, understand, analyze]",
+          "automated": false
+        },
+        {
+          "dimension": "stemClarity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 10,
+          "details": "Stem length: 39 chars (heuristic — needs human review)",
+          "automated": false
+        },
+        {
+          "dimension": "explanationQuality",
+          "score": 1,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "No explanation provided",
+          "automated": true
+        },
+        {
+          "dimension": "diversity",
+          "score": 4,
+          "maxScore": 5,
+          "weight": 5,
+          "details": "2 types: [multiple_choice, fill_blank], angle diversity: 100%",
+          "automated": true
+        }
+      ],
+      "totalScore": 76.47058823529412,
       "flags": [
         "Missing explanation"
       ]
