@@ -83,7 +83,7 @@ function evaluateQuestionQuick(
 
   // Explanation quality heuristic
   if (q.explanation) {
-    const hasWhy = /because|since|this is because|the reason|incorrect because|wrong because|misconception/i.test(q.explanation);
+    const hasWhy = /because|since|this is because|the reason|incorrect because|wrong because|misconception|因为|原因|之所以|错误在于|误区|常见错误|不正确|实际上/i.test(q.explanation);
     const expLen = q.explanation.length;
     const expScore = hasWhy && expLen > 60 ? 5 : hasWhy && expLen > 30 ? 4 : expLen > 20 ? 3 : 2;
     dims.push({ dimension: "explanationQuality", score: expScore, maxScore: 5, weight: DIMENSIONS.explanationQuality.weight, details: "", automated: false });

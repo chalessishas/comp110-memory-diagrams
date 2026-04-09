@@ -303,12 +303,30 @@ export function scoreDiversity(
 // ─── Bloom's Level Detection (heuristic) ─────────────────────
 
 const BLOOM_INDICATORS: Record<BloomLevel, string[]> = {
-  remember: ["define", "list", "name", "state", "recall", "identify", "what is", "which of the following"],
-  understand: ["explain", "describe", "summarize", "compare", "contrast", "interpret", "why"],
-  apply: ["calculate", "compute", "solve", "determine", "find", "evaluate the integral", "use", "apply"],
-  analyze: ["analyze", "distinguish", "compare and contrast", "what would happen if", "why does", "relationship between"],
-  evaluate: ["justify", "critique", "assess", "which approach is best", "argue", "defend"],
-  create: ["design", "construct", "propose", "develop", "create", "formulate"],
+  remember: [
+    "define", "list", "name", "state", "recall", "identify", "what is", "which of the following",
+    "列举", "说出", "写出", "指出", "定义", "是什么", "哪一个", "以下哪项", "选出",
+  ],
+  understand: [
+    "explain", "describe", "summarize", "compare", "contrast", "interpret", "why",
+    "解释", "描述", "概括", "说明", "阐述", "为什么", "区别", "含义", "理解",
+  ],
+  apply: [
+    "calculate", "compute", "solve", "determine", "find", "evaluate the integral", "use", "apply",
+    "计算", "求解", "运用", "应用", "求出", "利用", "根据", "代入", "演示",
+  ],
+  analyze: [
+    "analyze", "distinguish", "compare and contrast", "what would happen if", "why does", "relationship between",
+    "分析", "比较", "对比", "区分", "推断", "关系", "异同", "如果…会", "原因是",
+  ],
+  evaluate: [
+    "justify", "critique", "assess", "which approach is best", "argue", "defend",
+    "评价", "评估", "论证", "判断", "辩护", "哪种方法更", "合理性", "批判", "优劣",
+  ],
+  create: [
+    "design", "construct", "propose", "develop", "create", "formulate",
+    "设计", "构造", "提出", "拟定", "创造", "编写", "制定", "规划",
+  ],
 };
 
 export function detectBloomLevel(stem: string): BloomLevel {
