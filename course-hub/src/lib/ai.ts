@@ -15,8 +15,7 @@ const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsin
 const textModel = qwen("qwen3.5-plus"); // 19x faster than qwen-plus (MoE, 17B active params)
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
-// Temporarily disabled AbortSignal — investigating generate failures
-const AI_TIMEOUT_MS = 55_000;
+const AI_TIMEOUT_MS = 55_000; // 55s — just under Vercel's 60s maxDuration
 
 // Strip qwen3.5-plus thinking mode leaks (can corrupt JSON output)
 export function stripThinkBlocks(text: string): string {
@@ -50,7 +49,7 @@ export async function parseSyllabus(fileBase64: string, mimeType: string, langua
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: visionModel,
       messages: [
         {
@@ -93,7 +92,7 @@ export async function parseSyllabusText(rawText: string, language?: string): Pro
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: textModel,
       messages: [
         {
@@ -165,7 +164,7 @@ export async function parseExamQuestions(
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: visionModel,
       messages: [
         {
@@ -253,7 +252,7 @@ export async function generateStudyTasks(
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: textModel,
       messages: [
         {
@@ -315,7 +314,7 @@ export async function generateQuestionsFromOutline(
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: textModel,
       messages: [
         {
@@ -375,7 +374,7 @@ export async function generateLesson(
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: textModel,
       messages: [
         {
@@ -620,7 +619,7 @@ export async function organizeStudyNote({
 
   try {
     const { text } = await generateText({
-      // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
+      timeout: AI_TIMEOUT_MS,
       model: textModel,
       messages: [
         {
