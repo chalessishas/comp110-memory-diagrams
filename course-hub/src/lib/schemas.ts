@@ -123,7 +123,12 @@ export const parsedQuestionSchema = z.object({
   type: questionType,
   stem: z.string().min(1),
   options: optionsField,
-  answer: z.string().min(1),
+  answer: z.union([
+    z.string().min(1),
+    z.number().transform(String),
+    z.boolean().transform(String),
+    z.object({}).passthrough().transform((obj) => JSON.stringify(obj)),
+  ]),
   explanation: z.string().nullable().default(null),
   difficulty: difficultyField,
   bloom_level: bloomLevelField,
