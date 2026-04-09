@@ -53,14 +53,15 @@ ${scope_text.slice(0, 3000)}
     return NextResponse.json({ error: "No topics found in the exam scope" }, { status: 400 });
   }
 
-  // Step 2: Generate 2 questions per topic in parallel batches of 4
+  // Step 2: Generate 2 questions per topic in parallel batches of 3
+  // Keep maxTopics low to stay within 60s timeout (each AI call ~10-20s)
   type GenQ = { type: string; stem: string; options: unknown; answer: string; explanation: string | null; difficulty: number; topic: string };
   const allQuestions: GenQ[] = [];
   const topicsFailed: string[] = [];
-  const maxTopics = Math.min(topics.length, 12);
+  const maxTopics = Math.min(topics.length, 6);
 
-  for (let i = 0; i < maxTopics; i += 4) {
-    const batch = topics.slice(i, i + 4);
+  for (let i = 0; i < maxTopics; i += 3) {
+    const batch = topics.slice(i, i + 3);
     const results = await Promise.allSettled(batch.map(async (topic) => {
       const { text } = await generateText({
         model,
