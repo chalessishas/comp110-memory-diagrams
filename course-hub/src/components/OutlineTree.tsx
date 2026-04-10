@@ -39,14 +39,24 @@ function EditableNode({
   courseId,
   onUpdate,
   onDelete,
-  onAdd,
+  onStartAdd,
+  addingParentId,
+  addingTitle,
+  onAddTitleChange,
+  onConfirmAdd,
+  onCancelAdd,
 }: {
   node: TreeNode;
   depth: number;
   courseId: string;
   onUpdate: (id: string, title: string) => void;
   onDelete: (id: string) => void;
-  onAdd: (parentId: string) => void;
+  onStartAdd: (parentId: string) => void;
+  addingParentId: string | null;
+  addingTitle: string;
+  onAddTitleChange: (v: string) => void;
+  onConfirmAdd: () => void;
+  onCancelAdd: () => void;
 }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
@@ -157,7 +167,7 @@ function EditableNode({
             <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.rename")} style={{ color: "var(--text-muted)" }}>
               <Pencil size={13} />
             </button>
-            <button onClick={() => onAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.addChild")} style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => onStartAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.addChild")} style={{ color: "var(--text-muted)" }}>
               <Plus size={13} />
             </button>
             <button
@@ -185,9 +195,43 @@ function EditableNode({
           courseId={courseId}
           onUpdate={onUpdate}
           onDelete={onDelete}
-          onAdd={onAdd}
+          onStartAdd={onStartAdd}
+          addingParentId={addingParentId}
+          addingTitle={addingTitle}
+          onAddTitleChange={onAddTitleChange}
+          onConfirmAdd={onConfirmAdd}
+          onCancelAdd={onCancelAdd}
         />
       ))}
+
+      {addingParentId === node.id && (
+        <div
+          className="flex items-center gap-2 rounded-[14px] px-3 py-2"
+          style={{ paddingLeft: `${(depth + 1) * 24 + 12}px` }}
+        >
+          <span className="w-4 shrink-0" />
+          <input
+            autoFocus
+            value={addingTitle}
+            onChange={(e) => onAddTitleChange(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onConfirmAdd();
+              if (e.key === "Escape") onCancelAdd();
+            }}
+            placeholder={t("outline.addPlaceholder")}
+            className="flex-1 text-sm px-3 py-1.5 rounded-xl outline-none transition-shadow"
+            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+            onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
+            onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+          />
+          <button onClick={onConfirmAdd} className="cursor-pointer p-1 rounded-lg" style={{ color: "var(--success)" }}>
+            <Check size={14} />
+          </button>
+          <button onClick={onCancelAdd} className="cursor-pointer p-1 rounded-lg" style={{ color: "var(--text-muted)" }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -197,6 +241,8 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
   const [localNodes, setLocalNodes] = useState(nodes);
   const [dirty, setDirty] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
+  const [addingParentId, setAddingParentId] = useState<string | null>(null);
+  const [addingTitle, setAddingTitle] = useState("");
   const treeData = buildTree(localNodes);
 
   const handleUpdate = useCallback((id: string, title: string) => {
@@ -216,14 +262,21 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
     setDirty(true);
   }, [localNodes]);
 
-  const handleAdd = useCallback(async (parentId: string) => {
-    const title = prompt("New knowledge point title:");
-    if (!title?.trim()) return;
+  const handleStartAdd = useCallback((parentId: string) => {
+    setAddingParentId(parentId);
+    setAddingTitle("");
+  }, []);
+
+  const handleConfirmAdd = useCallback(async () => {
+    if (!addingTitle.trim() || !addingParentId) { setAddingParentId(null); return; }
+    const title = addingTitle.trim();
+    setAddingParentId(null);
+    setAddingTitle("");
 
     const res = await fetch("/api/outline-nodes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ course_id: courseId, parent_id: parentId, title: title.trim(), type: "knowledge_point" }),
+      body: JSON.stringify({ course_id: courseId, parent_id: addingParentId, title, type: "knowledge_point" }),
     });
 
     if (res.ok) {
@@ -231,7 +284,12 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
       setLocalNodes((prev) => [...prev, newNode]);
       setDirty(true);
     }
-  }, [courseId]);
+  }, [addingTitle, addingParentId, courseId]);
+
+  const handleCancelAdd = useCallback(() => {
+    setAddingParentId(null);
+    setAddingTitle("");
+  }, []);
 
   async function handleRegenerate() {
     setRegenerating(true);
@@ -265,7 +323,12 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
             courseId={courseId}
             onUpdate={handleUpdate}
             onDelete={handleDelete}
-            onAdd={handleAdd}
+            onStartAdd={handleStartAdd}
+            addingParentId={addingParentId}
+            addingTitle={addingTitle}
+            onAddTitleChange={setAddingTitle}
+            onConfirmAdd={handleConfirmAdd}
+            onCancelAdd={handleCancelAdd}
           />
         ))}
       </div>

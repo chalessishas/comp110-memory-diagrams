@@ -108,6 +108,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.deleteWithChildren": "Delete \"{name}\" and its {count} children?",
     "outline.noOutline": "No outline yet. Upload a syllabus to generate one.",
     "outline.hintRename": "Double-click to rename. Hover for add/delete.",
+    "outline.addPlaceholder": "Knowledge point title…",
     "outline.changedBanner": "Outline changed. Regenerate study tasks and practice questions?",
     "outline.regenerate": "Regenerate",
 
@@ -813,6 +814,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.deleteWithChildren": "删除「{name}」及其 {count} 个子项？",
     "outline.noOutline": "暂无大纲。上传课程表以自动生成。",
     "outline.hintRename": "双击重命名，悬停显示添加/删除操作。",
+    "outline.addPlaceholder": "知识点标题…",
     "outline.changedBanner": "大纲已更改。重新生成学习任务和练习题？",
     "outline.regenerate": "重新生成",
 
