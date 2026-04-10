@@ -31,8 +31,16 @@ Approximations (deliberate, refinable later):
 - **Per-question attempt history badge**: shows N attempts + % correct on each question
 - **RSC query parallelization**: all course pages (overview, progress, profile, tree) use Promise.all groups
 
+### i18n Sprint — Complete [2026-04-10]
+- 478 keys × 2 locales (EN/ZH), 0 duplicates, `t(key, vars)` interpolation added
+- `<T k="..." />` client component for RSC pages
+- All `isZh ?` ternaries migrated except: dynamic `${var}` plurals (5) + OnboardingWizard data-driven pattern (4)
+- Error boundaries added: `app/course/[id]/error.tsx` + `app/global-error.tsx`
+- Anki export: `GET /api/courses/[id]/export-anki` — tab-separated Anki import format
+- Fetch guards: all initial `.then(r.json())` calls now check `r.ok` first
+
 ### Migrations — All Applied [2026-04-10]
-All migrations through `019_fsrs_review_logs_unique` confirmed applied via Supabase MCP.
+All migrations through `020_drop_duplicate_rls_policies` confirmed applied via Supabase MCP.
 
 ### Known Issues
 - `courseConceptsAtLevel2OrAbove` hardcoded 0 (crossConceptOk always passes — avoids per-attempt count query)
