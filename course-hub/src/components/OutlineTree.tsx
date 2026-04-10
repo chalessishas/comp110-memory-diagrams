@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import { ChevronRight, ChevronDown, Plus, Trash2, Pencil, Check, X, Loader2, Sparkles } from "lucide-react";
 import type { OutlineNode } from "@/types";
 import { useI18n } from "@/lib/i18n";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 interface TreeNode {
   id: string;
@@ -45,6 +46,7 @@ function EditableNode({
   onAddTitleChange,
   onConfirmAdd,
   onCancelAdd,
+  confirmDelete,
 }: {
   node: TreeNode;
   depth: number;
@@ -57,6 +59,7 @@ function EditableNode({
   onAddTitleChange: (v: string) => void;
   onConfirmAdd: () => void;
   onCancelAdd: () => void;
+  confirmDelete: (msg: string) => Promise<boolean>;
 }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
@@ -171,11 +174,11 @@ function EditableNode({
               <Plus size={13} />
             </button>
             <button
-              onClick={() => {
+              onClick={async () => {
                 const msg = hasChildren
                   ? t("outline.deleteWithChildren", { name: node.name, count: node.children.length })
                   : t("outline.delete", { name: node.name });
-                if (confirm(msg)) onDelete(node.id);
+                if (await confirmDelete(msg)) onDelete(node.id);
               }}
               className="p-1.5 rounded-lg cursor-pointer transition-colors"
               title={t("misc.delete")}
@@ -201,6 +204,7 @@ function EditableNode({
           onAddTitleChange={onAddTitleChange}
           onConfirmAdd={onConfirmAdd}
           onCancelAdd={onCancelAdd}
+          confirmDelete={confirmDelete}
         />
       ))}
 
@@ -238,6 +242,7 @@ function EditableNode({
 
 export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseId: string }) {
   const { t } = useI18n();
+  const { confirm, dialog } = useConfirm();
   const [localNodes, setLocalNodes] = useState(nodes);
   const [dirty, setDirty] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
@@ -311,6 +316,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
 
   return (
     <div>
+      {dialog}
       <div className="ui-panel p-5 md:p-6">
         <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
           {t("outline.hintRename")}
@@ -329,6 +335,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
             onAddTitleChange={setAddingTitle}
             onConfirmAdd={handleConfirmAdd}
             onCancelAdd={handleCancelAdd}
+            confirmDelete={confirm}
           />
         ))}
       </div>

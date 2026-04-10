@@ -3,10 +3,12 @@
 import { useRouter } from "next/navigation";
 import { Archive, ArchiveRestore, Trash2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 export function ArchiveButton({ courseId, status }: { courseId: string; status: string }) {
   const router = useRouter();
   const { t } = useI18n();
+  const { confirm, dialog } = useConfirm();
 
   async function toggleArchive() {
     const newStatus = status === "active" ? "archived" : "active";
@@ -19,13 +21,14 @@ export function ArchiveButton({ courseId, status }: { courseId: string; status: 
   }
 
   async function deleteCourse() {
-    if (!confirm(t("archive.deleteConfirm"))) return;
+    if (!await confirm(t("archive.deleteConfirm"))) return;
     await fetch(`/api/courses/${courseId}`, { method: "DELETE" });
     router.push("/dashboard");
   }
 
   return (
     <div className="flex flex-wrap justify-end gap-2">
+      {dialog}
       <button
         onClick={toggleArchive}
         className="ui-button-secondary"

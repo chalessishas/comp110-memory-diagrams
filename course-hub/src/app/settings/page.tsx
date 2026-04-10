@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, RotateCcw, Palette } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { useConfirm } from "@/components/ConfirmDialog";
 import { THEMES, getSavedTheme, setTheme } from "@/lib/theme";
 import type { ThemeId } from "@/lib/theme";
 import { getDesiredRetention, setDesiredRetention, type DesiredRetention } from "@/lib/spaced-repetition";
@@ -15,6 +16,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const supabase = createClient();
   const { locale, setLocale, t } = useI18n();
+  const { confirm, dialog } = useConfirm();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<Section>("profile");
@@ -115,23 +117,23 @@ export default function SettingsPage() {
     setExporting(false);
   }
 
-  function handleClearStudyTracker() {
-    if (!confirm(t("settings.confirmClearStudy"))) return;
+  async function handleClearStudyTracker() {
+    if (!await confirm(t("settings.confirmClearStudy"))) return;
     setClearing("tracker");
     localStorage.removeItem("coursehub.study-tracker");
     setTimeout(() => setClearing(null), 1000);
   }
 
-  function handleClearReviewCards() {
-    if (!confirm(t("settings.confirmClearReview"))) return;
+  async function handleClearReviewCards() {
+    if (!await confirm(t("settings.confirmClearReview"))) return;
     setClearing("review");
     localStorage.removeItem("coursehub.review-cards");
     setTimeout(() => setClearing(null), 1000);
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm(t("settings.confirmDelete1"))) return;
-    if (!confirm(t("settings.confirmDelete2"))) return;
+    if (!await confirm(t("settings.confirmDelete1"))) return;
+    if (!await confirm(t("settings.confirmDelete2"))) return;
     setClearing("account");
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
@@ -161,6 +163,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4">
+      {dialog}
       <h1 className="text-3xl font-semibold mb-8">{t("settings.title")}</h1>
 
       {/* Section nav */}

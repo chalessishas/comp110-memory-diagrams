@@ -6,6 +6,7 @@ import { FileDropzone } from "@/components/FileDropzone";
 import { FileText, Image, Presentation, Download, Trash2, Loader2, Upload as UploadIcon, File, Sparkles } from "lucide-react";
 import type { Upload } from "@/types";
 import { useI18n } from "@/lib/i18n";
+import { useConfirm } from "@/components/ConfirmDialog";
 
 type UploadWithUrl = Upload & { download_url: string | null };
 
@@ -25,6 +26,7 @@ function formatDate(dateStr: string, locale?: string) {
 export default function LibraryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t, locale } = useI18n();
+  const { confirm, dialog } = useConfirm();
   const typeLabels: Record<string, string> = {
     syllabus: t("library.typeSyllabus"),
     exam: t("library.typeExam"),
@@ -52,7 +54,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   }
 
   async function handleDelete(uploadId: string) {
-    if (!confirm(t("library.deleteConfirm"))) return;
+    if (!await confirm(t("library.deleteConfirm"))) return;
     setDeleting(uploadId);
     await fetch(`/api/courses/${id}/uploads`, {
       method: "DELETE",
@@ -72,6 +74,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div>
+      {dialog}
       <CourseTabs courseId={id} />
 
       <div className="flex items-center justify-between mb-8">
