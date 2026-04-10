@@ -137,9 +137,18 @@ export async function POST(request: Request) {
         updates.has_transfer_correct = true;
       }
 
-      // Evaluate mastery level transition with all available data.
-      // courseConceptsAtLevel2OrAbove=0 and hasDownstreamDependents=false make crossConceptOk
-      // always pass — avoids an expensive count query on every attempt.
+      // Check if this KP has child KPs — used by the cross-concept proficiency gate.
+      // Only relevant for practiced→proficient transition; skip for other levels to avoid the query.
+      let hasDownstreamDependents = false;
+      if (mastery.current_level === "practiced" && question.knowledge_point_id) {
+        const { count } = await supabase
+          .from("outline_nodes")
+          .select("id", { count: "exact", head: true })
+          .eq("parent_id", question.knowledge_point_id)
+          .eq("type", "knowledge_point");
+        hasDownstreamDependents = (count ?? 0) > 0;
+      }
+
       const stats: MasteryStats = {
         currentLevel: mastery.current_level as MasteryLevelV2,
         timesTested: postUpdateTested,
@@ -158,7 +167,7 @@ export async function POST(request: Request) {
         recentAccuracy: recentAccuracy,
         recentCount: recentWindow.length,
         courseConceptsAtLevel2OrAbove: 0,
-        hasDownstreamDependents: false,
+        hasDownstreamDependents,
       };
 
       const levelResult = evaluateLevel(stats, false);

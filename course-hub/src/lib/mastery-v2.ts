@@ -101,13 +101,10 @@ export function evaluateLevel(stats: MasteryStats, hasCompletedLesson: boolean):
     const nonMcqOk = stats.hasNonMcqCorrect;
     const stabilityOk = stats.fsrsStability >= 7;
     const sleepOk = daysSinceFirstContact >= 3;
-    // crossConceptOk is currently always true: hasDownstreamDependents=false makes
-    // !hasDownstreamDependents short-circuit the OR before courseConceptsAtLevel2OrAbove
-    // is evaluated. To activate this gate, populate hasDownstreamDependents from the
-    // outline_nodes adjacency list when the KP has children that are also knowledge points.
-    const crossConceptOk = stats.hasCrossConceptCorrect ||
-      !stats.hasDownstreamDependents ||
-      stats.courseConceptsAtLevel2OrAbove < 3;
+    // Cross-concept gate: if this KP has child KPs in the outline, the student must
+    // demonstrate understanding across concepts before reaching proficient. The gate is
+    // skipped for leaf nodes (no downstream dependents) since there is nothing to cross-reference.
+    const crossConceptOk = stats.hasCrossConceptCorrect || !stats.hasDownstreamDependents;
 
     if (accuracyOk && nonMcqOk && stabilityOk && sleepOk && crossConceptOk) {
       return {
