@@ -96,6 +96,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.chapter": "Chapter",
     "outline.topic": "Topic",
     "outline.knowledgePoint": "Knowledge Point",
+    "outline.delete": "Delete \"{name}\"?",
+    "outline.deleteWithChildren": "Delete \"{name}\" and its {count} children?",
 
     // Course Tabs (v2: 3-view architecture)
     "tabs.today": "Today",
@@ -242,6 +244,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "blueprint.taskRead": "Learn",
     "blueprint.taskPractice": "Practice",
     "blueprint.taskReview": "Review",
+    "blueprint.step": "Step {n}",
+    "review.examDayRecall": "Exam day recall {pct}%",
 
     "progress.grid.kicker": "Progress",
     "progress.grid.title": "Knowledge Point Mastery",
@@ -290,6 +294,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "session.leveledUpLabel": "knowledge point(s) leveled up",
     "session.missed": "Missed",
     "session.reviewNow": "Review now →",
+    "session.streak": "{n}-day streak",
 
     // Library
     "library.title": "Course Library",
@@ -304,6 +309,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.typeOther": "Other",
     "library.typeFile": "File",
     "library.deleteConfirm": "Delete this file?",
+    "library.download": "Download",
 
     // Archive
     "archive.archive": "Archive",
@@ -441,6 +447,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "bank.noSaved": "No saved questions yet",
     "bank.noSavedDesc": "Bookmark questions while practicing to build your personal bank",
     "bank.answer": "Answer:",
+    "bank.saveToBank": "Save to question bank",
+    "bank.removeFromBank": "Remove from bank",
 
     // Dashboard - Today section
     "dashboard.today": "Today",
@@ -499,6 +507,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.loading": "Loading...",
     "misc.error": "Something went wrong",
     "misc.delete": "Delete",
+    "misc.rename": "Rename",
+    "misc.addChild": "Add child",
+    "misc.studyBuddy": "Study Buddy",
     "misc.cancel": "Cancel",
     "misc.confirm": "Confirm",
     "misc.backToDashboard": "Back to Dashboard",
@@ -653,6 +664,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.chapter": "章",
     "outline.topic": "主题",
     "outline.knowledgePoint": "知识点",
+    "outline.delete": "删除「{name}」？",
+    "outline.deleteWithChildren": "删除「{name}」及其 {count} 个子项？",
 
     // Course Tabs (v2: 3-view architecture)
     "tabs.today": "今日任务",
@@ -799,6 +812,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "blueprint.taskRead": "学习",
     "blueprint.taskPractice": "练习",
     "blueprint.taskReview": "复习",
+    "blueprint.step": "第{n}步",
+    "review.examDayRecall": "考试日记忆率 {pct}%",
 
     "progress.grid.kicker": "进度",
     "progress.grid.title": "知识点掌握度",
@@ -847,6 +862,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "session.leveledUpLabel": "个知识点提升",
     "session.missed": "需要复习",
     "session.reviewNow": "去复习 →",
+    "session.streak": "连续学习 {n} 天",
 
     // Library
     "library.title": "课程资料库",
@@ -861,6 +877,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.typeOther": "其他",
     "library.typeFile": "文件",
     "library.deleteConfirm": "删除这个文件？",
+    "library.download": "下载",
 
     // Archive
     "archive.archive": "归档",
@@ -998,6 +1015,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "bank.noSaved": "还没有收藏的题目",
     "bank.noSavedDesc": "练习时收藏题目，构建你的专属题库",
     "bank.answer": "答案：",
+    "bank.saveToBank": "收藏到题库",
+    "bank.removeFromBank": "从题库移除",
 
     // Dashboard - Today section
     "dashboard.today": "今天",
@@ -1056,6 +1075,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.loading": "加载中...",
     "misc.error": "出错了",
     "misc.delete": "删除",
+    "misc.rename": "重命名",
+    "misc.addChild": "添加子项",
+    "misc.studyBuddy": "学习助手",
     "misc.cancel": "取消",
     "misc.confirm": "确认",
     "misc.backToDashboard": "返回仪表盘",
@@ -1124,7 +1146,7 @@ const translations: Record<Locale, Record<string, string>> = {
 interface I18nContextType {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
 const I18nContext = createContext<I18nContextType>({
@@ -1149,8 +1171,10 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string) => {
-      return translations[locale][key] ?? key;
+    (key: string, vars?: Record<string, string | number>) => {
+      const str = translations[locale][key] ?? key;
+      if (!vars) return str;
+      return str.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`));
     },
     [locale]
   );

@@ -116,7 +116,7 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
           <div className="flex items-center gap-2 mb-3">
             <Flame size={16} style={{ color: "var(--warning)" }} />
             <span className="text-sm font-medium">
-              {isZh ? `连续学习 ${streak.currentStreak} 天` : `${streak.currentStreak}-day streak`}
+              {t("session.streak", { n: streak.currentStreak })}
             </span>
             {goalMet && (
               <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
@@ -135,10 +135,10 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
                     color: day.completed ? "white" : "var(--text-muted)",
                   }}
                 >
-                  {day.completed ? "✓" : new Date(day.day + "T12:00:00").toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "narrow" })}
+                  {day.completed ? "✓" : new Date(day.day + "T12:00:00").toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { weekday: "narrow" })}
                 </div>
                 <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  {new Date(day.day + "T12:00:00").toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "narrow" })}
+                  {new Date(day.day + "T12:00:00").toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { weekday: "narrow" })}
                 </span>
               </div>
             ))}

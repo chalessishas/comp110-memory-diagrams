@@ -135,7 +135,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                         }}
                         disabled={extracting === upload.id}
                         className="p-2 cursor-pointer rounded-lg hover:opacity-80"
-                        title="Extract key content with AI"
+                        title={t("library.extract")}
                       >
                         {extracting === upload.id ? (
                           <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />
@@ -150,7 +150,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                         target="_blank"
                         rel="noopener noreferrer"
                         className="p-2 cursor-pointer rounded-lg hover:opacity-80"
-                        title="Download"
+                        title={t("library.download")}
                       >
                         <Download size={15} style={{ color: "var(--text-secondary)" }} />
                       </a>
@@ -159,7 +159,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                       onClick={() => handleDelete(upload.id)}
                       disabled={deleting === upload.id}
                       className="p-2 cursor-pointer rounded-lg hover:opacity-80"
-                      title="Delete"
+                      title={t("misc.delete")}
                     >
                       {deleting === upload.id ? (
                         <Loader2 size={15} className="animate-spin" style={{ color: "var(--text-secondary)" }} />

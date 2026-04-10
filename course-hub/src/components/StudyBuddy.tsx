@@ -45,7 +45,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
           color: "var(--bg-surface)",
           boxShadow: "0 2px 12px var(--accent-muted)",
         }}
-        title="Study Buddy"
+        title={t("misc.studyBuddy")}
       >
         <MessageCircle size={24} />
       </button>

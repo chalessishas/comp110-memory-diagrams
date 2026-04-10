@@ -48,8 +48,7 @@ function EditableNode({
   onDelete: (id: string) => void;
   onAdd: (parentId: string) => void;
 }) {
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.name);
@@ -155,21 +154,21 @@ function EditableNode({
 
         {!editing && (
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Rename" style={{ color: "var(--text-muted)" }}>
+            <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.rename")} style={{ color: "var(--text-muted)" }}>
               <Pencil size={13} />
             </button>
-            <button onClick={() => onAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title="Add child" style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => onAdd(node.id)} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.addChild")} style={{ color: "var(--text-muted)" }}>
               <Plus size={13} />
             </button>
             <button
               onClick={() => {
                 const msg = hasChildren
-                  ? (isZh ? `删除"${node.name}"及其 ${node.children.length} 个子项？` : `Delete "${node.name}" and its ${node.children.length} children?`)
-                  : (isZh ? `删除"${node.name}"？` : `Delete "${node.name}"?`);
+                  ? t("outline.deleteWithChildren", { name: node.name, count: node.children.length })
+                  : t("outline.delete", { name: node.name });
                 if (confirm(msg)) onDelete(node.id);
               }}
               className="p-1.5 rounded-lg cursor-pointer transition-colors"
-              title="Delete"
+              title={t("misc.delete")}
               style={{ color: "var(--danger)" }}
             >
               <Trash2 size={13} />

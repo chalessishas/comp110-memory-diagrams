@@ -116,7 +116,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
         onClick={handleBookmarkToggle}
         className="absolute top-5 right-5 p-2 cursor-pointer rounded-xl transition-colors"
         style={{ color: "var(--accent)" }}
-        title={isBookmarked ? "Remove from bank" : "Save to question bank"}
+        title={isBookmarked ? t("bank.removeFromBank") : t("bank.saveToBank")}
       >
         <Bookmark size={16} fill={isBookmarked ? "var(--accent)" : "none"} />
       </button>

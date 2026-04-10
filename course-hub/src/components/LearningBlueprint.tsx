@@ -33,8 +33,7 @@ export function LearningBlueprint({
   courseId: string;
   items: LearningBlueprintItem[];
 }) {
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
   const masteryLabels: Record<MasteryLevel, string> = {
     mastered: t("progress.mastery.mastered"),
@@ -89,7 +88,7 @@ export function LearningBlueprint({
           const TaskIcon = item.nextTaskType ? taskIcons[item.nextTaskType] : ArrowRight;
           const stepLabel = index === 0
             ? t("blueprint.startHere")
-            : isZh ? `第${index + 1}步` : `Step ${index + 1}`;
+            : t("blueprint.step", { n: index + 1 });
 
           return (
             <div

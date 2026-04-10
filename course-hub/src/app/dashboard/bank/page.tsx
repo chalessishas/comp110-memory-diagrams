@@ -89,7 +89,7 @@ export default function QuestionBankPage() {
                 <button
                   onClick={() => removeBookmark(bm.questions.id)}
                   className="p-1.5 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                  title="Remove"
+                  title={t("bank.removeFromBank")}
                 >
                   <Trash2 size={14} style={{ color: "var(--danger)" }} />
                 </button>

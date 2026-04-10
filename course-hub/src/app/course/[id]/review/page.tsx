@@ -294,7 +294,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                   backgroundColor: "var(--bg-muted)",
                   color: r < 0.5 ? "var(--danger)" : r < 0.8 ? "var(--warning)" : "var(--success)",
                 }}>
-                  {isZh ? `考试日记忆率 ${Math.round(r * 100)}%` : `Exam day recall ${Math.round(r * 100)}%`}
+                  {t("review.examDayRecall", { pct: Math.round(r * 100) })}
                 </span>
               ) : (
                 <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}>
