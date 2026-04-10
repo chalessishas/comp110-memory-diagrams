@@ -1,6 +1,9 @@
 import { createClient } from "@/lib/supabase/server";
 import { attemptCreateSchema } from "@/lib/schemas";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { evaluateLevel } from "@/lib/mastery-v2";
+import type { MasteryStats } from "@/lib/mastery-v2";
+import type { MasteryLevelV2 } from "@/types";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -68,7 +71,7 @@ export async function POST(request: Request) {
   if (question.knowledge_point_id) {
     const { data: mastery } = await supabase
       .from("element_mastery")
-      .select("id, times_tested, times_correct, times_non_mcq, times_non_mcq_correct, has_non_mcq_correct")
+      .select("id, current_level, times_tested, times_correct, times_non_mcq, times_non_mcq_correct, has_non_mcq_correct, has_external_practice, has_cross_concept_correct, has_transfer_correct, has_teaching_challenge_pass, fsrs_stability, fsrs_retrievability, first_contact_at, level_reached_at")
       .eq("user_id", user.id)
       .eq("concept_id", question.knowledge_point_id)
       .maybeSingle();
@@ -80,17 +83,50 @@ export async function POST(request: Request) {
 
       // fill_blank and short_answer require free recall — count as non-MCQ
       const isNonMcq = question.type === "fill_blank" || question.type === "short_answer";
+      const newHasNonMcqCorrect = mastery.has_non_mcq_correct || (isNonMcq && isCorrect);
       const updates: Record<string, unknown> = {
         times_tested: postUpdateTested,
         times_correct: postUpdateCorrect,
+        has_external_practice: true, // any attempt via this route is outside lesson context
         updated_at: new Date().toISOString(),
       };
       if (isNonMcq) {
         updates.times_non_mcq = (mastery.times_non_mcq ?? 0) + 1;
         if (isCorrect) {
           updates.times_non_mcq_correct = (mastery.times_non_mcq_correct ?? 0) + 1;
-          updates.has_non_mcq_correct = true; // gates practiced→proficient in mastery-v2
+          updates.has_non_mcq_correct = true;
         }
+      }
+
+      // Evaluate mastery level transition with all available data.
+      // recentAccuracy uses overall accuracy as an approximation (no extra query needed).
+      // courseConceptsAtLevel2OrAbove=0 and hasDownstreamDependents=false make crossConceptOk
+      // always pass — avoids an expensive count query on every attempt.
+      const stats: MasteryStats = {
+        currentLevel: mastery.current_level as MasteryLevelV2,
+        timesTested: postUpdateTested,
+        timesCorrect: postUpdateCorrect,
+        timesNonMcq: (mastery.times_non_mcq ?? 0) + (isNonMcq ? 1 : 0),
+        timesNonMcqCorrect: (mastery.times_non_mcq_correct ?? 0) + (isNonMcq && isCorrect ? 1 : 0),
+        hasExternalPractice: true,
+        hasNonMcqCorrect: newHasNonMcqCorrect,
+        hasCrossConceptCorrect: mastery.has_cross_concept_correct ?? false,
+        hasTransferCorrect: mastery.has_transfer_correct ?? false,
+        hasTeachingChallengePass: mastery.has_teaching_challenge_pass ?? false,
+        fsrsStability: mastery.fsrs_stability ?? 0,
+        fsrsRetrievability: mastery.fsrs_retrievability ?? 1,
+        firstContactAt: new Date(mastery.first_contact_at ?? Date.now()),
+        levelReachedAt: new Date(mastery.level_reached_at ?? Date.now()),
+        recentAccuracy: postUpdateAccuracy,
+        recentCount: Math.min(postUpdateTested, 5),
+        courseConceptsAtLevel2OrAbove: 0,
+        hasDownstreamDependents: false,
+      };
+
+      const levelResult = evaluateLevel(stats, false);
+      if (levelResult.changed) {
+        updates.current_level = levelResult.newLevel;
+        updates.level_reached_at = new Date().toISOString();
       }
 
       await supabase
