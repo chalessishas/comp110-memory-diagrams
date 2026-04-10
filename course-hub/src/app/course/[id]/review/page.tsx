@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { SessionSummaryModal } from "@/components/SessionSummaryModal";
-import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope, getDesiredRetention, setDesiredRetention, type DesiredRetention } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
 import { TeachBackPanel } from "@/components/TeachBackPanel";
@@ -37,11 +37,14 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [sessionItems, setSessionItems] = useState<{ id: string; stem: string; correct: boolean }[]>([]);
   // Incremented after server pull completes — triggers queue recompute with fresh localStorage
   const [cardsKey, setCardsKey] = useState(0);
+  const [retention, setRetention] = useState<DesiredRetention>(0.9);
+  const [showRetentionPicker, setShowRetentionPicker] = useState(false);
 
   // Load questions + exam scope on mount; pull server FSRS state for cross-device sync
   useEffect(() => {
     setExamActive(isExamMode());
     setExamDays(daysUntilExam());
+    setRetention(getDesiredRetention());
 
     const scope = getExamScope(id);
     if (scope && scope.length > 0) {
@@ -120,6 +123,12 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       }
     } catch { /* ignore */ }
     setScopeLoading(false);
+  }
+
+  function handleSetRetention(v: DesiredRetention) {
+    setDesiredRetention(v);
+    setRetention(v);
+    setShowRetentionPicker(false);
   }
 
   function handleClearScope() {
@@ -260,6 +269,44 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             <button onClick={() => { setShowScopeInput(false); setScopeText(""); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
               {t("misc.cancel")}
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Desired retention picker */}
+      <button
+        onClick={() => setShowRetentionPicker((v) => !v)}
+        className="mb-4 px-4 py-3 rounded-xl w-full text-left flex items-center justify-between cursor-pointer transition-colors"
+        style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
+      >
+        <span className="text-sm">{t("review.retentionLabel")}</span>
+        <span className="text-xs font-medium" style={{ color: "var(--accent)" }}>
+          {retention === 0.7 ? t("review.retention70") : retention === 0.8 ? t("review.retention80") : t("review.retention90")}
+        </span>
+      </button>
+
+      {showRetentionPicker && (
+        <div className="mb-4 p-4 rounded-xl space-y-3" style={{ backgroundColor: "var(--bg-muted)" }}>
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>{t("review.retentionDesc")}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {([0.7, 0.8, 0.9] as DesiredRetention[]).map((v) => {
+              const label = v === 0.7 ? t("review.retention70") : v === 0.8 ? t("review.retention80") : t("review.retention90");
+              const isActive = retention === v;
+              return (
+                <button
+                  key={v}
+                  onClick={() => handleSetRetention(v)}
+                  className="py-2 px-3 rounded-xl text-xs font-medium cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: isActive ? "var(--accent)" : "var(--bg-surface)",
+                    color: isActive ? "white" : "var(--text-secondary)",
+                    border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

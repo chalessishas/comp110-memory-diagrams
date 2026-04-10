@@ -416,6 +416,11 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.showAll": "Show all",
     "review.upcoming7Days": "Upcoming 7 days",
     "review.noUpcoming": "No cards due this week",
+    "review.retentionLabel": "Target recall",
+    "review.retentionDesc": "Lower = fewer reviews, slightly less recall. Research shows 70–80% is optimal for most learners.",
+    "review.retention70": "70% · Efficient",
+    "review.retention80": "80% · Balanced",
+    "review.retention90": "90% · Thorough",
 
     // Study Tasks
     "studyTask.title": "Study Tasks",
@@ -1075,6 +1080,11 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.showAll": "显示全部",
     "review.upcoming7Days": "未来 7 天",
     "review.noUpcoming": "本周无待复习卡片",
+    "review.retentionLabel": "目标记忆率",
+    "review.retentionDesc": "越低 = 复习越少，记忆率略低。研究表明 70-80% 对多数学习者最优。",
+    "review.retention70": "70% · 高效",
+    "review.retention80": "80% · 均衡",
+    "review.retention90": "90% · 深刻",
 
     // Study Tasks
     "studyTask.title": "学习任务",

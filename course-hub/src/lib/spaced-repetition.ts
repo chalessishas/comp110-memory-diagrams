@@ -3,6 +3,7 @@ import { createEmptyCard, fsrs, generatorParameters, Rating, type Card, type Rev
 const STORAGE_KEY = "coursehub.review-cards";
 const EXAM_DATE_KEY = "coursehub.exam-date";
 const EXAM_SCOPE_KEY = "coursehub.exam-scope"; // per-course: { courseId: string[] (KP IDs) }
+const RETENTION_KEY = "coursehub.desired-retention"; // 0.7 | 0.8 | 0.9, default 0.9
 
 function getExamModeParams() {
   if (typeof window === "undefined") return null;
@@ -15,15 +16,35 @@ function getExamModeParams() {
   return { request_retention: 0.95, maximum_interval: daysUntilExam };
 }
 
+export type DesiredRetention = 0.7 | 0.8 | 0.9;
+
+export function getDesiredRetention(): DesiredRetention {
+  if (typeof window === "undefined") return 0.9;
+  const raw = localStorage.getItem(RETENTION_KEY);
+  const v = parseFloat(raw ?? "");
+  return (v === 0.7 || v === 0.8 || v === 0.9) ? v : 0.9;
+}
+
+export function setDesiredRetention(v: DesiredRetention) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(RETENTION_KEY, String(v));
+  // Invalidate cached scheduler so next call rebuilds with new retention
+  _scheduler = null;
+}
+
 let _scheduler: ReturnType<typeof fsrs> | null = null;
 let _lastExamKey: string | null = null;
+let _lastRetention: number | null = null;
 
 function getScheduler() {
   const examKey = typeof window !== "undefined" ? localStorage.getItem(EXAM_DATE_KEY) : null;
-  if (!_scheduler || examKey !== _lastExamKey) {
+  const retention = getDesiredRetention();
+  if (!_scheduler || examKey !== _lastExamKey || retention !== _lastRetention) {
     _lastExamKey = examKey ?? null;
+    _lastRetention = retention;
     const ep = getExamModeParams();
-    _scheduler = fsrs(generatorParameters(ep ?? { request_retention: 0.9 }));
+    // Exam mode overrides retention with 0.95 for critical recall
+    _scheduler = fsrs(generatorParameters(ep ?? { request_retention: retention }));
   }
   return _scheduler;
 }
