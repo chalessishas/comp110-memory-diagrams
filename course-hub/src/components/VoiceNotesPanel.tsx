@@ -347,7 +347,7 @@ export function VoiceNotesPanel({
 
         {!speechSupported && (
           <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
-            Browser speech recognition is not available here, so this panel falls back to typed notes.
+            {t("voiceNotes.speechFallbackNote")}
           </p>
         )}
 

@@ -287,7 +287,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {currentIndex + 1} of {dueCards.length} {examActive ? t("review.toReview") : t("review.due")}
+              {t("review.progress", { current: currentIndex + 1, total: dueCards.length })} {examActive ? t("review.toReview") : t("review.due")}
             </p>
             {examActive && dueCards[currentIndex] && (() => {
               const r = getExamDayRetrievability(dueCards[currentIndex]);

@@ -385,6 +385,8 @@ const translations: Record<Locale, Record<string, string>> = {
     // Review
     "review.title": "Spaced Review",
     "review.due": "due",
+    "review.progress": "{current} of {total}",
+    "voiceNotes.speechFallbackNote": "Browser speech recognition is not available here, so this panel falls back to typed notes.",
     "review.allCaughtUp": "All caught up",
     "review.allCaughtUpDesc": "No questions due for review right now. Keep practicing to build your review queue.",
     "review.howWell": "How well did you know this?",
@@ -1023,6 +1025,8 @@ const translations: Record<Locale, Record<string, string>> = {
     // Review
     "review.title": "间隔复习",
     "review.due": "待复习",
+    "review.progress": "{current} / {total}",
+    "voiceNotes.speechFallbackNote": "此浏览器不支持语音识别，面板已切换为文字输入模式。",
     "review.allCaughtUp": "全部完成",
     "review.allCaughtUpDesc": "当前没有需要复习的题目，继续练习来积累复习队列。",
     "review.howWell": "你对这道题的掌握程度？",
