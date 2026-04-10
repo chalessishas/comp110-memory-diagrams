@@ -131,7 +131,7 @@ export async function POST(request: Request) {
 
   // Append review logs — insert only new entries (idempotent by reviewed_at + question_id)
   if (logs.length > 0) {
-    await supabase.from("fsrs_review_logs").insert(
+    await supabase.from("fsrs_review_logs").upsert(
       logs.map((l) => ({
         user_id: user.id,
         question_id: l.question_id,
@@ -144,9 +144,10 @@ export async function POST(request: Request) {
         last_elapsed_days: l.last_elapsed_days,
         scheduled_days: l.scheduled_days,
         reviewed_at: l.reviewed_at,
-      }))
+      })),
+      { onConflict: "user_id,question_id,reviewed_at", ignoreDuplicates: true }
     );
-    // Ignore insert errors on review logs — duplicate reviewed_at entries are non-critical
+    // ignoreDuplicates: retry storms silently skip already-logged entries
   }
 
   return NextResponse.json({ synced: cards.length, logs: logs.length });
