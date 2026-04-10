@@ -805,7 +805,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "profile.relapsed": "已复发",
     "profile.overcome": "已克服",
     "profile.selfAssessment": "元认知准确度",
-    "profile.selfAssessmentDescPre": "你说"不确定"的题中，",
+    "profile.selfAssessmentDescPre": "你说「不确定」的题中，",
     "profile.selfAssessmentDescPost": "% 确实答错了。说明你对自己的判断相当准确。",
     "profile.thisWeek": "本周学习",
     "profile.questionsAnswered": "答题次数",
