@@ -14,26 +14,40 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: kps } = await supabase
-    .from("outline_nodes")
-    .select("*")
-    .eq("course_id", id)
-    .eq("type", "knowledge_point")
-    .order("order");
+  // Parallel group 1: both queries use course_id directly, no inter-dependency
+  const [{ data: kps }, { data: questions }] = await Promise.all([
+    supabase
+      .from("outline_nodes")
+      .select("*")
+      .eq("course_id", id)
+      .eq("type", "knowledge_point")
+      .order("order"),
+    supabase
+      .from("questions")
+      .select("id, knowledge_point_id")
+      .eq("course_id", id),
+  ]);
 
-  const { data: questions } = await supabase
-    .from("questions")
-    .select("id, knowledge_point_id")
-    .eq("course_id", id);
-
+  const kpIds = (kps ?? []).map((kp) => kp.id);
   const questionIds = (questions ?? []).map((q) => q.id);
-  const { data: attempts } = questionIds.length > 0
-    ? await supabase
-        .from("attempts")
-        .select("question_id, is_correct, answered_at, confidence")
-        .eq("user_id", user.id)
-        .in("question_id", questionIds)
-    : { data: [] };
+
+  // Parallel group 2: attempts depends on questionIds, masteryRows depends on kpIds
+  const [{ data: attempts }, { data: masteryRows }] = await Promise.all([
+    questionIds.length > 0
+      ? supabase
+          .from("attempts")
+          .select("question_id, is_correct, answered_at, confidence")
+          .eq("user_id", user.id)
+          .in("question_id", questionIds)
+      : Promise.resolve({ data: [] as { question_id: string; is_correct: boolean; answered_at: string; confidence: number | null }[] }),
+    kpIds.length > 0
+      ? supabase
+          .from("element_mastery")
+          .select("concept_id, current_level, times_tested, times_correct")
+          .eq("user_id", user.id)
+          .in("concept_id", kpIds)
+      : Promise.resolve({ data: [] as { concept_id: string; current_level: string; times_tested: number; times_correct: number }[] }),
+  ]);
 
   // Metacognitive calibration stats — accuracy grouped by confidence level
   const confStats = [1, 2, 3].map((lvl) => {
@@ -46,16 +60,6 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
   const [c1, c2, c3] = confStats.map((s) => s.accuracy);
   const isCalibrated = c1 !== null && c2 !== null && c3 !== null && c1 <= c2 && c2 <= c3;
   const isOverconfident = c3 !== null && c1 !== null && c3 < c1;
-
-  // Use element_mastery v2 levels as single source of truth — consistent with learn page
-  const kpIds = (kps ?? []).map((kp) => kp.id);
-  const { data: masteryRows } = kpIds.length > 0
-    ? await supabase
-        .from("element_mastery")
-        .select("concept_id, current_level, times_tested, times_correct")
-        .eq("user_id", user.id)
-        .in("concept_id", kpIds)
-    : { data: [] };
 
   const masteryMap = new Map(
     (masteryRows ?? []).map((m) => [m.concept_id, m])
