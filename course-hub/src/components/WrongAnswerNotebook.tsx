@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
-import { T } from "@/components/T";
+import { useI18n } from "@/lib/i18n";
 
 interface WrongAnswerNotebookItem {
   questionId: string;
@@ -14,8 +16,8 @@ interface WrongAnswerNotebookItem {
   status: "needs_redo" | "fixed";
 }
 
-function formatShortDate(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatShortDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale === "zh" ? "zh-CN" : "en-US", {
     month: "short",
     day: "numeric",
     hour: "numeric",
@@ -30,27 +32,28 @@ export function WrongAnswerNotebook({
   courseId: string;
   items: WrongAnswerNotebookItem[];
 }) {
+  const { t, locale } = useI18n();
   return (
     <div id="wrong-notebook" className="ui-panel p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="ui-kicker mb-3"><T k="wrongAnswer.kicker" /></div>
-          <h3 className="text-2xl font-semibold tracking-wide"><T k="wrongAnswer.headline" /></h3>
+          <div className="ui-kicker mb-3">{t("wrongAnswer.kicker")}</div>
+          <h3 className="text-2xl font-semibold tracking-wide">{t("wrongAnswer.headline")}</h3>
           <p className="ui-copy mt-2 max-w-2xl">
-            <T k="wrongAnswer.desc" />
+            {t("wrongAnswer.desc")}
           </p>
         </div>
         <Link href={`/course/${courseId}/practice`} className="ui-button-secondary">
-          <T k="wrongAnswer.redo" />
+          {t("wrongAnswer.redo")}
           <RotateCcw size={14} />
         </Link>
       </div>
 
       {items.length === 0 ? (
         <div className="ui-empty mt-6">
-          <p className="text-base font-medium mb-2"><T k="wrongAnswer.emptyTitle" /></p>
+          <p className="text-base font-medium mb-2">{t("wrongAnswer.emptyTitle")}</p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            <T k="wrongAnswer.emptyDesc" />
+            {t("wrongAnswer.emptyDesc")}
           </p>
         </div>
       ) : (
@@ -69,36 +72,36 @@ export function WrongAnswerNotebook({
                       {item.status === "needs_redo" ? (
                         <>
                           <AlertCircle size={12} style={{ color: "var(--danger)" }} />
-                          Needs Redo
+                          {t("wrongAnswer.needsRedo")}
                         </>
                       ) : (
                         <>
                           <CheckCircle2 size={12} style={{ color: "var(--success)" }} />
-                          Fixed Once
+                          {t("wrongAnswer.fixedOnce")}
                         </>
                       )}
                     </span>
                     {item.knowledgePointTitle && <span className="ui-badge">{item.knowledgePointTitle}</span>}
-                    <span className="ui-badge">{item.wrongCount} misses</span>
+                    <span className="ui-badge">{t("wrongAnswer.misses", { count: item.wrongCount })}</span>
                   </div>
                   <p className="text-sm font-medium mt-3">{item.stem}</p>
                 </div>
                 <p className="text-xs shrink-0" style={{ color: "var(--text-muted)" }}>
-                  Last miss: {formatShortDate(item.lastWrongAt)}
+                  {t("wrongAnswer.lastMiss")} {formatShortDate(item.lastWrongAt, locale)}
                 </p>
               </div>
 
               <div className="grid gap-3 mt-4 lg:grid-cols-2">
                 <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    <T k="wrongAnswer.yourAnswer" />
+                    {t("wrongAnswer.yourAnswer")}
                   </p>
-                  <p className="text-sm mt-2 leading-relaxed">{item.lastWrongAnswer || <T k="wrongAnswer.noAnswer" />}</p>
+                  <p className="text-sm mt-2 leading-relaxed">{item.lastWrongAnswer || t("wrongAnswer.noAnswer")}</p>
                 </div>
 
                 <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    <T k="wrongAnswer.correctAnswer" />
+                    {t("wrongAnswer.correctAnswer")}
                   </p>
                   <p className="text-sm mt-2 leading-relaxed">{item.correctAnswer}</p>
                 </div>
@@ -107,7 +110,7 @@ export function WrongAnswerNotebook({
               {item.explanation && (
                 <div className="rounded-[20px] p-4 mt-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    <T k="wrongAnswer.why" />
+                    {t("wrongAnswer.why")}
                   </p>
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {item.explanation}

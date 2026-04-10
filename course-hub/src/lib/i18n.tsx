@@ -620,6 +620,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.redo": "Redo Questions",
     "wrongAnswer.emptyTitle": "No wrong answers yet",
     "wrongAnswer.emptyDesc": "Once you start doing practice, the questions you miss will collect here for review.",
+    "wrongAnswer.needsRedo": "Needs Redo",
+    "wrongAnswer.fixedOnce": "Fixed Once",
+    "wrongAnswer.misses": "{count} misses",
+    "wrongAnswer.lastMiss": "Last miss:",
 
     // Share
     "share.copyLink": "Copy link",
@@ -1284,6 +1288,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.redo": "重练错题",
     "wrongAnswer.emptyTitle": "暂无错题",
     "wrongAnswer.emptyDesc": "开始练习后，答错的题会在这里汇集等待复习。",
+    "wrongAnswer.needsRedo": "待重练",
+    "wrongAnswer.fixedOnce": "已修正",
+    "wrongAnswer.misses": "答错 {count} 次",
+    "wrongAnswer.lastMiss": "最近错误：",
 
     // Share
     "share.copyLink": "复制链接",
