@@ -7,6 +7,7 @@ import { User, Lock, Sliders, Database, Info, Loader2, Check, Trash2, Download, 
 import { useI18n } from "@/lib/i18n";
 import { THEMES, getSavedTheme, setTheme } from "@/lib/theme";
 import type { ThemeId } from "@/lib/theme";
+import { getDesiredRetention, setDesiredRetention, type DesiredRetention } from "@/lib/spaced-repetition";
 
 type Section = "profile" | "account" | "preferences" | "data" | "about";
 
@@ -36,6 +37,9 @@ export default function SettingsPage() {
   // Theme
   const [currentTheme, setCurrentTheme] = useState<ThemeId>("spring");
 
+  // Spaced repetition retention
+  const [retention, setRetention] = useState<DesiredRetention>(0.9);
+
   // Data
   const [exporting, setExporting] = useState(false);
   const [clearing, setClearing] = useState<string | null>(null);
@@ -47,6 +51,7 @@ export default function SettingsPage() {
       setDisplayName(user.user_metadata?.display_name ?? "");
       setSemester(user.user_metadata?.semester ?? "");
       setCurrentTheme(getSavedTheme());
+      setRetention(getDesiredRetention());
       setLoading(false);
     });
   }, []);
@@ -298,6 +303,31 @@ export default function SettingsPage() {
                 <input value="Qwen3.5-Plus (DashScope)" disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} />
                 <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>{t("settings.modelNote")}</p>
               </div>
+              <div>
+                <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.reviewRetention")}</label>
+                <p className="text-[11px] mb-2" style={{ color: "var(--text-muted)" }}>{t("settings.reviewRetentionDesc")}</p>
+                <div className="flex gap-2">
+                  {([0.7, 0.8, 0.9] as DesiredRetention[]).map((v) => {
+                    const label = v === 0.7 ? t("review.retention70") : v === 0.8 ? t("review.retention80") : t("review.retention90");
+                    const isActive = retention === v;
+                    return (
+                      <button
+                        key={v}
+                        onClick={() => { setDesiredRetention(v); setRetention(v); }}
+                        className="flex-1 py-2 px-3 rounded-xl text-xs font-medium cursor-pointer transition-colors"
+                        style={{
+                          backgroundColor: isActive ? "var(--accent)" : "var(--bg-muted)",
+                          color: isActive ? "white" : "var(--text-secondary)",
+                          border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                        }}
+                      >
+                        {label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.language")}</label>
                 <div className="flex gap-2">
