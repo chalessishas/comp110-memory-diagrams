@@ -7,6 +7,7 @@ import { SessionSummaryModal } from "@/components/SessionSummaryModal";
 import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
+import { TeachBackPanel } from "@/components/TeachBackPanel";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -298,6 +299,14 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             question={currentQuestion}
             onAnswer={handleAnswer}
           />
+
+          {showRating && (
+            <TeachBackPanel
+              key={currentQuestion.id}
+              courseId={id}
+              questionId={currentQuestion.id}
+            />
+          )}
 
           {showRating && (
             <div className="mt-4 p-5 rounded-[20px]" style={{ backgroundColor: "var(--bg-muted)" }}>
