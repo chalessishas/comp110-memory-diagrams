@@ -38,6 +38,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [cardsKey, setCardsKey] = useState(0);
   const [retention, setRetention] = useState<DesiredRetention>(0.9);
   const [showRetentionPicker, setShowRetentionPicker] = useState(false);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
 
   // Load questions + exam scope on mount; pull server FSRS state for cross-device sync
   useEffect(() => {
@@ -56,12 +57,18 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     // Fixes race: questions fetch may complete before pull, computing queue with stale localStorage.
     pullCardsFromServer(id).then(() => setCardsKey((k) => k + 1));
 
-    fetch(`/api/questions?courseId=${id}`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data: Question[]) => {
-        setQuestions(Array.isArray(data) ? data : []);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch(`/api/questions?courseId=${id}`).then((r) => r.ok ? r.json() : []),
+      fetch("/api/bookmarks").then((r) => r.ok ? r.json() : []),
+    ]).then(([qs, bks]: [Question[], { questions?: { id?: string } }[]]) => {
+      setQuestions(Array.isArray(qs) ? qs : []);
+      setBookmarkedIds(new Set(
+        (Array.isArray(bks) ? bks : [])
+          .map((b) => b.questions?.id)
+          .filter((id): id is string => Boolean(id))
+      ));
+      setLoading(false);
+    });
   }, [id]);
 
   // Re-sort cards whenever questions load, exam mode, scope changes, or server pull completes
@@ -369,6 +376,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             key={currentQuestion.id}
             question={currentQuestion}
             onAnswer={handleAnswer}
+            bookmarked={bookmarkedIds.has(currentQuestion.id)}
           />
 
           {showRating && (
