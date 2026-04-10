@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { SessionSummaryModal } from "@/components/SessionSummaryModal";
-import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
 import { TeachBackPanel } from "@/components/TeachBackPanel";
@@ -34,7 +34,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionStart] = useState(() => Date.now());
 
-  // Load questions + exam scope on mount
+  // Load questions + exam scope on mount; pull server FSRS state for cross-device sync
   useEffect(() => {
     setExamActive(isExamMode());
     setExamDays(daysUntilExam());
@@ -45,6 +45,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setScopeKpIds(new Set(scope));
       setScopeMatchCount(scope.length);
     }
+
+    // Pull server card states — merges DB into localStorage (non-blocking)
+    pullCardsFromServer(id);
 
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())

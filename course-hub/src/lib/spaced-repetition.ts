@@ -89,7 +89,97 @@ export function updateCard(questionId: string, rating: Rating): ReviewCard {
     cards.push(reviewCard);
   }
   saveCards(cards);
+  // Fire-and-forget server sync — non-blocking, failure is silent (localStorage is fallback)
+  syncCardToServer(questionId, scheduled.card, scheduled.log);
   return reviewCard;
+}
+
+// Serialize a ts-fsrs Card + optional ReviewLog and POST to server.
+// Called after every review; non-blocking.
+export function syncCardToServer(questionId: string, card: Card, log?: ReviewLog): void {
+  if (typeof window === "undefined") return;
+  const cardPayload = {
+    question_id: questionId,
+    due: card.due instanceof Date ? card.due.toISOString() : card.due,
+    stability: card.stability,
+    difficulty: card.difficulty,
+    elapsed_days: card.elapsed_days,
+    scheduled_days: card.scheduled_days,
+    reps: card.reps,
+    lapses: card.lapses,
+    learning_steps: card.learning_steps,
+    state: card.state as number,
+    last_review: card.last_review
+      ? (card.last_review instanceof Date ? card.last_review.toISOString() : card.last_review)
+      : null,
+  };
+  const body: { cards: typeof cardPayload[]; logs?: object[] } = { cards: [cardPayload] };
+  if (log) {
+    body.logs = [{
+      question_id: questionId,
+      rating: log.rating as number,
+      state: log.state as number,
+      due: log.due instanceof Date ? log.due.toISOString() : log.due,
+      stability: log.stability,
+      difficulty: log.difficulty,
+      elapsed_days: log.elapsed_days,
+      last_elapsed_days: log.last_elapsed_days,
+      scheduled_days: log.scheduled_days,
+      reviewed_at: log.review instanceof Date ? log.review.toISOString() : log.review,
+    }];
+  }
+  fetch("/api/fsrs", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  }).catch(() => { /* silent — localStorage is the fallback */ });
+}
+
+// Pull card states for a course from server and merge into localStorage.
+// DB wins over localStorage on reps tie; higher reps = more recent reviews wins.
+// Called once on course page mount for authenticated users.
+export async function pullCardsFromServer(courseId: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const res = await fetch(`/api/fsrs?courseId=${courseId}`);
+    if (!res.ok) return;
+    const { cards: serverCards } = await res.json() as {
+      cards: Array<{
+        question_id: string; due: string; stability: number; difficulty: number;
+        elapsed_days: number; scheduled_days: number; reps: number; lapses: number;
+        learning_steps: number; state: number; last_review: string | null;
+      }>
+    };
+    if (!serverCards?.length) return;
+
+    const local = loadCards();
+    const localMap = new Map(local.map((c) => [c.question_id, c]));
+
+    for (const sc of serverCards) {
+      const existing = localMap.get(sc.question_id);
+      // Server wins if it has more reps or equal reps (server is source of truth)
+      if (!existing || sc.reps >= existing.card.reps) {
+        localMap.set(sc.question_id, {
+          question_id: sc.question_id,
+          card: {
+            due: new Date(sc.due),
+            stability: sc.stability,
+            difficulty: sc.difficulty,
+            elapsed_days: sc.elapsed_days,
+            scheduled_days: sc.scheduled_days,
+            reps: sc.reps,
+            lapses: sc.lapses,
+            learning_steps: sc.learning_steps ?? 0,
+            state: sc.state as Card["state"],
+            last_review: sc.last_review ? new Date(sc.last_review) : undefined,
+          },
+          log: existing?.log ?? [],
+        });
+      }
+    }
+
+    saveCards(Array.from(localMap.values()));
+  } catch { /* silent — localStorage is the fallback */ }
 }
 
 export function getDueCards(cards: ReviewCard[]): ReviewCard[] {
