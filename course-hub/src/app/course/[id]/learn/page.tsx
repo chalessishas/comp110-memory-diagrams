@@ -35,7 +35,7 @@ function parseSSE(text: string): { event: string; data: string }[] {
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
   const [items, setItems] = useState<KnowledgePointItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +118,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
       });
 
       if (!res.ok || !res.body) {
-        setGenerateError(isZh ? "生成失败，请稍后重试" : "Generation failed. Please try again.");
+        setGenerateError(t("learn.generationFailed"));
         setIsStreaming(false);
         setGeneratingForKp(null);
         return;
@@ -201,7 +201,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
             }
 
             if (event === "error") {
-              setGenerateError(parsed.message ?? (isZh ? "生成失败" : "Generation failed"));
+              setGenerateError(parsed.message ?? t("learn.generationFailedShort"));
             }
           } catch {
             // Skip unparseable events
@@ -209,7 +209,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         }
       }
     } catch {
-      setGenerateError(isZh ? "网络错误或超时，请重试" : "Network error or timeout. Please retry.");
+      setGenerateError(t("learn.networkError"));
     }
 
     setIsStreaming(false);
@@ -245,7 +245,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           <div className="text-center py-16">
             <Loader2 size={24} className="animate-spin mx-auto mb-4" style={{ color: "var(--accent)" }} />
             <p className="text-sm font-medium mb-1">
-              {isZh ? "正在生成互动课程..." : "Generating interactive lesson..."}
+              {t("learn.generatingLesson")}
             </p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               {isZh
@@ -273,7 +273,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           onClick={() => { setActiveLessonId(null); setChunks([]); setRefreshKey(k => k + 1); }}
           className="ui-button-ghost mb-4 !px-0"
         >
-          ← {isZh ? "返回知识点列表" : "Back to topics"}
+          ← {t("learn.backToTopics")}
         </button>
         <ChunkLesson
           chunks={chunks}
@@ -292,9 +292,9 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
 
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-xl font-semibold tracking-wide">{isZh ? "学习" : "Learn"}</h2>
+          <h2 className="text-xl font-semibold tracking-wide">{t("tabs.learn")}</h2>
           <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-            {isZh ? "选择一个知识点，AI 会生成互动课程" : "Pick a topic — AI generates an interactive lesson"}
+            {t("learn.pickTopic")}
           </p>
         </div>
       </div>
@@ -309,7 +309,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
         <div className="ui-empty">
           <BookOpen size={32} className="mx-auto mb-3" style={{ color: "var(--border)" }} />
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            {isZh ? "还没有知识点。先创建课程大纲。" : "No knowledge points yet. Create a course outline first."}
+            {t("learn.noKps")}
           </p>
         </div>
       ) : (
@@ -338,7 +338,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                     {inScope && (
                       <span className="shrink-0 flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full" style={{ backgroundColor: "var(--accent-light)", color: "var(--accent)" }}>
                         <Target size={8} />
-                        {isZh ? "考" : "exam"}
+                        {t("learn.examTag")}
                       </span>
                     )}
                   </div>
@@ -348,8 +348,8 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                         ? `正在生成...（${streamedCount}/${totalChunks}）`
                         : `Generating... (${streamedCount}/${totalChunks})`)
                       : item.hasLesson
-                        ? (isZh ? "点击复习" : "Click to review")
-                        : (isZh ? "点击生成" : "Click to generate")}
+                        ? t("learn.clickToReview")
+                        : t("learn.clickToGenerate")}
                   </p>
                 </div>
                 {isGenerating ? (
