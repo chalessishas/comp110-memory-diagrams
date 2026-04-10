@@ -40,8 +40,8 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
 
   useEffect(() => {
     fetch(`/api/courses/${id}/uploads`)
-      .then((r) => r.json())
-      .then((data) => { setUploads(data); setLoading(false); });
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => { setUploads(Array.isArray(data) ? data : []); setLoading(false); });
   }, [id]);
 
   async function handleFileUploaded() {

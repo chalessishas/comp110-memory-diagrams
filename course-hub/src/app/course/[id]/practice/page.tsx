@@ -44,8 +44,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     pullCardsFromServer(id);
 
     fetch(`/api/questions?courseId=${id}`)
-      .then((r) => r.json())
-      .then((data) => { setQuestions(data); setLoading(false); });
+      .then((r) => r.ok ? r.json() : [])
+      .then((data) => { setQuestions(Array.isArray(data) ? data : []); setLoading(false); });
   }, [id]);
 
   // Filter by exam scope if active

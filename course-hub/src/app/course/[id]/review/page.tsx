@@ -54,9 +54,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     pullCardsFromServer(id).then(() => setCardsKey((k) => k + 1));
 
     fetch(`/api/questions?courseId=${id}`)
-      .then((r) => r.json())
+      .then((r) => r.ok ? r.json() : [])
       .then((data: Question[]) => {
-        setQuestions(data);
+        setQuestions(Array.isArray(data) ? data : []);
         setLoading(false);
       });
   }, [id]);
