@@ -7,7 +7,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: course } = await supabase.from("courses").select("title").eq("id", id).single();
+  const { data: course } = await supabase.from("courses").select("title").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { data: questions } = await supabase
     .from("questions")
     .select("stem, answer, explanation, type, options")

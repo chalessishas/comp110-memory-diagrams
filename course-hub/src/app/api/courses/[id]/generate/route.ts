@@ -50,6 +50,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .from("courses")
     .update({ updated_at: lockTime })
     .eq("id", id)
+    .eq("user_id", user.id)
     .select("title")
     .single();
 

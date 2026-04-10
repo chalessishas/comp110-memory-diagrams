@@ -16,7 +16,7 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 
-  const { data: course } = await supabase.from("courses").select("title").eq("id", id).single();
+  const { data: course } = await supabase.from("courses").select("title").eq("id", id).eq("user_id", user.id).single();
   if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });
 
   // Get knowledge points that don't already have auto-generated questions

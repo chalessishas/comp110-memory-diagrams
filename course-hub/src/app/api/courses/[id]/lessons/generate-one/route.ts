@@ -40,7 +40,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   // Get course + knowledge point info
-  const { data: course } = await supabase.from("courses").select("title, description").eq("id", id).single();
+  const { data: course } = await supabase.from("courses").select("title, description").eq("id", id).eq("user_id", user.id).single();
   if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 });
 
   const { data: kp } = await supabase

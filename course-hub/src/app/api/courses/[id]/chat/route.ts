@@ -23,7 +23,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     .from("courses")
     .select("title, description, professor, semester")
     .eq("id", id)
+    .eq("user_id", user.id)
     .single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { data: nodes } = await supabase
     .from("outline_nodes")

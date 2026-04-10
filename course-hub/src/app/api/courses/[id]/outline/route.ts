@@ -9,6 +9,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { data: courseOwned } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!courseOwned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { data, error } = await supabase
     .from("outline_nodes")
     .select("*")
@@ -46,6 +49,9 @@ function flattenNodes(
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { nodes, version } = await request.json();
 
   // Optimistic locking: check updated_at matches what the client last saw
@@ -54,6 +60,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       .from("courses")
       .select("updated_at")
       .eq("id", id)
+      .eq("user_id", user.id)
       .single();
 
     if (course && course.updated_at !== version) {
