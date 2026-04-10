@@ -14,7 +14,6 @@ export default function SettingsPage() {
   const router = useRouter();
   const supabase = createClient();
   const { locale, setLocale, t } = useI18n();
-  const isZh = locale === "zh";
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<Section>("profile");
@@ -112,28 +111,22 @@ export default function SettingsPage() {
   }
 
   function handleClearStudyTracker() {
-    if (!confirm(isZh ? "清除所有学习时间记录？此操作不可恢复。" : "Clear all study time data? This cannot be undone.")) return;
+    if (!confirm(t("settings.confirmClearStudy"))) return;
     setClearing("tracker");
     localStorage.removeItem("coursehub.study-tracker");
     setTimeout(() => setClearing(null), 1000);
   }
 
   function handleClearReviewCards() {
-    if (!confirm(isZh ? "清除所有间隔重复进度？此操作不可恢复。" : "Clear all spaced repetition progress? This cannot be undone.")) return;
+    if (!confirm(t("settings.confirmClearReview"))) return;
     setClearing("review");
     localStorage.removeItem("coursehub.review-cards");
     setTimeout(() => setClearing(null), 1000);
   }
 
   const handleDeleteAccount = async () => {
-    if (!confirm(isZh
-      ? "删除账号及所有数据？此操作不可恢复。"
-      : "Delete your account and ALL data? This cannot be undone."
-    )) return;
-    if (!confirm(isZh
-      ? "确认删除？所有课程、题目和学习记录将被永久清除。"
-      : "Are you absolutely sure? All courses, questions, and progress will be permanently deleted."
-    )) return;
+    if (!confirm(t("settings.confirmDelete1"))) return;
+    if (!confirm(t("settings.confirmDelete2"))) return;
     setClearing("account");
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
@@ -142,11 +135,11 @@ export default function SettingsPage() {
         router.push("/login");
       } else {
         const data = await res.json().catch(() => null);
-        alert(data?.error ?? (isZh ? "删除失败，请稍后重试" : "Deletion failed. Please try again."));
+        alert(data?.error ?? t("settings.deletionFailed"));
         setClearing(null);
       }
     } catch {
-      alert(isZh ? "网络错误，请稍后重试" : "Network error. Please try again.");
+      alert(t("settings.networkError"));
       setClearing(null);
     }
   };
@@ -240,7 +233,7 @@ export default function SettingsPage() {
           <div className="ui-panel p-6">
             <div className="flex items-center gap-2 mb-4">
               <Palette size={18} style={{ color: "var(--accent)" }} />
-              <h2 className="text-lg font-semibold">{locale === "zh" ? "色彩主题" : "Color Theme"}</h2>
+              <h2 className="text-lg font-semibold">{t("settings.colorTheme")}</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
               {THEMES.map((theme) => {

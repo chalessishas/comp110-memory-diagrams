@@ -25,7 +25,6 @@ function formatDate(dateStr: string, locale?: string) {
 export default function LibraryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const { t, locale } = useI18n();
-  const isZh = locale === "zh";
   const typeLabels: Record<string, string> = {
     syllabus: t("library.typeSyllabus"),
     exam: t("library.typeExam"),
@@ -54,7 +53,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   }
 
   async function handleDelete(uploadId: string) {
-    if (!confirm(isZh ? "删除这个文件？" : "Delete this file?")) return;
+    if (!confirm(t("library.deleteConfirm"))) return;
     setDeleting(uploadId);
     await fetch(`/api/courses/${id}/uploads`, {
       method: "DELETE",

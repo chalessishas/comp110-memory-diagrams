@@ -6,8 +6,7 @@ import { useI18n } from "@/lib/i18n";
 
 export function ArchiveButton({ courseId, status }: { courseId: string; status: string }) {
   const router = useRouter();
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
   async function toggleArchive() {
     const newStatus = status === "active" ? "archived" : "active";
@@ -20,7 +19,7 @@ export function ArchiveButton({ courseId, status }: { courseId: string; status: 
   }
 
   async function deleteCourse() {
-    if (!confirm(isZh ? "删除这门课程及所有数据？" : "Delete this course and all its data?")) return;
+    if (!confirm(t("archive.deleteConfirm"))) return;
     await fetch(`/api/courses/${courseId}`, { method: "DELETE" });
     router.push("/dashboard");
   }
@@ -30,10 +29,10 @@ export function ArchiveButton({ courseId, status }: { courseId: string; status: 
       <button
         onClick={toggleArchive}
         className="ui-button-secondary"
-        title={status === "active" ? (isZh ? "归档" : "Archive") : (isZh ? "恢复" : "Restore")}
+        title={status === "active" ? t("archive.archive") : t("archive.restore")}
       >
         {status === "active" ? <Archive size={14} /> : <ArchiveRestore size={14} />}
-        {status === "active" ? (isZh ? "归档" : "Archive") : (isZh ? "恢复" : "Restore")}
+        {status === "active" ? t("archive.archive") : t("archive.restore")}
       </button>
       <button
         onClick={deleteCourse}
