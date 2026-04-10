@@ -196,6 +196,15 @@ const translations: Record<Locale, Record<string, string>> = {
     "onboarding.getStarted": "Get Started",
     "onboarding.next": "Next",
     "onboarding.skipSetup": "Skip setup, go straight to the app",
+    "onboarding.step1Title": "What describes you best?",
+    "onboarding.step1Subtitle": "This helps us customize your experience.",
+    "onboarding.step2Title": "What semester are you in?",
+    "onboarding.step2Subtitle": "We'll organize your dashboard around this.",
+    "onboarding.step3Title": "What matters most to you?",
+    "onboarding.step3Subtitle": "Pick 1-3. We'll highlight these features for you.",
+    "onboarding.step4Title": "You're all set!",
+    "onboarding.step4Subtitle": "Here's what we've configured for you.",
+    "onboarding.semesterPlaceholder": "e.g. Spring 2026",
 
     // Chunk Lesson
     "lesson.failedToLoad": "Lesson content failed to load. Please try again.",
@@ -723,6 +732,15 @@ const translations: Record<Locale, Record<string, string>> = {
     "onboarding.getStarted": "开始使用",
     "onboarding.next": "下一步",
     "onboarding.skipSetup": "跳过设置，直接开始",
+    "onboarding.step1Title": "你是哪类学习者？",
+    "onboarding.step1Subtitle": "帮助我们为你定制体验。",
+    "onboarding.step2Title": "你现在是哪个学期？",
+    "onboarding.step2Subtitle": "我们会按学期组织你的仪表盘。",
+    "onboarding.step3Title": "你最看重什么功能？",
+    "onboarding.step3Subtitle": "选 1-3 个，我们会为你重点推荐。",
+    "onboarding.step4Title": "设置完成！",
+    "onboarding.step4Subtitle": "以下是你的个性化配置。",
+    "onboarding.semesterPlaceholder": "例如：2026 春季",
 
     // Chunk Lesson
     "lesson.failedToLoad": "课程内容加载失败，请重试。",

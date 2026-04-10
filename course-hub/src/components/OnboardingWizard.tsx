@@ -66,10 +66,8 @@ export function OnboardingWizard({ onComplete }: Props) {
     // Step 1: Role
     {
       icon: <GraduationCap size={28} style={{ color: "var(--accent)" }} />,
-      title: "What describes you best?",
-      titleZh: "你是哪类学习者？",
-      subtitle: "This helps us customize your experience.",
-      subtitleZh: "帮助我们为你定制体验。",
+      titleKey: "onboarding.step1Title",
+      subtitleKey: "onboarding.step1Subtitle",
       canSkip: true,
       content: (
         <div className="grid grid-cols-2 gap-3 mt-6">
@@ -95,17 +93,15 @@ export function OnboardingWizard({ onComplete }: Props) {
     // Step 2: Semester
     {
       icon: <Calendar size={28} style={{ color: "var(--accent)" }} />,
-      title: "What semester are you in?",
-      titleZh: "你现在是哪个学期？",
-      subtitle: "We'll organize your dashboard around this.",
-      subtitleZh: "我们会按学期组织你的仪表盘。",
+      titleKey: "onboarding.step2Title",
+      subtitleKey: "onboarding.step2Subtitle",
       canSkip: true,
       content: (
         <div className="mt-6">
           <input
             value={prefs.semester ?? ""}
             onChange={(e) => setPrefs((p) => ({ ...p, semester: e.target.value || null }))}
-            placeholder={isZh ? "例如：2026 春季" : "e.g. Spring 2026"}
+            placeholder={t("onboarding.semesterPlaceholder")}
             className="ui-input w-full !py-3.5 !text-base"
           />
         </div>
@@ -114,10 +110,8 @@ export function OnboardingWizard({ onComplete }: Props) {
     // Step 3: Goals
     {
       icon: <Target size={28} style={{ color: "var(--accent)" }} />,
-      title: "What matters most to you?",
-      titleZh: "你最看重什么功能？",
-      subtitle: "Pick 1-3. We'll highlight these features for you.",
-      subtitleZh: "选 1-3 个，我们会为你重点推荐。",
+      titleKey: "onboarding.step3Title",
+      subtitleKey: "onboarding.step3Subtitle",
       canSkip: true,
       content: (
         <div className="space-y-2 mt-6">
@@ -146,10 +140,8 @@ export function OnboardingWizard({ onComplete }: Props) {
     // Step 4: Ready
     {
       icon: <Sparkles size={28} style={{ color: "var(--accent)" }} />,
-      title: "You're all set!",
-      titleZh: "设置完成！",
-      subtitle: "Here's what we've configured for you.",
-      subtitleZh: "以下是你的个性化配置。",
+      titleKey: "onboarding.step4Title",
+      subtitleKey: "onboarding.step4Subtitle",
       canSkip: false,
       content: (
         <div className="mt-6 space-y-3">
@@ -209,10 +201,10 @@ export function OnboardingWizard({ onComplete }: Props) {
             {currentStep.icon}
           </div>
           <h1 className="text-2xl font-semibold mt-4 tracking-wide">
-            {isZh ? currentStep.titleZh : currentStep.title}
+            {t(currentStep.titleKey)}
           </h1>
           <p className="text-sm mt-2" style={{ color: "var(--text-secondary)" }}>
-            {isZh ? currentStep.subtitleZh : currentStep.subtitle}
+            {t(currentStep.subtitleKey)}
           </p>
 
           {currentStep.content}
