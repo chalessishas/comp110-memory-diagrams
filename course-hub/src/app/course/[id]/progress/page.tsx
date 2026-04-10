@@ -7,6 +7,7 @@ import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import type { MasteryLevel } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import { CalibrationPanel } from "@/components/CalibrationPanel";
+import { T } from "@/components/T";
 
 export default async function ProgressPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -86,23 +87,21 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
     <div className="space-y-8">
       <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
         <ArrowLeft size={14} />
-        Back to Dashboard
+        <T k="misc.backToDashboard" />
       </Link>
       <CourseTabs courseId={id} />
 
       <div>
-        <div className="ui-kicker mb-3">Progress</div>
-        <h2 className="text-3xl font-semibold tracking-wide">See what is sticking.</h2>
+        <div className="ui-kicker mb-3"><T k="progress.kicker" /></div>
+        <h2 className="text-3xl font-semibold tracking-wide"><T k="progress.tagline" /></h2>
         <p className="ui-copy mt-3 max-w-2xl">
-          CourseHub groups your recent attempts into a quiet mastery map so the weak spots are easy to spot.
+          <T k="progress.intro" />
         </p>
       </div>
 
       <StudyTrackerPanel
         courseId={id}
         activeMode="studying"
-        title="Progress Review Time"
-        description="Time spent checking mastery and revisiting weak areas counts as study time. Long inactive stretches are marked as idle."
       />
 
       {totalRated >= 5 && (

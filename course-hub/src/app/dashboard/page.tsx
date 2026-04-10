@@ -111,8 +111,6 @@ export default async function DashboardPage() {
       <StudyStatsCard />
 
       <StudyTrackerPanel
-        title="Today"
-        description="How you spent your study time today — solving, reviewing, studying, or idle."
         track={false}
         className="mb-8"
       />

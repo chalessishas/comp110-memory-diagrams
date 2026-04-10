@@ -5,8 +5,10 @@ import { ArrowUpRight, BookOpen } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getDueCards, loadCards } from "@/lib/spaced-repetition";
 import type { Course } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 export function CourseCard({ course, questionIds }: { course: Course; questionIds?: string[] }) {
+  const { t } = useI18n();
   const [dueCount, setDueCount] = useState<number | null>(null);
 
   useEffect(() => {
@@ -59,7 +61,7 @@ export function CourseCard({ course, questionIds }: { course: Course; questionId
             className="text-xs px-2 py-0.5 rounded-lg font-medium"
             style={{ backgroundColor: "var(--warning)", color: "white" }}
           >
-            {dueCount} due
+            {dueCount} {t("courseCard.due")}
           </span>
         )}
       </div>

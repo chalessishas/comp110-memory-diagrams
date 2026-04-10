@@ -169,6 +169,9 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Progress
     "progress.title": "Knowledge Point Mastery",
+    "progress.kicker": "Progress",
+    "progress.tagline": "See what is sticking.",
+    "progress.intro": "CourseHub groups your recent attempts into a quiet mastery map so the weak spots are easy to spot.",
 
     // Library
     "library.title": "Course Library",
@@ -299,6 +302,28 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExamHide": "Hide Upload",
     "practice.turnMaterial": "Turn material into reps.",
     "practice.workThrough": "Work through generated questions or upload an exam to build a fresh drill set.",
+
+    // Study Tracker Panel
+    "studyTracker.title": "Time Track",
+    "studyTracker.kicker": "Time Track",
+    "studyTracker.desc": "We estimate whether the time is going into solving, reviewing, studying, or just sitting idle.",
+    "studyTracker.solving": "Solving",
+    "studyTracker.reviewing": "Reviewing",
+    "studyTracker.studying": "Studying",
+    "studyTracker.idle": "Idle / Staring",
+    "studyTracker.today": "Today",
+    "studyTracker.recordedDevice": "Recorded on this device today.",
+    "studyTracker.thisWeek": "This Week",
+
+    // Study Stats Card
+    "studyStats.title": "Study Time",
+    "studyStats.today": "Today",
+    "studyStats.thisWeek": "This Week",
+    "studyStats.dailyAvg": "Daily Avg",
+    "studyStats.distribution": "Time Distribution",
+
+    // Course Card
+    "courseCard.due": "due",
 
     // Misc
     "misc.loading": "Loading...",
@@ -473,6 +498,9 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Progress
     "progress.title": "知识点掌握度",
+    "progress.kicker": "进度",
+    "progress.tagline": "看看什么在留下来。",
+    "progress.intro": "CourseHub 把你最近的练习整理成掌握度地图，让薄弱点一目了然。",
 
     // Library
     "library.title": "课程资料库",
@@ -603,6 +631,28 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExamHide": "隐藏上传",
     "practice.turnMaterial": "把课程内容变成练习。",
     "practice.workThrough": "做生成的题目，或上传试卷来创建专项练习集。",
+
+    // Study Tracker Panel
+    "studyTracker.title": "学习时长",
+    "studyTracker.kicker": "时间追踪",
+    "studyTracker.desc": "我们估计你的时间是在做题、复习、学习，还是只是在发呆。",
+    "studyTracker.solving": "做题",
+    "studyTracker.reviewing": "复习",
+    "studyTracker.studying": "学习",
+    "studyTracker.idle": "发呆",
+    "studyTracker.today": "今天",
+    "studyTracker.recordedDevice": "今天在本设备上记录的时长。",
+    "studyTracker.thisWeek": "本周",
+
+    // Study Stats Card
+    "studyStats.title": "学习时长",
+    "studyStats.today": "今天",
+    "studyStats.thisWeek": "本周",
+    "studyStats.dailyAvg": "日均",
+    "studyStats.distribution": "时间分布",
+
+    // Course Card
+    "courseCard.due": "待复习",
 
     // Misc
     "misc.loading": "加载中...",

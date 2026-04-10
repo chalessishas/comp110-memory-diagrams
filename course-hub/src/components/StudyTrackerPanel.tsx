@@ -11,15 +11,9 @@ import {
   recordStudyTime,
   type StudySummary,
 } from "@/lib/study-tracker";
+import { useI18n } from "@/lib/i18n";
 
 const IDLE_THRESHOLD_MS = 20_000;
-
-const MODE_LABELS: Record<StudyMode, string> = {
-  solving: "Solving",
-  reviewing: "Reviewing",
-  studying: "Studying",
-  idle: "Idle / Staring",
-};
 
 const MODE_ICONS: Record<StudyMode, typeof Brain> = {
   solving: Brain,
@@ -99,8 +93,8 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
 export function StudyTrackerPanel({
   courseId,
   activeMode,
-  title = "Time Track",
-  description = "We estimate whether the time is going into solving, reviewing, studying, or just sitting idle.",
+  title,
+  description,
   track = true,
   className = "",
 }: {
@@ -111,20 +105,29 @@ export function StudyTrackerPanel({
   track?: boolean;
   className?: string;
 }) {
+  const { t } = useI18n();
   const [summary, setSummary] = useState<StudySummary>(emptySummary);
   const [liveMode, setLiveMode] = useState<StudyMode>(activeMode ?? "studying");
   const lastTickRef = useRef(0);
   const lastInteractionRef = useRef(0);
   const lastMouseMoveRef = useRef(0);
 
+  const modeLabels: Record<StudyMode, string> = {
+    solving: t("studyTracker.solving"),
+    reviewing: t("studyTracker.reviewing"),
+    studying: t("studyTracker.studying"),
+    idle: t("studyTracker.idle"),
+  };
+
   const breakdown = useMemo(
     () => [
-      { key: "solving" as const, label: MODE_LABELS.solving, value: summary.byMode.solving },
-      { key: "reviewing" as const, label: MODE_LABELS.reviewing, value: summary.byMode.reviewing },
-      { key: "studying" as const, label: MODE_LABELS.studying, value: summary.byMode.studying },
-      { key: "idle" as const, label: MODE_LABELS.idle, value: summary.byMode.idle },
+      { key: "solving" as const, label: modeLabels.solving, value: summary.byMode.solving },
+      { key: "reviewing" as const, label: modeLabels.reviewing, value: summary.byMode.reviewing },
+      { key: "studying" as const, label: modeLabels.studying, value: summary.byMode.studying },
+      { key: "idle" as const, label: modeLabels.idle, value: summary.byMode.idle },
     ],
-    [summary]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [summary, t]
   );
 
   useEffect(() => {
@@ -211,9 +214,9 @@ export function StudyTrackerPanel({
     <div className={`ui-panel p-5 md:p-6 ${className}`}>
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <div className="ui-kicker mb-3">Time Track</div>
-          <h3 className="text-2xl" style={{ fontWeight: 600 }}>{title}</h3>
-          <p className="ui-copy mt-2 max-w-2xl">{description}</p>
+          <div className="ui-kicker mb-3">{t("studyTracker.kicker")}</div>
+          <h3 className="text-2xl" style={{ fontWeight: 600 }}>{title ?? t("studyTracker.title")}</h3>
+          <p className="ui-copy mt-2 max-w-2xl">{description ?? t("studyTracker.desc")}</p>
         </div>
         {track && activeMode && (
           <div
@@ -221,7 +224,7 @@ export function StudyTrackerPanel({
             style={modeTone(liveMode)}
           >
             <LiveIcon size={16} />
-            <span className="text-sm font-medium">{MODE_LABELS[liveMode]}</span>
+            <span className="text-sm font-medium">{modeLabels[liveMode]}</span>
           </div>
         )}
       </div>
@@ -233,11 +236,11 @@ export function StudyTrackerPanel({
         >
           <div className="flex items-center gap-2 text-sm font-medium" style={{ color: "var(--text-secondary)" }}>
             <Activity size={16} />
-            Today
+            {t("studyTracker.today")}
           </div>
           <p className="text-4xl tracking-tight mt-3" style={{ fontWeight: 600, color: "var(--text-primary)" }}>{formatDuration(summary.totalMs)}</p>
           <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-            Recorded on this device today.
+            {t("studyTracker.recordedDevice")}
           </p>
         </div>
 
@@ -269,7 +272,7 @@ export function StudyTrackerPanel({
       </div>
 
       <div className="mt-6 pt-5">
-        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>This Week</p>
+        <p className="text-xs font-medium mb-3" style={{ color: "var(--text-muted)" }}>{t("studyTracker.thisWeek")}</p>
         <WeeklyMiniChart courseId={courseId} />
       </div>
     </div>
