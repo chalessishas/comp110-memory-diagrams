@@ -77,7 +77,26 @@ export async function POST(request: Request) {
       .eq("element_name", "_overall")
       .maybeSingle();
 
-    if (mastery) {
+    // Bootstrap mastery row if none exists — common when user skips lessons and goes straight to practice
+    let resolvedMastery = mastery;
+    if (!resolvedMastery) {
+      const { data: created } = await supabase
+        .from("element_mastery")
+        .insert({
+          user_id: user.id,
+          concept_id: question.knowledge_point_id,
+          element_name: "_overall",
+          current_level: "exposed",
+          has_external_practice: true,
+          first_contact_at: new Date().toISOString(),
+        })
+        .select("id, current_level, times_tested, times_correct, times_non_mcq, times_non_mcq_correct, has_non_mcq_correct, has_external_practice, has_cross_concept_correct, has_transfer_correct, has_teaching_challenge_pass, fsrs_stability, fsrs_retrievability, first_contact_at, level_reached_at")
+        .single();
+      if (created) resolvedMastery = created;
+    }
+
+    if (resolvedMastery) {
+      const mastery = resolvedMastery;
       postUpdateTested = mastery.times_tested + 1;
       const postUpdateCorrect = mastery.times_correct + (isCorrect ? 1 : 0);
       postUpdateAccuracy = postUpdateCorrect / postUpdateTested;
