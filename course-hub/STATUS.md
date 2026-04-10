@@ -1,8 +1,25 @@
 # CourseHub Status
 
-## [2026-04-07 22:25] Phase 5 — User-Requested Features (2 of 4 done)
+## [2026-04-10 04:42] Phase 5 — User-Requested Features (4 of 4 done ✓)
 
-User's 4-feature request during exam prep sprint. Priorities: exam scope filter (done) → term cards (done) → daily report → cross-course org.
+User's 4-feature request during exam prep sprint. All complete: exam scope filter → term cards → daily report → cross-course org (due-count badges).
+
+### Dashboard Due-Count Badges (Feature 4) — Done [2026-04-10]
+- `CourseCard.tsx` → client component; reads FSRS localStorage via `loadCards()` + `getDueCards()`
+- `questionIds?: string[]` prop: server fetches question IDs by course, passes down to client
+- Orange badge appears when `dueCount > 0`; 0-due cards show nothing (no visual noise)
+- `dashboard/page.tsx`: single batch `questions` query grouped by course_id — no N+1 requests
+
+### RLS Performance (014_rls_performance.sql) — Applied [2026-04-10]
+- 8 tables updated: `auth.uid()` → `(select auth.uid())` in USING/WITH CHECK clauses
+- Postgres now caches auth.uid() per statement instead of re-evaluating per row
+- Biggest impact on `element_mastery`, `attempts`, `courses` (high row-count tables)
+
+### Session Summary Modal (Feature 3) — Done [2026-04-10]
+- `GET /api/courses/[id]/mastery-summary?since=ISO` — returns KPs where `level_reached_at >= since`
+- `SessionSummaryModal.tsx` — shows session stats (questions/accuracy/time), streak 7-day grid, mastery level-ups, tomorrow preview
+- Triggered from `review/page.tsx` when queue exhausts or ≥1 question answered
+- No schema changes — reads existing `element_mastery` table via RLS-protected API
 
 ### Exam Scope Filter (Feature 1)
 - `/api/courses/[id]/exam-scope/route.ts`: AI matches scope text to course KP IDs
