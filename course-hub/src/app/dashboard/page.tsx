@@ -22,13 +22,43 @@ export default async function DashboardPage() {
 
   // Fetch question IDs per course for client-side due-count badges
   const courseIds = activeCourses.map((c) => c.id);
-  const questionsByCourseFetch = courseIds.length > 0
-    ? await supabase.from("questions").select("id, course_id").in("course_id", courseIds)
-    : { data: [] };
+  const [questionsByCourseFetch, kpsByCourseFetch] = await Promise.all([
+    courseIds.length > 0
+      ? supabase.from("questions").select("id, course_id").in("course_id", courseIds)
+      : Promise.resolve({ data: [] }),
+    courseIds.length > 0
+      ? supabase.from("outline_nodes").select("id, course_id").in("course_id", courseIds).eq("type", "knowledge_point")
+      : Promise.resolve({ data: [] }),
+  ]);
+
   const questionsByCourse: Record<string, string[]> = {};
   for (const q of questionsByCourseFetch.data ?? []) {
     if (!questionsByCourse[q.course_id]) questionsByCourse[q.course_id] = [];
     questionsByCourse[q.course_id].push(q.id);
+  }
+
+  // Batch mastery query — all KP ids across courses, then group
+  const kpNodes = kpsByCourseFetch.data ?? [];
+  const allKpIds = kpNodes.map((n) => n.id);
+  const kpsByCourse: Record<string, string[]> = {};
+  for (const n of kpNodes) {
+    if (!kpsByCourse[n.course_id]) kpsByCourse[n.course_id] = [];
+    kpsByCourse[n.course_id].push(n.id);
+  }
+
+  const masteryFetch = allKpIds.length > 0
+    ? await supabase.from("element_mastery").select("knowledge_point_id, current_level").in("knowledge_point_id", allKpIds)
+    : { data: [] };
+
+  const LEARNED_LEVELS = new Set(["practiced", "proficient", "mastered"]);
+  const masteryStatsByCourse: Record<string, { learned: number; total: number }> = {};
+  for (const courseId of courseIds) {
+    const kps = kpsByCourse[courseId] ?? [];
+    const kpSet = new Set(kps);
+    const learned = (masteryFetch.data ?? []).filter(
+      (m) => kpSet.has(m.knowledge_point_id) && LEARNED_LEVELS.has(m.current_level)
+    ).length;
+    masteryStatsByCourse[courseId] = { learned, total: kps.length };
   }
 
   if (!user) {
@@ -132,7 +162,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {activeCourses.map((course) => (
-            <CourseCard key={course.id} course={course} questionIds={questionsByCourse[course.id] ?? []} />
+            <CourseCard key={course.id} course={course} questionIds={questionsByCourse[course.id] ?? []} masteryStats={masteryStatsByCourse[course.id]} />
           ))}
         </div>
       )}

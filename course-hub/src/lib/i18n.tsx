@@ -587,6 +587,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Course Card
     "courseCard.due": "due",
+    "courseCard.mastery": "Mastery",
 
     // Misc
     "misc.loading": "Loading...",
@@ -1293,6 +1294,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Course Card
     "courseCard.due": "待复习",
+    "courseCard.mastery": "掌握度",
 
     // Misc
     "misc.loading": "加载中...",

@@ -7,7 +7,7 @@ import { getDueCards, loadCards } from "@/lib/spaced-repetition";
 import type { Course } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
-export function CourseCard({ course, questionIds }: { course: Course; questionIds?: string[] }) {
+export function CourseCard({ course, questionIds, masteryStats }: { course: Course; questionIds?: string[]; masteryStats?: { learned: number; total: number } }) {
   const { t } = useI18n();
   const [dueCount, setDueCount] = useState<number | null>(null);
 
@@ -65,6 +65,29 @@ export function CourseCard({ course, questionIds }: { course: Course; questionId
           </span>
         )}
       </div>
+
+      {/* Mastery progress bar */}
+      {masteryStats && masteryStats.total > 0 && (
+        <div className="mt-4">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+              {t("courseCard.mastery")}
+            </span>
+            <span className="text-[11px] font-medium" style={{ color: "var(--text-secondary)" }}>
+              {masteryStats.learned}/{masteryStats.total}
+            </span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${Math.round((masteryStats.learned / masteryStats.total) * 100)}%`,
+                backgroundColor: "var(--accent)",
+              }}
+            />
+          </div>
+        </div>
+      )}
     </Link>
   );
 }
