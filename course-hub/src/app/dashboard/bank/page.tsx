@@ -74,7 +74,7 @@ export default function QuestionBankPage() {
                   <p className="text-sm">{bm.questions.stem}</p>
                   <div className="mt-2 flex items-center gap-2">
                     <span className="ui-badge">
-                      {bm.questions.type.replace("_", " ")}
+                      {t(`qtype.${bm.questions.type}`)}
                     </span>
                     <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
                       {t("bank.answer")} {bm.questions.answer}

@@ -644,6 +644,12 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Question Bank
     "bank.unknownCourse": "Unknown course",
+
+    // Question types
+    "qtype.multiple_choice": "Multiple Choice",
+    "qtype.fill_blank": "Fill in the Blank",
+    "qtype.short_answer": "Short Answer",
+    "qtype.true_false": "True / False",
   },
   zh: {
     // Nav
@@ -1284,6 +1290,12 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Question Bank
     "bank.unknownCourse": "未知课程",
+
+    // Question types
+    "qtype.multiple_choice": "单选题",
+    "qtype.fill_blank": "填空题",
+    "qtype.short_answer": "简答题",
+    "qtype.true_false": "判断题",
   },
 };
 
