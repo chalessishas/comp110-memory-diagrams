@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
 import { parsedQuestionSchema } from "@/lib/schemas";
-import { stripThinkBlocks, textModel } from "@/lib/ai";
+import { stripThinkBlocks, textModel, fastModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -23,9 +23,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "scope_text required" }, { status: 400 });
   }
 
-  // Step 1: Extract exam topics from the scope text
+  // Step 1: Extract exam topics from the scope text (simple extraction — use fastModel)
   const { text: topicsText } = await generateText({
-    model: textModel,
+    model: fastModel,
     timeout: 55_000,
     messages: [{
       role: "user",

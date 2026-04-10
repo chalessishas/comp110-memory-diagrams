@@ -35,6 +35,7 @@ const qwenText = createOpenAI({
 
 export const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsing (proven stable)
 export const textModel = qwenText("qwen3.5-plus"); // 19x faster than qwen-plus, thinking disabled
+export const fastModel = qwenText("qwen-turbo"); // cheapest — simple extraction/matching tasks only
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 const AI_TIMEOUT_MS = 55_000; // 55s — just under Vercel's 60s maxDuration

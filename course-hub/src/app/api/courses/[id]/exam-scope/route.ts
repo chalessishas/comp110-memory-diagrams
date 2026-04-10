@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
-import { stripThinkBlocks, textModel } from "@/lib/ai";
+import { stripThinkBlocks, fastModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -36,9 +36,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const kpSummary = kpList.map((kp, i) => `${i + 1}. ${kp.title}`).join("\n");
 
-  // AI matches scope text to existing knowledge points
+  // AI matches scope text to existing knowledge points (simple matching — fastModel sufficient)
   const { text } = await generateText({
-    model: textModel,
+    model: fastModel,
     timeout: 55_000,
     messages: [{
       role: "user",
