@@ -25,7 +25,7 @@ interface Props {
 }
 
 export function OnboardingWizard({ onComplete }: Props) {
-  const { setLocale } = useI18n();
+  const { t, setLocale } = useI18n();
   const [step, setStep] = useState(0);
   const [prefs, setPrefs] = useState<OnboardingPreferences>({
     language: "en",
@@ -35,7 +35,7 @@ export function OnboardingWizard({ onComplete }: Props) {
     completed: false,
   });
 
-  const isZh = false;
+  const isZh = prefs.language === "zh";
 
   function handleNext() {
     if (step < steps.length - 1) {
@@ -154,24 +154,24 @@ export function OnboardingWizard({ onComplete }: Props) {
       content: (
         <div className="mt-6 space-y-3">
           <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-            <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "语言" : "Language"}</p>
+            <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.language")}</p>
             <p className="text-sm font-medium">{prefs.language === "zh" ? "中文" : "English"}</p>
           </div>
           {prefs.role && (
             <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "身份" : "Role"}</p>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.role")}</p>
               <p className="text-sm font-medium">{ROLES.find((r) => r.key === prefs.role)?.[isZh ? "zh" : "en"]}</p>
             </div>
           )}
           {prefs.semester && (
             <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "学期" : "Semester"}</p>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.semester")}</p>
               <p className="text-sm font-medium">{prefs.semester}</p>
             </div>
           )}
           {prefs.goals.length > 0 && (
             <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{isZh ? "学习目标" : "Goals"}</p>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.goals")}</p>
               <div className="flex flex-wrap gap-2">
                 {prefs.goals.map((g) => (
                   <span key={g} className="ui-badge">{GOALS.find((gl) => gl.key === g)?.[isZh ? "zh" : "en"]}</span>
@@ -226,7 +226,7 @@ export function OnboardingWizard({ onComplete }: Props) {
                   className="text-sm cursor-pointer"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  {isZh ? "上一步" : "Back"}
+                  {t("onboarding.back")}
                 </button>
               )}
             </div>
@@ -237,16 +237,14 @@ export function OnboardingWizard({ onComplete }: Props) {
                   className="text-sm cursor-pointer"
                   style={{ color: "var(--text-secondary)" }}
                 >
-                  {isZh ? "跳过" : "Skip"}
+                  {t("onboarding.skip")}
                 </button>
               )}
               <button
                 onClick={handleNext}
                 className="ui-button-primary"
               >
-                {step === steps.length - 1
-                  ? (isZh ? "开始使用" : "Get Started")
-                  : (isZh ? "下一步" : "Next")}
+                {step === steps.length - 1 ? t("onboarding.getStarted") : t("onboarding.next")}
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -260,7 +258,7 @@ export function OnboardingWizard({ onComplete }: Props) {
             className="w-full text-center text-xs mt-5 cursor-pointer"
             style={{ color: "var(--text-muted)" }}
           >
-            {isZh ? "跳过设置，直接开始" : "Skip setup, go straight to the app"}
+            {t("onboarding.skipSetup")}
           </button>
         )}
       </div>
