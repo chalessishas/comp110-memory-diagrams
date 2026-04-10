@@ -34,6 +34,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   const [revealedExplanation, setRevealedExplanation] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [confidence, setConfidence] = useState<1 | 2 | 3 | null>(null);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
@@ -46,7 +47,7 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
     const res = await fetch("/api/attempts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question_id: question.id, user_answer: userAnswer }),
+      body: JSON.stringify({ question_id: question.id, user_answer: userAnswer, confidence }),
     });
 
     const data = await res.json();
@@ -162,13 +163,35 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
       {/* Submit or feedback */}
       {!submitted ? (
-        <button
-          onClick={handleSubmit}
-          disabled={!userAnswer || submitting}
-          className="ui-button-primary disabled:opacity-40"
-        >
-          {submitting ? <Loader2 size={16} className="animate-spin" /> : t("practice.submit")}
-        </button>
+        <div className="space-y-3">
+          {userAnswer && (
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {t("questionCard.howConfident")}
+              </span>
+              {([1, 2, 3] as const).map((lvl) => (
+                <button
+                  key={lvl}
+                  onClick={() => setConfidence((c) => c === lvl ? null : lvl)}
+                  className="text-xs px-3 py-1 rounded-lg cursor-pointer transition-colors"
+                  style={{
+                    backgroundColor: confidence === lvl ? "var(--accent)" : "var(--bg-muted)",
+                    color: confidence === lvl ? "white" : "var(--text-secondary)",
+                  }}
+                >
+                  {lvl === 1 ? "🤔" : lvl === 2 ? "🙂" : "😎"}
+                </button>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={handleSubmit}
+            disabled={!userAnswer || submitting}
+            className="ui-button-primary disabled:opacity-40"
+          >
+            {submitting ? <Loader2 size={16} className="animate-spin" /> : t("practice.submit")}
+          </button>
+        </div>
       ) : (
         <div className="mt-6 space-y-4">
           {/* Correct / wrong feedback — soft bg, no harsh border */}

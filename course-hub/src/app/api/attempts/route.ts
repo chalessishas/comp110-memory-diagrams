@@ -54,6 +54,7 @@ export async function POST(request: Request) {
       question_id: parsed.data.question_id,
       user_answer: parsed.data.user_answer,
       is_correct: isCorrect,
+      confidence: parsed.data.confidence ?? null,
     })
     .select()
     .single();

@@ -119,6 +119,7 @@ export const parsedQuestionSchema = z.object({
 export const attemptCreateSchema = z.object({
   question_id: z.string().uuid(),
   user_answer: z.string().min(1),
+  confidence: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable().optional(),
 });
 
 export const noteOrganizeSchema = z.object({
