@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   const { data: question } = await supabase
     .from("questions")
-    .select("answer, type, explanation, knowledge_point_id")
+    .select("answer, type, explanation, stem, knowledge_point_id")
     .eq("id", parsed.data.question_id)
     .single();
 
@@ -80,6 +80,39 @@ export async function POST(request: Request) {
           updated_at: new Date().toISOString(),
         })
         .eq("id", mastery.id);
+    }
+  }
+
+  // Track misconceptions: auto-log when user answers incorrectly for a knowledge point.
+  // Increments occurrence_count on repeat; handles relapse if previously resolved.
+  if (!isCorrect && question.knowledge_point_id) {
+    const { data: existing } = await supabase
+      .from("misconceptions")
+      .select("id, occurrence_count, resolved, relapse_count")
+      .eq("user_id", user.id)
+      .eq("concept_id", question.knowledge_point_id)
+      .maybeSingle();
+
+    if (existing) {
+      await supabase
+        .from("misconceptions")
+        .update({
+          occurrence_count: existing.occurrence_count + 1,
+          last_seen_at: new Date().toISOString(),
+          ...(existing.resolved
+            ? { resolved: false, relapsed: true, relapse_count: existing.relapse_count + 1 }
+            : {}),
+        })
+        .eq("id", existing.id);
+    } else {
+      const desc = question.stem
+        ? question.stem.slice(0, 120)
+        : "Repeated errors on this topic";
+      await supabase.from("misconceptions").insert({
+        user_id: user.id,
+        concept_id: question.knowledge_point_id,
+        misconception_description: desc,
+      });
     }
   }
 
