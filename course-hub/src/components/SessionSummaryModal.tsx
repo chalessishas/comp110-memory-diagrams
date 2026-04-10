@@ -172,15 +172,25 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
           </div>
         )}
 
-        {/* Per-item review breakdown — wrong answers first, up to 5 items */}
+        {/* Per-item review breakdown — wrong answers as actionable list */}
         {reviewedItems && reviewedItems.length > 0 && (() => {
           const wrong = reviewedItems.filter((i) => !i.correct).slice(0, 5);
           if (wrong.length === 0) return null;
           return (
             <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
-              <p className="text-xs font-medium mb-2" style={{ color: "var(--danger)" }}>
-                {isZh ? `需要复习 (${wrong.length})` : `Review these (${wrong.length})`}
-              </p>
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium" style={{ color: "var(--danger)" }}>
+                  {isZh ? `需要复习 (${wrong.length})` : `Missed (${wrong.length})`}
+                </p>
+                <a
+                  href={`/course/${courseId}/review`}
+                  onClick={onClose}
+                  className="text-xs font-medium cursor-pointer hover:opacity-70 transition-opacity"
+                  style={{ color: "var(--accent)" }}
+                >
+                  {isZh ? "去复习 →" : "Review now →"}
+                </a>
+              </div>
               <div className="space-y-1">
                 {wrong.map((item) => (
                   <p key={item.id} className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>

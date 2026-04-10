@@ -125,7 +125,7 @@ export default function SettingsPage() {
     setTimeout(() => setClearing(null), 1000);
   }
 
-  async function handleDeleteAccount() {
+  const handleDeleteAccount = async () => {
     if (!confirm(isZh
       ? "删除账号及所有数据？此操作不可恢复。"
       : "Delete your account and ALL data? This cannot be undone."
@@ -149,7 +149,7 @@ export default function SettingsPage() {
       alert(isZh ? "网络错误，请稍后重试" : "Network error. Please try again.");
       setClearing(null);
     }
-  }
+  };
 
   const sections: { key: Section; label: string; icon: typeof User }[] = [
     { key: "profile", label: t("settings.profile"), icon: User },
