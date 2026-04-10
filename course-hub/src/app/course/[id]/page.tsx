@@ -83,6 +83,7 @@ function buildTodayTasks(data: {
     color: string;
     courseId: string;
     courseTitle: string;
+    actionUrl: string;
   }> = [];
 
   const masteryMap = new Map(data.mastery.map(m => [m.concept_id, m]));
@@ -108,6 +109,7 @@ function buildTodayTasks(data: {
           color: "var(--danger)",
           courseId: data.courseId,
           courseTitle: data.courseTitle,
+          actionUrl: `/course/${data.courseId}/review`,
         });
       }
 
@@ -128,6 +130,7 @@ function buildTodayTasks(data: {
           color: "var(--danger)",
           courseId: data.courseId,
           courseTitle: data.courseTitle,
+          actionUrl: `/course/${data.courseId}/learn`,
         });
       }
     } else if (daysUntil <= 14) {
@@ -149,6 +152,7 @@ function buildTodayTasks(data: {
           color: "var(--warning)",
           courseId: data.courseId,
           courseTitle: data.courseTitle,
+          actionUrl: `/course/${data.courseId}/review`,
         });
       }
     }
@@ -172,6 +176,7 @@ function buildTodayTasks(data: {
       color: "var(--warning)",
       courseId: data.courseId,
       courseTitle: data.courseTitle,
+      actionUrl: `/course/${data.courseId}/review`,
     });
   }
 
@@ -194,6 +199,7 @@ function buildTodayTasks(data: {
       color: "var(--accent)",
       courseId: data.courseId,
       courseTitle: data.courseTitle,
+      actionUrl: `/course/${data.courseId}/learn`,
     });
   } else {
     // Find next unlearned knowledge point that has a lesson
@@ -217,6 +223,7 @@ function buildTodayTasks(data: {
         color: "var(--accent)",
         courseId: data.courseId,
         courseTitle: data.courseTitle,
+        actionUrl: `/course/${data.courseId}/learn`,
       });
     }
   }
@@ -234,6 +241,7 @@ function buildTodayTasks(data: {
       color: "var(--accent)",
       courseId: data.courseId,
       courseTitle: data.courseTitle,
+      actionUrl: `/course/${data.courseId}/learn`,
     });
   }
 
@@ -251,6 +259,7 @@ function buildTodayTasks(data: {
       color: "var(--accent)",
       courseId: data.courseId,
       courseTitle: data.courseTitle,
+      actionUrl: `/course/${data.courseId}/practice`,
     });
   }
 

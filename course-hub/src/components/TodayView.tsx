@@ -34,6 +34,7 @@ interface TodayTask {
   color: string;
   courseId: string;
   courseTitle: string;
+  actionUrl: string;
 }
 
 export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: string }) {
@@ -74,9 +75,10 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
         const label = typeLabels[task.type] ?? { en: task.type, zh: task.type };
 
         return (
-          <div
+          <Link
             key={task.id}
-            className="ui-panel p-5 rounded-[20px] flex items-start gap-4 group cursor-pointer transition-all overflow-hidden"
+            href={task.actionUrl}
+            className="ui-panel p-5 rounded-[20px] flex items-start gap-4 group cursor-pointer transition-all overflow-hidden hover:-translate-y-0.5"
           >
             {/* Priority dot — left indicator */}
             <div className="flex flex-col items-center pt-1.5 shrink-0">
@@ -118,14 +120,14 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
               </p>
             </div>
 
-            {/* Start button */}
-            <button
-              className="px-4 py-2 text-sm font-medium cursor-pointer shrink-0 rounded-xl transition-all hover:-translate-y-0.5"
+            {/* Start indicator */}
+            <span
+              className="px-4 py-2 text-sm font-medium shrink-0 rounded-xl"
               style={{ backgroundColor: task.color, color: "white" }}
             >
               {isZh ? "开始" : "Start"}
-            </button>
-          </div>
+            </span>
+          </Link>
         );
       })}
 
@@ -137,7 +139,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
           style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
         >
           <Upload size={12} strokeWidth={1.8} />
-          Upload material
+          {isZh ? "上传资料" : "Upload material"}
         </Link>
         <div className="flex-1" />
         <StreakBadge />

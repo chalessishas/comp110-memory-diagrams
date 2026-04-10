@@ -332,7 +332,7 @@ export default function NewCoursePage() {
     if (!parsed) return;
 
     if (!isAuthenticated) {
-      setGuestNotice("You're in guest mode. Sign in when you want to save this course to your dashboard.");
+      setGuestNotice(t("newCourse.guestNotice"));
       return;
     }
 
