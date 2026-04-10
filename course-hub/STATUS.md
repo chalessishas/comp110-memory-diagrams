@@ -36,8 +36,9 @@ Approximations (deliberate, refinable later):
 - `018_fsrs_server_sync.sql` — fsrs_cards + fsrs_review_logs tables
 
 ### Known Issues
-- `recentAccuracy` in mastery eval uses overall accuracy not last-5 window (minor, refinable)
-- `has_transfer_correct` never written (no transfer question type exists yet)
+- `recentAccuracy` — resolved: last-5 window query now in attempts POST (embedded join across KP questions)
+- `has_transfer_correct` — resolved: `short_answer` correct answers now set this flag (Roediger & Butler 2011)
+- `courseConceptsAtLevel2OrAbove` hardcoded 0 (crossConceptOk always passes — avoids per-attempt count query)
 - SSE lesson streaming untested with live AI calls (build passes)
 - Vercel Git integration: manual deploy (`npx vercel deploy --prod`) still required
 
