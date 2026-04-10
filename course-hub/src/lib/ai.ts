@@ -6,13 +6,35 @@ import type { OrganizedStudyNote, ParsedQuestion, ParsedSyllabus } from "@/types
 
 // Qwen3.5-Plus via DashScope OpenAI-compatible API
 // $0.26/$1.56 per M tokens, native PDF vision, json_schema support
+const DASHSCOPE_BASE = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+
 const qwen = createOpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  baseURL: DASHSCOPE_BASE,
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
 });
 
+// Separate provider for text-only model with thinking mode disabled.
+// enable_thinking: false suppresses <think> chain-of-thought tokens (~30% token savings).
+// Uses custom fetch to inject the DashScope-specific body field (not in OpenAI spec).
+const qwenText = createOpenAI({
+  baseURL: DASHSCOPE_BASE,
+  apiKey: process.env.DASHSCOPE_API_KEY ?? "",
+  fetch: async (url, init) => {
+    if (init?.body && typeof init.body === "string") {
+      try {
+        const body = JSON.parse(init.body);
+        body.enable_thinking = false;
+        return fetch(url, { ...init, body: JSON.stringify(body) });
+      } catch {
+        // If body parsing fails, fall through to unmodified request
+      }
+    }
+    return fetch(url, init ?? {});
+  },
+});
+
 const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsing (proven stable)
-const textModel = qwen("qwen3.5-plus"); // 19x faster than qwen-plus (MoE, 17B active params)
+const textModel = qwenText("qwen3.5-plus"); // 19x faster than qwen-plus, thinking disabled
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 const AI_TIMEOUT_MS = 55_000; // 55s — just under Vercel's 60s maxDuration
