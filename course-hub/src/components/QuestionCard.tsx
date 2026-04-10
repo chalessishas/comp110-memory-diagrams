@@ -117,7 +117,16 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
       {/* Question stem */}
       <div className="mb-8">
-        <div className="ui-kicker mb-3">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <div className="ui-kicker">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
+          {question.attempt_count !== undefined && (
+            question.attempt_count === 0
+              ? <span className="text-xs px-2 py-0.5 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}>First attempt</span>
+              : <span className="text-xs px-2 py-0.5 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
+                  {question.attempt_count} attempt{question.attempt_count > 1 ? "s" : ""} · {Math.round((question.user_accuracy ?? 0) * 100)}% correct
+                </span>
+          )}
+        </div>
         <p className="text-lg font-medium leading-relaxed" style={{ color: "var(--text-primary)" }}>{question.stem}</p>
       </div>
 
