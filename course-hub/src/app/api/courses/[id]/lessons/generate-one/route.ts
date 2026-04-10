@@ -216,6 +216,8 @@ function sseResponse(handler: (
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      // Tells Vercel/Nginx proxy to flush chunks immediately, not buffer them
+      "X-Accel-Buffering": "no",
     },
   });
 }
