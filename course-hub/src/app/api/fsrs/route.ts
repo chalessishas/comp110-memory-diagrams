@@ -76,6 +76,57 @@ export async function POST(request: Request) {
       { onConflict: "user_id,question_id" }
     );
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Propagate FSRS stability + retrievability to element_mastery so mastery-v2
+    // can evaluate practiced→proficient (requires fsrsStability >= 7) and
+    // run downgrade checks (fsrsRetrievability < 0.70).
+    // Strategy: MAX stability per KP across all synced questions for that KP.
+    const questionIds = cards.map((c) => c.question_id);
+    const { data: qRows } = await supabase
+      .from("questions")
+      .select("id, knowledge_point_id")
+      .in("id", questionIds);
+
+    if (qRows && qRows.length > 0) {
+      // Build kp_id → {maxStability, latestReview} map
+      const kpMap = new Map<string, { stability: number; lastReview: string | null }>();
+      for (const q of qRows) {
+        if (!q.knowledge_point_id) continue;
+        const card = cards.find((c) => c.question_id === q.id);
+        if (!card) continue;
+        const existing = kpMap.get(q.knowledge_point_id);
+        if (!existing || card.stability > existing.stability) {
+          kpMap.set(q.knowledge_point_id, {
+            stability: card.stability,
+            lastReview: card.last_review ?? null,
+          });
+        }
+      }
+
+      // Update element_mastery rows — one update per distinct KP
+      const dayMs = 86_400_000;
+      await Promise.all(
+        Array.from(kpMap.entries()).map(([kpId, { stability, lastReview }]) => {
+          const daysSince = lastReview
+            ? (Date.now() - new Date(lastReview).getTime()) / dayMs
+            : 0;
+          // FSRS retrievability: R = (1 + t / (9 * S))^-1
+          const retrievability = stability > 0
+            ? Math.pow(1 + daysSince / (9 * stability), -1)
+            : 0;
+          return supabase
+            .from("element_mastery")
+            .update({
+              fsrs_stability: stability,
+              fsrs_retrievability: Math.round(retrievability * 1000) / 1000,
+              fsrs_last_review: lastReview,
+              updated_at: now,
+            })
+            .eq("user_id", user.id)
+            .eq("concept_id", kpId);
+        })
+      );
+    }
   }
 
   // Append review logs — insert only new entries (idempotent by reviewed_at + question_id)
