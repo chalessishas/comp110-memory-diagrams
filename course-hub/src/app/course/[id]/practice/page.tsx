@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
-import { getExamScope } from "@/lib/spaced-repetition";
+import { getExamScope, pullCardsFromServer } from "@/lib/spaced-repetition";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -35,6 +35,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     const scope = getExamScope(id);
     if (scope && scope.length > 0) setScopeKpIds(new Set(scope));
+
+    // Pull server FSRS state so adaptive sort uses current cross-device history
+    pullCardsFromServer(id);
 
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())

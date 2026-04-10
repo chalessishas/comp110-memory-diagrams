@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -41,6 +42,11 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 120/min — generous for fast reviewers (2 cards/sec), blocks bulk flooding
+  if (!await checkRateLimit(`fsrs-sync:${user.id}`, 120, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
 
   const body = await request.json();
   const parsed = syncBodySchema.safeParse(body);
@@ -100,6 +106,11 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 30/min — one pull per course page load; burst protection
+  if (!await checkRateLimit(`fsrs-fetch:${user.id}`, 30, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
 
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get("courseId");
