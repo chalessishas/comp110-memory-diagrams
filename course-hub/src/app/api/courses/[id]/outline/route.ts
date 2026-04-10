@@ -54,21 +54,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
   const { nodes, version } = await request.json();
 
-  // Optimistic locking: check updated_at matches what the client last saw
-  if (version) {
-    const { data: course } = await supabase
-      .from("courses")
-      .select("updated_at")
-      .eq("id", id)
-      .eq("user_id", user.id)
-      .single();
+  // Always verify course ownership before mutating
+  const { data: course } = await supabase
+    .from("courses")
+    .select("updated_at")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-    if (course && course.updated_at !== version) {
-      return NextResponse.json(
-        { error: "Course was modified by another session. Please refresh." },
-        { status: 409 }
-      );
-    }
+  // Optimistic locking: check updated_at matches what the client last saw
+  if (version && course.updated_at !== version) {
+    return NextResponse.json(
+      { error: "Course was modified by another session. Please refresh." },
+      { status: 409 }
+    );
   }
 
   const rows = flattenNodes(nodes, id);
