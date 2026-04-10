@@ -5,6 +5,8 @@ import { stripThinkBlocks } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
+export const maxDuration = 60;
+
 const qwen = createOpenAI({
   baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
@@ -45,6 +47,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // AI matches scope text to existing knowledge points
   const { text } = await generateText({
     model,
+    timeout: 55_000,
     messages: [{
       role: "user",
       content: `You are matching an exam scope description to a course's knowledge points.

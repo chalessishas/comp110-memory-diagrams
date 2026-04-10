@@ -34,6 +34,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Step 1: Extract exam topics from the scope text
   const { text: topicsText } = await generateText({
     model,
+    timeout: 55_000,
     messages: [{
       role: "user",
       content: `Extract the exam topics from this text. Return a JSON array of strings, each being one specific testable topic. Be specific — "Alternating series test" not just "Series". Return ONLY a JSON array like ["topic1", "topic2"].
@@ -68,6 +69,7 @@ ${scope_text.slice(0, 3000)}
     const results = await Promise.allSettled(batch.map(async (topic) => {
       const { text } = await generateText({
         model,
+        timeout: 55_000,
         messages: [{
           role: "user",
           content: `Generate exactly 2 practice questions about "${topic}" for a Calculus II exam. Return JSON:

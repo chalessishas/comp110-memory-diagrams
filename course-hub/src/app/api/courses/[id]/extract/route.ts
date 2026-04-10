@@ -5,6 +5,8 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 
+export const maxDuration = 60;
+
 const qwen = createOpenAI({
   baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
@@ -52,6 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { output } = await generateText({
     model: qwen("qwen-plus-latest"),
+    timeout: 55_000,
     messages: [{
       role: "user",
       content: [
