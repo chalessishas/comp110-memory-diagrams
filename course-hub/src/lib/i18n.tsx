@@ -180,6 +180,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.noFiles": "No files yet",
     "library.noFilesDesc": "Upload textbooks, slides, past exams — all stored in the cloud",
     "library.extract": "Extract key content with AI",
+    "library.typeSyllabus": "Syllabus",
+    "library.typeExam": "Exam",
+    "library.typePractice": "Practice",
+    "library.typeNotes": "Notes",
+    "library.typeOther": "Other",
+    "library.typeFile": "File",
 
     // Settings
     "settings.title": "Settings",
@@ -556,6 +562,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.noFiles": "还没有文件",
     "library.noFilesDesc": "上传教材、课件、试卷 — 全部存在云端",
     "library.extract": "AI 提取核心内容",
+    "library.typeSyllabus": "课程大纲",
+    "library.typeExam": "试卷",
+    "library.typePractice": "练习",
+    "library.typeNotes": "笔记",
+    "library.typeOther": "其他",
+    "library.typeFile": "文件",
 
     // Settings
     "settings.title": "设置",

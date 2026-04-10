@@ -17,13 +17,6 @@ const typeIcons: Record<string, typeof FileText> = {
   other: File,
 };
 
-const typeLabels: Record<string, string> = {
-  syllabus: "Syllabus",
-  exam: "Exam",
-  practice: "Practice",
-  notes: "Notes",
-  other: "Other",
-};
 
 function formatDate(dateStr: string, locale?: string) {
   return new Intl.DateTimeFormat(locale ?? "en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(dateStr));
@@ -33,6 +26,13 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   const { id } = use(params);
   const { t, locale } = useI18n();
   const isZh = locale === "zh";
+  const typeLabels: Record<string, string> = {
+    syllabus: t("library.typeSyllabus"),
+    exam: t("library.typeExam"),
+    practice: t("library.typePractice"),
+    notes: t("library.typeNotes"),
+    other: t("library.typeOther"),
+  };
   const [uploads, setUploads] = useState<UploadWithUrl[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUpload, setShowUpload] = useState(false);
@@ -113,7 +113,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{upload.file_name}</p>
                     <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                      {typeLabels[upload.upload_type] ?? "File"} · {formatDate(upload.created_at, locale)}
+                      {typeLabels[upload.upload_type] ?? t("library.typeFile")} · {formatDate(upload.created_at, locale)}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
