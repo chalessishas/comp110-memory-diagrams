@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { parseExamQuestions } from "@/lib/ai";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
@@ -78,6 +79,9 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const allowed = await checkRateLimit(`questions:extract:${user.id}`, 10, 60_000);
+  if (!allowed) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
 
   const { courseId, storagePath } = await request.json();
   if (!courseId || !storagePath) {
