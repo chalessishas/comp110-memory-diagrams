@@ -93,7 +93,7 @@ export default async function DashboardPage() {
     <div>
       <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between mb-8">
         <div>
-          <div className="ui-kicker mb-4">Dashboard</div>
+          <div className="ui-kicker mb-4"><T k="dashboard.kicker" /></div>
           <h1 className="text-4xl font-semibold tracking-tight"><T k="dashboard.title" /></h1>
           <p className="ui-copy mt-3">
             <T k="dashboard.subtitle" />

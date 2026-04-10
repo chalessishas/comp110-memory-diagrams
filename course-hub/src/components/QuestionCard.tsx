@@ -38,6 +38,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   // For wrong answers: explanation is gated behind one click to prompt active reflection
   // before the correction is revealed (test-potentiated encoding effect).
   const [explanationVisible, setExplanationVisible] = useState(false);
+  // Deliberate error reflection: brief prompt before explanation reveal (far-transfer effect)
+  const [reflectionText, setReflectionText] = useState("");
+  const [reflectionDone, setReflectionDone] = useState(false);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
@@ -222,8 +225,41 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
             )}
           </div>
 
+          {/* Deliberate error reflection — fires once before explanation gate for wrong answers */}
+          {!isCorrect && !reflectionDone && (
+            <div className="rounded-[16px] px-5 py-4 space-y-2" style={{ backgroundColor: "var(--bg-muted)" }}>
+              <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+                {t("questionCard.reflectPrompt")}
+              </p>
+              <textarea
+                value={reflectionText}
+                onChange={(e) => setReflectionText(e.target.value)}
+                placeholder={t("questionCard.reflectPlaceholder")}
+                className="w-full text-xs rounded-xl px-3 py-2 resize-none outline-none"
+                style={{ backgroundColor: "var(--bg-surface)", color: "var(--text-primary)", border: "1px solid var(--border)" }}
+                rows={2}
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setReflectionDone(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg cursor-pointer"
+                  style={{ backgroundColor: "var(--accent)", color: "white" }}
+                >
+                  {t("questionCard.reflectSubmit")}
+                </button>
+                <button
+                  onClick={() => setReflectionDone(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg cursor-pointer"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  {t("questionCard.reflectSkip")}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Explanation — gated for wrong answers to prompt active reflection first */}
-          {revealedExplanation && !explanationVisible && (
+          {revealedExplanation && !explanationVisible && reflectionDone && (
             <button
               onClick={() => setExplanationVisible(true)}
               className="w-full text-left text-sm px-5 py-3 rounded-[16px] cursor-pointer transition-colors"
