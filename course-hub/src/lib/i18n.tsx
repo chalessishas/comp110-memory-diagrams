@@ -15,6 +15,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.signOut": "Sign Out",
 
     // Dashboard
+    "dashboard.kicker": "Dashboard",
     "dashboard.title": "My Courses",
     "dashboard.subtitle": "All your courses organized in one place.",
     "dashboard.noCourses": "No courses yet",
@@ -98,6 +99,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.knowledgePoint": "Knowledge Point",
     "outline.delete": "Delete \"{name}\"?",
     "outline.deleteWithChildren": "Delete \"{name}\" and its {count} children?",
+    "outline.noOutline": "No outline yet. Upload a syllabus to generate one.",
+    "outline.hintRename": "Double-click to rename. Hover for add/delete.",
+    "outline.changedBanner": "Outline changed. Regenerate study tasks and practice questions?",
+    "outline.regenerate": "Regenerate",
 
     // Course Tabs (v2: 3-view architecture)
     "tabs.today": "Today",
@@ -400,6 +405,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "studyTask.typeReview": "Review",
     "studyTask.progress": "Progress",
     "studyTask.completed": "Completed",
+    "studyTask.headline": "Keep the work concrete.",
+    "studyTask.desc": "A focused checklist generated from the course outline.",
+    "studyTask.emptyDesc": "No study tasks yet. Generate the course content first and they will show up here.",
 
     // Question Card
     "questionCard.multipleChoice": "Multiple Choice",
@@ -415,6 +423,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reportTooHard": "Too Hard",
     "questionCard.howConfident": "How confident?",
     "questionCard.seeWhyWrong": "See where you went wrong",
+    "questionCard.reflectPrompt": "Why did that option seem correct?",
+    "questionCard.reflectPlaceholder": "In one sentence, what made it seem right...",
+    "questionCard.reflectSubmit": "Submit",
+    "questionCard.reflectSkip": "Skip",
 
     // Calibration panel
     "calibration.title": "Confidence Calibration",
@@ -547,6 +559,31 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.saveNote": "Save Note",
     "voiceNotes.transcriptPlaceholder": "Explain the concept in your own words, say what is confusing, or dictate what the teacher emphasized.",
     "voiceNotes.clarificationPlaceholder": "Reply here or use the mic",
+    "voiceNotes.refining": "Refining...",
+    "voiceNotes.refineWithAnswers": "Refine with Answers",
+    "voiceNotes.savedNotesKicker": "Saved Notes",
+    "voiceNotes.noNotesTitle": "No notes yet",
+    "voiceNotes.noNotesDesc": "Save a voice note and it will stay attached to this course.",
+    "voiceNotes.voiceNoteTag": "Voice Note",
+    "voiceNotes.typedNoteTag": "Typed Note",
+    "voiceNotes.panelKicker": "Voice Notes",
+    "voiceNotes.panelHeadline": "Talk it out. We will turn it into study notes.",
+    "voiceNotes.panelDesc": "Speak your understanding out loud, let AI clean it up, then answer a couple of follow-up questions if the idea is still fuzzy.",
+
+    // File dropzone
+    "dropzone.uploading": "Uploading your file...",
+    "dropzone.uploadingDesc": "Hold tight while CourseHub prepares it for parsing.",
+    "dropzone.dropActive": "Drop the file here",
+    "dropzone.idle": "Drag and drop a file, or click to browse",
+    "dropzone.hint": "PDF, slides, images, or notes. CourseHub will sort the structure out for you.",
+    "dropzone.maxSize": "Max 30 MB",
+    "dropzone.uploadFailed": "Upload failed",
+
+    // Wrong answer notebook
+    "wrongAnswer.yourAnswer": "Your Wrong Answer",
+    "wrongAnswer.correctAnswer": "Correct Answer",
+    "wrongAnswer.why": "Why",
+    "wrongAnswer.noAnswer": "No answer recorded",
 
     // Share
     "share.copyLink": "Copy link",
@@ -599,6 +636,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "nav.signOut": "退出",
 
     // Dashboard
+    "dashboard.kicker": "学习中心",
     "dashboard.title": "我的课程",
     "dashboard.subtitle": "所有课程，一目了然。",
     "dashboard.noCourses": "还没有课程",
@@ -682,6 +720,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "outline.knowledgePoint": "知识点",
     "outline.delete": "删除「{name}」？",
     "outline.deleteWithChildren": "删除「{name}」及其 {count} 个子项？",
+    "outline.noOutline": "暂无大纲。上传课程表以自动生成。",
+    "outline.hintRename": "双击重命名，悬停显示添加/删除操作。",
+    "outline.changedBanner": "大纲已更改。重新生成学习任务和练习题？",
+    "outline.regenerate": "重新生成",
 
     // Course Tabs (v2: 3-view architecture)
     "tabs.today": "今日任务",
@@ -984,6 +1026,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "studyTask.typeReview": "复习",
     "studyTask.progress": "进度",
     "studyTask.completed": "已完成",
+    "studyTask.headline": "把工作落到实处。",
+    "studyTask.desc": "根据课程大纲自动生成的专注清单。",
+    "studyTask.emptyDesc": "还没有学习任务。先生成课程内容，任务就会出现在这里。",
 
     // Question Card
     "questionCard.multipleChoice": "单项选择",
@@ -999,6 +1044,10 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reportTooHard": "太难",
     "questionCard.howConfident": "确信程度？",
     "questionCard.seeWhyWrong": "看看哪里错了",
+    "questionCard.reflectPrompt": "为什么觉得那个选项是对的？",
+    "questionCard.reflectPlaceholder": "一句话说说为什么觉得那个选项对...",
+    "questionCard.reflectSubmit": "提交",
+    "questionCard.reflectSkip": "跳过",
 
     // Calibration panel
     "calibration.title": "信心校准",
@@ -1131,6 +1180,31 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.saveNote": "保存笔记",
     "voiceNotes.transcriptPlaceholder": "用自己的话解释概念、记录疑惑，或口述老师强调的内容。",
     "voiceNotes.clarificationPlaceholder": "在此回复，或使用麦克风",
+    "voiceNotes.refining": "优化中...",
+    "voiceNotes.refineWithAnswers": "结合答案优化",
+    "voiceNotes.savedNotesKicker": "已保存笔记",
+    "voiceNotes.noNotesTitle": "暂无笔记",
+    "voiceNotes.noNotesDesc": "保存语音笔记后，它将附加到本课程。",
+    "voiceNotes.voiceNoteTag": "语音笔记",
+    "voiceNotes.typedNoteTag": "文字笔记",
+    "voiceNotes.panelKicker": "语音笔记",
+    "voiceNotes.panelHeadline": "说出来，我们会整理成学习笔记。",
+    "voiceNotes.panelDesc": "大声说出你的理解，让 AI 整理，再回答几个跟进问题，直到概念清晰为止。",
+
+    // File dropzone
+    "dropzone.uploading": "正在上传文件...",
+    "dropzone.uploadingDesc": "CourseHub 正在解析文件，请稍候。",
+    "dropzone.dropActive": "松开以上传",
+    "dropzone.idle": "拖拽文件到此处，或点击浏览",
+    "dropzone.hint": "支持 PDF、幻灯片、图片或笔记，CourseHub 会自动整理结构。",
+    "dropzone.maxSize": "最大 30 MB",
+    "dropzone.uploadFailed": "上传失败",
+
+    // Wrong answer notebook
+    "wrongAnswer.yourAnswer": "你的错误答案",
+    "wrongAnswer.correctAnswer": "正确答案",
+    "wrongAnswer.why": "解析",
+    "wrongAnswer.noAnswer": "未记录答案",
 
     // Share
     "share.copyLink": "复制链接",

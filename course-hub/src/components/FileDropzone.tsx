@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, File, Loader2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 interface FileDropzoneProps {
   onFileUploaded: (result: { storagePath: string; fileUrl: string; fileName: string; fileType: string }) => void;
@@ -11,6 +12,7 @@ interface FileDropzoneProps {
 }
 
 export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneProps) {
+  const { t } = useI18n();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +31,7 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
     const data = await res.json();
 
     if (!res.ok) {
-      setError(data.error || "Upload failed");
+      setError(data.error || t("dropzone.uploadFailed"));
       setUploading(false);
       return;
     }
@@ -58,9 +60,9 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
         {uploading ? (
           <div className="flex flex-col items-center gap-3">
             <Loader2 size={34} className="animate-spin" style={{ color: "var(--accent)" }} />
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Uploading your file...</p>
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("dropzone.uploading")}</p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Hold tight while CourseHub prepares it for parsing.
+              {t("dropzone.uploadingDesc")}
             </p>
           </div>
         ) : (
@@ -77,13 +79,13 @@ export function FileDropzone({ onFileUploaded, courseId, accept }: FileDropzoneP
             </div>
             <div>
               <p className="text-base font-medium" style={{ color: "var(--text-primary)" }}>
-                {isDragActive ? "Drop the file here" : "Drag and drop a file, or click to browse"}
+                {isDragActive ? t("dropzone.dropActive") : t("dropzone.idle")}
               </p>
               <p className="text-sm mt-1.5" style={{ color: "var(--text-secondary)" }}>
-                PDF, slides, images, or notes. CourseHub will sort the structure out for you.
+                {t("dropzone.hint")}
               </p>
             </div>
-            <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>Max 30 MB</span>
+            <span className="text-[11px] font-medium" style={{ color: "var(--text-muted)" }}>{t("dropzone.maxSize")}</span>
           </div>
         )}
       </div>

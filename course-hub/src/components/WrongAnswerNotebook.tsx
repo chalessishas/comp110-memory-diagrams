@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { AlertCircle, ArrowRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { T } from "@/components/T";
 
 interface WrongAnswerNotebookItem {
   questionId: string;
@@ -90,14 +91,14 @@ export function WrongAnswerNotebook({
               <div className="grid gap-3 mt-4 lg:grid-cols-2">
                 <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    Your Wrong Answer
+                    <T k="wrongAnswer.yourAnswer" />
                   </p>
-                  <p className="text-sm mt-2 leading-relaxed">{item.lastWrongAnswer || "No answer recorded"}</p>
+                  <p className="text-sm mt-2 leading-relaxed">{item.lastWrongAnswer || <T k="wrongAnswer.noAnswer" />}</p>
                 </div>
 
                 <div className="rounded-[20px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    Correct Answer
+                    <T k="wrongAnswer.correctAnswer" />
                   </p>
                   <p className="text-sm mt-2 leading-relaxed">{item.correctAnswer}</p>
                 </div>
@@ -106,7 +107,7 @@ export function WrongAnswerNotebook({
               {item.explanation && (
                 <div className="rounded-[20px] p-4 mt-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                    Why
+                    <T k="wrongAnswer.why" />
                   </p>
                   <p className="text-sm mt-2 leading-relaxed" style={{ color: "var(--text-secondary)" }}>
                     {item.explanation}

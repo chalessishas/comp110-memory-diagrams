@@ -193,6 +193,7 @@ function EditableNode({
 }
 
 export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseId: string }) {
+  const { t } = useI18n();
   const [localNodes, setLocalNodes] = useState(nodes);
   const [dirty, setDirty] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
@@ -244,7 +245,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
     return (
       <div className="ui-empty">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          No outline yet. Upload a syllabus to generate one.
+          {t("outline.noOutline")}
         </p>
       </div>
     );
@@ -254,7 +255,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
     <div>
       <div className="ui-panel p-5 md:p-6">
         <p className="text-xs mb-4" style={{ color: "var(--text-muted)" }}>
-          Double-click to rename. Hover for add/delete.
+          {t("outline.hintRename")}
         </p>
         {treeData.map((node) => (
           <EditableNode
@@ -276,7 +277,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
         >
           <Sparkles size={16} style={{ color: "var(--text-muted)" }} />
           <p className="text-sm flex-1" style={{ color: "var(--text-secondary)" }}>
-            Outline changed. Regenerate study tasks and practice questions?
+            {t("outline.changedBanner")}
           </p>
           <button
             onClick={handleRegenerate}
@@ -284,7 +285,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
             className="px-5 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50 transition-transform"
             style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}
           >
-            {regenerating ? <Loader2 size={14} className="animate-spin" /> : "Regenerate"}
+            {regenerating ? <Loader2 size={14} className="animate-spin" /> : t("outline.regenerate")}
           </button>
         </div>
       )}

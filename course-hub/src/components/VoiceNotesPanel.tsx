@@ -299,10 +299,10 @@ export function VoiceNotesPanel({
       {/* Header */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <div className="ui-kicker mb-3">Voice Notes</div>
-          <h3 className="text-2xl font-semibold tracking-wide">Talk it out. We will turn it into study notes.</h3>
+          <div className="ui-kicker mb-3">{t("voiceNotes.panelKicker")}</div>
+          <h3 className="text-2xl font-semibold tracking-wide">{t("voiceNotes.panelHeadline")}</h3>
           <p className="ui-copy mt-2 max-w-2xl">
-            Speak your understanding out loud, let AI clean it up, then answer a couple of follow-up questions if the idea is still fuzzy.
+            {t("voiceNotes.panelDesc")}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -525,7 +525,7 @@ export function VoiceNotesPanel({
             {draft.clarification_questions.length > 0 && (
               <button onClick={organizeNote} disabled={organizing || !canRefine} className="ui-button-secondary disabled:opacity-40">
                 <Sparkles size={14} />
-                {organizing ? "Refining..." : "Refine with Answers"}
+                {organizing ? t("voiceNotes.refining") : t("voiceNotes.refineWithAnswers")}
               </button>
             )}
           </div>
@@ -534,12 +534,12 @@ export function VoiceNotesPanel({
 
       {/* Saved notes list */}
       <div className="mt-8">
-        <div className="ui-kicker mb-4">Saved Notes</div>
+        <div className="ui-kicker mb-4">{t("voiceNotes.savedNotesKicker")}</div>
         {notes.length === 0 ? (
           <div className="ui-empty">
-            <p className="text-base font-medium mb-2">No notes yet</p>
+            <p className="text-base font-medium mb-2">{t("voiceNotes.noNotesTitle")}</p>
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              Save a voice note and it will stay attached to this course.
+              {t("voiceNotes.noNotesDesc")}
             </p>
           </div>
         ) : (
@@ -551,7 +551,7 @@ export function VoiceNotesPanel({
                     <div className="flex flex-wrap gap-2">
                       <span className="ui-badge">
                         <CheckCircle2 size={12} />
-                        {note.source === "voice" ? "Voice Note" : "Typed Note"}
+                        {note.source === "voice" ? t("voiceNotes.voiceNoteTag") : t("voiceNotes.typedNoteTag")}
                       </span>
                       {note.knowledge_point_title && <span className="ui-badge">{note.knowledge_point_title}</span>}
                     </div>
