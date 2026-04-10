@@ -17,27 +17,24 @@ All data flows required by `mastery-v2.ts evaluateLevel()` are now written on ev
 | `evaluateLevel()` call + level write | attempts POST | d690156 |
 
 Approximations (deliberate, refinable later):
-- `recentAccuracy` = overall accuracy (no last-5 window query)
-- `courseConceptsAtLevel2OrAbove = 0` (crossConceptOk always passes)
+- `recentAccuracy` = last-5 window via embedded join on questions table ✓ (was: overall accuracy)
+- `courseConceptsAtLevel2OrAbove = 0` (crossConceptOk always passes — avoids per-attempt count query)
 
 ### Evidence-Based Learning Features — Shipped [2026-04-10]
 - **Adaptive difficulty** (85% rule, Wilson 2019): questions sorted by accuracy band
-- **Session Summary Modal**: stats + streak + mastery level-ups after review
+- **Session Summary Modal**: stats + streak + mastery level-ups + missed-items CTA after review
 - **Teach-back panel** (protégé effect, g=0.48): explain in own words → AI grades → writes mastery gate
 - **Metacognitive confidence** (g=0.57): predict before answering → calibration panel on progress page
 - **Explanation gating** (test-potentiated encoding, Kornell 2009): wrong answers require reflection click
 - **Misconception lifecycle**: auto-log wrong answers, auto-resolve at 75% accuracy / 5 attempts
-- **FSRS server sync**: cross-device spaced repetition (migration 018)
+- **FSRS server sync**: cross-device spaced repetition (migration 018, applied)
 - **Per-question attempt history badge**: shows N attempts + % correct on each question
+- **RSC query parallelization**: all course pages (overview, progress, profile, tree) use Promise.all groups
 
-### Pending Migrations (need `supabase db push`)
-- `015_mastery_summary_index.sql` — partial index on element_mastery(user_id, level_reached_at)
-- `016_attempts_confidence.sql` — confidence SMALLINT on attempts
-- `018_fsrs_server_sync.sql` — fsrs_cards + fsrs_review_logs tables
+### Migrations — All Applied [2026-04-10]
+All migrations through `019_fsrs_review_logs_unique` confirmed applied via Supabase MCP.
 
 ### Known Issues
-- `recentAccuracy` — resolved: last-5 window query now in attempts POST (embedded join across KP questions)
-- `has_transfer_correct` — resolved: `short_answer` correct answers now set this flag (Roediger & Butler 2011)
 - `courseConceptsAtLevel2OrAbove` hardcoded 0 (crossConceptOk always passes — avoids per-attempt count query)
 - SSE lesson streaming untested with live AI calls (build passes)
 - Vercel Git integration: manual deploy (`npx vercel deploy --prod`) still required
