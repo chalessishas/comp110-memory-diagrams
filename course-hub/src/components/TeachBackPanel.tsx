@@ -15,10 +15,12 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ feedback: string; quality: "strong" | "partial" | "missing" } | null>(null);
+  const [error, setError] = useState(false);
 
   async function handleSubmit() {
     if (!text.trim() || loading) return;
     setLoading(true);
+    setError(false);
     try {
       const res = await fetch(`/api/courses/${courseId}/teach-back`, {
         method: "POST",
@@ -30,7 +32,10 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
       });
       const data = await res.json();
       if (data.feedback) setResult(data);
-    } catch { /* ignore */ }
+      else setError(true);
+    } catch {
+      setError(true);
+    }
     setLoading(false);
   }
 
@@ -76,6 +81,9 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
                 {loading ? <Loader2 size={14} className="animate-spin" /> : null}
                 {t("teachBack.getFeedback")}
               </button>
+              {error && (
+                <p className="text-xs" style={{ color: "var(--danger)" }}>{t("misc.error")}</p>
+              )}
             </>
           ) : (
             <div className="space-y-2">
