@@ -35,6 +35,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
   const [isCorrect, setIsCorrect] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [confidence, setConfidence] = useState<1 | 2 | 3 | null>(null);
+  // For wrong answers: explanation is gated behind one click to prompt active reflection
+  // before the correction is revealed (test-potentiated encoding effect).
+  const [explanationVisible, setExplanationVisible] = useState(false);
 
   const userAnswer = question.type === "multiple_choice" || question.type === "true_false"
     ? selected ?? ""
@@ -56,6 +59,8 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
     setIsCorrect(correct);
     setRevealedAnswer(data.correct_answer ?? null);
     setRevealedExplanation(data.explanation ?? null);
+    // Show explanation immediately for correct answers; gate it for wrong answers.
+    setExplanationVisible(correct);
     setSubmitted(true);
 
     // Add to spaced repetition review queue
@@ -217,8 +222,17 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
             )}
           </div>
 
-          {/* Explanation — subtle left accent bar */}
-          {revealedExplanation && (
+          {/* Explanation — gated for wrong answers to prompt active reflection first */}
+          {revealedExplanation && !explanationVisible && (
+            <button
+              onClick={() => setExplanationVisible(true)}
+              className="w-full text-left text-sm px-5 py-3 rounded-[16px] cursor-pointer transition-colors"
+              style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}
+            >
+              {t("questionCard.seeWhyWrong")} →
+            </button>
+          )}
+          {revealedExplanation && explanationVisible && (
             <div
               className="text-sm py-4 px-5 rounded-[16px]"
               style={{

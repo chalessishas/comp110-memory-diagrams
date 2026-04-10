@@ -251,6 +251,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reportTooEasy": "Too Easy",
     "questionCard.reportTooHard": "Too Hard",
     "questionCard.howConfident": "How confident?",
+    "questionCard.seeWhyWrong": "See where you went wrong",
 
     // Exam Countdown
     "exam.upcoming": "Upcoming Exams",
@@ -544,6 +545,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reportTooEasy": "太简单",
     "questionCard.reportTooHard": "太难",
     "questionCard.howConfident": "确信程度？",
+    "questionCard.seeWhyWrong": "看看哪里错了",
 
     // Exam Countdown
     "exam.upcoming": "即将到来的考试",
