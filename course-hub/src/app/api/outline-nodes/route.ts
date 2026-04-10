@@ -1,10 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 120/min — allows fast bulk outline creation; prevents KP spam
+  if (!await checkRateLimit(`outline-nodes:${user.id}`, 120, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
 
   const { course_id, parent_id, title, type, content } = await request.json();
   if (!course_id || !title || !type) {

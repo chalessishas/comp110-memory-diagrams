@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { courseCreateSchema } from "@/lib/schemas";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -20,6 +21,11 @@ export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // 20/min — prevents course spam (each course can trigger expensive AI generation)
+  if (!await checkRateLimit(`courses-create:${user.id}`, 20, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
 
   const body = await request.json();
   const parsed = courseCreateSchema.safeParse(body);
