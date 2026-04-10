@@ -1,7 +1,8 @@
 "use client";
 
-import { masteryColors, masteryLabels } from "@/lib/mastery";
+import { masteryColors } from "@/lib/mastery";
 import type { OutlineNode, MasteryLevel } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface KPMastery {
   node: OutlineNode;
@@ -11,11 +12,19 @@ interface KPMastery {
 }
 
 export function ProgressGrid({ data }: { data: KPMastery[] }) {
+  const { t } = useI18n();
+  const masteryLabels: Record<MasteryLevel, string> = {
+    mastered: t("progress.mastery.mastered"),
+    reviewing: t("progress.mastery.reviewing"),
+    weak: t("progress.mastery.weak"),
+    untested: t("progress.mastery.untested"),
+  };
+
   if (data.length === 0) {
     return (
       <div className="ui-empty">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          No knowledge points to track yet.
+          {t("progress.grid.noKps")}
         </p>
       </div>
     );
@@ -31,10 +40,10 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
   return (
     <div className="ui-panel p-5 md:p-6">
       <div className="mb-6">
-        <div className="ui-kicker mb-3">Progress</div>
-        <h3 className="text-2xl" style={{ fontWeight: 600 }}>Knowledge Point Mastery</h3>
+        <div className="ui-kicker mb-3">{t("progress.grid.kicker")}</div>
+        <h3 className="text-2xl" style={{ fontWeight: 600 }}>{t("progress.grid.title")}</h3>
         <p className="ui-copy mt-2">
-          A grayscale map of what feels solid, shaky, or still untouched.
+          {t("progress.grid.desc")}
         </p>
       </div>
 
@@ -65,7 +74,7 @@ export function ProgressGrid({ data }: { data: KPMastery[] }) {
               style={{ backgroundColor: "var(--bg-surface)", color: "var(--text-primary)", boxShadow: "var(--shadow-md)" }}
             >
               {item.node.title}
-              {item.total > 0 && ` · ${Math.round(item.rate * 100)}% (${item.total} attempts)`}
+              {item.total > 0 && ` · ${Math.round(item.rate * 100)}% (${item.total} ${t("progress.grid.attempts")})`}
             </div>
           </div>
         ))}
