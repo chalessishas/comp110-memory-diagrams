@@ -45,10 +45,9 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
   }, [id]);
 
   async function handleFileUploaded() {
-    // Refresh list after upload
     const res = await fetch(`/api/courses/${id}/uploads`);
-    const data = await res.json();
-    setUploads(data);
+    const data = res.ok ? await res.json() : [];
+    setUploads(Array.isArray(data) ? data : []);
     setShowUpload(false);
   }
 

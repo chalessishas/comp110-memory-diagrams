@@ -106,7 +106,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     <div className="space-y-8">
       <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
         <ArrowLeft size={14} />
-        Back to Dashboard
+        {t("misc.backToDashboard")}
       </Link>
       <CourseTabs courseId={id} />
 
