@@ -1,11 +1,17 @@
 import { createClient } from "@/lib/supabase/server";
 import { attemptCreateSchema } from "@/lib/schemas";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Rate limit: prevents flooding the attempts table to game adaptive difficulty sorting
+  if (!await checkRateLimit(`attempts:${user.id}`, 60, 60_000)) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
+  }
 
   const body = await request.json();
   const parsed = attemptCreateSchema.safeParse(body);
