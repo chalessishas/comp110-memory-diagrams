@@ -32,7 +32,6 @@ interface Props {
 
 export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes, sessionStart, reviewedItems }: Props) {
   const { t, locale } = useI18n();
-  const isZh = locale === "zh";
   const levelLabels: Record<string, { label: string; color: string }> = {
     exposed:    { label: t("mastery.level.exposed"),    color: "var(--text-secondary)" },
     practiced:  { label: t("mastery.level.practiced"),  color: "var(--warning)" },
@@ -204,9 +203,9 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>
           <Calendar size={14} />
           <span>
-            {isZh
-              ? `明天约有 ${tomorrowDue} 张卡片待复习`
-              : `${tomorrowDue} card${tomorrowDue !== 1 ? "s" : ""} due tomorrow`}
+            {tomorrowDue !== 1
+              ? t("session.cardsDueTomorrowPlural", { count: tomorrowDue })
+              : t("session.cardsDueTomorrow", { count: tomorrowDue })}
           </span>
         </div>
       </div>

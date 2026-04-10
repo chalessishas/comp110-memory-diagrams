@@ -28,7 +28,7 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
       onClick={handleRegenerate}
       disabled={loading || done}
       className="ui-button-secondary !text-xs disabled:opacity-50"
-      title={locale === "zh" ? t("regenerate.titleZh") : t("regenerate.titleEn")}
+      title={t("regenerate.title")}
     >
       {loading ? (
         <Loader2 size={13} className="animate-spin" />

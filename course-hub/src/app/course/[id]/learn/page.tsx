@@ -35,8 +35,7 @@ function parseSSE(text: string): { event: string; data: string }[] {
 
 export default function LearnPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [items, setItems] = useState<KnowledgePointItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeLessonId, setActiveLessonId] = useState<string | null>(null);
@@ -248,9 +247,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
               {t("learn.generatingLesson")}
             </p>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {isZh
-                ? `已完成 ${streamedCount}/${totalChunks} 个教学环节`
-                : `${streamedCount}/${totalChunks} sections ready`}
+              {t("learn.sectionsReady", { count: streamedCount, total: totalChunks })}
             </p>
           </div>
         </div>
@@ -344,9 +341,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
                   </div>
                   <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>
                     {isGenerating
-                      ? (isZh
-                        ? `正在生成...（${streamedCount}/${totalChunks}）`
-                        : `Generating... (${streamedCount}/${totalChunks})`)
+                      ? t("learn.generatingProgress", { count: streamedCount, total: totalChunks })
                       : item.hasLesson
                         ? t("learn.clickToReview")
                         : t("learn.clickToGenerate")}

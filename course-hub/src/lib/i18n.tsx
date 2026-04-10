@@ -169,6 +169,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "learn.examTag": "exam",
     "learn.clickToReview": "Click to review",
     "learn.clickToGenerate": "Click to generate",
+    "learn.sectionsReady": "{count}/{total} sections ready",
+    "learn.generatingProgress": "Generating... ({count}/{total})",
     "learn.generationFailed": "Generation failed. Please try again.",
     "learn.generationFailedShort": "Generation failed",
     "learn.networkError": "Network error or timeout. Please retry.",
@@ -306,6 +308,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "regenerate.translate": "Translate course",
     "regenerate.titleEn": "Regenerate all content in English",
     "regenerate.titleZh": "用中文重新生成所有内容",
+    "regenerate.title": "Regenerate all content in English",
+    "session.cardsDueTomorrow": "{count} card due tomorrow",
+    "session.cardsDueTomorrowPlural": "{count} cards due tomorrow",
 
     // Session Summary Modal
     "session.complete": "Session Complete",
@@ -851,6 +856,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "learn.examTag": "考",
     "learn.clickToReview": "点击复习",
     "learn.clickToGenerate": "点击生成",
+    "learn.sectionsReady": "已完成 {count}/{total} 个教学环节",
+    "learn.generatingProgress": "正在生成...（{count}/{total}）",
     "learn.generationFailed": "生成失败，请稍后重试",
     "learn.generationFailedShort": "生成失败",
     "learn.networkError": "网络错误或超时，请重试",
@@ -988,6 +995,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "regenerate.translate": "汉化课程",
     "regenerate.titleEn": "Regenerate all content in English",
     "regenerate.titleZh": "用中文重新生成所有内容",
+    "regenerate.title": "用中文重新生成所有内容",
+    "session.cardsDueTomorrow": "明天约有 {count} 张卡片待复习",
+    "session.cardsDueTomorrowPlural": "明天约有 {count} 张卡片待复习",
 
     // Session Summary Modal
     "session.complete": "复习完成",
