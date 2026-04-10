@@ -180,6 +180,26 @@ export async function POST(request: Request) {
         .from("element_mastery")
         .update(updates)
         .eq("id", mastery.id);
+
+      // Cross-concept propagation: a correct answer on a child KP counts as cross-concept
+      // evidence for the parent KP. This satisfies the hasCrossConceptCorrect gate when
+      // the parent is at "practiced" and has downstream dependents.
+      if (isCorrect && question.knowledge_point_id) {
+        const { data: parentNode } = await supabase
+          .from("outline_nodes")
+          .select("parent_id")
+          .eq("id", question.knowledge_point_id)
+          .single();
+        if (parentNode?.parent_id) {
+          await supabase
+            .from("element_mastery")
+            .update({ has_cross_concept_correct: true, updated_at: new Date().toISOString() })
+            .eq("user_id", user.id)
+            .eq("concept_id", parentNode.parent_id)
+            .eq("element_name", "_overall")
+            .eq("has_cross_concept_correct", false); // only write when not already true
+        }
+      }
     }
   }
 
