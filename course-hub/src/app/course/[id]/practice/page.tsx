@@ -23,6 +23,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [generatingAI, setGeneratingAI] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
   const [showExamPrep, setShowExamPrep] = useState(false);
+  const [sessionAnswered, setSessionAnswered] = useState(0);
+  const [sessionCorrect, setSessionCorrect] = useState(0);
   const [examScope, setExamScope] = useState("");
   const [examPrepLoading, setExamPrepLoading] = useState(false);
   const [examPrepResult, setExamPrepResult] = useState<{ topics_found: number; topics_processed: number; questions_generated: number; topics_failed: string[]; topics: string[] } | null>(null);
@@ -62,8 +64,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     setShowUpload(false);
   }
 
-  function handleAnswer() {
+  function handleAnswer(_questionId: string, _answer: string, isCorrect: boolean) {
     setQuestionMode("reviewing");
+    setSessionAnswered((n) => n + 1);
+    if (isCorrect) setSessionCorrect((n) => n + 1);
   }
 
   const progress = filteredQuestions.length > 0 ? ((currentIndex + 1) / filteredQuestions.length) * 100 : 0;
@@ -290,9 +294,25 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           <div className="ui-panel p-5 md:p-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-sm font-medium">
-                  Question {currentIndex + 1} of {filteredQuestions.length}
-                </p>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <p className="text-sm font-medium">
+                    Question {currentIndex + 1} of {filteredQuestions.length}
+                  </p>
+                  {sessionAnswered >= 3 && (() => {
+                    const acc = sessionCorrect / sessionAnswered;
+                    const pct = Math.round(acc * 100);
+                    const color = acc >= 0.75 && acc <= 0.92
+                      ? "var(--success)"
+                      : acc > 0.92
+                      ? "var(--accent)"
+                      : "var(--warning)";
+                    return (
+                      <span className="text-xs px-2 py-0.5 rounded-lg font-medium" style={{ backgroundColor: "var(--bg-muted)", color }}>
+                        {pct}% {isZh ? "正确率" : "accuracy"} · {isZh ? "目标 85%" : "target 85%"}
+                      </span>
+                    );
+                  })()}
+                </div>
                 <div className="ui-progress-track mt-3 max-w-xs">
                   <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
                 </div>
