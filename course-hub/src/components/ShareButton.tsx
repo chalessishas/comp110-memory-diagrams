@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Share2, Copy, Check, Loader2 } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export function ShareButton({ courseId }: { courseId: string }) {
+  const { t } = useI18n();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -37,7 +39,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
         <button
           onClick={handleCopy}
           className="ui-icon-button"
-          title="Copy link"
+          title={t("share.copyLink")}
         >
           {copied ? <Check size={14} style={{ color: "var(--success)" }} /> : <Copy size={14} />}
         </button>
@@ -50,7 +52,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
       onClick={handleShare}
       disabled={loading}
       className="ui-icon-button"
-      title="Share course"
+      title={t("share.shareCourse")}
     >
       {loading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
     </button>

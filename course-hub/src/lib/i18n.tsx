@@ -504,6 +504,27 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.backToDashboard": "Back to Dashboard",
     "misc.or": "or",
 
+    // Voice Notes
+    "voiceNotes.noBrowserSpeech": "This browser does not expose speech recognition. You can still type into the note box.",
+    "voiceNotes.speechFailed": "Speech recognition failed.",
+    "voiceNotes.emptySpeech": "Say something first, or paste a note into the transcript box.",
+    "voiceNotes.organizeFailed": "Failed to organize note",
+    "voiceNotes.organizedWithGaps": "AI organized the note and highlighted the gaps it wants to check with you.",
+    "voiceNotes.organizedClean": "AI organized the note. It looks clear enough to save.",
+    "voiceNotes.notOrganized": "Organize the note with AI before saving it.",
+    "voiceNotes.saveFailed": "Failed to save note",
+    "voiceNotes.noteSaved": "Note saved to this course.",
+    "voiceNotes.organizing": "Organizing...",
+    "voiceNotes.organizeWithAI": "Organize with AI",
+    "voiceNotes.saving": "Saving...",
+    "voiceNotes.saveNote": "Save Note",
+    "voiceNotes.transcriptPlaceholder": "Explain the concept in your own words, say what is confusing, or dictate what the teacher emphasized.",
+    "voiceNotes.clarificationPlaceholder": "Reply here or use the mic",
+
+    // Share
+    "share.copyLink": "Copy link",
+    "share.shareCourse": "Share course",
+
     // Study Buddy
     "studyBuddy.askAnything": "Ask me anything about this course",
     "studyBuddy.quickQ1": "What are the key topics?",
@@ -1039,6 +1060,27 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.confirm": "确认",
     "misc.backToDashboard": "返回仪表盘",
     "misc.or": "或",
+
+    // Voice Notes
+    "voiceNotes.noBrowserSpeech": "此浏览器不支持语音识别。你仍可以在笔记框中直接输入。",
+    "voiceNotes.speechFailed": "语音识别失败。",
+    "voiceNotes.emptySpeech": "请先说点什么，或将笔记粘贴到文本框中。",
+    "voiceNotes.organizeFailed": "整理笔记失败",
+    "voiceNotes.organizedWithGaps": "AI 已整理笔记，并标出了需要进一步确认的知识缺口。",
+    "voiceNotes.organizedClean": "AI 已整理笔记，内容清晰，可以直接保存。",
+    "voiceNotes.notOrganized": "请先用 AI 整理笔记，再保存。",
+    "voiceNotes.saveFailed": "保存笔记失败",
+    "voiceNotes.noteSaved": "笔记已保存到本课程。",
+    "voiceNotes.organizing": "整理中...",
+    "voiceNotes.organizeWithAI": "AI 整理",
+    "voiceNotes.saving": "保存中...",
+    "voiceNotes.saveNote": "保存笔记",
+    "voiceNotes.transcriptPlaceholder": "用自己的话解释概念、记录疑惑，或口述老师强调的内容。",
+    "voiceNotes.clarificationPlaceholder": "在此回复，或使用麦克风",
+
+    // Share
+    "share.copyLink": "复制链接",
+    "share.shareCourse": "分享课程",
 
     // Study Buddy
     "studyBuddy.askAnything": "有什么关于这门课的问题都可以问我",

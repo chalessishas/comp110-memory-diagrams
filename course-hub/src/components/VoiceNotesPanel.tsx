@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { CourseNote, NoteSource, OrganizedStudyNote } from "@/types";
 import { toCourseNote, toCourseNoteCreatePayload, type CourseNoteRow } from "@/lib/course-notes";
+import { useI18n } from "@/lib/i18n";
 
 type DictationTarget = { type: "transcript" } | { type: "clarification"; index: number };
 
@@ -82,6 +83,7 @@ export function VoiceNotesPanel({
   knowledgePoints: { id: string; title: string }[];
   initialNotes: CourseNote[];
 }) {
+  const { t } = useI18n();
   const [notes, setNotes] = useState<CourseNote[]>(initialNotes);
   const [transcript, setTranscript] = useState("");
   const [draft, setDraft] = useState<OrganizedStudyNote | null>(null);
@@ -137,7 +139,7 @@ export function VoiceNotesPanel({
   function startDictation(target: DictationTarget) {
     const Recognition = getRecognitionConstructor();
     if (!Recognition) {
-      setError("This browser does not expose speech recognition. You can still type into the note box.");
+      setError(t("voiceNotes.noBrowserSpeech"));
       return;
     }
 
@@ -181,7 +183,7 @@ export function VoiceNotesPanel({
     };
 
     recognition.onerror = (event) => {
-      setError(event.error ? `Speech recognition error: ${event.error}` : "Speech recognition failed.");
+      setError(t("voiceNotes.speechFailed"));
     };
 
     recognition.onend = () => {
@@ -200,7 +202,7 @@ export function VoiceNotesPanel({
 
   async function organizeNote() {
     if (!transcript.trim()) {
-      setError("Say something first, or paste a note into the transcript box.");
+      setError(t("voiceNotes.emptySpeech"));
       return;
     }
 
@@ -221,7 +223,7 @@ export function VoiceNotesPanel({
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error?.formErrors?.join(", ") || data.error || "Failed to organize note");
+      setError(data.error?.formErrors?.join(", ") || data.error || t("voiceNotes.organizeFailed"));
       setOrganizing(false);
       return;
     }
@@ -236,15 +238,15 @@ export function VoiceNotesPanel({
     }
     setStatus(
       note.clarification_questions.length > 0
-        ? "AI organized the note and highlighted the gaps it wants to check with you."
-        : "AI organized the note. It looks clear enough to save."
+        ? t("voiceNotes.organizedWithGaps")
+        : t("voiceNotes.organizedClean")
     );
     setOrganizing(false);
   }
 
   async function handleSave() {
     if (!draft) {
-      setError("Organize the note with AI before saving it.");
+      setError(t("voiceNotes.notOrganized"));
       return;
     }
 
@@ -270,7 +272,7 @@ export function VoiceNotesPanel({
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error?.formErrors?.join(", ") || data.error || "Failed to save note");
+      setError(data.error?.formErrors?.join(", ") || data.error || t("voiceNotes.saveFailed"));
       setSaving(false);
       return;
     }
@@ -285,7 +287,7 @@ export function VoiceNotesPanel({
     setDraft(null);
     setClarificationAnswers([]);
     setSelectedKnowledgePointId("");
-    setStatus("Note saved to this course.");
+    setStatus(t("voiceNotes.noteSaved"));
     setSaving(false);
   }
 
@@ -338,7 +340,7 @@ export function VoiceNotesPanel({
             )}
             <button onClick={organizeNote} disabled={organizing || !transcript.trim()} className="ui-button-secondary disabled:opacity-40">
               <Sparkles size={14} />
-              {organizing ? "Organizing..." : "Organize with AI"}
+              {organizing ? t("voiceNotes.organizing") : t("voiceNotes.organizeWithAI")}
             </button>
           </div>
         </div>
@@ -382,7 +384,7 @@ export function VoiceNotesPanel({
               }}
               rows={6}
               className="ui-textarea mt-2"
-              placeholder="Explain the concept in your own words, say what is confusing, or dictate what the teacher emphasized."
+              placeholder={t("voiceNotes.transcriptPlaceholder")}
             />
             {isRecording && recordingTarget.type === "transcript" && interimText && (
               <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
@@ -492,7 +494,7 @@ export function VoiceNotesPanel({
                           )
                         }
                         className="ui-input"
-                        placeholder="Reply here or use the mic"
+                        placeholder={t("voiceNotes.clarificationPlaceholder")}
                       />
                       <button
                         type="button"
@@ -518,7 +520,7 @@ export function VoiceNotesPanel({
           <div className="flex flex-wrap gap-2">
             <button onClick={handleSave} disabled={saving} className="ui-button-primary">
               <Save size={14} />
-              {saving ? "Saving..." : "Save Note"}
+              {saving ? t("voiceNotes.saving") : t("voiceNotes.saveNote")}
             </button>
             {draft.clarification_questions.length > 0 && (
               <button onClick={organizeNote} disabled={organizing || !canRefine} className="ui-button-secondary disabled:opacity-40">
