@@ -1,0 +1,21 @@
+{
+  "timestamp": "2026-04-09T12:53:43.162Z",
+  "results": [
+    {
+      "modelId": "glm-5.1",
+      "modelName": "GLM-5.1 (智谱) 🆕 Apr 7",
+      "provider": "Zhipu AI",
+      "costPerMInput": 1.4,
+      "costPerMOutput": 4.4,
+      "totalQuestions": 0,
+      "avgScore": 0,
+      "byDimension": {},
+      "bySubject": {},
+      "avgLatencyMs": 83513,
+      "errors": 0,
+      "jsonParseFailures": 1,
+      "bloomDistribution": {},
+      "sampleQuestions": []
+    }
+  ]
+}

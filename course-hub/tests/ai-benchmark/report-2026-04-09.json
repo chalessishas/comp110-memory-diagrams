@@ -1,0 +1,91 @@
+{
+  "timestamp": "2026-04-09T12:52:07.687Z",
+  "totalKPs": 5,
+  "totalQuestions": 0,
+  "overallScore": 0,
+  "bySubject": {},
+  "byDimension": {
+    "answerCorrectness": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "distractorQuality": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "kpAlignment": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "difficultyCal": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "bloomLevel": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "stemClarity": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "explanationQuality": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "diversity": {
+      "avgScore": 0,
+      "distribution": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "criticalFlags": [],
+  "questions": []
+}

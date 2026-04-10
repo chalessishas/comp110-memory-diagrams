@@ -29,13 +29,33 @@ function extractJSON(text: string): string | null {
     .replace(/<think>[\s\S]*?<\/think>/g, "")
     .replace(/```(?:json)?\s*/g, "")
     .replace(/```\s*/g, "");
-  // Try to find JSON object
-  const objMatch = cleaned.match(/\{[\s\S]*\}/);
-  if (objMatch) return objMatch[0];
-  // Try array
-  const arrMatch = cleaned.match(/\[[\s\S]*\]/);
-  if (arrMatch) return arrMatch[0];
-  return null;
+
+  // Balanced-brace extraction: find the first { or [ and match to its closing pair
+  const start = cleaned.search(/[{\[]/);
+  if (start === -1) return null;
+
+  const open = cleaned[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if (escape) { escape = false; continue; }
+    if (ch === "\\") { escape = true; continue; }
+    if (ch === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (ch === open || ch === (open === "{" ? "[" : "{")) depth++;
+    if (ch === close || ch === (close === "}" ? "]" : "}")) depth--;
+    if (depth === 0) return cleaned.slice(start, i + 1);
+  }
+
+  // Fallback: greedy regex (last resort)
+  const fallback = open === "{"
+    ? cleaned.match(/\{[\s\S]*\}/)
+    : cleaned.match(/\[[\s\S]*\]/);
+  return fallback?.[0] ?? null;
 }
 
 // ─── Pipeline 1: Syllabus → Course Outline ───
@@ -332,11 +352,21 @@ Generate 2-3 practice questions per knowledge point. Mix question types:
 
 Each question must have:
 - A clear, unambiguous stem
-- A correct answer with explanation
-- difficulty 1-5
+- A correct answer
+- explanation: Explain WHY the answer is correct. Then identify the most likely wrong reasoning a student might have and explain why it fails. (2-3 sentences minimum)
+- difficulty: 1-5 calibrated as follows:
+  1 = Recall: identify or define a term
+  2 = Understand: explain a concept in own words, interpret a diagram
+  3 = Apply: use a formula/method in a straightforward problem
+  4 = Analyze: compare approaches, identify relationships, multi-step reasoning
+  5 = Evaluate/Create: critique a solution, design an approach, justify a choice
+- bloom_level: tag as "remember", "understand", "apply", "analyze", "evaluate", or "create"
 - matched_kp_title: exactly matching one of the knowledge point titles listed above
 
-Make questions test understanding, not just memorization.
+Question design rules:
+- At least one question per KP must be Apply level or above (not just recall/definition)
+- For multiple_choice: base WRONG options on real student misconceptions, not random facts. Each distractor should represent a specific error in reasoning that a student might actually make.
+- Make questions test understanding, not just memorization.
 
 Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
         },
@@ -487,7 +517,7 @@ export async function generateSingleLessonChunk(
 
   // Concreteness fading: each chunk has a different abstraction level
   const abstractionLevels = [
-    "CONCRETE SCENARIO: Use a real-world scenario (physical quantities, money, areas, rates). No abstract symbols yet — only numbers and words.",
+    "CONCRETE SCENARIO: Use a real-world scenario (physical quantities, money, areas, rates). STRICT: No variables (x, y, n), no Greek letters (α, θ, Σ), no formulas — only concrete numbers, units, and everyday words. The student should not see any mathematical notation in this chunk.",
     "CONCRETE EXAMPLE: Use a specific worked example with numbers. Introduce mathematical notation alongside the concrete values.",
     "SYMBOLIC: Teach the general formula/method using variables. Reference the earlier concrete example to bridge understanding.",
     "TRANSFER: Apply the concept to a different context than chunks 1-3. The student should recognize the same deep structure in a new surface form.",

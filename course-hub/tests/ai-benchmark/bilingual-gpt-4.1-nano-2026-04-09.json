@@ -1,0 +1,157 @@
+{
+  "timestamp": "2026-04-09T12:04:36.408Z",
+  "model": "gpt-4.1-nano",
+  "results": [
+    {
+      "lang": "en",
+      "kpId": "bi-calc-001",
+      "subject": "calculus",
+      "totalScore": 82.94117647058823,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "apply": 2
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-calc-001",
+      "subject": "calculus",
+      "totalScore": 76.91176470588235,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "apply": 2
+      }
+    },
+    {
+      "lang": "en",
+      "kpId": "bi-calc-002",
+      "subject": "calculus",
+      "totalScore": 82.94117647058823,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "apply": 2
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-calc-002",
+      "subject": "calculus",
+      "totalScore": 82.94117647058823,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "apply": 2
+      }
+    },
+    {
+      "lang": "en",
+      "kpId": "bi-phys-001",
+      "subject": "physics",
+      "totalScore": 87.97058823529412,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-phys-001",
+      "subject": "physics",
+      "totalScore": 82.94117647058823,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "en",
+      "kpId": "bi-phys-002",
+      "subject": "physics",
+      "totalScore": 81.5,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-phys-002",
+      "subject": "physics",
+      "totalScore": 78.23529411764706,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "en",
+      "kpId": "bi-cs-001",
+      "subject": "cs",
+      "totalScore": 81.17647058823529,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-cs-001",
+      "subject": "cs",
+      "totalScore": 77.91176470588235,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "en",
+      "kpId": "bi-econ-001",
+      "subject": "economics",
+      "totalScore": 84.44117647058823,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    },
+    {
+      "lang": "zh",
+      "kpId": "bi-econ-001",
+      "subject": "economics",
+      "totalScore": 80,
+      "questionCount": 2,
+      "latencyMs": 0,
+      "bloomDistribution": {
+        "understand": 1,
+        "apply": 1
+      }
+    }
+  ],
+  "subjectRecommendations": {
+    "calculus": "en",
+    "physics": "en",
+    "cs": "en",
+    "economics": "en"
+  },
+  "summary": {
+    "enWins": 5,
+    "zhWins": 0,
+    "ties": 1
+  }
+}

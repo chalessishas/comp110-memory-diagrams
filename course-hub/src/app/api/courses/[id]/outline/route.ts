@@ -49,6 +49,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const { nodes, version } = await request.json();
 
   // Optimistic locking: check updated_at matches what the client last saw
+  // Skip if no version provided or if course has no existing nodes (first save)
   if (version) {
     const { data: course } = await supabase
       .from("courses")
@@ -56,11 +57,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       .eq("id", id)
       .single();
 
-    if (course && course.updated_at !== version) {
-      return NextResponse.json(
-        { error: "Course was modified by another session. Please refresh." },
-        { status: 409 }
-      );
+    if (course && course.updated_at) {
+      const { count: existingCount } = await supabase
+        .from("outline_nodes")
+        .select("id", { count: "exact", head: true })
+        .eq("course_id", id);
+
+      if (existingCount && existingCount > 0 && course.updated_at !== version) {
+        return NextResponse.json(
+          { error: "Course was modified by another session. Please refresh." },
+          { status: 409 }
+        );
+      }
     }
   }
 
