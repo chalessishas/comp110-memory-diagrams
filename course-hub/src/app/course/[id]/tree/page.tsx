@@ -18,24 +18,26 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: kps } = await supabase
-    .from("outline_nodes")
-    .select("id, title, content, parent_id, type")
-    .eq("course_id", id)
-    .order("order");
+  // Parallel group 1: outline_nodes + lessons both need only course_id
+  const [{ data: kps }, { data: lessons }] = await Promise.all([
+    supabase
+      .from("outline_nodes")
+      .select("id, title, content, parent_id, type")
+      .eq("course_id", id)
+      .order("order"),
+    supabase
+      .from("lessons")
+      .select("knowledge_point_id")
+      .eq("course_id", id),
+  ]);
 
   const allNodes = kps ?? [];
   const knowledgePoints = allNodes.filter((n) => n.type === "knowledge_point");
   const nodeMap = new Map(allNodes.map((n) => [n.id, n]));
   const kpIds = knowledgePoints.map((n) => n.id);
-
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("knowledge_point_id")
-    .eq("course_id", id);
   const lessonKpIds = new Set((lessons ?? []).map((l) => l.knowledge_point_id));
 
-  // Use element_mastery v2 as single source of truth — consistent with learn page
+  // Parallel group 2: element_mastery needs kpIds from group 1
   const { data: masteryRows } = kpIds.length > 0
     ? await supabase
         .from("element_mastery")
