@@ -1,10 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Flame, Check, Calendar } from "lucide-react";
+import { X, Flame, Check, Calendar, TrendingUp } from "lucide-react";
 import { getStreakData, getWeekHistory } from "@/lib/streaks";
 import { getDueCards, loadCards } from "@/lib/spaced-repetition";
 import { useI18n } from "@/lib/i18n";
+
+interface MasteryLevelUp {
+  element_name: string;
+  current_level: string;
+  level_reached_at: string;
+}
 
 interface Props {
   open: boolean;
@@ -13,21 +19,38 @@ interface Props {
   sessionAnswered: number;
   sessionCorrect: number;
   sessionMinutes: number;
+  sessionStart: number; // Date.now() when session started, for mastery-summary API
 }
 
-export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes }: Props) {
+const LEVEL_LABELS: Record<string, { en: string; zh: string; color: string }> = {
+  exposed:   { en: "exposed",   zh: "初识",   color: "var(--text-secondary)" },
+  practiced: { en: "practiced", zh: "练习中", color: "var(--warning)" },
+  proficient:{ en: "proficient",zh: "熟练",   color: "var(--accent)" },
+  mastered:  { en: "mastered",  zh: "已掌握", color: "var(--success)" },
+};
+
+export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes, sessionStart }: Props) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
   const [tomorrowDue, setTomorrowDue] = useState<number>(0);
+  const [levelUps, setLevelUps] = useState<MasteryLevelUp[]>([]);
 
   useEffect(() => {
     if (!open) return;
-    // Count cards due within next 24 hours (approximate "tomorrow")
+
+    // Count cards due within next 24 hours
     const cards = loadCards();
     const tomorrow = new Date(Date.now() + 86_400_000);
     const due = getDueCards(cards).filter((c) => new Date(c.card.due) <= tomorrow);
     setTomorrowDue(due.length);
-  }, [open, courseId]);
+
+    // Fetch mastery level-ups since session start
+    const since = new Date(sessionStart).toISOString();
+    fetch(`/api/courses/${courseId}/mastery-summary?since=${encodeURIComponent(since)}`)
+      .then((r) => r.ok ? r.json() : [])
+      .then((data: MasteryLevelUp[]) => setLevelUps(data))
+      .catch(() => {});
+  }, [open, courseId, sessionStart]);
 
   if (!open) return null;
 
@@ -46,8 +69,8 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-[24px] p-6 relative"
-        style={{ backgroundColor: "var(--bg-card)" }}
+        className="w-full max-w-sm rounded-[24px] p-6 relative overflow-y-auto"
+        style={{ backgroundColor: "var(--bg-card)", maxHeight: "90vh" }}
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -116,6 +139,31 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             ))}
           </div>
         </div>
+
+        {/* Mastery level-ups */}
+        {levelUps.length > 0 && (
+          <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp size={16} style={{ color: "var(--accent)" }} />
+              <span className="text-sm font-medium">
+                {isZh ? `${levelUps.length} 个知识点提升` : `${levelUps.length} knowledge point${levelUps.length > 1 ? "s" : ""} leveled up`}
+              </span>
+            </div>
+            <div className="space-y-1.5">
+              {levelUps.map((kp, i) => {
+                const levelInfo = LEVEL_LABELS[kp.current_level] ?? { en: kp.current_level, zh: kp.current_level, color: "var(--text-secondary)" };
+                return (
+                  <div key={i} className="flex items-center justify-between">
+                    <span className="text-sm truncate mr-2" style={{ maxWidth: "70%" }}>{kp.element_name}</span>
+                    <span className="text-xs font-medium shrink-0" style={{ color: levelInfo.color }}>
+                      → {isZh ? levelInfo.zh : levelInfo.en}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Tomorrow preview */}
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>

@@ -332,6 +332,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         sessionAnswered={sessionAnswered}
         sessionCorrect={sessionCorrect}
         sessionMinutes={Math.round((Date.now() - sessionStart) / 60_000)}
+        sessionStart={sessionStart}
       />
     </div>
   );
