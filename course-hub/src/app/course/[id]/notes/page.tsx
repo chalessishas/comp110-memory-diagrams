@@ -76,8 +76,6 @@ export default async function CourseNotesPage({ params }: { params: Promise<{ id
       <StudyTrackerPanel
         courseId={id}
         activeMode="studying"
-        title="Note Time"
-        description="Talking through a concept, refining the explanation, and saving the result all count as study time."
       />
 
       <VoiceNotesPanel
