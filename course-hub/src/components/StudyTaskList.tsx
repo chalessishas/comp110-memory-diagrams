@@ -53,14 +53,14 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
   if (tasks.length === 0) {
     return (
       <div className="ui-panel p-5 md:p-6">
-        <div className="ui-kicker mb-3">Study Tasks</div>
-        <h3 className="text-2xl font-semibold tracking-wide">Keep the work concrete.</h3>
+        <div className="ui-kicker mb-3">{t("studyTask.title")}</div>
+        <h3 className="text-2xl font-semibold tracking-wide">{t("studyTask.headline")}</h3>
         <p className="ui-copy mt-2">
-          A focused checklist generated from the course outline.
+          {t("studyTask.desc")}
         </p>
         <div className="ui-empty mt-6">
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            No study tasks yet. Generate the course content first and they will show up here.
+            {t("studyTask.emptyDesc")}
           </p>
         </div>
       </div>
@@ -80,15 +80,15 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
     <div className="ui-panel p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between mb-6">
         <div>
-          <div className="ui-kicker mb-3">Study Tasks</div>
-          <h3 className="text-2xl font-semibold tracking-wide">Keep the work concrete.</h3>
+          <div className="ui-kicker mb-3">{t("studyTask.title")}</div>
+          <h3 className="text-2xl font-semibold tracking-wide">{t("studyTask.headline")}</h3>
           <p className="ui-copy mt-2">
-            A focused checklist generated from the course outline.
+            {t("studyTask.desc")}
           </p>
         </div>
         <div className="min-w-[190px]">
           <div className="flex items-center justify-between text-xs mb-2" style={{ color: "var(--text-secondary)" }}>
-            <span>Progress</span>
+            <span>{t("studyTask.progress")}</span>
             <span>{doneTasks.length}/{tasks.length}</span>
           </div>
           <div className="ui-progress-track">
@@ -146,7 +146,7 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
       {doneTasks.length > 0 && (
         <details className="mt-6">
           <summary className="text-[11px] cursor-pointer font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-            Completed ({doneTasks.length})
+            {t("studyTask.completed", { count: doneTasks.length })}
           </summary>
           <div className="space-y-2 mt-3 opacity-60">
             {doneTasks.map((task) => (
