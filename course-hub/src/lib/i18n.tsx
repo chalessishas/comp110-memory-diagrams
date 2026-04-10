@@ -583,6 +583,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.panelKicker": "Voice Notes",
     "voiceNotes.panelHeadline": "Talk it out. We will turn it into study notes.",
     "voiceNotes.panelDesc": "Speak your understanding out loud, let AI clean it up, then answer a couple of follow-up questions if the idea is still fuzzy.",
+    "voiceNotes.letAiMatch": "Let AI match it",
 
     // File dropzone
     "dropzone.uploading": "Uploading your file...",
@@ -1218,6 +1219,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.panelKicker": "语音笔记",
     "voiceNotes.panelHeadline": "说出来，我们会整理成学习笔记。",
     "voiceNotes.panelDesc": "大声说出你的理解，让 AI 整理，再回答几个跟进问题，直到概念清晰为止。",
+    "voiceNotes.letAiMatch": "让 AI 自动匹配",
 
     // File dropzone
     "dropzone.uploading": "正在上传文件...",

@@ -361,7 +361,7 @@ export function VoiceNotesPanel({
               onChange={(event) => setSelectedKnowledgePointId(event.target.value)}
               className="ui-input mt-2"
             >
-              <option value="">Let AI match it</option>
+              <option value="">{t("voiceNotes.letAiMatch")}</option>
               {knowledgePoints.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.title}
