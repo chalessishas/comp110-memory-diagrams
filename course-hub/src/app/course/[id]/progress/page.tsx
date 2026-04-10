@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CourseTabs } from "@/components/CourseTabs";
 import { ProgressGrid } from "@/components/ProgressGrid";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { calculateMastery } from "@/lib/mastery";
+import type { MasteryLevel } from "@/types";
 import { ArrowLeft } from "lucide-react";
 import { CalibrationPanel } from "@/components/CalibrationPanel";
 
@@ -47,21 +47,36 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
   const isCalibrated = c1 !== null && c2 !== null && c3 !== null && c1 <= c2 && c2 <= c3;
   const isOverconfident = c3 !== null && c1 !== null && c3 < c1;
 
-  const kpQuestions = new Map<string, string[]>();
-  for (const q of questions ?? []) {
-    if (q.knowledge_point_id) {
-      const list = kpQuestions.get(q.knowledge_point_id) ?? [];
-      list.push(q.id);
-      kpQuestions.set(q.knowledge_point_id, list);
-    }
-  }
+  // Use element_mastery v2 levels as single source of truth — consistent with learn page
+  const kpIds = (kps ?? []).map((kp) => kp.id);
+  const { data: masteryRows } = kpIds.length > 0
+    ? await supabase
+        .from("element_mastery")
+        .select("concept_id, current_level, times_tested, times_correct")
+        .eq("user_id", user.id)
+        .in("concept_id", kpIds)
+    : { data: [] };
+
+  const masteryMap = new Map(
+    (masteryRows ?? []).map((m) => [m.concept_id, m])
+  );
+
+  // Map mastery-v2 5-level to ProgressGrid 4-level display categories
+  const v2ToDisplay = (level: string | undefined): MasteryLevel => {
+    if (!level || level === "unseen") return "untested";
+    if (level === "exposed") return "weak";
+    if (level === "practiced") return "reviewing";
+    return "mastered"; // proficient or mastered
+  };
 
   const data = (kps ?? []).map((kp) => {
-    const qIds = kpQuestions.get(kp.id) ?? [];
-    const kpAttempts = (attempts ?? []).filter((a) => qIds.includes(a.question_id));
-    const mastery = calculateMastery(kpAttempts);
-    return { node: kp, ...mastery };
+    const m = masteryMap.get(kp.id);
+    const level = v2ToDisplay(m?.current_level);
+    const total = m?.times_tested ?? 0;
+    const rate = total > 0 ? (m?.times_correct ?? 0) / total : 0;
+    return { node: kp, level, rate, total };
   });
+
 
   return (
     <div className="space-y-8">
