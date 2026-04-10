@@ -220,6 +220,15 @@ const translations: Record<Locale, Record<string, string>> = {
     "onboarding.step4Title": "You're all set!",
     "onboarding.step4Subtitle": "Here's what we've configured for you.",
     "onboarding.semesterPlaceholder": "e.g. Spring 2026",
+    "onboarding.role.college": "College Student",
+    "onboarding.role.highschool": "High School",
+    "onboarding.role.selflearner": "Self-Learner",
+    "onboarding.role.teacher": "Teacher / TA",
+    "onboarding.goal.organize": "Organize my courses",
+    "onboarding.goal.practice": "Practice with AI questions",
+    "onboarding.goal.review": "Spaced repetition review",
+    "onboarding.goal.progress": "Track my mastery",
+    "onboarding.goal.lessons": "AI-generated lessons",
 
     // Chunk Lesson
     "lesson.failedToLoad": "Lesson content failed to load. Please try again.",
@@ -421,6 +430,11 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.retention70": "70% · Efficient",
     "review.retention80": "80% · Balanced",
     "review.retention90": "90% · Thorough",
+    "review.examModeBanner": "Exam Mode · {days} · weakest first",
+    "review.examDay": "{n} day",
+    "review.examDays": "{n} days",
+    "review.examScopeBanner": "Exam Scope · {count} knowledge point",
+    "review.examScopeBannerPlural": "Exam Scope · {count} knowledge points",
 
     // Study Tasks
     "studyTask.title": "Study Tasks",
@@ -888,6 +902,15 @@ const translations: Record<Locale, Record<string, string>> = {
     "onboarding.step4Title": "设置完成！",
     "onboarding.step4Subtitle": "以下是你的个性化配置。",
     "onboarding.semesterPlaceholder": "例如：2026 春季",
+    "onboarding.role.college": "大学生",
+    "onboarding.role.highschool": "高中生",
+    "onboarding.role.selflearner": "自学者",
+    "onboarding.role.teacher": "教师 / 助教",
+    "onboarding.goal.organize": "整理课程大纲",
+    "onboarding.goal.practice": "AI 出题练习",
+    "onboarding.goal.review": "间隔重复复习",
+    "onboarding.goal.progress": "追踪学习进度",
+    "onboarding.goal.lessons": "AI 生成课程内容",
 
     // Chunk Lesson
     "lesson.failedToLoad": "课程内容加载失败，请重试。",
@@ -1089,6 +1112,11 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.retention70": "70% · 高效",
     "review.retention80": "80% · 均衡",
     "review.retention90": "90% · 深刻",
+    "review.examModeBanner": "考试模式 · {days} · 按薄弱程度排序",
+    "review.examDay": "{n} 天后考试",
+    "review.examDays": "{n} 天后考试",
+    "review.examScopeBanner": "考试范围 · {count} 个知识点",
+    "review.examScopeBannerPlural": "考试范围 · {count} 个知识点",
 
     // Study Tasks
     "studyTask.title": "学习任务",

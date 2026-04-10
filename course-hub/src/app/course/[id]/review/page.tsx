@@ -14,8 +14,7 @@ import { useI18n } from "@/lib/i18n";
 
 export default function ReviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [dueCards, setDueCards] = useState<ReviewCard[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -181,9 +180,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           <div className="flex items-center gap-2">
             <Zap size={16} style={{ color: "var(--warning)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--warning)" }}>
-              {isZh
-                ? `考试模式 · ${examDays} 天后考试 · 按薄弱程度排序`
-                : `Exam Mode · ${examDays} day${examDays > 1 ? "s" : ""} · weakest first`}
+              {t("review.examModeBanner", {
+                days: examDays > 1 ? t("review.examDays", { n: examDays }) : t("review.examDay", { n: examDays }),
+              })}
             </span>
           </div>
           <button
@@ -227,9 +226,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           <div className="flex items-center gap-2">
             <Target size={16} style={{ color: "var(--accent)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-              {isZh
-                ? `考试范围 · ${scopeMatchCount} 个知识点`
-                : `Exam Scope · ${scopeMatchCount} knowledge point${scopeMatchCount > 1 ? "s" : ""}`}
+              {scopeMatchCount > 1
+                ? t("review.examScopeBannerPlural", { count: scopeMatchCount })
+                : t("review.examScopeBanner", { count: scopeMatchCount })}
             </span>
           </div>
           <button onClick={handleClearScope} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>

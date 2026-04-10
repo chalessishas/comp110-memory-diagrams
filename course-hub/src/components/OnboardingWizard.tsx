@@ -6,18 +6,18 @@ import { saveOnboarding, type OnboardingPreferences } from "@/lib/onboarding";
 import { useI18n, type Locale } from "@/lib/i18n";
 
 const ROLES = [
-  { key: "college", en: "College Student", zh: "大学生", icon: "🎓" },
-  { key: "highschool", en: "High School", zh: "高中生", icon: "📚" },
-  { key: "selflearner", en: "Self-Learner", zh: "自学者", icon: "💡" },
-  { key: "teacher", en: "Teacher / TA", zh: "教师 / 助教", icon: "👩‍🏫" },
+  { key: "college", icon: "🎓" },
+  { key: "highschool", icon: "📚" },
+  { key: "selflearner", icon: "💡" },
+  { key: "teacher", icon: "👩‍🏫" },
 ];
 
 const GOALS = [
-  { key: "organize", en: "Organize my courses", zh: "整理课程大纲", icon: "📋" },
-  { key: "practice", en: "Practice with AI questions", zh: "AI 出题练习", icon: "📝" },
-  { key: "review", en: "Spaced repetition review", zh: "间隔重复复习", icon: "🔄" },
-  { key: "progress", en: "Track my mastery", zh: "追踪学习进度", icon: "📊" },
-  { key: "lessons", en: "AI-generated lessons", zh: "AI 生成课程内容", icon: "📖" },
+  { key: "organize", icon: "📋" },
+  { key: "practice", icon: "📝" },
+  { key: "review", icon: "🔄" },
+  { key: "progress", icon: "📊" },
+  { key: "lessons", icon: "📖" },
 ];
 
 interface Props {
@@ -34,8 +34,6 @@ export function OnboardingWizard({ onComplete }: Props) {
     goals: [],
     completed: false,
   });
-
-  const isZh = prefs.language === "zh";
 
   function handleNext() {
     if (step < steps.length - 1) {
@@ -84,7 +82,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               }}
             >
               <span className="text-2xl">{role.icon}</span>
-              <p className="text-sm font-medium mt-2">{isZh ? role.zh : role.en}</p>
+              <p className="text-sm font-medium mt-2">{t(`onboarding.role.${role.key}`)}</p>
             </button>
           ))}
         </div>
@@ -128,7 +126,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               }}
             >
               <span className="text-xl">{goal.icon}</span>
-              <span className="text-sm font-medium">{isZh ? goal.zh : goal.en}</span>
+              <span className="text-sm font-medium">{t(`onboarding.goal.${goal.key}`)}</span>
               {prefs.goals.includes(goal.key) && (
                 <Check size={16} className="ml-auto" style={{ color: "var(--accent)" }} />
               )}
@@ -152,7 +150,7 @@ export function OnboardingWizard({ onComplete }: Props) {
           {prefs.role && (
             <div className="p-4 rounded-[16px]" style={{ backgroundColor: "var(--bg-muted)" }}>
               <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.role")}</p>
-              <p className="text-sm font-medium">{ROLES.find((r) => r.key === prefs.role)?.[isZh ? "zh" : "en"]}</p>
+              <p className="text-sm font-medium">{prefs.role ? t(`onboarding.role.${prefs.role}`) : ""}</p>
             </div>
           )}
           {prefs.semester && (
@@ -166,7 +164,7 @@ export function OnboardingWizard({ onComplete }: Props) {
               <p className="text-xs font-medium mb-2" style={{ color: "var(--text-muted)" }}>{t("onboarding.goals")}</p>
               <div className="flex flex-wrap gap-2">
                 {prefs.goals.map((g) => (
-                  <span key={g} className="ui-badge">{GOALS.find((gl) => gl.key === g)?.[isZh ? "zh" : "en"]}</span>
+                  <span key={g} className="ui-badge">{t(`onboarding.goal.${g}`)}</span>
                 ))}
               </div>
             </div>
