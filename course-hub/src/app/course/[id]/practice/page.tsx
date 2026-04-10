@@ -34,6 +34,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [scopeKpIds, setScopeKpIds] = useState<Set<string> | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [sessionStart] = useState(() => Date.now());
+  const [sessionItems, setSessionItems] = useState<{ id: string; stem: string; correct: boolean }[]>([]);
 
   useEffect(() => {
     const scope = getExamScope(id);
@@ -70,10 +71,12 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     setShowUpload(false);
   }
 
-  function handleAnswer(_questionId: string, _answer: string, isCorrect: boolean) {
+  function handleAnswer(questionId: string, _answer: string, isCorrect: boolean) {
     setQuestionMode("reviewing");
     setSessionAnswered((n) => n + 1);
     if (isCorrect) setSessionCorrect((n) => n + 1);
+    const q = filteredQuestions.find((q) => q.id === questionId);
+    if (q) setSessionItems((prev) => [...prev, { id: questionId, stem: q.stem, correct: isCorrect }]);
   }
 
   const progress = filteredQuestions.length > 0 ? ((currentIndex + 1) / filteredQuestions.length) * 100 : 0;
@@ -378,6 +381,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         sessionCorrect={sessionCorrect}
         sessionMinutes={Math.round((Date.now() - sessionStart) / 60_000)}
         sessionStart={sessionStart}
+        reviewedItems={sessionItems}
       />
     </div>
   );

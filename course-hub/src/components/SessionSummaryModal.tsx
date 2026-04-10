@@ -12,6 +12,12 @@ interface MasteryLevelUp {
   level_reached_at: string;
 }
 
+interface ReviewedItem {
+  id: string;
+  stem: string;
+  correct: boolean;
+}
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -20,6 +26,7 @@ interface Props {
   sessionCorrect: number;
   sessionMinutes: number;
   sessionStart: number; // Date.now() when session started, for mastery-summary API
+  reviewedItems?: ReviewedItem[]; // per-item breakdown (optional)
 }
 
 const LEVEL_LABELS: Record<string, { en: string; zh: string; color: string }> = {
@@ -29,7 +36,7 @@ const LEVEL_LABELS: Record<string, { en: string; zh: string; color: string }> = 
   mastered:  { en: "mastered",  zh: "已掌握", color: "var(--success)" },
 };
 
-export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes, sessionStart }: Props) {
+export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes, sessionStart, reviewedItems }: Props) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
   const [tomorrowDue, setTomorrowDue] = useState<number>(0);
@@ -164,6 +171,26 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             </div>
           </div>
         )}
+
+        {/* Per-item review breakdown — wrong answers first, up to 5 items */}
+        {reviewedItems && reviewedItems.length > 0 && (() => {
+          const wrong = reviewedItems.filter((i) => !i.correct).slice(0, 5);
+          if (wrong.length === 0) return null;
+          return (
+            <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
+              <p className="text-xs font-medium mb-2" style={{ color: "var(--danger)" }}>
+                {isZh ? `需要复习 (${wrong.length})` : `Review these (${wrong.length})`}
+              </p>
+              <div className="space-y-1">
+                {wrong.map((item) => (
+                  <p key={item.id} className="text-xs truncate" style={{ color: "var(--text-secondary)" }}>
+                    · {item.stem}
+                  </p>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Tomorrow preview */}
         <div className="flex items-center gap-2 text-sm" style={{ color: "var(--text-secondary)" }}>

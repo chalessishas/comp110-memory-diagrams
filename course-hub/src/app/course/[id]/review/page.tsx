@@ -33,6 +33,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [sessionAnswered, setSessionAnswered] = useState(0);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionStart] = useState(() => Date.now());
+  const [sessionItems, setSessionItems] = useState<{ id: string; stem: string; correct: boolean }[]>([]);
   // Incremented after server pull completes — triggers queue recompute with fresh localStorage
   const [cardsKey, setCardsKey] = useState(0);
 
@@ -127,10 +128,12 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     setScopeMatchCount(null);
   }
 
-  function handleAnswer(_questionId: string, _answer: string, isCorrect: boolean) {
+  function handleAnswer(questionId: string, _answer: string, isCorrect: boolean) {
     setShowRating(true);
     setSessionAnswered((n) => n + 1);
     if (isCorrect) setSessionCorrect((n) => n + 1);
+    const q = questions.find((q) => q.id === questionId);
+    if (q) setSessionItems((prev) => [...prev, { id: questionId, stem: q.stem, correct: isCorrect }]);
   }
 
   function handleRate(rating: Rating): void {
@@ -349,6 +352,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         sessionCorrect={sessionCorrect}
         sessionMinutes={Math.round((Date.now() - sessionStart) / 60_000)}
         sessionStart={sessionStart}
+        reviewedItems={sessionItems}
       />
     </div>
   );
