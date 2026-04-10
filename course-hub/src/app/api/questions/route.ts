@@ -22,10 +22,56 @@ export async function GET(request: Request) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Interleaved practice: shuffle questions so different knowledge points are mixed
-  // Evidence: interleaving produces g=0.42 overall, d=1.05-1.21 in math (Rohrer et al.)
-  const shuffled = [...(data ?? [])].sort(() => Math.random() - 0.5);
-  return NextResponse.json(shuffled);
+  const questions = data ?? [];
+
+  // Fetch this user's attempt stats per question for adaptive difficulty sorting
+  const { data: attemptStats } = questions.length > 0
+    ? await supabase
+        .from("attempts")
+        .select("question_id, is_correct")
+        .eq("user_id", user.id)
+        .in("question_id", questions.map((q) => q.id))
+    : { data: [] };
+
+  // Aggregate: count total and correct per question
+  const statsMap = new Map<string, { total: number; correct: number }>();
+  for (const a of attemptStats ?? []) {
+    const s = statsMap.get(a.question_id) ?? { total: 0, correct: 0 };
+    s.total++;
+    if (a.is_correct) s.correct++;
+    statsMap.set(a.question_id, s);
+  }
+
+  // Attach accuracy to each question
+  const withStats = questions.map((q) => {
+    const s = statsMap.get(q.id);
+    return {
+      ...q,
+      attempt_count: s?.total ?? 0,
+      user_accuracy: s ? s.correct / s.total : null,
+    };
+  });
+
+  // Adaptive 85%-rule sort (Wilson et al. 2019, Nature Communications):
+  // Target error rate ≈15% → optimal accuracy ≈0.85.
+  // Priority 0 = show first.
+  //   unseen (null)      → priority 1: introduce new material early
+  //   accuracy 0.5–0.9   → priority 0: "desirable difficulty" sweet spot — most practice here
+  //   accuracy < 0.5     → priority 2: struggling; include but don't overwhelm
+  //   accuracy ≥ 0.9     → priority 3: near-mastered; show last
+  // Within each band, shuffle for interleaving (Rohrer et al., g=0.42).
+  const band = (acc: number | null): number => {
+    if (acc === null) return 1;
+    if (acc >= 0.5 && acc < 0.9) return 0;
+    if (acc < 0.5) return 2;
+    return 3;
+  };
+  const sorted = withStats
+    .map((q) => ({ q, band: band(q.user_accuracy), jitter: Math.random() }))
+    .sort((a, b) => a.band - b.band || a.jitter - b.jitter)
+    .map(({ q }) => q);
+
+  return NextResponse.json(sorted);
 }
 
 export async function POST(request: Request) {

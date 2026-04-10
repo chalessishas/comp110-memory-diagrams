@@ -52,6 +52,9 @@ export interface Question {
   options: { label: string; text: string }[] | null;
   difficulty: number;
   created_at: string;
+  // Populated by GET /api/questions — user's attempt history for adaptive 85%-rule sorting
+  attempt_count?: number;
+  user_accuracy?: number | null;
 }
 
 // Full question with answer — only used server-side or in admin contexts
