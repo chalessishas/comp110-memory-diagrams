@@ -6,6 +6,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { VoiceNotesPanel } from "@/components/VoiceNotesPanel";
 import { toCourseNote, type CourseNoteRow } from "@/lib/course-notes";
+import { T } from "@/components/T";
 
 export default async function CourseNotesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -45,27 +46,27 @@ export default async function CourseNotesPage({ params }: { params: Promise<{ id
     <div className="space-y-8">
       <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
         <ArrowLeft size={14} />
-        Back to Dashboard
+        <T k="misc.backToDashboard" />
       </Link>
 
       <div className="ui-panel p-6 md:p-8">
         <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
           <div>
-            <div className="ui-kicker mb-4">Notes</div>
-            <h1 className="text-4xl font-semibold tracking-wide">Talk your way into clearer notes.</h1>
+            <div className="ui-kicker mb-4"><T k="notes.kicker" /></div>
+            <h1 className="text-4xl font-semibold tracking-wide"><T k="notes.headline" /></h1>
             <p className="ui-copy mt-3 max-w-3xl">
-              CourseHub captures your spoken understanding, cleans it up, and pushes back when the explanation is still vague.
+              <T k="notes.desc" />
             </p>
             <div className="flex flex-wrap gap-2 mt-5">
               <span className="ui-badge">
                 <Mic size={12} />
-                Voice-first
+                <T k="notes.voiceFirst" />
               </span>
               <span className="ui-badge">
                 <NotebookPen size={12} />
-                {notes.length} saved notes
+                <T k="notes.savedNotes" vars={{ count: notes.length }} />
               </span>
-              <span className="ui-badge">{fallbackTargets.length} knowledge points</span>
+              <span className="ui-badge"><T k="notes.kpCount" vars={{ count: fallbackTargets.length }} /></span>
             </div>
           </div>
         </div>
