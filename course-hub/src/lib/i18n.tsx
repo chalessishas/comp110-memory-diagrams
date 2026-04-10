@@ -78,6 +78,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "newCourse.savingOutline": "Saving outline tree...",
     "newCourse.redirecting": "Redirecting to your course...",
     "newCourse.answerPlaceholder": "Type your answer...",
+    "newCourse.correct": "Correct",
+    "newCourse.failedParseFile": "Failed to parse file",
+    "newCourse.failedParseText": "Failed to parse text",
+    "newCourse.failedPreview": "Failed to generate study preview",
+    "newCourse.failedCreate": "Failed to create course",
+    "newCourse.failedSaveOutline": "Course created but failed to save outline",
 
     // Generation progress steps
     "gen.step1": "Reading your document...",
@@ -603,12 +609,19 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.correctAnswer": "Correct Answer",
     "wrongAnswer.why": "Why",
     "wrongAnswer.noAnswer": "No answer recorded",
+    "wrongAnswer.kicker": "Wrong Notebook",
+    "wrongAnswer.headline": "Keep the misses, not just the score.",
+    "wrongAnswer.desc": "Every incorrect answer becomes a review target with the right answer and explanation attached.",
+    "wrongAnswer.redo": "Redo Questions",
+    "wrongAnswer.emptyTitle": "No wrong answers yet",
+    "wrongAnswer.emptyDesc": "Once you start doing practice, the questions you miss will collect here for review.",
 
     // Share
     "share.copyLink": "Copy link",
     "share.shareCourse": "Share course",
 
     // Study Buddy
+    "studyBuddy.title": "Study Buddy",
     "studyBuddy.askAnything": "Ask me anything about this course",
     "studyBuddy.quickQ1": "What are the key topics?",
     "studyBuddy.quickQ2": "Explain the hardest concept",
@@ -724,6 +737,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "newCourse.savingOutline": "正在保存大纲...",
     "newCourse.redirecting": "正在跳转到课程页...",
     "newCourse.answerPlaceholder": "请输入你的答案...",
+    "newCourse.correct": "正确",
+    "newCourse.failedParseFile": "文件解析失败",
+    "newCourse.failedParseText": "文本解析失败",
+    "newCourse.failedPreview": "学习预览生成失败",
+    "newCourse.failedCreate": "课程创建失败",
+    "newCourse.failedSaveOutline": "课程已创建，但大纲保存失败",
 
     // Generation progress steps
     "gen.step1": "正在阅读你的文档...",
@@ -1249,12 +1268,19 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.correctAnswer": "正确答案",
     "wrongAnswer.why": "解析",
     "wrongAnswer.noAnswer": "未记录答案",
+    "wrongAnswer.kicker": "错题本",
+    "wrongAnswer.headline": "留住错误，不只是分数。",
+    "wrongAnswer.desc": "每道答错的题都会成为复习目标，附上正确答案和解析。",
+    "wrongAnswer.redo": "重练错题",
+    "wrongAnswer.emptyTitle": "暂无错题",
+    "wrongAnswer.emptyDesc": "开始练习后，答错的题会在这里汇集等待复习。",
 
     // Share
     "share.copyLink": "复制链接",
     "share.shareCourse": "分享课程",
 
     // Study Buddy
+    "studyBuddy.title": "学习伙伴",
     "studyBuddy.askAnything": "有什么关于这门课的问题都可以问我",
     "studyBuddy.quickQ1": "这门课的核心主题是什么？",
     "studyBuddy.quickQ2": "帮我解释最难的概念",

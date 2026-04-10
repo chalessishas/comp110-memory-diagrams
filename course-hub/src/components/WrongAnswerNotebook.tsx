@@ -34,23 +34,23 @@ export function WrongAnswerNotebook({
     <div id="wrong-notebook" className="ui-panel p-5 md:p-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="ui-kicker mb-3">Wrong Notebook</div>
-          <h3 className="text-2xl font-semibold tracking-wide">Keep the misses, not just the score.</h3>
+          <div className="ui-kicker mb-3"><T k="wrongAnswer.kicker" /></div>
+          <h3 className="text-2xl font-semibold tracking-wide"><T k="wrongAnswer.headline" /></h3>
           <p className="ui-copy mt-2 max-w-2xl">
-            Every incorrect answer becomes a review target with the right answer and explanation attached.
+            <T k="wrongAnswer.desc" />
           </p>
         </div>
         <Link href={`/course/${courseId}/practice`} className="ui-button-secondary">
-          Redo Questions
+          <T k="wrongAnswer.redo" />
           <RotateCcw size={14} />
         </Link>
       </div>
 
       {items.length === 0 ? (
         <div className="ui-empty mt-6">
-          <p className="text-base font-medium mb-2">No wrong answers yet</p>
+          <p className="text-base font-medium mb-2"><T k="wrongAnswer.emptyTitle" /></p>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-            Once you start doing practice, the questions you miss will collect here for review.
+            <T k="wrongAnswer.emptyDesc" />
           </p>
         </div>
       ) : (

@@ -184,9 +184,9 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
         <div className="mt-2">
           <div className="flex items-center gap-2 mb-2">
             {isCorrect ? (
-              <><Check size={14} style={{ color: "var(--success)" }} /><span className="text-sm font-medium" style={{ color: "var(--success)" }}>Correct</span></>
+              <><Check size={14} style={{ color: "var(--success)" }} /><span className="text-sm font-medium" style={{ color: "var(--success)" }}>{t("newCourse.correct")}</span></>
             ) : (
-              <><span className="text-sm font-medium" style={{ color: "var(--danger)" }}>Answer: {question.answer}</span></>
+              <><span className="text-sm font-medium" style={{ color: "var(--danger)" }}>{t("bank.answer")} {question.answer}</span></>
             )}
           </div>
           {question.explanation && (
@@ -267,7 +267,7 @@ export default function NewCoursePage() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || "Failed to parse file");
+      setError(data.error || t("newCourse.failedParseFile"));
       setStep("upload");
       return;
     }
@@ -296,7 +296,7 @@ export default function NewCoursePage() {
 
     const data = await res.json();
     if (!res.ok) {
-      setError(data.error || "Failed to parse text");
+      setError(data.error || t("newCourse.failedParseText"));
       setStep("upload");
       return;
     }
@@ -319,7 +319,7 @@ export default function NewCoursePage() {
 
     const data = await res.json();
     if (!res.ok) {
-      setPreviewError(data.error || "Failed to generate study preview");
+      setPreviewError(data.error || t("newCourse.failedPreview"));
       setPreviewLoading(false);
       return;
     }
@@ -355,7 +355,7 @@ export default function NewCoursePage() {
 
     const course = await courseRes.json();
     if (!courseRes.ok) {
-      setError(course.error || "Failed to create course");
+      setError(course.error || t("newCourse.failedCreate"));
       setCreating(false);
       setSaveStage(null);
       return;
@@ -369,7 +369,7 @@ export default function NewCoursePage() {
     });
 
     if (!res.ok) {
-      setError("Course created but failed to save outline");
+      setError(t("newCourse.failedSaveOutline"));
       setCreating(false);
       setSaveStage(null);
       return;

@@ -70,7 +70,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
             <Bot size={16} style={{ color: "var(--accent)" }} />
           </div>
           <div>
-            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>Study Buddy</p>
+            <p className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>{t("studyBuddy.title")}</p>
             <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>{courseTitle}</p>
           </div>
         </div>
