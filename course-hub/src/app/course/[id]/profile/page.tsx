@@ -21,9 +21,9 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
 
   const kpIds = (kps ?? []).map(k => k.id);
 
-  // Get mastery data
+  // Get mastery data — filter to _overall rows only; per-element rows inflate counts
   const { data: mastery } = kpIds.length > 0
-    ? await supabase.from("element_mastery").select("*").eq("user_id", user.id).in("concept_id", kpIds)
+    ? await supabase.from("element_mastery").select("*").eq("user_id", user.id).eq("element_name", "_overall").in("concept_id", kpIds)
     : { data: [] };
 
   // Get misconceptions

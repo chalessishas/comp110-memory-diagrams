@@ -27,16 +27,26 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const kpIds = (kps ?? []).map((k: { id: string }) => k.id);
   if (kpIds.length === 0) return NextResponse.json([]);
 
-  // Find mastery records that leveled up since the given timestamp
+  // Find _overall mastery records that leveled up since the given timestamp,
+  // joined with outline_nodes for the human-readable concept title
   const { data, error } = await supabase
     .from("element_mastery")
-    .select("element_name, current_level, level_reached_at")
+    .select("concept_id, current_level, level_reached_at, outline_nodes!concept_id(title)")
     .eq("user_id", user.id)
+    .eq("element_name", "_overall")
     .in("concept_id", kpIds)
     .neq("current_level", "unseen")
     .gte("level_reached_at", since)
     .order("level_reached_at", { ascending: false });
 
   if (error) return NextResponse.json([]);
-  return NextResponse.json(data ?? []);
+
+  // Flatten join result: return element_name as the concept title
+  const result = (data ?? []).map((m) => ({
+    element_name: (m.outline_nodes as unknown as { title: string } | null)?.title ?? "Knowledge point",
+    current_level: m.current_level,
+    level_reached_at: m.level_reached_at,
+  }));
+
+  return NextResponse.json(result);
 }

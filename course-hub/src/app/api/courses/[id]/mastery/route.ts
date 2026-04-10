@@ -20,6 +20,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     .from("element_mastery")
     .select("concept_id, current_level")
     .eq("user_id", user.id)
+    .eq("element_name", "_overall")
     .in("concept_id", kpIds);
 
   if (error) return NextResponse.json([]);
