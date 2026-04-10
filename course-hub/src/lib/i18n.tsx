@@ -137,6 +137,21 @@ const translations: Record<Locale, Record<string, string>> = {
     "today.startButton": "Start",
     "today.estimatedTime": "min",
     "today.dailyGoal": "Daily Goal",
+    "today.task.reviewKps": "Review {n} knowledge points",
+    "today.task.reviewKpsDesc": "Strengthen your memory before it fades",
+    "today.task.examReviewTitle": "{title} — Exam Review",
+    "today.task.examReviewDesc": "{n} weak spots need attention",
+    "today.task.urgentStudyTitle": "{title} — Urgent Study",
+    "today.task.urgentStudyDesc": "{n} knowledge points not yet learned",
+    "today.task.studyPlanTitle": "{title} — Study Plan",
+    "today.task.studyPlanDesc": "{n} topics to strengthen before {title}",
+    "today.task.generateLessons": "Generate course lessons",
+    "today.task.generateLessonsDesc": "{n} knowledge points ready to become lessons",
+    "today.task.nextLesson": "Next lesson available",
+    "today.task.setup": "Set up this course",
+    "today.task.setupDesc": "Upload a syllabus or add knowledge points to get started",
+    "today.task.strengthenTitle": "Strengthen weak spots",
+    "today.task.strengthenDesc": "{n} recurring issues to address",
     "today.completed": "completed",
 
     // Profile View
@@ -643,6 +658,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.fixedOnce": "Fixed Once",
     "wrongAnswer.misses": "{count} misses",
     "wrongAnswer.lastMiss": "Last miss:",
+    "wrongAnswer.seeRest": "See the rest in Practice",
 
     // Share
     "share.copyLink": "Copy link",
@@ -825,6 +841,21 @@ const translations: Record<Locale, Record<string, string>> = {
     "today.estimatedTime": "分钟",
     "today.dailyGoal": "每日目标",
     "today.completed": "已完成",
+    "today.task.reviewKps": "复习 {n} 个知识点",
+    "today.task.reviewKpsDesc": "在记忆消退前巩固",
+    "today.task.examReviewTitle": "{title} — 考前排查",
+    "today.task.examReviewDesc": "{n} 个薄弱点需要关注",
+    "today.task.urgentStudyTitle": "{title} — 紧急补课",
+    "today.task.urgentStudyDesc": "{n} 个知识点尚未学习",
+    "today.task.studyPlanTitle": "{title} — 备考计划",
+    "today.task.studyPlanDesc": "在 {title} 前需强化 {n} 个主题",
+    "today.task.generateLessons": "生成课程讲义",
+    "today.task.generateLessonsDesc": "{n} 个知识点可以生成讲义",
+    "today.task.nextLesson": "下一课已就绪",
+    "today.task.setup": "配置本课程",
+    "today.task.setupDesc": "上传课程大纲或添加知识点开始使用",
+    "today.task.strengthenTitle": "强化薄弱知识点",
+    "today.task.strengthenDesc": "{n} 个高频错误需要解决",
 
     // Profile View
     "profile.title": "Mastery Profile",
@@ -1330,6 +1361,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "wrongAnswer.fixedOnce": "已修正",
     "wrongAnswer.misses": "答错 {count} 次",
     "wrongAnswer.lastMiss": "最近错误：",
+    "wrongAnswer.seeRest": "前往练习页查看全部",
 
     // Share
     "share.copyLink": "复制链接",

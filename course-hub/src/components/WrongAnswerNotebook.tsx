@@ -125,7 +125,7 @@ export function WrongAnswerNotebook({
       {items.length > 8 && (
         <div className="mt-5">
           <Link href={`/course/${courseId}/practice`} className="ui-button-ghost w-fit !px-0">
-            See the rest in Practice
+            {t("wrongAnswer.seeRest")}
             <ArrowRight size={14} />
           </Link>
         </div>

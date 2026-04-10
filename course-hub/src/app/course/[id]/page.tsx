@@ -77,7 +77,11 @@ function buildTodayTasks(data: {
     type: string;
     priority: number;
     title: string;
+    titleKey?: string;
+    titleVars?: Record<string, string | number>;
     description: string;
+    descKey?: string;
+    descVars?: Record<string, string | number>;
     estimatedMinutes: number;
     count: number;
     color: string;
@@ -103,7 +107,11 @@ function buildTodayTasks(data: {
           type: "exam_review",
           priority: 1,
           title: `${exam.title} — Exam Review`,
+          titleKey: "today.task.examReviewTitle",
+          titleVars: { title: exam.title },
           description: `${activeMisconceptions.length} weak spots need attention`,
+          descKey: "today.task.examReviewDesc",
+          descVars: { n: activeMisconceptions.length },
           estimatedMinutes: activeMisconceptions.length * 8,
           count: activeMisconceptions.length,
           color: "var(--danger)",
@@ -124,7 +132,11 @@ function buildTodayTasks(data: {
           type: "urgent_study",
           priority: 0,
           title: `${exam.title} — Urgent Study`,
+          titleKey: "today.task.urgentStudyTitle",
+          titleVars: { title: exam.title },
           description: `${unseenCount} knowledge points not yet learned`,
+          descKey: "today.task.urgentStudyDesc",
+          descVars: { n: unseenCount },
           estimatedMinutes: unseenCount * 6,
           count: unseenCount,
           color: "var(--danger)",
@@ -146,7 +158,11 @@ function buildTodayTasks(data: {
           type: "exam_prep",
           priority: 3,
           title: `${exam.title} — Study Plan`,
+          titleKey: "today.task.studyPlanTitle",
+          titleVars: { title: exam.title },
           description: `${weakCount} topics to strengthen before ${exam.title}`,
+          descKey: "today.task.studyPlanDesc",
+          descVars: { n: weakCount, title: exam.title },
           estimatedMinutes: weakCount * 12,
           count: weakCount,
           color: "var(--warning)",
@@ -170,7 +186,10 @@ function buildTodayTasks(data: {
       type: "fsrs_review",
       priority: 2,
       title: `Review ${Math.min(dueForReview.length, 20)} knowledge points`,
+      titleKey: "today.task.reviewKps",
+      titleVars: { n: Math.min(dueForReview.length, 20) },
       description: "Strengthen your memory before it fades",
+      descKey: "today.task.reviewKpsDesc",
       estimatedMinutes: Math.min(dueForReview.length, 20) * 1,
       count: Math.min(dueForReview.length, 20),
       color: "var(--warning)",
@@ -193,7 +212,10 @@ function buildTodayTasks(data: {
       type: "new_content",
       priority: 4,
       title: "Generate course lessons",
+      titleKey: "today.task.generateLessons",
       description: `${data.kps.length} knowledge points ready to become lessons`,
+      descKey: "today.task.generateLessonsDesc",
+      descVars: { n: data.kps.length },
       estimatedMinutes: 2,
       count: data.kps.length,
       color: "var(--accent)",
@@ -218,6 +240,7 @@ function buildTodayTasks(data: {
         priority: 4,
         title: nextToLearn.title,
         description: "Next lesson available",
+        descKey: "today.task.nextLesson",
         estimatedMinutes: 25,
         count: 1,
         color: "var(--accent)",
@@ -235,7 +258,9 @@ function buildTodayTasks(data: {
       type: "new_content",
       priority: 4,
       title: "Set up this course",
+      titleKey: "today.task.setup",
       description: "Upload a syllabus or add knowledge points to get started",
+      descKey: "today.task.setupDesc",
       estimatedMinutes: 5,
       count: 0,
       color: "var(--accent)",
@@ -253,7 +278,10 @@ function buildTodayTasks(data: {
       type: "weakness",
       priority: 5,
       title: "Strengthen weak spots",
+      titleKey: "today.task.strengthenTitle",
       description: `${persistentMisconceptions.length} recurring issues to address`,
+      descKey: "today.task.strengthenDesc",
+      descVars: { n: persistentMisconceptions.length },
       estimatedMinutes: persistentMisconceptions.length * 5,
       count: persistentMisconceptions.length,
       color: "var(--accent)",

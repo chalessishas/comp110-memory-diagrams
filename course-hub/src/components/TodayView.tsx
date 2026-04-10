@@ -28,7 +28,11 @@ interface TodayTask {
   type: string;
   priority: number;
   title: string;
+  titleKey?: string;
+  titleVars?: Record<string, string | number>;
   description: string;
+  descKey?: string;
+  descVars?: Record<string, string | number>;
   estimatedMinutes: number;
   count: number;
   color: string;
@@ -109,10 +113,10 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
                 className="text-sm font-medium leading-snug"
                 style={{ color: "var(--text-primary)" }}
               >
-                {task.title}
+                {task.titleKey ? t(task.titleKey, task.titleVars) : task.title}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                {task.description} · {task.estimatedMinutes} {t("today.estimatedTime")}
+                {task.descKey ? t(task.descKey, task.descVars) : task.description} · {task.estimatedMinutes} {t("today.estimatedTime")}
               </p>
             </div>
 
