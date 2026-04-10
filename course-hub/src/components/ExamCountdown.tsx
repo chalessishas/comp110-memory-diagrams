@@ -41,12 +41,12 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
   }
 
   async function handleDelete(examId: string) {
-    await fetch(`/api/courses/${courseId}/exams`, {
+    const res = await fetch(`/api/courses/${courseId}/exams`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ exam_id: examId }),
     });
-    setExams((prev) => prev.filter((e) => e.id !== examId));
+    if (res.ok) setExams((prev) => prev.filter((e) => e.id !== examId));
   }
 
   const upcoming = exams.filter((e) => daysUntil(e.exam_date) >= 0);

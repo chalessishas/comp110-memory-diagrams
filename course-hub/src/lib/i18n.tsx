@@ -170,6 +170,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "tree.weak": "Weak",
     "tree.notStarted": "Not started",
     "tree.percentMastered": "mastered",
+    "tree.noNodes": "No knowledge points yet. Create a course to grow your tree.",
 
     // Practice
     "practice.title": "Practice",
@@ -738,6 +739,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "tree.weak": "薄弱",
     "tree.notStarted": "未开始",
     "tree.percentMastered": "已掌握",
+    "tree.noNodes": "还没有知识点。创建课程来生长你的知识树。",
 
     // Practice
     "practice.title": "练习",

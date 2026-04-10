@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { MasteryLevel } from "@/types";
+import { useI18n } from "@/lib/i18n";
 
 interface KnowledgeNodeData {
   id: string;
@@ -21,17 +22,18 @@ interface KnowledgeTreeProps {
 function getNodeStyle(mastery: MasteryLevel) {
   switch (mastery) {
     case "mastered":
-      return { size: 56, bg: "var(--mastery-mastered)", border: "var(--success)", opacity: 1, label: "Mastered" };
+      return { size: 56, bg: "var(--mastery-mastered)", border: "var(--success)", opacity: 1, labelKey: "tree.mastered" };
     case "reviewing":
-      return { size: 44, bg: "var(--mastery-practiced)", border: "var(--warning)", opacity: 1, label: "Reviewing" };
+      return { size: 44, bg: "var(--mastery-practiced)", border: "var(--warning)", opacity: 1, labelKey: "tree.reviewing" };
     case "weak":
-      return { size: 36, bg: "var(--mastery-exposed)", border: "var(--danger)", opacity: 0.9, label: "Weak" };
+      return { size: 36, bg: "var(--mastery-exposed)", border: "var(--danger)", opacity: 0.9, labelKey: "tree.weak" };
     default:
-      return { size: 24, bg: "var(--mastery-unseen)", border: "var(--border-strong)", opacity: 0.5, label: "Not started" };
+      return { size: 24, bg: "var(--mastery-unseen)", border: "var(--border-strong)", opacity: 0.5, labelKey: "tree.notStarted" };
   }
 }
 
 function NodeCircle({ node, x, y }: { node: KnowledgeNodeData; x: number; y: number }) {
+  const { t } = useI18n();
   const style = getNodeStyle(node.mastery);
   const r = style.size / 2;
 
@@ -76,13 +78,14 @@ function NodeCircle({ node, x, y }: { node: KnowledgeNodeData; x: number; y: num
       </text>
 
       <text x={x} y={y + r + 26} textAnchor="middle" fontSize={8} fill="var(--text-muted)">
-        {style.label}{node.totalAttempts > 0 ? ` (${node.totalAttempts})` : ""}
+        {t(style.labelKey)}{node.totalAttempts > 0 ? ` (${node.totalAttempts})` : ""}
       </text>
     </g>
   );
 }
 
 export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
+  const { t } = useI18n();
   const layout = useMemo(() => {
     if (nodes.length === 0) return [];
 
@@ -109,7 +112,7 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
     return (
       <div className="ui-empty">
         <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-          No knowledge points yet. Create a course to grow your tree.
+          {t("tree.noNodes")}
         </p>
       </div>
     );
@@ -132,23 +135,23 @@ export function KnowledgeTree({ nodes }: KnowledgeTreeProps) {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-mastered)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Mastered ({mastered})</span>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("tree.mastered")} ({mastered})</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-practiced)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Reviewing ({reviewing})</span>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("tree.reviewing")} ({reviewing})</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-exposed)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Weak ({weak})</span>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("tree.weak")} ({weak})</span>
           </div>
           <div className="flex items-center gap-1.5">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: "var(--mastery-unseen)" }} />
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>Not started ({untested})</span>
+            <span className="text-xs" style={{ color: "var(--text-muted)" }}>{t("tree.notStarted")} ({untested})</span>
           </div>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{Math.round(overallProgress)}% mastered</span>
+          <span className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>{Math.round(overallProgress)}% {t("tree.percentMastered")}</span>
           <div className="ui-progress-track w-24">
             <div
               className="ui-progress-bar"
