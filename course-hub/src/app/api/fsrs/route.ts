@@ -123,7 +123,8 @@ export async function POST(request: Request) {
               updated_at: now,
             })
             .eq("user_id", user.id)
-            .eq("concept_id", kpId);
+            .eq("concept_id", kpId)
+            .eq("element_name", "_overall");
         })
       );
     }

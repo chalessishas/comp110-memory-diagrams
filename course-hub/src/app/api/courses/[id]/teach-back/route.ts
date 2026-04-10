@@ -73,7 +73,8 @@ QUALITY: MISSING`,
         .from("element_mastery")
         .update({ has_teaching_challenge_pass: true, updated_at: new Date().toISOString() })
         .eq("user_id", user.id)
-        .eq("concept_id", kpId);
+        .eq("concept_id", kpId)
+        .eq("element_name", "_overall");
     }
   }
 
