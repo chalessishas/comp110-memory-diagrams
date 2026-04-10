@@ -181,7 +181,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             className="text-xs cursor-pointer"
             style={{ color: "var(--text-muted)" }}
           >
-            {isZh ? "关闭" : "Turn off"}
+            {t("review.turnOff")}
           </button>
         </div>
       ) : (
@@ -191,7 +191,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
         >
           <Calendar size={16} />
-          <span className="text-sm">{isZh ? "设置考试日期，启用高强度复习" : "Set exam date for intensive review mode"}</span>
+          <span className="text-sm">{t("review.setExamDate")}</span>
         </button>
       )}
 
@@ -206,7 +206,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)" }}
           />
           <button onClick={() => setShowDatePicker(false)} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
-            {isZh ? "取消" : "Cancel"}
+            {t("misc.cancel")}
           </button>
         </div>
       )}
@@ -223,7 +223,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             </span>
           </div>
           <button onClick={handleClearScope} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
-            {isZh ? "清除范围" : "Clear scope"}
+            {t("review.clearScope")}
           </button>
         </div>
       ) : (
@@ -233,17 +233,17 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
         >
           <Target size={16} />
-          <span className="text-sm">{isZh ? "设置考试范围，只复习考试内容" : "Set exam scope to focus review on tested material"}</span>
+          <span className="text-sm">{t("review.setExamScope")}</span>
         </button>
       )}
 
       {showScopeInput && (
         <div className="mb-4 p-4 rounded-xl space-y-3" style={{ backgroundColor: "var(--bg-muted)" }}>
-          <p className="text-sm font-medium">{isZh ? "粘贴考试范围（如：Chapters 8-10, 级数判别法, Taylor 展开）" : "Paste exam scope (e.g., Chapters 8-10, convergence tests, Taylor series)"}</p>
+          <p className="text-sm font-medium">{t("review.pasteScopeLabel")}</p>
           <textarea
             value={scopeText}
             onChange={(e) => setScopeText(e.target.value)}
-            placeholder={isZh ? "输入或粘贴考试范围..." : "Type or paste exam scope..."}
+            placeholder={t("review.pasteScopePlaceholder")}
             className="w-full px-3 py-2 rounded-lg text-sm"
             style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", minHeight: "80px" }}
           />
@@ -254,10 +254,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
               className="ui-button-primary disabled:opacity-30"
             >
               {scopeLoading ? <Loader2 size={14} className="animate-spin" /> : null}
-              {isZh ? "匹配知识点" : "Match knowledge points"}
+              {t("review.matchKps")}
             </button>
             <button onClick={() => { setShowScopeInput(false); setScopeText(""); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
-              {isZh ? "取消" : "Cancel"}
+              {t("misc.cancel")}
             </button>
           </div>
         </div>
@@ -285,7 +285,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {currentIndex + 1} of {dueCards.length} {examActive ? (isZh ? "需复习" : "to review") : t("review.due")}
+              {currentIndex + 1} of {dueCards.length} {examActive ? t("review.toReview") : t("review.due")}
             </p>
             {examActive && dueCards[currentIndex] && (() => {
               const r = getExamDayRetrievability(dueCards[currentIndex]);
@@ -298,7 +298,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
                 </span>
               ) : (
                 <span className="text-xs px-2 py-1 rounded-full" style={{ backgroundColor: "var(--bg-muted)", color: "var(--danger)" }}>
-                  {isZh ? "未复习过" : "Not yet reviewed"}
+                  {t("review.notYetReviewed")}
                 </span>
               );
             })()}

@@ -121,7 +121,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             </span>
           </div>
           <button onClick={() => setScopeKpIds(null)} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
-            {isZh ? "显示全部" : "Show all"}
+            {t("practice.showAll")}
           </button>
         </div>
       )}
@@ -140,7 +140,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             className="ui-button-primary"
           >
             <Sparkles size={14} />
-            {showExamPrep ? (isZh ? "收起" : "Hide Exam Prep") : (isZh ? "考前冲刺" : "Exam Prep")}
+            {showExamPrep ? t("practice.examPrepHide") : t("practice.examPrep")}
           </button>
           <button
             onClick={() => { setShowUpload(!showUpload); setShowExamPrep(false); }}
@@ -154,13 +154,13 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
 
       {showExamPrep && (
         <div className="ui-panel p-6 md:p-8">
-          <div className="ui-kicker mb-3">{isZh ? "考前冲刺" : "EXAM PREP"}</div>
-          <h3 className="text-xl font-semibold mb-2">{isZh ? "粘贴考试范围" : "Paste your exam scope"}</h3>
-          <p className="ui-copy mb-4">{isZh ? "粘贴老师发的考试范围邮件或文档，AI 会根据考点生成针对性练习题。" : "Paste the email or document that describes what the exam covers. AI will generate targeted practice questions."}</p>
+          <div className="ui-kicker mb-3">{t("practice.examPrepKicker")}</div>
+          <h3 className="text-xl font-semibold mb-2">{t("practice.examPrepTitle")}</h3>
+          <p className="ui-copy mb-4">{t("practice.examPrepDesc")}</p>
           <textarea
             value={examScope}
             onChange={(e) => setExamScope(e.target.value)}
-            placeholder={isZh ? "在此粘贴考试范围...\n\n例如：期中考试范围包括 5.3 误差界、5.5 交替级数、6.1 幂级数..." : "Paste exam topics here...\n\nExample: The midterm covers 5.3 Error bounds, 5.5 Alternating series, 6.1 Power series..."}
+            placeholder={t("practice.examPrepPlaceholder")}
             className="ui-textarea text-sm mb-4"
             rows={6}
             disabled={examPrepLoading}
@@ -225,10 +225,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   }
                 } else {
                   const err = await res.json().catch(() => null);
-                  setExamPrepError(err?.error ?? (isZh ? "生成失败，请稍后重试" : "Generation failed. Please try again."));
+                  setExamPrepError(err?.error ?? t("practice.examPrepFailed"));
                 }
               } catch {
-                setExamPrepError(isZh ? "网络错误或超时，请重试" : "Network error or timeout. Please retry.");
+                setExamPrepError(t("practice.examPrepTimeout"));
               }
               setExamPrepLoading(false);
             }}
@@ -236,9 +236,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             className="ui-button-primary disabled:opacity-50"
           >
             {examPrepLoading ? (
-              <><Loader2 size={16} className="animate-spin" /> {isZh ? "正在生成考试题目..." : "Generating exam questions..."}</>
+              <><Loader2 size={16} className="animate-spin" /> {t("practice.examPrepGenerating")}</>
             ) : (
-              <><Sparkles size={16} /> {isZh ? "生成考试题目" : "Generate Exam Questions"}</>
+              <><Sparkles size={16} /> {t("practice.examPrepGenerate")}</>
             )}
           </button>
         </div>
@@ -303,9 +303,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <p className="text-sm font-medium">
-                    {isZh
-                      ? `${t("practice.questionOf")} ${currentIndex + 1} ${t("practice.of")} ${filteredQuestions.length}`
-                      : `${t("practice.questionOf")} ${currentIndex + 1} ${t("practice.of")} ${filteredQuestions.length}`}
+                    {t("practice.questionOf")} {currentIndex + 1} {t("practice.of")} {filteredQuestions.length}
                   </p>
                   {sessionAnswered >= 3 && (() => {
                     const acc = sessionCorrect / sessionAnswered;
@@ -317,7 +315,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                       : "var(--warning)";
                     return (
                       <span className="text-xs px-2 py-0.5 rounded-lg font-medium" style={{ backgroundColor: "var(--bg-muted)", color }}>
-                        {pct}% {isZh ? "正确率" : "accuracy"} · {isZh ? "目标 85%" : "target 85%"}
+                        {pct}% {t("practice.accuracy")} · {t("practice.target85")}
                       </span>
                     );
                   })()}
@@ -334,7 +332,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   <button
                     onClick={() => setShowSummary(true)}
                     className="ui-icon-button"
-                    title={isZh ? "结束本次练习" : "End session"}
+                    title={t("practice.endSession")}
                   >
                     <Flag size={16} />
                   </button>
