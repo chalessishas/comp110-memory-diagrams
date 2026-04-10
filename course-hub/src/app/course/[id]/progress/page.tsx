@@ -40,6 +40,8 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
           .select("question_id, is_correct, answered_at, confidence")
           .eq("user_id", user.id)
           .in("question_id", questionIds)
+          .order("answered_at", { ascending: false })
+          .limit(500) // recent 500 is more than enough for calibration stats
       : Promise.resolve({ data: [] as { question_id: string; is_correct: boolean; answered_at: string; confidence: number | null }[] }),
     kpIds.length > 0
       ? supabase
