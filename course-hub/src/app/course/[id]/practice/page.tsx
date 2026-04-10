@@ -6,7 +6,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target, Flag } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target, Flag, Download } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
@@ -15,8 +15,7 @@ import { SessionSummaryModal } from "@/components/SessionSummaryModal";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -115,9 +114,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           <div className="flex items-center gap-2">
             <Target size={16} style={{ color: "var(--accent)" }} />
             <span className="text-sm font-medium" style={{ color: "var(--accent)" }}>
-              {isZh
-                ? `考试范围 · ${filteredQuestions.length} 题`
-                : `Exam Scope · ${filteredQuestions.length} question${filteredQuestions.length !== 1 ? "s" : ""}`}
+              {t(filteredQuestions.length !== 1 ? "practice.examScopePlural" : "practice.examScope", { count: filteredQuestions.length })}
             </span>
           </div>
           <button onClick={() => setScopeKpIds(null)} className="text-xs cursor-pointer" style={{ color: "var(--text-muted)" }}>
@@ -149,6 +146,16 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             <Upload size={14} />
             {showUpload ? t("practice.uploadExamHide") : t("practice.uploadExam")}
           </button>
+          {questions.length > 0 && (
+            <a
+              href={`/api/courses/${id}/export-anki`}
+              download
+              className="ui-button-secondary"
+            >
+              <Download size={14} />
+              {t("practice.exportAnki")}
+            </a>
+          )}
         </div>
       </div>
 
@@ -174,9 +181,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             <div className="space-y-2 mb-4">
               <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                 <p className="text-sm font-medium" style={{ color: "var(--success)" }}>
-                  {isZh
-                    ? `从 ${examPrepResult.topics_processed} 个主题生成了 ${examPrepResult.questions_generated} 道题`
-                    : `Generated ${examPrepResult.questions_generated} questions from ${examPrepResult.topics_processed} topics`}
+                  {t("practice.examPrepGenerated", { questions: examPrepResult.questions_generated, topics: examPrepResult.topics_processed })}
                 </p>
                 <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
                   {examPrepResult.topics.join(", ")}
@@ -185,9 +190,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               {examPrepResult.topics_failed.length > 0 && (
                 <div className="rounded-[20px] px-4 py-3" style={{ backgroundColor: "var(--bg-muted)" }}>
                   <p className="text-sm font-medium" style={{ color: "var(--warning)" }}>
-                    {isZh
-                      ? `${examPrepResult.topics_failed.length} 个主题生成失败，可重试`
-                      : `${examPrepResult.topics_failed.length} topic${examPrepResult.topics_failed.length > 1 ? "s" : ""} failed — try again`}
+                    {t(examPrepResult.topics_failed.length > 1 ? "practice.examPrepTopicFailedPlural" : "practice.examPrepTopicFailed", { count: examPrepResult.topics_failed.length })}
                   </p>
                   <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
                     {examPrepResult.topics_failed.join(", ")}
