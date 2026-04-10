@@ -63,6 +63,8 @@ export async function POST(request: Request) {
 
   // Keep mastery attempt counters current — required for exposed→practiced evaluation
   // Only updates existing rows (lesson completion creates the initial "exposed" record)
+  let postUpdateAccuracy: number | null = null;
+  let postUpdateTested = 0;
   if (question.knowledge_point_id) {
     const { data: mastery } = await supabase
       .from("element_mastery")
@@ -72,47 +74,60 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (mastery) {
+      postUpdateTested = mastery.times_tested + 1;
+      const postUpdateCorrect = mastery.times_correct + (isCorrect ? 1 : 0);
+      postUpdateAccuracy = postUpdateCorrect / postUpdateTested;
       await supabase
         .from("element_mastery")
         .update({
-          times_tested: mastery.times_tested + 1,
-          times_correct: mastery.times_correct + (isCorrect ? 1 : 0),
+          times_tested: postUpdateTested,
+          times_correct: postUpdateCorrect,
           updated_at: new Date().toISOString(),
         })
         .eq("id", mastery.id);
     }
   }
 
-  // Track misconceptions: auto-log when user answers incorrectly for a knowledge point.
-  // Increments occurrence_count on repeat; handles relapse if previously resolved.
-  if (!isCorrect && question.knowledge_point_id) {
-    const { data: existing } = await supabase
-      .from("misconceptions")
-      .select("id, occurrence_count, resolved, relapse_count")
-      .eq("user_id", user.id)
-      .eq("concept_id", question.knowledge_point_id)
-      .maybeSingle();
+  // Track misconceptions: auto-log wrong answers, auto-resolve when accuracy recovers.
+  // Resolve threshold: ≥75% accuracy over ≥5 attempts on the knowledge point.
+  if (question.knowledge_point_id) {
+    if (!isCorrect) {
+      const { data: existing } = await supabase
+        .from("misconceptions")
+        .select("id, occurrence_count, resolved, relapse_count")
+        .eq("user_id", user.id)
+        .eq("concept_id", question.knowledge_point_id)
+        .maybeSingle();
 
-    if (existing) {
+      if (existing) {
+        await supabase
+          .from("misconceptions")
+          .update({
+            occurrence_count: existing.occurrence_count + 1,
+            last_seen_at: new Date().toISOString(),
+            ...(existing.resolved
+              ? { resolved: false, relapsed: true, relapse_count: existing.relapse_count + 1 }
+              : {}),
+          })
+          .eq("id", existing.id);
+      } else {
+        const desc = question.stem
+          ? question.stem.slice(0, 120)
+          : "Repeated errors on this topic";
+        await supabase.from("misconceptions").insert({
+          user_id: user.id,
+          concept_id: question.knowledge_point_id,
+          misconception_description: desc,
+        });
+      }
+    } else if (postUpdateAccuracy !== null && postUpdateAccuracy >= 0.75 && postUpdateTested >= 5) {
+      // Correct answer pushed accuracy above threshold — resolve any open misconception
       await supabase
         .from("misconceptions")
-        .update({
-          occurrence_count: existing.occurrence_count + 1,
-          last_seen_at: new Date().toISOString(),
-          ...(existing.resolved
-            ? { resolved: false, relapsed: true, relapse_count: existing.relapse_count + 1 }
-            : {}),
-        })
-        .eq("id", existing.id);
-    } else {
-      const desc = question.stem
-        ? question.stem.slice(0, 120)
-        : "Repeated errors on this topic";
-      await supabase.from("misconceptions").insert({
-        user_id: user.id,
-        concept_id: question.knowledge_point_id,
-        misconception_description: desc,
-      });
+        .update({ resolved: true, resolved_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("concept_id", question.knowledge_point_id)
+        .eq("resolved", false);
     }
   }
 
