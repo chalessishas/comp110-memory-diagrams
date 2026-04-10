@@ -130,9 +130,9 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
           <div className="ui-kicker">{t(QUESTION_TYPE_I18N_KEYS[question.type])}</div>
           {question.attempt_count !== undefined && (
             question.attempt_count === 0
-              ? <span className="text-xs px-2 py-0.5 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}>First attempt</span>
+              ? <span className="text-xs px-2 py-0.5 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}>{t("questionCard.firstAttempt")}</span>
               : <span className="text-xs px-2 py-0.5 rounded-lg" style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}>
-                  {question.attempt_count} attempt{question.attempt_count > 1 ? "s" : ""} · {Math.round((question.user_accuracy ?? 0) * 100)}% correct
+                  {t("questionCard.attemptHistory", { n: question.attempt_count, s: question.attempt_count > 1 ? "s" : "", pct: Math.round((question.user_accuracy ?? 0) * 100) })}
                 </span>
           )}
         </div>
