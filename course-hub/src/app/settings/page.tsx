@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const router = useRouter();
   const supabase = createClient();
   const { locale, setLocale, t } = useI18n();
+  const isZh = locale === "zh";
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<Section>("profile");
@@ -125,14 +126,29 @@ export default function SettingsPage() {
   }
 
   async function handleDeleteAccount() {
-    if (!confirm("Delete your account and ALL data? This cannot be undone.")) return;
-    if (!confirm("Are you absolutely sure? All courses, questions, and progress will be permanently deleted.")) return;
-    const { data: courses } = await supabase.from("courses").select("id");
-    if (courses && courses.length > 0) {
-      await supabase.from("courses").delete().in("id", courses.map((c) => c.id));
+    if (!confirm(isZh
+      ? "删除账号及所有数据？此操作不可恢复。"
+      : "Delete your account and ALL data? This cannot be undone."
+    )) return;
+    if (!confirm(isZh
+      ? "确认删除？所有课程、题目和学习记录将被永久清除。"
+      : "Are you absolutely sure? All courses, questions, and progress will be permanently deleted."
+    )) return;
+    setClearing("account");
+    try {
+      const res = await fetch("/api/account", { method: "DELETE" });
+      if (res.ok) {
+        await supabase.auth.signOut();
+        router.push("/login");
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(data?.error ?? (isZh ? "删除失败，请稍后重试" : "Deletion failed. Please try again."));
+        setClearing(null);
+      }
+    } catch {
+      alert(isZh ? "网络错误，请稍后重试" : "Network error. Please try again.");
+      setClearing(null);
     }
-    await supabase.auth.signOut();
-    router.push("/login");
   }
 
   const sections: { key: Section; label: string; icon: typeof User }[] = [
