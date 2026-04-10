@@ -6,11 +6,12 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target, Flag } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
 import { getExamScope, pullCardsFromServer } from "@/lib/spaced-repetition";
+import { SessionSummaryModal } from "@/components/SessionSummaryModal";
 
 export default function PracticePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -31,6 +32,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [examPrepError, setExamPrepError] = useState<string | null>(null);
   const [questionMode, setQuestionMode] = useState<"solving" | "reviewing">("solving");
   const [scopeKpIds, setScopeKpIds] = useState<Set<string> | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [sessionStart] = useState(() => Date.now());
 
   useEffect(() => {
     const scope = getExamScope(id);
@@ -324,6 +327,15 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                 </p>
               </div>
               <div className="flex gap-2">
+                {sessionAnswered >= 5 && (
+                  <button
+                    onClick={() => setShowSummary(true)}
+                    className="ui-icon-button"
+                    title={isZh ? "结束本次练习" : "End session"}
+                  >
+                    <Flag size={16} />
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setCurrentIndex((i) => Math.max(0, i - 1));
@@ -357,6 +369,16 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           </div>
         </div>
       )}
+
+      <SessionSummaryModal
+        open={showSummary}
+        onClose={() => setShowSummary(false)}
+        courseId={id}
+        sessionAnswered={sessionAnswered}
+        sessionCorrect={sessionCorrect}
+        sessionMinutes={Math.round((Date.now() - sessionStart) / 60_000)}
+        sessionStart={sessionStart}
+      />
     </div>
   );
 }
