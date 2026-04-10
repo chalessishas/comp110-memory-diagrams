@@ -20,6 +20,17 @@ export default async function DashboardPage() {
   const activeCourses = (courses ?? []).filter((c) => c.status === "active");
   const archivedCourses = (courses ?? []).filter((c) => c.status === "archived");
 
+  // Fetch question IDs per course for client-side due-count badges
+  const courseIds = activeCourses.map((c) => c.id);
+  const questionsByCourseFetch = courseIds.length > 0
+    ? await supabase.from("questions").select("id, course_id").in("course_id", courseIds)
+    : { data: [] };
+  const questionsByCourse: Record<string, string[]> = {};
+  for (const q of questionsByCourseFetch.data ?? []) {
+    if (!questionsByCourse[q.course_id]) questionsByCourse[q.course_id] = [];
+    questionsByCourse[q.course_id].push(q.id);
+  }
+
   if (!user) {
     return (
       <div className="space-y-8">
@@ -123,7 +134,7 @@ export default async function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {activeCourses.map((course) => (
-            <CourseCard key={course.id} course={course} />
+            <CourseCard key={course.id} course={course} questionIds={questionsByCourse[course.id] ?? []} />
           ))}
         </div>
       )}

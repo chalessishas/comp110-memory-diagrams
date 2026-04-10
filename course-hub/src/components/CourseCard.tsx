@@ -1,8 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
+import { useEffect, useState } from "react";
+import { getDueCards, loadCards } from "@/lib/spaced-repetition";
 import type { Course } from "@/types";
 
-export function CourseCard({ course }: { course: Course }) {
+export function CourseCard({ course, questionIds }: { course: Course; questionIds?: string[] }) {
+  const [dueCount, setDueCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!questionIds || questionIds.length === 0) return;
+    const cards = loadCards();
+    const qSet = new Set(questionIds);
+    const courseCards = cards.filter((c) => qSet.has(c.question_id));
+    setDueCount(getDueCards(courseCards).length);
+  }, [questionIds]);
+
   return (
     <Link
       href={`/course/${course.id}`}
@@ -38,6 +52,14 @@ export function CourseCard({ course }: { course: Course }) {
             style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}
           >
             {course.semester}
+          </span>
+        )}
+        {dueCount !== null && dueCount > 0 && (
+          <span
+            className="text-xs px-2 py-0.5 rounded-lg font-medium"
+            style={{ backgroundColor: "var(--warning)", color: "white" }}
+          >
+            {dueCount} due
           </span>
         )}
       </div>
