@@ -1,19 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
 import { parsedQuestionSchema } from "@/lib/schemas";
-import { stripThinkBlocks } from "@/lib/ai";
+import { stripThinkBlocks, textModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
-
-const qwen = createOpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-});
-
-const model = qwen("qwen3.5-plus");
 
 // Exam Prep: paste exam scope text → generate targeted questions
 // qwen3.5-plus is fast enough to handle 10+ topics within 60s
@@ -33,7 +25,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // Step 1: Extract exam topics from the scope text
   const { text: topicsText } = await generateText({
-    model,
+    model: textModel,
     timeout: 55_000,
     messages: [{
       role: "user",
@@ -68,7 +60,7 @@ ${scope_text.slice(0, 3000)}
     const batch = topics.slice(i, i + 4);
     const results = await Promise.allSettled(batch.map(async (topic) => {
       const { text } = await generateText({
-        model,
+        model: textModel,
         timeout: 55_000,
         messages: [{
           role: "user",

@@ -1,18 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
-import { stripThinkBlocks } from "@/lib/ai";
+import { stripThinkBlocks, textModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 60;
-
-const qwen = createOpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-});
-
-const model = qwen("qwen3.5-plus");
 
 // POST: parse exam scope text → match to knowledge point IDs
 // Returns matched KP IDs so the client can store them and filter all views
@@ -46,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // AI matches scope text to existing knowledge points
   const { text } = await generateText({
-    model,
+    model: textModel,
     timeout: 55_000,
     messages: [{
       role: "user",

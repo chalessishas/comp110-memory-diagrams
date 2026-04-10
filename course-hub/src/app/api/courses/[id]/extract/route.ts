@@ -2,15 +2,10 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { generateText, Output } from "ai";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { createOpenAI } from "@ai-sdk/openai";
+import { visionModel } from "@/lib/ai";
 import { z } from "zod";
 
 export const maxDuration = 60;
-
-const qwen = createOpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-});
 
 const extractionSchema = z.object({
   sections: z.array(z.object({
@@ -53,7 +48,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const kpList = (kps ?? []).map((kp) => kp.title).join(", ");
 
   const { output } = await generateText({
-    model: qwen("qwen-plus-latest"),
+    model: visionModel,
     timeout: 55_000,
     messages: [{
       role: "user",

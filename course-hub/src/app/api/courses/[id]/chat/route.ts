@@ -1,15 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { streamText, convertToModelMessages, UIMessage } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+import { textModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
 export const maxDuration = 30;
-
-const qwen = createOpenAI({
-  baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-  apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-});
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -57,7 +52,7 @@ Instructions:
 - You can suggest which knowledge points to review for a topic`;
 
   const result = streamText({
-    model: qwen("qwen3.5-plus"),
+    model: textModel,
     system: systemPrompt,
     messages: await convertToModelMessages(messages),
   });

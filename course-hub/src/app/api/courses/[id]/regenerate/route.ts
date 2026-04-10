@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { generateStudyTasks, generateQuestionsFromOutline, stripThinkBlocks } from "@/lib/ai";
+import { generateStudyTasks, generateQuestionsFromOutline, stripThinkBlocks, textModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -34,14 +34,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Step 1: Translate outline node titles and content via AI
   try {
     const { generateText } = await import("ai");
-    const { createOpenAI } = await import("@ai-sdk/openai");
-    const qwen = createOpenAI({
-      baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
-      apiKey: process.env.DASHSCOPE_API_KEY ?? "",
-    });
 
     const { text } = await generateText({
-      model: qwen("qwen3.5-plus"),
+      model: textModel,
       timeout: 55_000,
       messages: [{
         role: "user",
