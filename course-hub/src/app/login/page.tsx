@@ -7,13 +7,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 
-const AUTH_ERROR_MESSAGES: Record<string, string> = {
-  auth_denied: "Sign-in was canceled or denied. Please try again.",
-  auth_callback_missing_code: "That sign-in link is invalid or incomplete. Please try again.",
-  auth_callback_failed: "We couldn't complete sign-in from that link. Please request a new one and try again.",
-};
-
-const DEFAULT_AUTH_ERROR = "We couldn't complete sign-in. Please try again.";
 
 function LoginPageFallback() {
   return (
@@ -55,8 +48,13 @@ function LoginPageContent() {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [dismissedAuthError, setDismissedAuthError] = useState(false);
+  const authErrorMessages: Record<string, string> = {
+    auth_denied: t("login.authDenied"),
+    auth_callback_missing_code: t("login.authCallbackMissing"),
+    auth_callback_failed: t("login.authCallbackFailed"),
+  };
   const authError = dismissedAuthError ? null : searchParams.get("error");
-  const displayedError = error ?? (authError ? AUTH_ERROR_MESSAGES[authError] ?? DEFAULT_AUTH_ERROR : null);
+  const displayedError = error ?? (authError ? authErrorMessages[authError] ?? t("login.authError") : null);
 
   async function signInWithGoogle() {
     setDismissedAuthError(true);
@@ -82,7 +80,7 @@ function LoginPageContent() {
       if (error) {
         setError(error.message);
       } else {
-        setMessage("Check your email to confirm your account.");
+        setMessage(t("login.checkEmail"));
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -175,7 +173,7 @@ function LoginPageContent() {
           />
           <input
             type="password"
-            placeholder="Password"
+            placeholder={t("login.password")}
             value={password}
             onChange={(e) => {
               setDismissedAuthError(true);

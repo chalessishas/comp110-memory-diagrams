@@ -5,10 +5,8 @@ import { Flame, Shield, Target } from "lucide-react";
 import { getStreakData, getWeekHistory, type StreakData } from "@/lib/streaks";
 import { useI18n } from "@/lib/i18n";
 
-const DAY_NAMES = ["S", "M", "T", "W", "T", "F", "S"];
-
 export function StreakBadge() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const [data, setData] = useState<StreakData | null>(null);
   const [open, setOpen] = useState(false);
   const [week, setWeek] = useState(getWeekHistory());
@@ -98,7 +96,7 @@ export function StreakBadge() {
                       {day.completed ? "\u2713" : ""}
                     </div>
                     <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
-                      {DAY_NAMES[d.getDay()]}
+                      {d.toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", { weekday: "narrow" })}
                     </span>
                   </div>
                 );

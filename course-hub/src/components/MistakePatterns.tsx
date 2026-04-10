@@ -15,8 +15,7 @@ interface MistakePattern {
 }
 
 export function MistakePatterns({ courseId }: { courseId: string }) {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [patterns, setPatterns] = useState<MistakePattern[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +36,7 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
       <div className="flex items-center gap-2 mb-4">
         <TrendingDown size={16} style={{ color: "var(--danger)" }} />
         <h3 className="text-sm font-medium" style={{ color: "var(--text-primary)" }}>
-          {isZh ? "\u8584\u5f31\u77e5\u8bc6\u70b9" : "Weak Spots"}
+          {t("mistakes.title")}
         </h3>
       </div>
 
@@ -76,7 +75,7 @@ export function MistakePatterns({ courseId }: { courseId: string }) {
       </div>
 
       <p className="text-[10px] mt-4" style={{ color: "var(--text-muted)" }}>
-        {isZh ? "\u9519\u8bef\u7387 = \u7b54\u9519\u6b21\u6570 / \u603b\u7b54\u9898\u6b21\u6570\uff0c\u6309\u77e5\u8bc6\u70b9\u805a\u5408" : "Error rate = wrong / total attempts, grouped by knowledge point"}
+        {t("mistakes.footnote")}
       </p>
     </div>
   );

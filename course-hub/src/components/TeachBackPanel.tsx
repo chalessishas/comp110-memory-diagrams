@@ -9,15 +9,8 @@ interface Props {
   questionId: string;
 }
 
-const QUALITY_CONFIG = {
-  strong:  { icon: CheckCircle2, color: "var(--success)",  label: { en: "Strong",  zh: "掌握" } },
-  partial: { icon: AlertCircle,  color: "var(--warning)",  label: { en: "Partial", zh: "部分" } },
-  missing: { icon: MinusCircle,  color: "var(--danger)",   label: { en: "Missing", zh: "薄弱" } },
-};
-
 export function TeachBackPanel({ courseId, questionId }: Props) {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,7 +34,12 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
     setLoading(false);
   }
 
-  const q = result ? QUALITY_CONFIG[result.quality] : null;
+  const qualityConfig = {
+    strong:  { icon: CheckCircle2, color: "var(--success)",  label: t("teachBack.strong") },
+    partial: { icon: AlertCircle,  color: "var(--warning)",  label: t("teachBack.partial") },
+    missing: { icon: MinusCircle,  color: "var(--danger)",   label: t("teachBack.missing") },
+  };
+  const q = result ? qualityConfig[result.quality] : null;
 
   return (
     <div className="mt-3 rounded-[20px] overflow-hidden" style={{ backgroundColor: "var(--bg-muted)" }}>
@@ -52,7 +50,7 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
       >
         <BookOpen size={14} />
         <span className="text-sm">
-          {isZh ? "用自己的话解释这道题的概念" : "Explain this concept in your own words"}
+          {t("teachBack.explain")}
         </span>
         <span className="ml-auto text-xs" style={{ color: "var(--text-muted)" }}>
           {expanded ? "▲" : "▼"}
@@ -66,7 +64,7 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
               <textarea
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder={isZh ? "用你自己的语言解释..." : "Explain in your own words..."}
+                placeholder={t("teachBack.placeholder")}
                 className="w-full px-3 py-2 rounded-xl text-sm resize-none"
                 style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", minHeight: "72px" }}
               />
@@ -76,7 +74,7 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
                 className="ui-button-primary disabled:opacity-30 text-sm"
               >
                 {loading ? <Loader2 size={14} className="animate-spin" /> : null}
-                {isZh ? "获取反馈" : "Get feedback"}
+                {t("teachBack.getFeedback")}
               </button>
             </>
           ) : (
@@ -84,7 +82,7 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
               <div className="flex items-center gap-2">
                 {q && <q.icon size={16} style={{ color: q.color }} />}
                 <span className="text-xs font-medium" style={{ color: q?.color }}>
-                  {isZh ? q?.label.zh : q?.label.en}
+                  {q?.label}
                 </span>
               </div>
               <p className="text-sm leading-relaxed" style={{ color: "var(--text-primary)" }}>
@@ -95,7 +93,7 @@ export function TeachBackPanel({ courseId, questionId }: Props) {
                 className="text-xs cursor-pointer"
                 style={{ color: "var(--text-muted)" }}
               >
-                {isZh ? "再试一次" : "Try again"}
+                {t("teachBack.tryAgain")}
               </button>
             </div>
           )}

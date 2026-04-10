@@ -69,7 +69,7 @@ export default function QuestionBankPage() {
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <p className="text-xs mb-2 font-medium" style={{ color: "var(--text-secondary)" }}>
-                    {bm.questions.courses?.title || "Unknown course"}
+                    {bm.questions.courses?.title || t("bank.unknownCourse")}
                   </p>
                   <p className="text-sm">{bm.questions.stem}</p>
                   <div className="mt-2 flex items-center gap-2">

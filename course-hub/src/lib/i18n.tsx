@@ -215,6 +215,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "login.continueGoogle": "Continue with Google",
     "login.bottomNote": "Sign in to save your courses and track progress across devices.",
     "login.continueGuest": "Continue as Guest",
+    "login.password": "Password",
+    "login.checkEmail": "Check your email to confirm your account.",
+    "login.authDenied": "Sign-in was canceled or denied. Please try again.",
+    "login.authCallbackMissing": "That sign-in link is invalid or incomplete. Please try again.",
+    "login.authCallbackFailed": "We couldn't complete sign-in from that link. Please request a new one and try again.",
+    "login.authError": "We couldn't complete sign-in. Please try again.",
 
     // Review
     "review.title": "Spaced Review",
@@ -337,6 +343,43 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.confirm": "Confirm",
     "misc.backToDashboard": "Back to Dashboard",
     "misc.or": "or",
+
+    // Study Buddy
+    "studyBuddy.askAnything": "Ask me anything about this course",
+    "studyBuddy.quickQ1": "What are the key topics?",
+    "studyBuddy.quickQ2": "Explain the hardest concept",
+    "studyBuddy.quickQ3": "Help me prepare for the exam",
+    "studyBuddy.thinking": "Thinking...",
+    "studyBuddy.placeholder": "Ask about this course...",
+
+    // Usage Panel
+    "usage.title": "AI Usage",
+    "usage.today": "Today",
+    "usage.thisWeek": "This Week",
+    "usage.estCost": "Est. Cost",
+    "usage.calls": "calls",
+
+    // Teach Back
+    "teachBack.explain": "Explain this concept in your own words",
+    "teachBack.placeholder": "Explain in your own words...",
+    "teachBack.getFeedback": "Get feedback",
+    "teachBack.tryAgain": "Try again",
+    "teachBack.strong": "Strong",
+    "teachBack.partial": "Partial",
+    "teachBack.missing": "Missing",
+
+    // Mistake Patterns
+    "mistakes.title": "Weak Spots",
+    "mistakes.footnote": "Error rate = wrong / total attempts, grouped by knowledge point",
+
+    // Join Page
+    "join.title": "Join Shared Course",
+    "join.desc": "Someone shared their course outline with you. Fork it to your account to start studying.",
+    "join.fork": "Fork to My Account",
+    "join.failed": "Failed to join",
+
+    // Question Bank
+    "bank.unknownCourse": "Unknown course",
   },
   zh: {
     // Nav
@@ -548,6 +591,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "login.continueGoogle": "Google 登录",
     "login.bottomNote": "登录后可跨设备保存课程和学习进度。",
     "login.continueGuest": "游客模式继续",
+    "login.password": "密码",
+    "login.checkEmail": "请检查邮箱，确认你的账号。",
+    "login.authDenied": "登录已取消或被拒绝，请重试。",
+    "login.authCallbackMissing": "该登录链接无效或不完整，请重试。",
+    "login.authCallbackFailed": "无法通过该链接完成登录，请重新申请后重试。",
+    "login.authError": "登录失败，请重试。",
 
     // Review
     "review.title": "间隔复习",
@@ -670,6 +719,43 @@ const translations: Record<Locale, Record<string, string>> = {
     "misc.confirm": "确认",
     "misc.backToDashboard": "返回仪表盘",
     "misc.or": "或",
+
+    // Study Buddy
+    "studyBuddy.askAnything": "有什么关于这门课的问题都可以问我",
+    "studyBuddy.quickQ1": "这门课的核心主题是什么？",
+    "studyBuddy.quickQ2": "帮我解释最难的概念",
+    "studyBuddy.quickQ3": "帮我备考",
+    "studyBuddy.thinking": "思考中...",
+    "studyBuddy.placeholder": "问关于这门课的问题...",
+
+    // Usage Panel
+    "usage.title": "AI 用量",
+    "usage.today": "今天",
+    "usage.thisWeek": "本周",
+    "usage.estCost": "预估费用",
+    "usage.calls": "次调用",
+
+    // Teach Back
+    "teachBack.explain": "用自己的话解释这道题的概念",
+    "teachBack.placeholder": "用你自己的语言解释...",
+    "teachBack.getFeedback": "获取反馈",
+    "teachBack.tryAgain": "再试一次",
+    "teachBack.strong": "掌握",
+    "teachBack.partial": "部分",
+    "teachBack.missing": "薄弱",
+
+    // Mistake Patterns
+    "mistakes.title": "薄弱知识点",
+    "mistakes.footnote": "错误率 = 答错次数 / 总答题次数，按知识点聚合",
+
+    // Join Page
+    "join.title": "加入共享课程",
+    "join.desc": "有人向你分享了课程大纲，复制到你的账号开始学习。",
+    "join.fork": "复制到我的账号",
+    "join.failed": "加入失败",
+
+    // Question Bank
+    "bank.unknownCourse": "未知课程",
   },
 };
 

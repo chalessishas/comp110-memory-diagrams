@@ -4,8 +4,10 @@ import { useRef, useEffect, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, isTextUIPart } from "ai";
 import { MessageCircle, Send, X, Loader2, Bot } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export function StudyBuddy({ courseId, courseTitle }: { courseId: string; courseTitle: string }) {
+  const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -87,10 +89,10 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
           <div className="text-center py-8">
             <Bot size={32} className="mx-auto mb-3" style={{ color: "var(--text-muted)" }} />
             <p className="text-sm mb-5" style={{ color: "var(--text-muted)" }}>
-              Ask me anything about this course
+              {t("studyBuddy.askAnything")}
             </p>
             <div className="space-y-2">
-              {["What are the key topics?", "Explain the hardest concept", "Help me prepare for the exam"].map((q) => (
+              {[t("studyBuddy.quickQ1"), t("studyBuddy.quickQ2"), t("studyBuddy.quickQ3")].map((q) => (
                 <button
                   key={q}
                   onClick={() => submitQuickQuestion(q)}
@@ -147,7 +149,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
               className="px-4 py-3 rounded-[16px] text-sm"
               style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-muted)" }}
             >
-              Thinking...
+              {t("studyBuddy.thinking")}
             </div>
           </div>
         )}
@@ -160,7 +162,7 @@ export function StudyBuddy({ courseId, courseTitle }: { courseId: string; course
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about this course..."
+          placeholder={t("studyBuddy.placeholder")}
           className="flex-1 px-4 py-2.5 rounded-[12px] text-sm outline-none"
           style={{
             backgroundColor: "var(--bg-surface)",
