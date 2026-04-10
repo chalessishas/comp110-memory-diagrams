@@ -67,7 +67,7 @@ export default function SettingsPage() {
     if (error) {
       setPasswordMessage(error.message);
     } else {
-      setPasswordMessage("Password updated successfully.");
+      setPasswordMessage(t("settings.passwordUpdated"));
       setNewPassword("");
     }
     setChangingPassword(false);
@@ -190,7 +190,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.displayName")}</label>
                 <div className="flex gap-2">
-                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
+                  <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={t("settings.namePlaceholder")} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
                   <button onClick={handleSaveName} disabled={savingName} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingName ? <Loader2 size={14} className="animate-spin" /> : nameSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -207,7 +207,7 @@ export default function SettingsPage() {
           <div className="ui-panel p-6">
             <h2 className="text-lg font-semibold mb-4">{t("settings.changePassword")}</h2>
             <div className="flex gap-2">
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password (min 6 characters)" minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={t("settings.passwordPlaceholder")} minLength={6} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
               <button onClick={handleChangePassword} disabled={changingPassword || newPassword.length < 6} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                 {changingPassword ? <Loader2 size={14} className="animate-spin" /> : t("settings.save")}
               </button>
@@ -287,7 +287,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.semester")}</label>
                 <div className="flex gap-2">
-                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder="e.g. Fall 2026" className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
+                  <input value={semester} onChange={(e) => setSemester(e.target.value)} placeholder={t("settings.semesterPlaceholder")} className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }} />
                   <button onClick={handleSaveSemester} disabled={savingSemester} className="px-4 py-2.5 rounded-xl text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: "var(--accent)", color: "white" }}>
                     {savingSemester ? <Loader2 size={14} className="animate-spin" /> : semesterSaved ? <Check size={14} /> : t("settings.save")}
                   </button>
@@ -296,7 +296,7 @@ export default function SettingsPage() {
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.aiModel")}</label>
                 <input value="Qwen3.5-Plus (DashScope)" disabled className="w-full px-4 py-2.5 rounded-xl text-sm" style={{ backgroundColor: "var(--bg-surface)", border: "1px solid var(--border)", color: "var(--text-secondary)" }} />
-                <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>Model selection is managed by the administrator.</p>
+                <p className="text-[10px] mt-1" style={{ color: "var(--text-secondary)" }}>{t("settings.modelNote")}</p>
               </div>
               <div>
                 <label className="block text-xs font-medium mb-1.5" style={{ color: "var(--text-secondary)" }}>{t("settings.language")}</label>
@@ -360,14 +360,14 @@ export default function SettingsPage() {
       {/* About */}
       {activeSection === "about" && (
         <div className="ui-panel p-6">
-          <h2 className="text-lg font-semibold mb-4">About CourseHub</h2>
+          <h2 className="text-lg font-semibold mb-4">{t("settings.aboutTitle")}</h2>
           <div className="space-y-3 text-sm" style={{ color: "var(--text-secondary)" }}>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Version:</span> 1.0.0 (MVP)</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Stack:</span> Next.js 16 + Supabase + Qwen AI</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>AI Model:</span> Qwen3.5-Plus via DashScope</p>
-            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>Storage:</span> Supabase (PostgreSQL + Object Storage)</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.aboutVersion")}</span> 1.0.0 (MVP)</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.aboutStack")}</span> Next.js 16 + Supabase + Qwen AI</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.aboutAI")}</span> Qwen3.5-Plus via DashScope</p>
+            <p><span className="font-medium" style={{ color: "var(--text-primary)" }}>{t("settings.aboutStorage")}</span> Supabase (PostgreSQL + Object Storage)</p>
             <p className="pt-3 mt-3" style={{ opacity: 0.8 }}>
-              CourseHub turns your syllabus into a structured learning system — outlines, study tasks, practice questions, and mastery tracking. Built for students who want to study smarter, not harder.
+              {t("settings.aboutDesc")}
             </p>
           </div>
         </div>
