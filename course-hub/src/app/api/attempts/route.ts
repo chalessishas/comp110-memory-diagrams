@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
   const { data: question } = await supabase
     .from("questions")
-    .select("answer, type, explanation")
+    .select("answer, type, explanation, knowledge_point_id")
     .eq("id", parsed.data.question_id)
     .single();
 
@@ -60,6 +60,28 @@ export async function POST(request: Request) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Keep mastery attempt counters current — required for exposed→practiced evaluation
+  // Only updates existing rows (lesson completion creates the initial "exposed" record)
+  if (question.knowledge_point_id) {
+    const { data: mastery } = await supabase
+      .from("element_mastery")
+      .select("id, times_tested, times_correct")
+      .eq("user_id", user.id)
+      .eq("concept_id", question.knowledge_point_id)
+      .maybeSingle();
+
+    if (mastery) {
+      await supabase
+        .from("element_mastery")
+        .update({
+          times_tested: mastery.times_tested + 1,
+          times_correct: mastery.times_correct + (isCorrect ? 1 : 0),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", mastery.id);
+    }
+  }
 
   // Reveal answer + explanation only after submission
   return NextResponse.json({
