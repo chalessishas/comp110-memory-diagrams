@@ -1,5 +1,46 @@
 # CourseHub Status
 
+## [2026-04-10 05:51] Phase 6 — Evidence-Based Mastery System (fully operational)
+
+Post-exam sprint. Full mastery pipeline now wired end-to-end. All Phase 5 exam features remain deployed.
+
+### Mastery Pipeline — Complete [2026-04-10]
+All data flows required by `mastery-v2.ts evaluateLevel()` are now written on every attempt:
+
+| Field | Written by | Since |
+|-------|-----------|-------|
+| `times_tested`, `times_correct` | attempts POST | turn 76 |
+| `times_non_mcq`, `has_non_mcq_correct` | attempts POST | turn 78 |
+| `has_external_practice` | attempts POST | d690156 |
+| `has_teaching_challenge_pass` | teach-back POST | turn 74 |
+| `fsrs_stability`, `fsrs_retrievability` | FSRS sync POST | turn 80 |
+| `evaluateLevel()` call + level write | attempts POST | d690156 |
+
+Approximations (deliberate, refinable later):
+- `recentAccuracy` = overall accuracy (no last-5 window query)
+- `courseConceptsAtLevel2OrAbove = 0` (crossConceptOk always passes)
+
+### Evidence-Based Learning Features — Shipped [2026-04-10]
+- **Adaptive difficulty** (85% rule, Wilson 2019): questions sorted by accuracy band
+- **Session Summary Modal**: stats + streak + mastery level-ups after review
+- **Teach-back panel** (protégé effect, g=0.48): explain in own words → AI grades → writes mastery gate
+- **Metacognitive confidence** (g=0.57): predict before answering → calibration panel on progress page
+- **Explanation gating** (test-potentiated encoding, Kornell 2009): wrong answers require reflection click
+- **Misconception lifecycle**: auto-log wrong answers, auto-resolve at 75% accuracy / 5 attempts
+- **FSRS server sync**: cross-device spaced repetition (migration 018)
+- **Per-question attempt history badge**: shows N attempts + % correct on each question
+
+### Pending Migrations (need `supabase db push`)
+- `015_mastery_summary_index.sql` — partial index on element_mastery(user_id, level_reached_at)
+- `016_attempts_confidence.sql` — confidence SMALLINT on attempts
+- `018_fsrs_server_sync.sql` — fsrs_cards + fsrs_review_logs tables
+
+### Known Issues
+- `recentAccuracy` in mastery eval uses overall accuracy not last-5 window (minor, refinable)
+- `has_transfer_correct` never written (no transfer question type exists yet)
+- SSE lesson streaming untested with live AI calls (build passes)
+- Vercel Git integration: manual deploy (`npx vercel deploy --prod`) still required
+
 ## [2026-04-10 04:42] Phase 5 — User-Requested Features (4 of 4 done ✓)
 
 User's 4-feature request during exam prep sprint. All complete: exam scope filter → term cards → daily report → cross-course org (due-count badges).
