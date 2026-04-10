@@ -406,6 +406,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.toReview": "to review",
     "review.notYetReviewed": "Not yet reviewed",
     "review.showAll": "Show all",
+    "review.upcoming7Days": "Upcoming 7 days",
+    "review.noUpcoming": "No cards due this week",
 
     // Study Tasks
     "studyTask.title": "Study Tasks",
@@ -1042,6 +1044,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.toReview": "需复习",
     "review.notYetReviewed": "未复习过",
     "review.showAll": "显示全部",
+    "review.upcoming7Days": "未来 7 天",
+    "review.noUpcoming": "本周无待复习卡片",
 
     // Study Tasks
     "studyTask.title": "学习任务",

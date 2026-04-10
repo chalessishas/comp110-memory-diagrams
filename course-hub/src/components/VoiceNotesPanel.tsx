@@ -354,7 +354,7 @@ export function VoiceNotesPanel({
         <div className="grid gap-3 mt-4 lg:grid-cols-[220px_minmax(0,1fr)]">
           <div>
             <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-              Knowledge Point
+              {t("outline.knowledgePoint")}
             </label>
             <select
               value={selectedKnowledgePointId}

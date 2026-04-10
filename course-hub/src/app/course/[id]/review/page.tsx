@@ -8,6 +8,7 @@ import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleave
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
 import { TeachBackPanel } from "@/components/TeachBackPanel";
+import { ReviewSparkline } from "@/components/ReviewSparkline";
 import type { Question } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -280,6 +281,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
             {t("review.allCaughtUpDesc")}
           </p>
+          <ReviewSparkline questionIds={questions.map((q) => q.id)} />
         </div>
       ) : currentQuestion ? (
         <div>
