@@ -119,6 +119,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "today.examPrep": "Exam Prep",
     "today.newContent": "New Content",
     "today.weakness": "Weakness",
+    "today.examReview": "Exam Review",
     "today.startButton": "Start",
     "today.estimatedTime": "min",
     "today.dailyGoal": "Daily Goal",
@@ -293,6 +294,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.typeNotes": "Notes",
     "library.typeOther": "Other",
     "library.typeFile": "File",
+    "library.deleteConfirm": "Delete this file?",
+
+    // Archive
+    "archive.archive": "Archive",
+    "archive.restore": "Restore",
+    "archive.deleteConfirm": "Delete this course and all its data?",
 
     // Settings
     "settings.title": "Settings",
@@ -317,6 +324,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "settings.clearStudy": "Clear Study Time",
     "settings.clearReview": "Clear Review Progress",
     "settings.language": "Language",
+    "settings.colorTheme": "Color Theme",
+    "settings.confirmClearStudy": "Clear all study time data? This cannot be undone.",
+    "settings.confirmClearReview": "Clear all spaced repetition progress? This cannot be undone.",
+    "settings.confirmDelete1": "Delete your account and ALL data? This cannot be undone.",
+    "settings.confirmDelete2": "Are you absolutely sure? All courses, questions, and progress will be permanently deleted.",
+    "settings.deletionFailed": "Deletion failed. Please try again.",
+    "settings.networkError": "Network error. Please try again.",
 
     // Login
     "login.welcome": "Welcome back.",
@@ -632,6 +646,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "today.examPrep": "考前准备",
     "today.newContent": "新内容",
     "today.weakness": "弱点强化",
+    "today.examReview": "考前排雷",
     "today.startButton": "开始",
     "today.estimatedTime": "分钟",
     "today.dailyGoal": "每日目标",
@@ -806,6 +821,12 @@ const translations: Record<Locale, Record<string, string>> = {
     "library.typeNotes": "笔记",
     "library.typeOther": "其他",
     "library.typeFile": "文件",
+    "library.deleteConfirm": "删除这个文件？",
+
+    // Archive
+    "archive.archive": "归档",
+    "archive.restore": "恢复",
+    "archive.deleteConfirm": "删除这门课程及所有数据？",
 
     // Settings
     "settings.title": "设置",
@@ -830,6 +851,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "settings.clearStudy": "清除学习时间",
     "settings.clearReview": "清除复习进度",
     "settings.language": "语言",
+    "settings.colorTheme": "色彩主题",
+    "settings.confirmClearStudy": "清除所有学习时间记录？此操作不可恢复。",
+    "settings.confirmClearReview": "清除所有间隔重复进度？此操作不可恢复。",
+    "settings.confirmDelete1": "删除账号及所有数据？此操作不可恢复。",
+    "settings.confirmDelete2": "确认删除？所有课程、题目和学习记录将被永久清除。",
+    "settings.deletionFailed": "删除失败，请稍后重试",
+    "settings.networkError": "网络错误，请稍后重试",
 
     // Login
     "login.welcome": "欢迎回来。",

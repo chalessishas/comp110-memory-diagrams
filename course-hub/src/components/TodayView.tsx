@@ -14,13 +14,13 @@ const typeIcons: Record<string, typeof AlertTriangle> = {
   weakness: Target,
 };
 
-const typeLabels: Record<string, { en: string; zh: string }> = {
-  urgent_study: { en: "Urgent", zh: "紧急" },
-  exam_review: { en: "Exam Review", zh: "考前排雷" },
-  fsrs_review: { en: "Review", zh: "复习" },
-  exam_prep: { en: "Exam Prep", zh: "考前准备" },
-  new_content: { en: "New Content", zh: "新内容" },
-  weakness: { en: "Weakness", zh: "弱点强化" },
+const typeLabelKeys: Record<string, string> = {
+  urgent_study: "today.urgent",
+  exam_review: "today.examReview",
+  fsrs_review: "today.review",
+  exam_prep: "today.examPrep",
+  new_content: "today.newContent",
+  weakness: "today.weakness",
 };
 
 interface TodayTask {
@@ -38,8 +38,7 @@ interface TodayTask {
 }
 
 export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: string }) {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
   // courseId available for future Start button routing
   void courseId;
@@ -57,12 +56,10 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
           className="text-xl font-semibold mb-2"
           style={{ color: "var(--text-primary)" }}
         >
-          {isZh ? "今天状态很好！" : "You're all caught up!"}
+          {t("today.allCaughtUp")}
         </h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          {isZh
-            ? "没有紧急任务。可以提前预习，或者巩固复习。"
-            : "No urgent tasks. Preview next week's content or review for fun."}
+          {t("today.allCaughtUpDesc")}
         </p>
       </div>
     );
@@ -72,7 +69,6 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
     <div className="space-y-3">
       {tasks.map((task) => {
         const Icon = typeIcons[task.type] ?? BookOpen;
-        const label = typeLabels[task.type] ?? { en: task.type, zh: task.type };
 
         return (
           <Link
@@ -103,7 +99,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
                   className="text-xs font-medium"
                   style={{ color: task.color }}
                 >
-                  {isZh ? label.zh : label.en}
+                  {t(typeLabelKeys[task.type] ?? task.type)}
                 </span>
                 {task.count > 1 && (
                   <span className="ui-badge">{task.count}</span>
@@ -116,7 +112,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
                 {task.title}
               </p>
               <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                {task.description} · {task.estimatedMinutes} {isZh ? "分钟" : "min"}
+                {task.description} · {task.estimatedMinutes} {t("today.estimatedTime")}
               </p>
             </div>
 
@@ -125,7 +121,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
               className="px-4 py-2 text-sm font-medium shrink-0 rounded-xl"
               style={{ backgroundColor: task.color, color: "white" }}
             >
-              {isZh ? "开始" : "Start"}
+              {t("today.startButton")}
             </span>
           </Link>
         );
@@ -139,7 +135,7 @@ export function TodayView({ tasks, courseId }: { tasks: TodayTask[]; courseId: s
           style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
         >
           <Upload size={12} strokeWidth={1.8} />
-          {isZh ? "上传资料" : "Upload material"}
+          {t("learn.uploadMaterial")}
         </Link>
         <div className="flex-1" />
         <StreakBadge />
