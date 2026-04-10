@@ -74,6 +74,7 @@ export async function POST(request: Request) {
       .select("id, current_level, times_tested, times_correct, times_non_mcq, times_non_mcq_correct, has_non_mcq_correct, has_external_practice, has_cross_concept_correct, has_transfer_correct, has_teaching_challenge_pass, fsrs_stability, fsrs_retrievability, first_contact_at, level_reached_at")
       .eq("user_id", user.id)
       .eq("concept_id", question.knowledge_point_id)
+      .eq("element_name", "_overall")
       .maybeSingle();
 
     if (mastery) {
