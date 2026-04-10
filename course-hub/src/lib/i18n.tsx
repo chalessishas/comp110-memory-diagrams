@@ -200,6 +200,44 @@ const translations: Record<Locale, Record<string, string>> = {
     "progress.mastery.weak": "Weak",
     "progress.mastery.untested": "Untested",
 
+    // Mastery Level Labels (v2 — 5-level system)
+    "mastery.level.unseen": "Not started",
+    "mastery.level.exposed": "Seen",
+    "mastery.level.practiced": "Practiced",
+    "mastery.level.proficient": "Proficient",
+    "mastery.level.mastered": "Mastered",
+
+    // Profile View
+    "profile.masteryOverview": "Mastery Overview",
+    "profile.mastered": "mastered",
+    "profile.persistentWeaknesses": "Persistent Weaknesses",
+    "profile.occurred": "Occurred",
+    "profile.times": "times",
+    "profile.relapsed": "Relapsed",
+    "profile.overcome": "Overcome",
+    "profile.selfAssessment": "Self-assessment Accuracy",
+    "profile.selfAssessmentDescPre": "Your self-assessment matched reality",
+    "profile.selfAssessmentDescPost": "% of the time.",
+    "profile.thisWeek": "This Week",
+    "profile.questionsAnswered": "Questions Answered",
+    "profile.conceptsProficient": "Concepts Proficient+",
+
+    // Regenerate Button
+    "regenerate.done": "Done!",
+    "regenerate.translate": "Translate course",
+    "regenerate.titleEn": "Regenerate all content in English",
+    "regenerate.titleZh": "用中文重新生成所有内容",
+
+    // Session Summary Modal
+    "session.complete": "Session Complete",
+    "session.questions": "questions",
+    "session.accuracy": "accuracy",
+    "session.time": "time",
+    "session.goalMet": "Goal met!",
+    "session.leveledUpLabel": "knowledge point(s) leveled up",
+    "session.missed": "Missed",
+    "session.reviewNow": "Review now →",
+
     // Library
     "library.title": "Course Library",
     "library.uploadFile": "Upload File",
@@ -268,6 +306,16 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.goodDesc": "Remembered with effort",
     "review.easy": "Easy",
     "review.easyDesc": "Knew instantly",
+    "review.turnOff": "Turn off",
+    "review.setExamDate": "Set exam date for intensive review mode",
+    "review.clearScope": "Clear scope",
+    "review.setExamScope": "Set exam scope to focus review on tested material",
+    "review.pasteScopeLabel": "Paste exam scope (e.g., Chapters 8-10, convergence tests, Taylor series)",
+    "review.pasteScopePlaceholder": "Type or paste exam scope...",
+    "review.matchKps": "Match knowledge points",
+    "review.toReview": "to review",
+    "review.notYetReviewed": "Not yet reviewed",
+    "review.showAll": "Show all",
 
     // Study Tasks
     "studyTask.title": "Study Tasks",
@@ -344,6 +392,20 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.generateBtn": "Generate Practice Questions",
     "practice.generating": "Generating questions...",
     "practice.reviewHint": "After you answer, stay on the card to review the explanation, then move with the arrows when you're ready.",
+    "practice.showAll": "Show all",
+    "practice.examPrep": "Exam Prep",
+    "practice.examPrepHide": "Hide Exam Prep",
+    "practice.examPrepKicker": "EXAM PREP",
+    "practice.examPrepTitle": "Paste your exam scope",
+    "practice.examPrepDesc": "Paste the email or document that describes what the exam covers. AI will generate targeted practice questions.",
+    "practice.examPrepPlaceholder": "Paste exam topics here...\n\nExample: The midterm covers 5.3 Error bounds, 5.5 Alternating series, 6.1 Power series...",
+    "practice.examPrepGenerate": "Generate Exam Questions",
+    "practice.examPrepGenerating": "Generating exam questions...",
+    "practice.examPrepFailed": "Generation failed. Please try again.",
+    "practice.examPrepTimeout": "Network error or timeout. Please retry.",
+    "practice.accuracy": "accuracy",
+    "practice.target85": "target 85%",
+    "practice.endSession": "End session",
 
     // Study Tracker Panel
     "studyTracker.title": "Time Track",
@@ -608,6 +670,44 @@ const translations: Record<Locale, Record<string, string>> = {
     "progress.mastery.weak": "薄弱",
     "progress.mastery.untested": "未测试",
 
+    // Mastery Level Labels (v2 — 5-level system)
+    "mastery.level.unseen": "未接触",
+    "mastery.level.exposed": "初识",
+    "mastery.level.practiced": "练习中",
+    "mastery.level.proficient": "熟练",
+    "mastery.level.mastered": "已掌握",
+
+    // Profile View
+    "profile.masteryOverview": "掌握度概览",
+    "profile.mastered": "已掌握",
+    "profile.persistentWeaknesses": "持续性弱点",
+    "profile.occurred": "出现",
+    "profile.times": "次",
+    "profile.relapsed": "已复发",
+    "profile.overcome": "已克服",
+    "profile.selfAssessment": "元认知准确度",
+    "profile.selfAssessmentDescPre": "你说"不确定"的题中，",
+    "profile.selfAssessmentDescPost": "% 确实答错了。说明你对自己的判断相当准确。",
+    "profile.thisWeek": "本周学习",
+    "profile.questionsAnswered": "答题次数",
+    "profile.conceptsProficient": "掌握的知识点",
+
+    // Regenerate Button
+    "regenerate.done": "已完成",
+    "regenerate.translate": "汉化课程",
+    "regenerate.titleEn": "Regenerate all content in English",
+    "regenerate.titleZh": "用中文重新生成所有内容",
+
+    // Session Summary Modal
+    "session.complete": "复习完成",
+    "session.questions": "题",
+    "session.accuracy": "正确率",
+    "session.time": "时长",
+    "session.goalMet": "今日目标达成",
+    "session.leveledUpLabel": "个知识点提升",
+    "session.missed": "需要复习",
+    "session.reviewNow": "去复习 →",
+
     // Library
     "library.title": "课程资料库",
     "library.uploadFile": "上传文件",
@@ -676,6 +776,16 @@ const translations: Record<Locale, Record<string, string>> = {
     "review.goodDesc": "费力想起来了",
     "review.easy": "很简单",
     "review.easyDesc": "瞬间就知道了",
+    "review.turnOff": "关闭",
+    "review.setExamDate": "设置考试日期，启用高强度复习",
+    "review.clearScope": "清除范围",
+    "review.setExamScope": "设置考试范围，只复习考试内容",
+    "review.pasteScopeLabel": "粘贴考试范围（如：Chapters 8-10, 级数判别法, Taylor 展开）",
+    "review.pasteScopePlaceholder": "输入或粘贴考试范围...",
+    "review.matchKps": "匹配知识点",
+    "review.toReview": "需复习",
+    "review.notYetReviewed": "未复习过",
+    "review.showAll": "显示全部",
 
     // Study Tasks
     "studyTask.title": "学习任务",
@@ -752,6 +862,20 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.generateBtn": "生成练习题",
     "practice.generating": "正在生成题目...",
     "practice.reviewHint": "答题后继续浏览卡片查看解析，准备好了再用箭头切换题目。",
+    "practice.showAll": "显示全部",
+    "practice.examPrep": "考前冲刺",
+    "practice.examPrepHide": "收起",
+    "practice.examPrepKicker": "考前冲刺",
+    "practice.examPrepTitle": "粘贴考试范围",
+    "practice.examPrepDesc": "粘贴老师发的考试范围邮件或文档，AI 会根据考点生成针对性练习题。",
+    "practice.examPrepPlaceholder": "在此粘贴考试范围...\n\n例如：期中考试范围包括 5.3 误差界、5.5 交替级数、6.1 幂级数...",
+    "practice.examPrepGenerate": "生成考试题目",
+    "practice.examPrepGenerating": "正在生成考试题目...",
+    "practice.examPrepFailed": "生成失败，请稍后重试",
+    "practice.examPrepTimeout": "网络错误或超时，请重试",
+    "practice.accuracy": "正确率",
+    "practice.target85": "目标 85%",
+    "practice.endSession": "结束本次练习",
 
     // Study Tracker Panel
     "studyTracker.title": "学习时长",

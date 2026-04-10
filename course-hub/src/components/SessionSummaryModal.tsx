@@ -29,16 +29,16 @@ interface Props {
   reviewedItems?: ReviewedItem[]; // per-item breakdown (optional)
 }
 
-const LEVEL_LABELS: Record<string, { en: string; zh: string; color: string }> = {
-  exposed:   { en: "exposed",   zh: "初识",   color: "var(--text-secondary)" },
-  practiced: { en: "practiced", zh: "练习中", color: "var(--warning)" },
-  proficient:{ en: "proficient",zh: "熟练",   color: "var(--accent)" },
-  mastered:  { en: "mastered",  zh: "已掌握", color: "var(--success)" },
-};
 
 export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, sessionCorrect, sessionMinutes, sessionStart, reviewedItems }: Props) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
+  const levelLabels: Record<string, { label: string; color: string }> = {
+    exposed:    { label: t("mastery.level.exposed"),    color: "var(--text-secondary)" },
+    practiced:  { label: t("mastery.level.practiced"),  color: "var(--warning)" },
+    proficient: { label: t("mastery.level.proficient"), color: "var(--accent)" },
+    mastered:   { label: t("mastery.level.mastered"),   color: "var(--success)" },
+  };
   const [tomorrowDue, setTomorrowDue] = useState<number>(0);
   const [levelUps, setLevelUps] = useState<MasteryLevelUp[]>([]);
 
@@ -66,8 +66,6 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
   const accuracy = sessionAnswered > 0 ? Math.round((sessionCorrect / sessionAnswered) * 100) : 0;
   const goalMet = streak.todayQuestions >= Math.max(5, streak.dailyGoal) || streak.todayMinutes >= streak.dailyGoal;
 
-  const DAY_LABELS_ZH = ["一", "二", "三", "四", "五", "六", "日"];
-  const DAY_LABELS_EN = ["M", "T", "W", "T", "F", "S", "S"];
 
   return (
     <div
@@ -95,16 +93,16 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             <Check size={24} color="white" />
           </div>
           <h2 className="text-lg font-semibold">
-            {isZh ? "复习完成" : "Session Complete"}
+            {t("session.complete")}
           </h2>
         </div>
 
         {/* Session stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
           {[
-            { value: sessionAnswered, label: isZh ? "题" : "questions" },
-            { value: `${accuracy}%`, label: isZh ? "正确率" : "accuracy" },
-            { value: sessionMinutes > 0 ? `${sessionMinutes}m` : "—", label: isZh ? "时长" : "time" },
+            { value: sessionAnswered, label: t("session.questions") },
+            { value: `${accuracy}%`, label: t("session.accuracy") },
+            { value: sessionMinutes > 0 ? `${sessionMinutes}m` : "—", label: t("session.time") },
           ].map((stat) => (
             <div key={stat.label} className="text-center p-3 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
               <p className="text-xl font-bold">{stat.value}</p>
@@ -123,7 +121,7 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             {goalMet && (
               <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{ backgroundColor: "var(--success)", color: "white" }}>
-                {isZh ? "今日目标达成" : "Goal met!"}
+                {t("session.goalMet")}
               </span>
             )}
           </div>
@@ -137,10 +135,10 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
                     color: day.completed ? "white" : "var(--text-muted)",
                   }}
                 >
-                  {day.completed ? "✓" : (isZh ? DAY_LABELS_ZH[i] : DAY_LABELS_EN[i])}
+                  {day.completed ? "✓" : new Date(day.day + "T12:00:00").toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "narrow" })}
                 </div>
                 <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  {isZh ? DAY_LABELS_ZH[i] : DAY_LABELS_EN[i]}
+                  {new Date(day.day + "T12:00:00").toLocaleDateString(isZh ? "zh-CN" : "en-US", { weekday: "narrow" })}
                 </span>
               </div>
             ))}
@@ -153,17 +151,17 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={16} style={{ color: "var(--accent)" }} />
               <span className="text-sm font-medium">
-                {isZh ? `${levelUps.length} 个知识点提升` : `${levelUps.length} knowledge point${levelUps.length > 1 ? "s" : ""} leveled up`}
+                {levelUps.length} {t("session.leveledUpLabel")}
               </span>
             </div>
             <div className="space-y-1.5">
               {levelUps.map((kp, i) => {
-                const levelInfo = LEVEL_LABELS[kp.current_level] ?? { en: kp.current_level, zh: kp.current_level, color: "var(--text-secondary)" };
+                const levelInfo = levelLabels[kp.current_level] ?? { label: kp.current_level, color: "var(--text-secondary)" };
                 return (
                   <div key={i} className="flex items-center justify-between">
                     <span className="text-sm truncate mr-2" style={{ maxWidth: "70%" }}>{kp.element_name}</span>
                     <span className="text-xs font-medium shrink-0" style={{ color: levelInfo.color }}>
-                      → {isZh ? levelInfo.zh : levelInfo.en}
+                      → {levelInfo.label}
                     </span>
                   </div>
                 );
@@ -180,7 +178,7 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
             <div className="mb-5 p-4 rounded-xl" style={{ backgroundColor: "var(--bg-muted)" }}>
               <div className="flex items-center justify-between mb-2">
                 <p className="text-xs font-medium" style={{ color: "var(--danger)" }}>
-                  {isZh ? `需要复习 (${wrong.length})` : `Missed (${wrong.length})`}
+                  {t("session.missed")} ({wrong.length})
                 </p>
                 <a
                   href={`/course/${courseId}/review`}
@@ -188,7 +186,7 @@ export function SessionSummaryModal({ open, onClose, courseId, sessionAnswered, 
                   className="text-xs font-medium cursor-pointer hover:opacity-70 transition-opacity"
                   style={{ color: "var(--accent)" }}
                 >
-                  {isZh ? "去复习 →" : "Review now →"}
+                  {t("session.reviewNow")}
                 </a>
               </div>
               <div className="space-y-1">

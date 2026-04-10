@@ -15,8 +15,14 @@ interface ProfileViewProps {
 }
 
 export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, metacognitionData, weeklyAttempts }: ProfileViewProps) {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
+  const v2Labels: Record<MasteryLevelV2, string> = {
+    unseen: t("mastery.level.unseen"),
+    exposed: t("mastery.level.exposed"),
+    practiced: t("mastery.level.practiced"),
+    proficient: t("mastery.level.proficient"),
+    mastered: t("mastery.level.mastered"),
+  };
 
   const counts: Record<MasteryLevelV2, number> = {
     unseen: totalKps,
@@ -49,14 +55,14 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       {/* Mastery Overview */}
       <div className="ui-panel p-6">
         <h2 className="text-lg font-semibold mb-5 tracking-wide">
-          {isZh ? "掌握度概览" : "Mastery Overview"}
+          {t("profile.masteryOverview")}
         </h2>
 
         {/* Progress bar */}
         <div className="mb-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm" style={{ color: "var(--text-secondary)" }}>
-              {isZh ? `${Math.round(overallProgress)}% 已掌握` : `${Math.round(overallProgress)}% mastered`}
+              {Math.round(overallProgress)}% {t("profile.mastered")}
             </span>
           </div>
           <div className="h-[6px] rounded-full overflow-hidden flex" style={{ backgroundColor: "var(--bg-muted)" }}>
@@ -80,7 +86,7 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
             <div key={level} className="text-center p-3 rounded-[12px]" style={{ backgroundColor: "var(--bg-muted)" }}>
               <p className="text-lg font-semibold" style={{ color: levelConfig[level].color }}>{counts[level]}</p>
               <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                {isZh ? levelConfig[level].labelZh : levelConfig[level].label}
+                {v2Labels[level]}
               </p>
             </div>
           ))}
@@ -92,7 +98,7 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
             <AlertTriangle size={18} style={{ color: "var(--warning)" }} />
-            {isZh ? "持续性弱点" : "Persistent Weaknesses"}
+            {t("profile.persistentWeaknesses")}
           </h2>
           <div className="space-y-3">
             {active.map(m => (
@@ -104,8 +110,8 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
                 <div>
                   <p className="text-sm font-medium">{m.misconception_description}</p>
                   <p className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
-                    {isZh ? `出现 ${m.occurrence_count} 次` : `Occurred ${m.occurrence_count} times`}
-                    {m.relapsed && (isZh ? " · 已复发" : " · Relapsed")}
+                    {t("profile.occurred")} {m.occurrence_count} {t("profile.times")}
+                    {m.relapsed && ` · ${t("profile.relapsed")}`}
                   </p>
                 </div>
               </div>
@@ -119,7 +125,7 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
             <Check size={18} style={{ color: "var(--success)" }} />
-            {isZh ? "已克服" : "Overcome"}
+            {t("profile.overcome")}
           </h2>
           <div className="space-y-2">
             {resolved.map(m => (
@@ -137,13 +143,11 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
         <div className="ui-panel p-6">
           <h2 className="text-lg font-semibold mb-3 flex items-center gap-2 tracking-wide">
             <Brain size={18} style={{ color: "var(--accent)" }} />
-            {isZh ? "元认知准确度" : "Self-assessment Accuracy"}
+            {t("profile.selfAssessment")}
           </h2>
           <p className="text-3xl font-semibold">{metacognitionAccuracy}%</p>
           <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-            {isZh
-              ? `你说"不确定"的题中，${metacognitionAccuracy}% 确实答错了。说明你对自己的判断相当准确。`
-              : `Your self-assessment matched reality ${metacognitionAccuracy}% of the time.`}
+            {t("profile.selfAssessmentDescPre")}{metacognitionAccuracy}{t("profile.selfAssessmentDescPost")}
           </p>
         </div>
       )}
@@ -152,18 +156,18 @@ export function ProfileView({ courseTitle, totalKps, mastery, misconceptions, me
       <div className="ui-panel p-6">
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 tracking-wide">
           <Activity size={18} style={{ color: "var(--accent)" }} />
-          {isZh ? "本周学习" : "This Week"}
+          {t("profile.thisWeek")}
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <div className="rounded-[16px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {isZh ? "答题次数" : "Questions Answered"}
+              {t("profile.questionsAnswered")}
             </p>
             <p className="text-2xl font-semibold mt-1">{weeklyAttempts}</p>
           </div>
           <div className="rounded-[16px] p-4" style={{ backgroundColor: "var(--bg-muted)" }}>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              {isZh ? "掌握的知识点" : "Concepts Proficient+"}
+              {t("profile.conceptsProficient")}
             </p>
             <p className="text-2xl font-semibold mt-1">{counts.proficient + counts.mastered}</p>
           </div>

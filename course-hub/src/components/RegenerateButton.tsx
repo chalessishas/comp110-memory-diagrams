@@ -5,7 +5,7 @@ import { Languages, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export function RegenerateButton({ courseId }: { courseId: string }) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
 
@@ -28,16 +28,14 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
       onClick={handleRegenerate}
       disabled={loading || done}
       className="ui-button-secondary !text-xs disabled:opacity-50"
-      title={locale === "zh" ? "用中文重新生成所有内容" : "Regenerate all content in English"}
+      title={locale === "zh" ? t("regenerate.titleZh") : t("regenerate.titleEn")}
     >
       {loading ? (
         <Loader2 size={13} className="animate-spin" />
       ) : (
         <Languages size={13} />
       )}
-      {done
-        ? (locale === "zh" ? "已完成" : "Done!")
-        : (locale === "zh" ? "汉化课程" : "Translate course")}
+      {done ? t("regenerate.done") : t("regenerate.translate")}
     </button>
   );
 }
