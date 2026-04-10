@@ -86,7 +86,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
       <div className="space-y-8">
         <Link href="/dashboard" className="ui-button-ghost w-fit !px-0">
           <ArrowLeft size={14} />
-          Back to Dashboard
+          {t("misc.backToDashboard")}
         </Link>
         <CourseTabs courseId={id} />
         <div className="ui-panel p-10 md:p-14 flex flex-col items-center gap-4 text-center">
@@ -285,9 +285,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             className="ui-button-primary disabled:opacity-50"
           >
             {generatingAI ? (
-              <><Loader2 size={16} className="animate-spin" /> Generating questions...</>
+              <><Loader2 size={16} className="animate-spin" /> {t("practice.generating")}</>
             ) : (
-              <><Sparkles size={16} /> Generate Practice Questions</>
+              <><Sparkles size={16} /> {t("practice.generateBtn")}</>
             )}
           </button>
         </div>
@@ -296,8 +296,6 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           <StudyTrackerPanel
             courseId={id}
             activeMode={questionMode}
-            title="Question Time Track"
-            description="We estimate whether you are actively solving, reviewing the explanation, or just sitting on the question without interaction."
           />
 
           <div className="ui-panel p-5 md:p-6">
@@ -305,7 +303,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               <div>
                 <div className="flex items-center gap-3 flex-wrap">
                   <p className="text-sm font-medium">
-                    Question {currentIndex + 1} of {filteredQuestions.length}
+                    {isZh
+                      ? `${t("practice.questionOf")} ${currentIndex + 1} ${t("practice.of")} ${filteredQuestions.length}`
+                      : `${t("practice.questionOf")} ${currentIndex + 1} ${t("practice.of")} ${filteredQuestions.length}`}
                   </p>
                   {sessionAnswered >= 3 && (() => {
                     const acc = sessionCorrect / sessionAnswered;
@@ -326,7 +326,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   <div className="ui-progress-bar transition-all" style={{ width: `${progress}%` }} />
                 </div>
                 <p className="text-xs mt-3" style={{ color: "var(--text-secondary)" }}>
-                  After you answer, stay on the card to review the explanation, then move with the arrows when you are ready.
+                  {t("practice.reviewHint")}
                 </p>
               </div>
               <div className="flex gap-2">

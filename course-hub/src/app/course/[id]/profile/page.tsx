@@ -9,41 +9,27 @@ export default async function ProfilePage({ params }: { params: Promise<{ id: st
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: course } = await supabase.from("courses").select("title").eq("id", id).single();
-  if (!course) redirect("/dashboard");
+  // Parallel group 1: courses + outline_nodes + recentAttempts all independent
+  const weekAgo = new Date();
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const [{ data: course }, { data: kps }, { data: recentAttempts }] = await Promise.all([
+    supabase.from("courses").select("title").eq("id", id).single(),
+    supabase.from("outline_nodes").select("id, title").eq("course_id", id).eq("type", "knowledge_point"),
+    supabase.from("attempts").select("id").eq("user_id", user.id).gte("answered_at", weekAgo.toISOString()),
+  ]);
 
-  // Get knowledge points
-  const { data: kps } = await supabase
-    .from("outline_nodes")
-    .select("id, title")
-    .eq("course_id", id)
-    .eq("type", "knowledge_point");
+  if (!course) redirect("/dashboard");
 
   const kpIds = (kps ?? []).map(k => k.id);
 
-  // Get mastery data — filter to _overall rows only; per-element rows inflate counts
-  const { data: mastery } = kpIds.length > 0
-    ? await supabase.from("element_mastery").select("*").eq("user_id", user.id).eq("element_name", "_overall").in("concept_id", kpIds)
-    : { data: [] };
-
-  // Get misconceptions
-  const { data: allMisconceptions } = kpIds.length > 0
-    ? await supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).order("occurrence_count", { ascending: false })
-    : { data: [] };
-
-  // Get challenge logs for metacognition
-  const { data: challenges } = kpIds.length > 0
-    ? await supabase.from("challenge_logs").select("student_self_rating, ai_confidence_rating, meta_cognition_match").eq("user_id", user.id).in("concept_id", kpIds)
-    : { data: [] };
-
-  // Get study time (from attempts count this week)
-  const weekAgo = new Date();
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const { data: recentAttempts } = await supabase
-    .from("attempts")
-    .select("id")
-    .eq("user_id", user.id)
-    .gte("answered_at", weekAgo.toISOString());
+  // Parallel group 2: element_mastery + misconceptions + challenge_logs all need kpIds
+  const [{ data: mastery }, { data: allMisconceptions }, { data: challenges }] = kpIds.length > 0
+    ? await Promise.all([
+        supabase.from("element_mastery").select("*").eq("user_id", user.id).eq("element_name", "_overall").in("concept_id", kpIds),
+        supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).order("occurrence_count", { ascending: false }),
+        supabase.from("challenge_logs").select("student_self_rating, ai_confidence_rating, meta_cognition_match").eq("user_id", user.id).in("concept_id", kpIds),
+      ])
+    : [{ data: null }, { data: null }, { data: null }];
 
   const kpMap = new Map((kps ?? []).map(k => [k.id, k.title]));
 

@@ -303,6 +303,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExamHide": "Hide Upload",
     "practice.turnMaterial": "Turn material into reps.",
     "practice.workThrough": "Work through generated questions or upload an exam to build a fresh drill set.",
+    "practice.generateBtn": "Generate Practice Questions",
+    "practice.generating": "Generating questions...",
+    "practice.reviewHint": "After you answer, stay on the card to review the explanation, then move with the arrows when you're ready.",
 
     // Study Tracker Panel
     "studyTracker.title": "Time Track",
@@ -633,6 +636,9 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExamHide": "隐藏上传",
     "practice.turnMaterial": "把课程内容变成练习。",
     "practice.workThrough": "做生成的题目，或上传试卷来创建专项练习集。",
+    "practice.generateBtn": "生成练习题",
+    "practice.generating": "正在生成题目...",
+    "practice.reviewHint": "答题后继续浏览卡片查看解析，准备好了再用箭头切换题目。",
 
     // Study Tracker Panel
     "studyTracker.title": "学习时长",
