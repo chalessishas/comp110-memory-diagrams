@@ -112,14 +112,14 @@ export default function SettingsPage() {
   }
 
   function handleClearStudyTracker() {
-    if (!confirm("Clear all study time data? This cannot be undone.")) return;
+    if (!confirm(isZh ? "清除所有学习时间记录？此操作不可恢复。" : "Clear all study time data? This cannot be undone.")) return;
     setClearing("tracker");
     localStorage.removeItem("coursehub.study-tracker");
     setTimeout(() => setClearing(null), 1000);
   }
 
   function handleClearReviewCards() {
-    if (!confirm("Clear all spaced repetition progress? This cannot be undone.")) return;
+    if (!confirm(isZh ? "清除所有间隔重复进度？此操作不可恢复。" : "Clear all spaced repetition progress? This cannot be undone.")) return;
     setClearing("review");
     localStorage.removeItem("coursehub.review-cards");
     setTimeout(() => setClearing(null), 1000);

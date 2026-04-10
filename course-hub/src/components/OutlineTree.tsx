@@ -48,7 +48,8 @@ function EditableNode({
   onDelete: (id: string) => void;
   onAdd: (parentId: string) => void;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [expanded, setExpanded] = useState(true);
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(node.name);
@@ -163,8 +164,8 @@ function EditableNode({
             <button
               onClick={() => {
                 const msg = hasChildren
-                  ? `Delete "${node.name}" and its ${node.children.length} children?`
-                  : `Delete "${node.name}"?`;
+                  ? (isZh ? `删除"${node.name}"及其 ${node.children.length} 个子项？` : `Delete "${node.name}" and its ${node.children.length} children?`)
+                  : (isZh ? `删除"${node.name}"？` : `Delete "${node.name}"?`);
                 if (confirm(msg)) onDelete(node.id);
               }}
               className="p-1.5 rounded-lg cursor-pointer transition-colors"
