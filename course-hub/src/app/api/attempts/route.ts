@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   if (question.knowledge_point_id) {
     const { data: mastery } = await supabase
       .from("element_mastery")
-      .select("id, times_tested, times_correct")
+      .select("id, times_tested, times_correct, times_non_mcq, times_non_mcq_correct, has_non_mcq_correct")
       .eq("user_id", user.id)
       .eq("concept_id", question.knowledge_point_id)
       .maybeSingle();
@@ -77,13 +77,25 @@ export async function POST(request: Request) {
       postUpdateTested = mastery.times_tested + 1;
       const postUpdateCorrect = mastery.times_correct + (isCorrect ? 1 : 0);
       postUpdateAccuracy = postUpdateCorrect / postUpdateTested;
+
+      // fill_blank and short_answer require free recall — count as non-MCQ
+      const isNonMcq = question.type === "fill_blank" || question.type === "short_answer";
+      const updates: Record<string, unknown> = {
+        times_tested: postUpdateTested,
+        times_correct: postUpdateCorrect,
+        updated_at: new Date().toISOString(),
+      };
+      if (isNonMcq) {
+        updates.times_non_mcq = (mastery.times_non_mcq ?? 0) + 1;
+        if (isCorrect) {
+          updates.times_non_mcq_correct = (mastery.times_non_mcq_correct ?? 0) + 1;
+          updates.has_non_mcq_correct = true; // gates practiced→proficient in mastery-v2
+        }
+      }
+
       await supabase
         .from("element_mastery")
-        .update({
-          times_tested: postUpdateTested,
-          times_correct: postUpdateCorrect,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updates)
         .eq("id", mastery.id);
     }
   }
