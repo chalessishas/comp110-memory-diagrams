@@ -34,6 +34,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [showSummary, setShowSummary] = useState(false);
   const [sessionStart] = useState(() => Date.now());
   const [sessionItems, setSessionItems] = useState<{ id: string; stem: string; correct: boolean }[]>([]);
+  const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const scope = getExamScope(id);
@@ -42,9 +43,19 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     // Pull server FSRS state so adaptive sort uses current cross-device history
     pullCardsFromServer(id);
 
-    fetch(`/api/questions?courseId=${id}`)
-      .then((r) => r.ok ? r.json() : [])
-      .then((data) => { setQuestions(Array.isArray(data) ? data : []); setLoading(false); });
+    Promise.all([
+      fetch(`/api/questions?courseId=${id}`).then((r) => r.ok ? r.json() : []),
+      fetch("/api/bookmarks").then((r) => r.ok ? r.json() : []),
+    ]).then(([qs, bks]) => {
+      setQuestions(Array.isArray(qs) ? qs : []);
+      const ids = new Set<string>(
+        (Array.isArray(bks) ? bks : [])
+          .map((b: { questions?: { id?: string } }) => b.questions?.id)
+          .filter(Boolean) as string[]
+      );
+      setBookmarkedIds(ids);
+      setLoading(false);
+    });
   }, [id]);
 
   // Filter by exam scope if active
@@ -369,6 +380,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               key={filteredQuestions[currentIndex].id}
               question={filteredQuestions[currentIndex]}
               onAnswer={handleAnswer}
+              bookmarked={bookmarkedIds.has(filteredQuestions[currentIndex].id)}
             />
           </div>
         </div>
