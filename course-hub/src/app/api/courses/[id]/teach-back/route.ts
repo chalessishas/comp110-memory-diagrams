@@ -24,7 +24,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Fetch question server-side — answer never travels to client
   const { data: question } = await supabase
     .from("questions")
-    .select("stem, answer")
+    .select("stem, answer, knowledge_point_id")
     .eq("id", question_id)
     .single();
 
@@ -53,6 +53,29 @@ QUALITY: MISSING`,
   const qualityMatch = clean.match(/QUALITY:\s*(STRONG|PARTIAL|MISSING)/i);
   const quality = (qualityMatch?.[1]?.toLowerCase() ?? "partial") as "strong" | "partial" | "missing";
   const feedback = clean.replace(/QUALITY:\s*(STRONG|PARTIAL|MISSING)\s*$/i, "").trim();
+
+  // Persist result — required for mastery pathway (proficient → mastered needs has_teaching_challenge_pass)
+  const kpId = question.knowledge_point_id;
+  if (kpId) {
+    // Log the challenge session
+    await supabase.from("challenge_logs").insert({
+      user_id: user.id,
+      concept_id: kpId,
+      session_type: "teaching_challenge",
+      turns: [{ role: "user", content: user_explanation }],
+      ai_confidence_rating: quality,
+      final_confidence: quality === "strong" ? "solid" : quality === "partial" ? "partial" : "none",
+    });
+
+    // Unlock mastery gate on a strong explanation
+    if (quality === "strong") {
+      await supabase
+        .from("element_mastery")
+        .update({ has_teaching_challenge_pass: true, updated_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("concept_id", kpId);
+    }
+  }
 
   return NextResponse.json({ feedback, quality });
 }
