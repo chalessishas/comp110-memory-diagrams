@@ -16,6 +16,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     .from("study_tasks")
     .update({ status })
     .eq("id", id)
+    .eq("user_id", user.id)
     .select()
     .single();
 
