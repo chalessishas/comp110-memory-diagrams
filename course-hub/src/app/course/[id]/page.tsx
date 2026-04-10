@@ -9,45 +9,32 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: course } = await supabase.from("courses").select("*").eq("id", id).single();
+  // Parallel group 1: courses + outline_nodes + exam_dates + lessons all need only course_id
+  const today = new Date().toISOString().split("T")[0];
+  const [{ data: course }, { data: kps }, { data: exams }, { data: lessons }] = await Promise.all([
+    supabase.from("courses").select("*").eq("id", id).single(),
+    supabase.from("outline_nodes").select("id, title, type").eq("course_id", id).eq("type", "knowledge_point"),
+    supabase.from("exam_dates").select("*").eq("course_id", id).gte("exam_date", today).order("exam_date"),
+    supabase.from("lessons").select("id, knowledge_point_id").eq("course_id", id),
+  ]);
+
   if (!course) redirect("/dashboard");
 
-  // Get all knowledge points
-  const { data: kps } = await supabase
-    .from("outline_nodes")
-    .select("id, title, type")
-    .eq("course_id", id)
-    .eq("type", "knowledge_point");
-
-  // Get mastery data (guard empty array)
   const kpIds = (kps ?? []).map(k => k.id);
-  const { data: mastery } = kpIds.length > 0
-    ? await supabase.from("element_mastery").select("concept_id, current_level, fsrs_retrievability").eq("user_id", user.id).in("concept_id", kpIds)
-    : { data: [] };
-
-  // Get exam dates (future only)
-  const { data: exams } = await supabase
-    .from("exam_dates")
-    .select("*")
-    .eq("course_id", id)
-    .gte("exam_date", new Date().toISOString().split("T")[0])
-    .order("exam_date");
-
-  // Get active misconceptions (guard empty array)
-  const { data: misconceptions } = kpIds.length > 0
-    ? await supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).eq("resolved", false)
-    : { data: [] };
-
-  // Get lessons to check what's been learned
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("id, knowledge_point_id")
-    .eq("course_id", id);
-
   const lessonIds = (lessons ?? []).map(l => l.id);
-  const { data: progress } = lessonIds.length > 0
-    ? await supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id).in("lesson_id", lessonIds)
-    : { data: [] };
+
+  // Parallel group 2: element_mastery + misconceptions need kpIds; lesson_progress needs lessonIds
+  const [{ data: mastery }, { data: misconceptions }, { data: progress }] = await Promise.all([
+    kpIds.length > 0
+      ? supabase.from("element_mastery").select("concept_id, current_level, fsrs_retrievability").eq("user_id", user.id).in("concept_id", kpIds)
+      : Promise.resolve({ data: [] as { concept_id: string; current_level: string; fsrs_retrievability: number }[] }),
+    kpIds.length > 0
+      ? supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).eq("resolved", false)
+      : Promise.resolve({ data: [] as { id: string; concept_id: string; misconception_description: string; occurrence_count: number }[] }),
+    lessonIds.length > 0
+      ? supabase.from("lesson_progress").select("lesson_id, completed").eq("user_id", user.id).in("lesson_id", lessonIds)
+      : Promise.resolve({ data: [] as { lesson_id: string; completed: boolean }[] }),
+  ]);
 
   const tasks = buildTodayTasks({
     kps: kps ?? [],
