@@ -84,6 +84,8 @@ export async function POST(request: Request) {
       // fill_blank and short_answer require free recall — count as non-MCQ
       const isNonMcq = question.type === "fill_blank" || question.type === "short_answer";
       const newHasNonMcqCorrect = mastery.has_non_mcq_correct || (isNonMcq && isCorrect);
+      // short_answer correct = transfer evidence (free construction > MCQ recognition, Roediger & Butler 2011)
+      const newHasTransferCorrect = mastery.has_transfer_correct || (question.type === "short_answer" && isCorrect);
       const updates: Record<string, unknown> = {
         times_tested: postUpdateTested,
         times_correct: postUpdateCorrect,
@@ -96,6 +98,9 @@ export async function POST(request: Request) {
           updates.times_non_mcq_correct = (mastery.times_non_mcq_correct ?? 0) + 1;
           updates.has_non_mcq_correct = true;
         }
+      }
+      if (newHasTransferCorrect && !mastery.has_transfer_correct) {
+        updates.has_transfer_correct = true;
       }
 
       // Evaluate mastery level transition with all available data.
@@ -111,7 +116,7 @@ export async function POST(request: Request) {
         hasExternalPractice: true,
         hasNonMcqCorrect: newHasNonMcqCorrect,
         hasCrossConceptCorrect: mastery.has_cross_concept_correct ?? false,
-        hasTransferCorrect: mastery.has_transfer_correct ?? false,
+        hasTransferCorrect: newHasTransferCorrect,
         hasTeachingChallengePass: mastery.has_teaching_challenge_pass ?? false,
         fsrsStability: mastery.fsrs_stability ?? 0,
         fsrsRetrievability: mastery.fsrs_retrievability ?? 1,
