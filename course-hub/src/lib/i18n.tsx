@@ -77,6 +77,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "newCourse.savingCourse": "Creating course record...",
     "newCourse.savingOutline": "Saving outline tree...",
     "newCourse.redirecting": "Redirecting to your course...",
+    "newCourse.answerPlaceholder": "Type your answer...",
 
     // Generation progress steps
     "gen.step1": "Reading your document...",
@@ -438,6 +439,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reflectPlaceholder": "In one sentence, what made it seem right...",
     "questionCard.reflectSubmit": "Submit",
     "questionCard.reflectSkip": "Skip",
+    "questionCard.firstAttempt": "First attempt",
+    "questionCard.attemptHistory": "{n} attempt{s} · {pct}% correct",
 
     // Calibration panel
     "calibration.title": "Confidence Calibration",
@@ -709,6 +712,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "newCourse.savingCourse": "正在创建课程...",
     "newCourse.savingOutline": "正在保存大纲...",
     "newCourse.redirecting": "正在跳转到课程页...",
+    "newCourse.answerPlaceholder": "请输入你的答案...",
 
     // Generation progress steps
     "gen.step1": "正在阅读你的文档...",
@@ -1070,6 +1074,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reflectPlaceholder": "一句话说说为什么觉得那个选项对...",
     "questionCard.reflectSubmit": "提交",
     "questionCard.reflectSkip": "跳过",
+    "questionCard.firstAttempt": "首次作答",
+    "questionCard.attemptHistory": "{n} 次 · {pct}% 正确",
 
     // Calibration panel
     "calibration.title": "信心校准",

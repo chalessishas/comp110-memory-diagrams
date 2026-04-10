@@ -111,6 +111,7 @@ function GeneratingStatus() {
   );
 }
 function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matched_kp_title: string } }) {
+  const { t } = useI18n();
   const [selected, setSelected] = useState<string | null>(null);
   const [textAnswer, setTextAnswer] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -164,7 +165,7 @@ function PreviewQuestionCard({ question }: { question: ParsedQuestion & { matche
           onChange={(e) => !submitted && setTextAnswer(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
           disabled={submitted}
-          placeholder="Type your answer..."
+          placeholder={t("newCourse.answerPlaceholder")}
           className="w-full px-4 py-2.5 rounded-xl text-sm mb-3 outline-none"
           style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
         />
