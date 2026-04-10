@@ -33,6 +33,8 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [sessionAnswered, setSessionAnswered] = useState(0);
   const [sessionCorrect, setSessionCorrect] = useState(0);
   const [sessionStart] = useState(() => Date.now());
+  // Incremented after server pull completes — triggers queue recompute with fresh localStorage
+  const [cardsKey, setCardsKey] = useState(0);
 
   // Load questions + exam scope on mount; pull server FSRS state for cross-device sync
   useEffect(() => {
@@ -46,8 +48,9 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setScopeMatchCount(scope.length);
     }
 
-    // Pull server card states — merges DB into localStorage (non-blocking)
-    pullCardsFromServer(id);
+    // Pull server card states then bump cardsKey to force queue recompute.
+    // Fixes race: questions fetch may complete before pull, computing queue with stale localStorage.
+    pullCardsFromServer(id).then(() => setCardsKey((k) => k + 1));
 
     fetch(`/api/questions?courseId=${id}`)
       .then((r) => r.json())
@@ -57,7 +60,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       });
   }, [id]);
 
-  // Re-sort cards whenever questions load, exam mode, or scope changes
+  // Re-sort cards whenever questions load, exam mode, scope changes, or server pull completes
   useEffect(() => {
     if (questions.length === 0) return;
 
@@ -78,7 +81,8 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setDueCards(getDueCards(courseCards));
     }
     setCurrentIndex(0);
-  }, [questions, examActive, scopeActive, scopeKpIds]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questions, examActive, scopeActive, scopeKpIds, cardsKey]);
 
   function handleSetExamDate(dateStr: string) {
     if (!dateStr) {
