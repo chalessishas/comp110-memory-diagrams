@@ -159,6 +159,19 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     }
   }
 
+  // Keyboard shortcut: 1=Again 2=Hard 3=Good 4=Easy (standard Anki convention)
+  useEffect(() => {
+    if (!showRating) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const map: Record<string, Rating> = { "1": Rating.Again, "2": Rating.Hard, "3": Rating.Good, "4": Rating.Easy };
+      if (map[e.key]) handleRate(map[e.key]);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showRating]);
+
   const currentQuestion = dueCards[currentIndex]
     ? questions.find((q) => q.id === dueCards[currentIndex].question_id)
     : null;
@@ -371,17 +384,18 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
               <p className="text-sm font-medium mb-3">{t("review.howWell")}</p>
               <div className="grid grid-cols-4 gap-2">
                 {([
-                  { rating: Rating.Again, label: t("review.again"), desc: t("review.againDesc"), color: "var(--danger)" },
-                  { rating: Rating.Hard, label: t("review.hard"), desc: t("review.hardDesc"), color: "var(--warning)" },
-                  { rating: Rating.Good, label: t("review.good"), desc: t("review.goodDesc"), color: "var(--success)" },
-                  { rating: Rating.Easy, label: t("review.easy"), desc: t("review.easyDesc"), color: "var(--accent)" },
-                ] as { rating: Rating; label: string; desc: string; color: string }[]).map((opt) => (
+                  { rating: Rating.Again, key: "1", label: t("review.again"), desc: t("review.againDesc"), color: "var(--danger)" },
+                  { rating: Rating.Hard, key: "2", label: t("review.hard"), desc: t("review.hardDesc"), color: "var(--warning)" },
+                  { rating: Rating.Good, key: "3", label: t("review.good"), desc: t("review.goodDesc"), color: "var(--success)" },
+                  { rating: Rating.Easy, key: "4", label: t("review.easy"), desc: t("review.easyDesc"), color: "var(--accent)" },
+                ] as { rating: Rating; key: string; label: string; desc: string; color: string }[]).map((opt) => (
                   <button
                     key={opt.rating}
                     onClick={() => handleRate(opt.rating)}
-                    className="p-3 rounded-xl text-center cursor-pointer hover:opacity-80 transition-opacity"
+                    className="p-3 rounded-xl text-center cursor-pointer hover:opacity-80 transition-opacity relative"
                     style={{ backgroundColor: opt.color, color: "white" }}
                   >
+                    <span className="absolute top-1.5 right-2 text-[9px] opacity-50">[{opt.key}]</span>
                     <p className="text-sm font-medium">{opt.label}</p>
                     <p className="text-[10px] mt-0.5 opacity-80">{opt.desc}</p>
                   </button>
