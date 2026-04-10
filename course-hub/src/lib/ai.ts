@@ -4,15 +4,17 @@ import { parsedSyllabusSchema, parsedQuestionSchema, generatedLessonSchema } fro
 import { z } from "zod";
 import type { OrganizedStudyNote, ParsedQuestion, ParsedSyllabus } from "@/types";
 
-// Qwen3.5-Plus via DashScope OpenAI-compatible API
-// $0.26/$1.56 per M tokens, native PDF vision, json_schema support
+// Qwen via DashScope OpenAI-compatible API
+// compatibility: "compatible" forces /chat/completions (default /responses isn't supported by Qwen)
 const qwen = createOpenAI({
   baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
   apiKey: process.env.DASHSCOPE_API_KEY ?? "",
 });
 
-const visionModel = qwen("qwen-plus-latest"); // multimodal — PDF/image parsing (proven stable)
-const textModel = qwen("qwen3.5-plus"); // 19x faster than qwen-plus (MoE, 17B active params)
+// Use qwen.chat() not qwen() — the default qwen() factory builds Responses-API models,
+// but Qwen only supports Chat Completions API
+const visionModel = qwen.chat("qwen-vl-max-latest"); // multimodal — PDF/image parsing
+const textModel = qwen.chat("qwen3.5-plus"); // text-only, fast MoE model
 
 const MAX_BASE64_SIZE = 20 * 1024 * 1024; // ~15MB decoded
 // Temporarily disabled AbortSignal — investigating generate failures
@@ -23,8 +25,8 @@ export function stripThinkBlocks(text: string): string {
   return text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 }
 
-// Fix #9: robust JSON extraction — strips markdown fences + think blocks, finds object or array
-function extractJSON(text: string): string | null {
+// Robust JSON extraction — strips markdown fences + think blocks, balanced-brace match
+export function extractJSON(text: string): string | null {
   // Strip qwen3.5-plus thinking mode leaks and markdown code fences
   const cleaned = text
     .replace(/<think>[\s\S]*?<\/think>/g, "")
@@ -47,8 +49,8 @@ function extractJSON(text: string): string | null {
     if (ch === "\\") { escape = true; continue; }
     if (ch === '"') { inString = !inString; continue; }
     if (inString) continue;
-    if (ch === open || ch === (open === "{" ? "[" : "{")) depth++;
-    if (ch === close || ch === (close === "}" ? "]" : "}")) depth--;
+    if (ch === "{" || ch === "[") depth++;
+    if (ch === "}" || ch === "]") depth--;
     if (depth === 0) return cleaned.slice(start, i + 1);
   }
 
@@ -57,6 +59,48 @@ function extractJSON(text: string): string | null {
     ? cleaned.match(/\{[\s\S]*\}/)
     : cleaned.match(/\[[\s\S]*\]/);
   return fallback?.[0] ?? null;
+}
+
+// Sanitize invalid JSON escape sequences from AI output before JSON.parse.
+// AI often returns LaTeX like \frac{} or math notation \alpha which breaks JSON.parse.
+// Valid JSON escapes are: \" \\ \/ \b \f \n \r \t \uXXXX
+function sanitizeJSONEscapes(json: string): string {
+  // Escape any backslash that isn't followed by a valid JSON escape character
+  return json.replace(/\\(?!["\\/bfnrtu])/g, "\\\\");
+}
+
+// Parse a pre-extracted JSON string, sanitizing bad escapes on failure.
+// Use this instead of JSON.parse(jsonStr) when jsonStr may contain LaTeX/math.
+// Returns `any` to match the loose typing of the call sites (they narrow afterward).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function safeJSONParse(jsonStr: string): any {
+  try {
+    return JSON.parse(jsonStr);
+  } catch (err) {
+    if (err instanceof SyntaxError && /escaped character|escape/i.test(err.message)) {
+      return JSON.parse(sanitizeJSONEscapes(jsonStr));
+    }
+    throw err;
+  }
+}
+
+// Retry an async operation up to `maxAttempts` times, with a small delay between attempts.
+// Use for flaky AI calls where occasional JSON parse failures or timeouts should be retried.
+async function retryAI<T>(op: () => Promise<T>, maxAttempts = 2, label = "AI call"): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await op();
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`${label} attempt ${attempt}/${maxAttempts} failed: ${msg.slice(0, 150)}`);
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, 500));
+      }
+    }
+  }
+  throw lastErr;
 }
 
 // ─── Pipeline 1: Syllabus → Course Outline ───
@@ -78,7 +122,8 @@ export async function parseSyllabus(fileBase64: string, mimeType: string, langua
           content: [
             {
               type: "file",
-              data: `data:${mimeType};base64,${fileBase64}`,
+              // AI SDK expects raw base64 (without data: prefix) or Uint8Array; it builds the data URI internally
+              data: fileBase64,
               mediaType: mimeType as "application/pdf",
             },
             {
@@ -101,7 +146,7 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
+    const parsed = parsedSyllabusSchema.parse(safeJSONParse(jsonStr));
     return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -161,7 +206,7 @@ ${rawText}
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
 
-    const parsed = parsedSyllabusSchema.parse(JSON.parse(jsonStr));
+    const parsed = parsedSyllabusSchema.parse(safeJSONParse(jsonStr));
     return parsed as ParsedSyllabus;
   } catch (err) {
     throw new Error(`Syllabus text parsing failed: ${err instanceof Error ? err.message : "Unknown error"}`);
@@ -193,7 +238,8 @@ export async function parseExamQuestions(
           content: [
             {
               type: "file",
-              data: `data:${mimeType};base64,${fileBase64}`,
+              // AI SDK expects raw base64; it builds the data URI internally
+              data: fileBase64,
               mediaType: mimeType as "application/pdf",
             },
             {
@@ -216,7 +262,7 @@ Return ONLY valid JSON (no markdown, no code fences).`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
+    const raw = safeJSONParse(jsonStr);
     const wrapped = Array.isArray(raw) ? { questions: raw } : raw;
     const parsed = questionsSchema.parse(wrapped);
     return parsed.questions;
@@ -296,7 +342,7 @@ Return ONLY the JSON object with a "tasks" array. No other format.${langInstruct
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
+    const raw = safeJSONParse(jsonStr);
     // AI returns various formats: { tasks: [...] }, [...], or { "1": [...], "2": [...] }
     let tasks: unknown[];
     if (Array.isArray(raw)) {
@@ -334,6 +380,7 @@ export async function generateQuestionsFromOutline(
   });
 
   try {
+    return await retryAI(async () => {
     const { text } = await generateText({
       // abortSignal: AbortSignal.timeout(AI_TIMEOUT_MS), // TEMP DISABLED
       model: textModel,
@@ -353,7 +400,7 @@ Generate 2-3 practice questions per knowledge point. Mix question types:
 
 Each question must have:
 - A clear, unambiguous stem
-- A correct answer
+- answer: MUST be a non-empty string. For MCQ use the letter ("A"/"B"/"C"/"D"). For true_false use "True"/"False". For fill_blank use the exact phrase that fills the blank. For short_answer provide a sentence. NEVER return null, empty, or omitted answers — every single question must include a valid answer.
 - explanation: Explain WHY the answer is correct. Then identify the most likely wrong reasoning a student might have and explain why it fails. (2-3 sentences minimum)
 - difficulty: 1-5 calibrated as follows:
   1 = Recall: identify or define a term
@@ -376,7 +423,7 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const raw = JSON.parse(jsonStr);
+    const raw = safeJSONParse(jsonStr);
     // Handle: { questions: [...] }, [...], or { "1": [...], "2": [...] }
     let qArr: unknown[];
     if (Array.isArray(raw)) {
@@ -387,7 +434,11 @@ Return ONLY valid JSON (no markdown, no code fences).${langInstruction}`,
       qArr = Object.values(raw).flat();
     }
     const parsed = autoQuizSchema.parse({ questions: qArr });
-    return parsed.questions;
+    // Filter out questions with empty answers (AI flakiness, not a schema error)
+    const withAnswers = parsed.questions.filter((q) => q.answer && q.answer.trim().length > 0);
+    if (withAnswers.length === 0) throw new Error("AI returned all empty answers");
+    return withAnswers;
+    }, 2, "generateQuestionsFromOutline");
   } catch (err) {
     throw new Error(`Question generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -438,7 +489,7 @@ Rules:
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
 
-    return generatedLessonSchema.parse(JSON.parse(jsonStr));
+    return generatedLessonSchema.parse(safeJSONParse(jsonStr));
   } catch (err) {
     throw new Error(`Lesson generation failed: ${err instanceof Error ? err.message : "Unknown error"}`);
   }
@@ -570,7 +621,7 @@ Return ONLY JSON:
 
     const json = extractJSON(text);
     if (!json) return null;
-    const raw = JSON.parse(json);
+    const raw = safeJSONParse(json);
     return {
       chunk_index: index,
       content: String(raw.content ?? ""),
@@ -692,7 +743,7 @@ Return ONLY valid JSON (no markdown, no code fences).`,
 
     const jsonStr = extractJSON(text);
     if (!jsonStr) throw new Error("AI did not return valid JSON");
-    const organized = organizedStudyNoteSchema.parse(JSON.parse(jsonStr));
+    const organized = organizedStudyNoteSchema.parse(safeJSONParse(jsonStr));
 
     return {
       title: organized.title,

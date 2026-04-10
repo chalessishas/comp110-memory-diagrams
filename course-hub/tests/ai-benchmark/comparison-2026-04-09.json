@@ -1,6 +1,22 @@
 {
-  "timestamp": "2026-04-09T12:53:43.162Z",
+  "timestamp": "2026-04-09T17:23:20.997Z",
   "results": [
+    {
+      "modelId": "qwen3.6-plus",
+      "modelName": "Qwen 3.6-Plus 🆕 (Apr 2)",
+      "provider": "DashScope (Alibaba)",
+      "costPerMInput": 0.5,
+      "costPerMOutput": 3,
+      "totalQuestions": 0,
+      "avgScore": 0,
+      "byDimension": {},
+      "bySubject": {},
+      "avgLatencyMs": 2323,
+      "errors": 1,
+      "jsonParseFailures": 0,
+      "bloomDistribution": {},
+      "sampleQuestions": []
+    },
     {
       "modelId": "glm-5.1",
       "modelName": "GLM-5.1 (智谱) 🆕 Apr 7",
@@ -11,9 +27,9 @@
       "avgScore": 0,
       "byDimension": {},
       "bySubject": {},
-      "avgLatencyMs": 83513,
-      "errors": 0,
-      "jsonParseFailures": 1,
+      "avgLatencyMs": 9735,
+      "errors": 1,
+      "jsonParseFailures": 0,
       "bloomDistribution": {},
       "sampleQuestions": []
     }

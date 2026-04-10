@@ -35,7 +35,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     });
 
     const { text } = await generateText({
-      model: qwen("qwen3.5-plus"),
+      model: qwen.chat("qwen3.5-plus"),
       messages: [{
         role: "user",
         content: `Translate the following course outline nodes into ${lang === "zh" ? "Chinese (简体中文)" : "English"}. Return ONLY valid JSON (no markdown). Keep the same structure, just translate title and content fields.

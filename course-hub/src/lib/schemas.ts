@@ -63,8 +63,9 @@ export const parsedSyllabusSchema = z.object({
   confidence: confidenceField,
 });
 
-// Fix #2: lenient question type — normalize MCQ variants
-const questionType = z.string().transform((val) => {
+// Fix #2: lenient question type — normalize MCQ variants, accept any input
+const questionType = z.unknown().transform((raw) => {
+  const val = typeof raw === "string" ? raw : String(raw ?? "");
   const v = val.toLowerCase().replace(/[-_\s]/g, "");
   if (v.includes("multiple") || v === "mcq" || v === "mc") return "multiple_choice" as const;
   if (v.includes("fill") || v.includes("blank")) return "fill_blank" as const;
@@ -121,14 +122,22 @@ const bloomLevelField = z.string().transform((val) => {
 
 export const parsedQuestionSchema = z.object({
   type: questionType,
-  stem: z.string().min(1),
+  stem: z.unknown().transform((val, ctx) => {
+    const str = typeof val === "string" ? val : String(val ?? "");
+    if (str.trim().length === 0) {
+      ctx.addIssue({ code: "custom", message: "stem must not be empty" });
+      return z.NEVER;
+    }
+    return str;
+  }),
   options: optionsField,
-  answer: z.union([
-    z.string().min(1),
-    z.number().transform(String),
-    z.boolean().transform(String),
-    z.object({}).passthrough().transform((obj) => JSON.stringify(obj)),
-  ]),
+  answer: z.unknown().transform((val) => {
+    // Coerce any type to string; empty answers are filtered downstream, not rejected here
+    if (val === null || val === undefined) return "";
+    if (typeof val === "string") return val;
+    if (typeof val === "number" || typeof val === "boolean") return String(val);
+    return JSON.stringify(val);
+  }),
   explanation: z.string().nullable().default(null),
   difficulty: difficultyField,
   bloom_level: bloomLevelField,

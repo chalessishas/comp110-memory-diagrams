@@ -13,6 +13,7 @@
 //   npx tsx tests/ai-benchmark/compare-models.ts
 
 import { createOpenAI } from "@ai-sdk/openai";
+import { extractJSON } from "../../src/lib/ai";
 import { generateText } from "ai";
 
 export interface ModelConfig {
@@ -357,14 +358,7 @@ Return ONLY valid JSON (no markdown, no code fences).`,
       }],
     });
 
-    // Parse JSON (same logic as ai.ts extractJSON)
-    const cleaned = text
-      .replace(/<think>[\s\S]*?<\/think>/g, "")
-      .replace(/```(?:json)?\s*/g, "")
-      .replace(/```\s*/g, "");
-    const objMatch = cleaned.match(/\{[\s\S]*\}/);
-    const arrMatch = cleaned.match(/\[[\s\S]*\]/);
-    const jsonStr = objMatch?.[0] ?? arrMatch?.[0];
+    const jsonStr = extractJSON(text);
 
     if (!jsonStr) throw new Error("No JSON found in response");
     const raw = JSON.parse(jsonStr);

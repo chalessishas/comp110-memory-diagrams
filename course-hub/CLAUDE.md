@@ -1,66 +1,104 @@
-# CourseHub — AI 驱动的课程学习平台
+# CourseHub — API-Only Backend Skeleton
 
 ## 快速概览
 
 | 维度 | 值 |
 |------|-----|
-| 框架 | Next.js 16 (App Router) + React 19 + TypeScript |
+| 框架 | Next.js 16 (App Router) — API routes only, 无前端 |
 | 数据库 | Supabase PostgreSQL (项目: `zubvbcexqaiauyptsyby`) |
-| 认证 | Supabase Auth (Email/密码 + Google OAuth + 游客模式) |
-| AI | Qwen 3.5-Plus via DashScope (`@ai-sdk/openai` 适配) |
-| 样式 | Tailwind CSS v4 + CSS 变量 + `ui-*` 自定义类 |
-| 图标 | Lucide React (描边风格，不用 emoji) |
-| 间隔重复 | ts-fsrs |
-| i18n | 自定义 Context (EN/ZH) |
+| 认证 | Supabase Auth (cookie-based SSR, base64url + "base64-" prefix) |
+| AI | Qwen 3.5-Plus via DashScope (国内端点 `dashscope.aliyuncs.com`) |
 | 部署 | Vercel (60s API timeout) |
 
-## 框架手册索引
+## 当前状态
 
-| 手册 | 路径 | 职责 |
-|------|------|------|
-| 架构手册 | [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | 技术栈、目录结构、路由、数据流、认证、AI 集成 |
-| API 参考 | [`docs/API_REFERENCE.md`](docs/API_REFERENCE.md) | 全部 33 个 API 端点的方法、参数、响应、错误码 |
-| 组件手册 | [`docs/COMPONENTS.md`](docs/COMPONENTS.md) | 全部 31 个组件的 Props、依赖、状态、使用示例 |
-| 设计系统 | [`docs/DESIGN_SYSTEM.md`](docs/DESIGN_SYSTEM.md) | CSS 变量、ui-* 类、颜色语义、字体、间距、组件视觉规范 |
-| 编码规范 | [`docs/CONVENTIONS.md`](docs/CONVENTIONS.md) | 命名、导入顺序、组件模式、样式、错误处理、禁止事项 |
+前端已全部删除（2026-04-09），只保留 34 个 API routes + 后端 lib。等待前端重建。
 
-> **规则：** 具体规范查手册，CLAUDE.md 只做索引。不在此文件中重复手册内容。
-
-## 数据模型 (核心关系)
+## 目录结构
 
 ```
-User
- └── Course
-      ├── OutlineNode (adjacency list tree, parent_id 自引用)
-      │    └── knowledge_point → ElementMastery (FSRS 掌握度追踪)
-      ├── Question → Attempt (答题 + 自动批改)
-      │    └── QuestionBookmark
-      ├── StudyTask (AI 生成的学习任务)
-      ├── Lesson → LessonChunk (AI 生成的分块课程)
-      │    └── LessonProgress
-      ├── ExamDate (考试日期 + 关联知识点)
-      ├── Upload (文件上传 → AI 内容提取)
-      ├── CourseNote (语音笔记 → AI 整理)
-      ├── Misconception (错误概念追踪)
-      └── ShareToken (课程分享链接)
+src/
+  app/
+    layout.tsx          ← 空壳（Next.js 必须有）
+    api/                ← 34 个 API routes
+      courses/          ← CRUD + outline + generate + exams + exam-prep + exam-scope + share + ...
+      questions/        ← GET/POST + quality-check + feedback
+      attempts/         ← 答题提交 + 自动批改
+      parse/            ← 大纲/考试文本解析
+      bookmarks/        ← 题目收藏
+      upload/           ← 文件上传
+      outline-nodes/    ← 大纲节点 CRUD
+      preview/          ← 学习预览
+  lib/
+    ai.ts               ← AI 调用入口（Qwen wrapper + extractJSON balanced-brace parser）
+    schemas.ts           ← Zod schema（AI 输出校验，answer 支持 string/number/boolean/object）
+    mastery-v2.ts        ← FSRS 掌握度计算
+    mastery.ts           ← 旧版掌握度
+    spaced-repetition.ts ← 间隔重复调度
+    rate-limit.ts        ← API 限流
+    course-notes.ts      ← 笔记处理
+    supabase/            ← client.ts / server.ts / middleware.ts
+  types.ts              ← TypeScript 类型定义
+tests/
+  e2e-backend.ts        ← 端到端 API 测试（3 场景）
+  ai-benchmark/         ← 多模型质量对比框架
 ```
 
-## 关键入口文件
+## 数据模型
 
-| 文件 | 职责 |
-|------|------|
-| `src/app/globals.css` | 全部 CSS 变量 + ui-* 类定义 (设计系统的唯一真相源) |
-| `src/types.ts` | 全部 TypeScript 类型定义 |
-| `src/lib/ai.ts` | AI 调用入口 (Qwen wrapper) |
-| `src/lib/schemas.ts` | Zod schema (AI 输出校验) |
-| `src/lib/mastery-v2.ts` | FSRS 掌握度计算 |
-| `src/lib/i18n.tsx` | i18n Context + 翻译表 |
+```
+User → Course → OutlineNode (tree, parent_id) → knowledge_point → ElementMastery (FSRS)
+                 ├── Question → Attempt (自动批改)
+                 ├── StudyTask (AI 生成)
+                 ├── Lesson → LessonChunk → LessonProgress
+                 ├── ExamDate (考试日期 + KP 关联)
+                 ├── Upload → AI 内容提取
+                 ├── CourseNote (语音笔记 → AI 整理)
+                 └── ShareToken
+```
 
-## 已知约束和坑
+## 已知约束
 
-- **Vercel 60s timeout**: AI 生成类 API 必须控制批次大小 (如 generate-questions 每次最多 5 个 KP)
-- **localStorage 数据**: 打卡、学习时间、复习卡片状态存在 localStorage，换设备会丢失
-- **暗色模式**: 设计规范中有定义但项目未实现，不要引入 `data-theme` 相关代码
-- **DM Sans**: 设计规范历史遗留，实际使用 Inter 系统字体栈
-- **拖拽排序**: OutlineTree 有视觉提示但未接入实际 drag-drop
-- **Web Speech API**: VoiceNotesPanel 仅 Chrome/Edge 完全支持
+- **Vercel 60s timeout**: AI 生成必须控制批次（generate-questions: 5 KP/call, exam-prep: 6 topics/call）
+- **DashScope 国内端点**: API key 是国内区域的，必须用 `dashscope.aliyuncs.com` 不是 `-intl`
+- **Qwen 只支持 Chat Completions API**: 必须用 `qwen.chat("model-name")`，不是 `qwen("model-name")`（后者默认走 /responses 端点，Qwen 不支持）
+- **Qwen 的 json_schema response_format 要求 prompt 里必须出现 "json" 字样** — 否则报错 `'messages' must contain the word 'json'`
+- **Qwen OpenAI compat 不接受 `type: "file"` content block**: 只支持 text/image_url/video。PDF 必须服务端 pdf-parse 提取文本后再发给 text model
+- **questions.flagged 列不存在**: migration 014 未应用，quality-check 和 feedback 路由会 500
+- **Supabase SSR cookie**: 格式为 base64url + "base64-" prefix，chunk at 3180 chars
+- **regenerate/exam-prep 本地 dev 会 timeout**: 这些路由需要翻译或生成大量内容，本地 Next.js dev 很慢。生产环境 Vercel 60s 限制下也可能挂
+
+## 已修复的 Bug（2026-04-09 ~ 2026-04-10）
+
+1. outline PUT 409: 新课程首次保存版本冲突 → 跳过空课程检查
+2. questions.flagged: 查询引用不存在的列 → 移除 flagged 过滤
+3. extractJSON 贪婪正则: AI 输出后追加文本 → balanced-brace parser
+4. answer schema 类型: AI 返回 number/object/null → z.unknown + transform
+5. exam-prep timeout: 12 topics batch 4 → 6 topics batch 3
+6. **Chat 500 → streaming**: `/chat` 返回 SSE stream，测试端需用 `text/event-stream` 处理
+7. **Feedback FK 违反**: 问题 ID 过期 → scenario 9 改为从 DB 直接 re-fetch
+8. **Cleanup 401**: JWT 长任务后过期 → 改用 `supabaseAdmin` 直接删除
+9. **AI JSON 解析 escape 错误**: LaTeX `\frac` 等破坏 JSON.parse → `sanitizeJSONEscapes` + `safeJSONParse` 回退
+10. **Qwen 模型调用方式错误**: `qwen("xxx")` 默认走 Responses API → 改用 `qwen.chat("xxx")`
+11. **Extract 路由的文件格式**: 原来用 `type: "file"` content block（Qwen 不支持）+ `qwen-plus-latest` 是纯文本模型 → 改用 `pdf-parse` 服务端提取文本 + `qwen3.5-plus`
+12. **Qwen `response_format: json_schema` 要求 "json"**: prompt 里补上 "Return JSON"
+
+## E2E 测试覆盖（47/52 routes 通过）
+
+**全部通过 (11 个 scenario)**:
+- Scenario 1: Create course → Parse syllabus → Save outline → Generate questions → List
+- Scenario 2: Create exam → Match scope → Exam prep (timeout on dev)
+- Scenario 3: Submit attempts (correct + wrong) → Check mastery
+- Scenario 4: Bookmarks CRUD → Chat (streaming) → Get exams
+- Scenario 5: Course CRUD → Outline node CRUD → Study task PATCH
+- Scenario 6: Share token → Fork course → Revoke share
+- Scenario 7: Generate lesson (AI) → List → Get chunks → Progress tracking
+- Scenario 8: Organize note (AI) → Save note
+- Scenario 9: Feedback (×3) → Quality check → Mistake patterns → Anki export → Delete exam
+- Scenario 10: Upload PDF → List → Extract (AI with pdf-parse) → Delete → Preview learning
+- Scenario 11: Generate study tasks → Regenerate (AI heavy, dev timeout)
+
+**已知不稳定**:
+- `exam-prep`: 本地 dev 6 topics × 3 parallel AI calls > 2min，Vercel 生产环境 60s hard limit 可能挂
+- `regenerate`: 翻译 30+ KPs + 生成 tasks/questions，本地 dev 通常 > 3min timeout
+- 这两个路由需要异步化（Trigger.dev 或类似）才能在生产环境可靠
