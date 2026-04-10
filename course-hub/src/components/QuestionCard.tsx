@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Check, X, Bookmark, Loader2 } from "lucide-react";
 import type { Question } from "@/types";
 import { updateCard, Rating } from "@/lib/spaced-repetition";
@@ -72,6 +72,18 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
 
     onAnswer(question.id, userAnswer, correct);
   }
+
+  // Enter to submit — active for MCQ/T-F (no textarea) and fill_blank (1-row textarea).
+  // Skipped for short_answer where Enter means newline.
+  useEffect(() => {
+    if (submitted || !userAnswer || question.type === "short_answer") return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Enter" && !submitting) handleSubmit();
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submitted, userAnswer, submitting, question.type]);
 
   function getOptionStyles(optionLabel: string) {
     const normalizedLabel = optionLabel.toLowerCase();
