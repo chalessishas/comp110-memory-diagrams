@@ -2,8 +2,15 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { CourseTabs } from "@/components/CourseTabs";
 import { KnowledgeTree } from "@/components/KnowledgeTree";
-import { calculateMastery } from "@/lib/mastery";
+import type { MasteryLevel } from "@/types";
 import { T } from "@/components/T";
+
+const v2ToDisplay = (level: string | undefined): MasteryLevel => {
+  if (!level || level === "unseen") return "untested";
+  if (level === "exposed") return "weak";
+  if (level === "practiced") return "reviewing";
+  return "mastered"; // proficient or mastered
+};
 
 export default async function TreePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,20 +27,7 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
   const allNodes = kps ?? [];
   const knowledgePoints = allNodes.filter((n) => n.type === "knowledge_point");
   const nodeMap = new Map(allNodes.map((n) => [n.id, n]));
-
-  const { data: questions } = await supabase
-    .from("questions")
-    .select("id, knowledge_point_id")
-    .eq("course_id", id);
-
-  const questionIds = (questions ?? []).map((q) => q.id);
-  const { data: attempts } = questionIds.length > 0
-    ? await supabase
-        .from("attempts")
-        .select("question_id, is_correct, answered_at")
-        .eq("user_id", user.id)
-        .in("question_id", questionIds)
-    : { data: [] };
+  const kpIds = knowledgePoints.map((n) => n.id);
 
   const { data: lessons } = await supabase
     .from("lessons")
@@ -41,27 +35,29 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
     .eq("course_id", id);
   const lessonKpIds = new Set((lessons ?? []).map((l) => l.knowledge_point_id));
 
-  const kpQuestions = new Map<string, string[]>();
-  for (const q of questions ?? []) {
-    if (q.knowledge_point_id) {
-      const list = kpQuestions.get(q.knowledge_point_id) ?? [];
-      list.push(q.id);
-      kpQuestions.set(q.knowledge_point_id, list);
-    }
-  }
+  // Use element_mastery v2 as single source of truth — consistent with learn page
+  const { data: masteryRows } = kpIds.length > 0
+    ? await supabase
+        .from("element_mastery")
+        .select("concept_id, current_level, times_tested, times_correct")
+        .eq("user_id", user.id)
+        .in("concept_id", kpIds)
+    : { data: [] };
+
+  const masteryMap = new Map(
+    (masteryRows ?? []).map((m) => [m.concept_id, m])
+  );
 
   const treeNodes = knowledgePoints.map((kp) => {
-    const qIds = kpQuestions.get(kp.id) ?? [];
-    const kpAttempts = (attempts ?? []).filter((a) => qIds.includes(a.question_id));
-    const mastery = calculateMastery(kpAttempts);
+    const m = masteryMap.get(kp.id);
     const parent = kp.parent_id ? nodeMap.get(kp.parent_id) : null;
 
     return {
       id: kp.id,
       title: kp.title,
-      mastery: mastery.level,
-      rate: mastery.rate,
-      totalAttempts: mastery.total,
+      mastery: v2ToDisplay(m?.current_level),
+      rate: m && m.times_tested > 0 ? m.times_correct / m.times_tested : 0,
+      totalAttempts: m?.times_tested ?? 0,
       hasLesson: lessonKpIds.has(kp.id),
       parentTitle: parent?.title ?? null,
     };
