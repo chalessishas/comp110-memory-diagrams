@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
+import { SessionSummaryModal } from "@/components/SessionSummaryModal";
 import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope } from "@/lib/spaced-repetition";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
@@ -27,6 +28,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [scopeText, setScopeText] = useState("");
   const [scopeLoading, setScopeLoading] = useState(false);
   const [scopeMatchCount, setScopeMatchCount] = useState<number | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
+  const [sessionAnswered, setSessionAnswered] = useState(0);
+  const [sessionCorrect, setSessionCorrect] = useState(0);
+  const [sessionStart] = useState(() => Date.now());
 
   // Load questions + exam scope on mount
   useEffect(() => {
@@ -114,8 +119,10 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     setScopeMatchCount(null);
   }
 
-  function handleAnswer(_questionId: string, _answer: string, _isCorrect: boolean) {
+  function handleAnswer(_questionId: string, _answer: string, isCorrect: boolean) {
     setShowRating(true);
+    setSessionAnswered((n) => n + 1);
+    if (isCorrect) setSessionCorrect((n) => n + 1);
   }
 
   function handleRate(rating: Rating): void {
@@ -128,6 +135,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
       setCurrentIndex((i) => i + 1);
     } else {
       setDueCards([]);
+      if (sessionAnswered > 0) setShowSummary(true);
     }
   }
 
@@ -316,6 +324,15 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
           )}
         </div>
       ) : null}
+
+      <SessionSummaryModal
+        open={showSummary}
+        onClose={() => setShowSummary(false)}
+        courseId={id}
+        sessionAnswered={sessionAnswered}
+        sessionCorrect={sessionCorrect}
+        sessionMinutes={Math.round((Date.now() - sessionStart) / 60_000)}
+      />
     </div>
   );
 }
