@@ -81,6 +81,20 @@ export async function POST(request: Request) {
       const postUpdateCorrect = mastery.times_correct + (isCorrect ? 1 : 0);
       postUpdateAccuracy = postUpdateCorrect / postUpdateTested;
 
+      // True last-5 window for recentAccuracy — more responsive than overall accuracy
+      // for students who struggled early but have since recovered. One join query.
+      const { data: recent5 } = await supabase
+        .from("attempts")
+        .select("is_correct, questions!inner(knowledge_point_id)")
+        .eq("user_id", user.id)
+        .eq("questions.knowledge_point_id", question.knowledge_point_id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      const recentWindow = recent5 ?? [];
+      const recentAccuracy = recentWindow.length > 0
+        ? recentWindow.filter((a) => a.is_correct).length / recentWindow.length
+        : postUpdateAccuracy;
+
       // fill_blank and short_answer require free recall — count as non-MCQ
       const isNonMcq = question.type === "fill_blank" || question.type === "short_answer";
       const newHasNonMcqCorrect = mastery.has_non_mcq_correct || (isNonMcq && isCorrect);
@@ -104,7 +118,6 @@ export async function POST(request: Request) {
       }
 
       // Evaluate mastery level transition with all available data.
-      // recentAccuracy uses overall accuracy as an approximation (no extra query needed).
       // courseConceptsAtLevel2OrAbove=0 and hasDownstreamDependents=false make crossConceptOk
       // always pass — avoids an expensive count query on every attempt.
       const stats: MasteryStats = {
@@ -122,8 +135,8 @@ export async function POST(request: Request) {
         fsrsRetrievability: mastery.fsrs_retrievability ?? 1,
         firstContactAt: new Date(mastery.first_contact_at ?? Date.now()),
         levelReachedAt: new Date(mastery.level_reached_at ?? Date.now()),
-        recentAccuracy: postUpdateAccuracy,
-        recentCount: Math.min(postUpdateTested, 5),
+        recentAccuracy: recentAccuracy,
+        recentCount: recentWindow.length,
         courseConceptsAtLevel2OrAbove: 0,
         hasDownstreamDependents: false,
       };
