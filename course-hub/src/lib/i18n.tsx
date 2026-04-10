@@ -253,6 +253,16 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.howConfident": "How confident?",
     "questionCard.seeWhyWrong": "See where you went wrong",
 
+    // Calibration panel
+    "calibration.title": "Confidence Calibration",
+    "calibration.wellCalibrated": "Well calibrated",
+    "calibration.overconfident": "Overconfident",
+    "calibration.guessing": "Guessing",
+    "calibration.unsure": "Unsure",
+    "calibration.confident": "Confident",
+    "calibration.footer": "Accuracy when you rated yourself as guessing, unsure, or confident.",
+    "calibration.ratedAttempts": "rated attempts",
+
     // Exam Countdown
     "exam.upcoming": "Upcoming Exams",
     "exam.noUpcoming": "No upcoming exams. Add one to get adaptive study recommendations.",
@@ -546,6 +556,16 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reportTooHard": "太难",
     "questionCard.howConfident": "确信程度？",
     "questionCard.seeWhyWrong": "看看哪里错了",
+
+    // Calibration panel
+    "calibration.title": "信心校准",
+    "calibration.wellCalibrated": "校准良好",
+    "calibration.overconfident": "过度自信",
+    "calibration.guessing": "在猜",
+    "calibration.unsure": "不确定",
+    "calibration.confident": "有把握",
+    "calibration.footer": "按信心程度（在猜/不确定/有把握）分组的答题正确率。",
+    "calibration.ratedAttempts": "次有评级的答题",
 
     // Exam Countdown
     "exam.upcoming": "即将到来的考试",

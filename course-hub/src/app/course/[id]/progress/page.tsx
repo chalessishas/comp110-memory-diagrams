@@ -5,7 +5,8 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { ProgressGrid } from "@/components/ProgressGrid";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
 import { calculateMastery } from "@/lib/mastery";
-import { ArrowLeft, Brain } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { CalibrationPanel } from "@/components/CalibrationPanel";
 
 export default async function ProgressPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -86,42 +87,12 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
       />
 
       {totalRated >= 5 && (
-        <div className="ui-panel p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Brain size={16} style={{ color: "var(--accent)" }} />
-            <span className="text-sm font-medium">Confidence Calibration</span>
-            {isCalibrated && (
-              <span className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium" style={{ backgroundColor: "var(--success)", color: "white" }}>Well calibrated</span>
-            )}
-            {isOverconfident && (
-              <span className="ml-auto text-xs px-2 py-0.5 rounded-lg font-medium" style={{ backgroundColor: "var(--warning)", color: "white" }}>Overconfident</span>
-            )}
-          </div>
-          <div className="space-y-2.5">
-            {confStats.map(({ lvl, total, accuracy }) => {
-              const emoji = lvl === 1 ? "🤔" : lvl === 2 ? "🙂" : "😎";
-              const label = lvl === 1 ? "Guessing" : lvl === 2 ? "Unsure" : "Confident";
-              const pct = accuracy !== null ? Math.round(accuracy * 100) : null;
-              const color = pct === null ? "var(--text-muted)"
-                : pct >= 75 ? "var(--success)" : pct >= 50 ? "var(--warning)" : "var(--danger)";
-              return (
-                <div key={lvl} className="flex items-center gap-3">
-                  <span className="w-5 text-center text-sm">{emoji}</span>
-                  <span className="text-xs w-16" style={{ color: "var(--text-secondary)" }}>{label}</span>
-                  <div className="flex-1 ui-progress-track">
-                    <div className="ui-progress-bar" style={{ width: `${pct ?? 0}%`, backgroundColor: color }} />
-                  </div>
-                  <span className="text-xs w-20 text-right" style={{ color }}>
-                    {pct !== null ? `${pct}% (${total})` : "—"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          <p className="text-[10px] mt-3" style={{ color: "var(--text-muted)" }}>
-            Accuracy when you rated yourself as guessing, unsure, or confident. {totalRated} rated attempts.
-          </p>
-        </div>
+        <CalibrationPanel
+          confStats={confStats}
+          totalRated={totalRated}
+          isCalibrated={isCalibrated}
+          isOverconfident={isOverconfident}
+        />
       )}
 
       <ProgressGrid data={data} />
