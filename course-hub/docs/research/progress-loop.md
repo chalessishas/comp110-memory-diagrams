@@ -1,30 +1,25 @@
-# Progress Loop Status — 2026-04-11 16:43:28
+# Progress Loop Research — 2026-04-11
 
 ## Status: PRODUCTION-READY ✅
 
-### Recent commits (last 5)
-- `f18e1ee` fix(types): replace as any in library/page.tsx with ParsedSection interface
-- `25f2f42` fix(a11y): ConfirmDialog focus trap + role/aria-modal + focus restore
-- `35fe299` fix(i18n): VoiceNotesPanel 14 hardcoded strings → t() (EN + ZH)
-- `25de3ae` fix(mobile): action buttons visible on touch — library, outline, exam
-- `d2cf83f` docs: chronicle turn 127 (mobile hover fix sweep)
+### Completed this session
+- [x] IDOR audit — 35 routes, all guarded
+- [x] ownership.ts helper (verifyCourseOwnership, verifyNodeOwnership)
+- [x] i18n completeness — zero hardcoded UI strings
+- [x] TypeScript type safety — no `as any`, proper interfaces
+- [x] a11y — ConfirmDialog focus trap + aria-modal
+- [x] Error boundaries — review/learn/practice/course sub-routes
+- [x] UX dead-ends — bank, review all-caught-up, practice empty state
+- [x] Generate-questions error feedback (429 / 0-results / fail)
+- [x] Silent API failure fixes — ArchiveButton, ShareButton, RegenerateButton, OutlineTree (5 components)
+- [x] Review exam-scope: catch { ignore } → proper error + no-match feedback
+- [x] StudyTaskList: optimistic update → server-confirmed update with rollback
 
-### Production readiness checklist — ALL COMPLETE
+### Remaining known gaps
+- `courseConceptsAtLevel2OrAbove` in MasteryStats interface is dead code (never read by evaluateLevel) — cosmetic, safe to leave
+- Vercel env vars (UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, SUPABASE_SERVICE_ROLE_KEY) — blocked on user
 
-| Category | Status |
-|----------|--------|
-| Security (IDOR) | ✅ 35 routes, 8+ gaps fixed |
-| i18n | ✅ Zero hardcoded UI strings |
-| Error boundaries | ✅ All sub-routes |
-| Rate limiting | ✅ All AI routes |
-| TypeScript | ✅ tsc exit 0, no `as any` |
-| Ownership helper | ✅ DRY, fully adopted |
-| Mobile UX | ✅ All action buttons visible on touch |
-| a11y | ✅ ConfirmDialog focus trap complete |
-| Loading states | ✅ All data-fetching pages covered |
-
-### Only remaining blocked items (user action required)
-- Vercel env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`
-
-### No further autonomous work items
-All identified gaps are closed. Awaiting user direction for new features.
+### Next candidate work
+- Performance: check for N+1 queries in dashboard/today page
+- Accessibility: keyboard nav on OutlineTree
+- Mobile: test key flows on narrow viewport

@@ -38,15 +38,17 @@ export function StudyTaskList({ initialTasks }: { initialTasks: StudyTask[] }) {
     setToggling(taskId);
     const newStatus = currentStatus === "todo" ? "done" : "todo";
 
-    await fetch(`/api/study-tasks/${taskId}`, {
+    const res = await fetch(`/api/study-tasks/${taskId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: newStatus }),
     });
 
-    setTasks((prev) =>
-      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus as "todo" | "done" } : t))
-    );
+    if (res.ok) {
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, status: newStatus as "todo" | "done" } : t))
+      );
+    }
     setToggling(null);
   }
 

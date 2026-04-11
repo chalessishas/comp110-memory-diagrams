@@ -30,6 +30,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   const [scopeText, setScopeText] = useState("");
   const [scopeLoading, setScopeLoading] = useState(false);
   const [scopeMatchCount, setScopeMatchCount] = useState<number | null>(null);
+  const [scopeError, setScopeError] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
   const [sessionAnswered, setSessionAnswered] = useState(0);
   const [sessionCorrect, setSessionCorrect] = useState(0);
@@ -113,12 +114,14 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
   async function handleSetScope() {
     if (!scopeText.trim()) return;
     setScopeLoading(true);
+    setScopeError(null);
     try {
       const res = await fetch(`/api/courses/${id}/exam-scope`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ scope_text: scopeText }),
       });
+      if (!res.ok) { setScopeError(t("review.scopeError")); setScopeLoading(false); return; }
       const data = await res.json();
       if (data.matched_kp_ids?.length > 0) {
         setExamScope(id, data.matched_kp_ids);
@@ -127,8 +130,12 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         setScopeMatchCount(data.matched_count);
         setShowScopeInput(false);
         setScopeText("");
+      } else {
+        setScopeError(t("review.scopeNoMatch"));
       }
-    } catch { /* ignore */ }
+    } catch {
+      setScopeError(t("review.scopeError"));
+    }
     setScopeLoading(false);
   }
 
@@ -293,10 +300,13 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
               {scopeLoading ? <Loader2 size={14} className="animate-spin" /> : null}
               {t("review.matchKps")}
             </button>
-            <button onClick={() => { setShowScopeInput(false); setScopeText(""); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
+            <button onClick={() => { setShowScopeInput(false); setScopeText(""); setScopeError(null); }} className="text-sm cursor-pointer" style={{ color: "var(--text-muted)" }}>
               {t("misc.cancel")}
             </button>
           </div>
+          {scopeError && (
+            <p className="text-xs" style={{ color: "var(--danger)" }}>{scopeError}</p>
+          )}
         </div>
       )}
 
