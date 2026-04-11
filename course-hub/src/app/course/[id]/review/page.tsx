@@ -152,6 +152,13 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
     if (q) setSessionItems((prev) => [...prev, { id: questionId, stem: q.stem, correct: isCorrect }]);
   }
 
+  function handleOverrideCorrect(questionId: string) {
+    setSessionCorrect((n) => n + 1);
+    setSessionItems((prev) =>
+      prev.map((item) => item.id === questionId ? { ...item, correct: true } : item)
+    );
+  }
+
   function handleRate(rating: Rating): void {
     const card = dueCards[currentIndex];
     if (card) {
@@ -376,6 +383,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
             key={currentQuestion.id}
             question={currentQuestion}
             onAnswer={handleAnswer}
+            onOverrideCorrect={handleOverrideCorrect}
             bookmarked={bookmarkedIds.has(currentQuestion.id)}
           />
 
