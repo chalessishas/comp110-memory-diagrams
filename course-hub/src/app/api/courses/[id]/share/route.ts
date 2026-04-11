@@ -8,6 +8,9 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   // Check if token already exists
   const { data: existing } = await supabase
     .from("share_tokens")
@@ -35,6 +38,9 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await supabase.from("share_tokens").delete().eq("course_id", id);
   return NextResponse.json({ success: true });

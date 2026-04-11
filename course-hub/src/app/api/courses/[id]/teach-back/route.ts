@@ -7,7 +7,7 @@ import { generateText } from "ai";
 export const maxDuration = 60;
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  await params; // ensure dynamic context
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,11 +21,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  // Fetch question server-side — answer never travels to client
+  // Fetch question server-side — scoped to this course, answer never travels to client
   const { data: question } = await supabase
     .from("questions")
     .select("stem, answer, knowledge_point_id")
     .eq("id", question_id)
+    .eq("course_id", id)
     .single();
 
   if (!question) return NextResponse.json({ error: "Question not found" }, { status: 404 });

@@ -22,6 +22,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { title, exam_date, knowledge_point_ids } = await request.json();
   if (!title || !exam_date) return NextResponse.json({ error: "title and exam_date required" }, { status: 400 });
 
@@ -35,12 +38,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   return NextResponse.json(data, { status: 201 });
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { exam_id } = await request.json();
-  await supabase.from("exam_dates").delete().eq("id", exam_id);
+  await supabase.from("exam_dates").delete().eq("id", exam_id).eq("course_id", id);
   return NextResponse.json({ success: true });
 }

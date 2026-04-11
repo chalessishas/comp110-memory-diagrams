@@ -39,10 +39,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { upload_id } = await request.json();
 
-  // Get file path first
-  const { data: upload } = await supabase.from("uploads").select("file_url").eq("id", upload_id).single();
+  // Get file path, scoped to this course to prevent cross-course deletion
+  const { data: upload } = await supabase.from("uploads").select("file_url").eq("id", upload_id).eq("course_id", id).single();
   if (upload) {
     const pathMatch = upload.file_url.match(/course-files\/(.+)$/);
     if (pathMatch) {
@@ -50,6 +53,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     }
   }
 
-  await supabase.from("uploads").delete().eq("id", upload_id);
+  await supabase.from("uploads").delete().eq("id", upload_id).eq("course_id", id);
   return NextResponse.json({ success: true });
 }

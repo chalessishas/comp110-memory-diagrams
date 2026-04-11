@@ -26,8 +26,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 
+  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { storagePath } = await request.json();
   if (!storagePath) return NextResponse.json({ error: "storagePath required" }, { status: 400 });
+
+  // Verify the file belongs to this course before downloading
+  const { data: uploadRecord } = await supabase
+    .from("uploads")
+    .select("id")
+    .eq("course_id", id)
+    .like("file_url", `%${storagePath}`)
+    .single();
+  if (!uploadRecord) return NextResponse.json({ error: "File not found" }, { status: 404 });
 
   // Download file
   const { data: fileData } = await supabase.storage.from("course-files").download(storagePath);
