@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { NextResponse } from "next/server";
 
 // Generate or get existing share link
@@ -8,8 +9,9 @@ export async function POST(_: Request, { params }: { params: Promise<{ id: strin
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Check if token already exists
   const { data: existing } = await supabase
@@ -39,8 +41,9 @@ export async function DELETE(_: Request, { params }: { params: Promise<{ id: str
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   await supabase.from("share_tokens").delete().eq("course_id", id);
   return NextResponse.json({ success: true });

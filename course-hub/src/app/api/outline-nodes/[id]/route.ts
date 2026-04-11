@@ -1,22 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyNodeOwnership } from "@/lib/supabase/ownership";
 import { NextResponse } from "next/server";
-
-async function verifyNodeOwnership(supabase: Awaited<ReturnType<typeof createClient>>, nodeId: string, userId: string): Promise<boolean> {
-  const { data: node } = await supabase
-    .from("outline_nodes")
-    .select("course_id")
-    .eq("id", nodeId)
-    .single();
-  if (!node) return false;
-
-  const { data: course } = await supabase
-    .from("courses")
-    .select("id")
-    .eq("id", node.course_id)
-    .eq("user_id", userId)
-    .single();
-  return !!course;
-}
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

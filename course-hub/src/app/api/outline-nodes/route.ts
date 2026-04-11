@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -17,8 +18,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "course_id, title, type required" }, { status: 400 });
   }
 
-  const { data: courseOwned } = await supabase.from("courses").select("id").eq("id", course_id).eq("user_id", user.id).single();
-  if (!courseOwned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, course_id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Get max order for siblings
   const { data: siblings } = await supabase

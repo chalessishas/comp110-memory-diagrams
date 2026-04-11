@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { parseExamQuestions } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
@@ -15,8 +16,9 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   // Verify course ownership before returning questions
-  const { data: courseOwned } = await supabase.from("courses").select("id").eq("id", courseId).eq("user_id", user.id).single();
-  if (!courseOwned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, courseId, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Never send answer/explanation to client — revealed only after attempt submission
   const { data, error } = await supabase
@@ -92,8 +94,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "courseId and storagePath required" }, { status: 400 });
   }
 
-  const { data: courseOwned } = await supabase.from("courses").select("id").eq("id", courseId).eq("user_id", user.id).single();
-  if (!courseOwned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, courseId, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Verify file belongs to this course
   const { data: uploadRecord } = await supabase.from("uploads").select("id").eq("course_id", courseId).like("file_url", `%${storagePath}`).single();

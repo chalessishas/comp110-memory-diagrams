@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { NextResponse } from "next/server";
 
 export interface MistakePattern {
@@ -18,8 +19,9 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Fetch questions with KP linkage
   const { data: questions } = await supabase

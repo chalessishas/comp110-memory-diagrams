@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { generateText } from "ai";
 import { stripThinkBlocks, fastModel } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -17,8 +18,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "Rate limit exceeded. Try again in a minute." }, { status: 429 });
   }
 
-  const { data: course } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
-  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   const { scope_text } = await request.json();
   if (!scope_text || typeof scope_text !== "string") {
