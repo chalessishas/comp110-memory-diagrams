@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Preferences
@@ -74,8 +75,10 @@ export default function SettingsPage() {
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) {
       setPasswordMessage(error.message);
+      setPasswordSuccess(false);
     } else {
       setPasswordMessage(t("settings.passwordUpdated"));
+      setPasswordSuccess(true);
       setNewPassword("");
     }
     setChangingPassword(false);
@@ -221,7 +224,7 @@ export default function SettingsPage() {
                 {changingPassword ? <Loader2 size={14} className="animate-spin" /> : t("settings.save")}
               </button>
             </div>
-            {passwordMessage && <p className="text-xs mt-2" style={{ color: passwordMessage.includes("success") ? "var(--success)" : "var(--danger)" }}>{passwordMessage}</p>}
+            {passwordMessage && <p className="text-xs mt-2" style={{ color: passwordSuccess ? "var(--success)" : "var(--danger)" }}>{passwordMessage}</p>}
           </div>
 
           <div className="ui-panel p-6">
