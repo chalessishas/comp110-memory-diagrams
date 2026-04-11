@@ -62,10 +62,12 @@ export default function SettingsPage() {
 
   async function handleSaveName() {
     setSavingName(true);
-    await supabase.auth.updateUser({ data: { display_name: displayName } });
+    const { error } = await supabase.auth.updateUser({ data: { display_name: displayName } });
     setSavingName(false);
-    setNameSaved(true);
-    setTimeout(() => setNameSaved(false), 2000);
+    if (!error) {
+      setNameSaved(true);
+      setTimeout(() => setNameSaved(false), 2000);
+    }
   }
 
   async function handleChangePassword() {
@@ -86,10 +88,12 @@ export default function SettingsPage() {
 
   async function handleSaveSemester() {
     setSavingSemester(true);
-    await supabase.auth.updateUser({ data: { semester } });
+    const { error } = await supabase.auth.updateUser({ data: { semester } });
     setSavingSemester(false);
-    setSemesterSaved(true);
-    setTimeout(() => setSemesterSaved(false), 2000);
+    if (!error) {
+      setSemesterSaved(true);
+      setTimeout(() => setSemesterSaved(false), 2000);
+    }
   }
 
   async function handleExportData() {
