@@ -29,6 +29,18 @@ export interface OutlineNode {
   order: number;
 }
 
+export interface ParsedContentSection {
+  title: string;
+  summary: string;
+  key_concepts: string[];
+  formulas: string[];
+  matched_knowledge_point: string | null;
+}
+
+export interface ParsedContent {
+  sections: ParsedContentSection[];
+}
+
 export interface Upload {
   id: string;
   course_id: string;
@@ -36,7 +48,7 @@ export interface Upload {
   file_name: string;
   file_type: string;
   upload_type: UploadType;
-  parsed_content: unknown | null;
+  parsed_content: ParsedContent | null;
   status: UploadStatus;
   created_at: string;
 }
