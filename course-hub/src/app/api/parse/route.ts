@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { parseSyllabus, parseSyllabusText, parseExamQuestions } from "@/lib/ai";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
@@ -34,6 +35,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "storagePath or rawText required" }, { status: 400 });
   }
 
+  // Validate file belongs to this user — upload paths are always scoped to user.id/
+  if (!storagePath.startsWith(`${user.id}/`)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const { data: fileData, error: downloadError } = await supabase.storage
     .from("course-files")
     .download(storagePath);
@@ -60,6 +66,9 @@ export async function POST(request: Request) {
       let knowledgePoints: { id: string; title: string }[] = [];
 
       if (courseId) {
+        if (!await verifyCourseOwnership(supabase, courseId, user.id)) {
+          return NextResponse.json({ error: "Not found" }, { status: 404 });
+        }
         const { data: nodes } = await supabase
           .from("outline_nodes")
           .select("id, title")

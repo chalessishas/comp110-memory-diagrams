@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { NextResponse } from "next/server";
 
@@ -39,6 +40,12 @@ export async function POST(request: Request) {
     : "other";
 
   if (courseId) {
+    if (!await verifyCourseOwnership(supabase, courseId, user.id)) {
+      // Clean up the already-uploaded file before rejecting
+      await supabase.storage.from("course-files").remove([path]);
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
     const { data: upload, error: dbError } = await supabase
       .from("uploads")
       .insert({

@@ -430,6 +430,34 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               onOverrideCorrect={handleOverrideCorrect}
               bookmarked={bookmarkedIds.has(filteredQuestions[currentIndex].id)}
             />
+            {/* End-of-deck banner — shown when last question answered */}
+            {questionMode === "reviewing" && currentIndex === filteredQuestions.length - 1 && (
+              <div className="mt-4 px-5 py-4 rounded-[20px] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" style={{ backgroundColor: "var(--bg-muted)" }}>
+                <div>
+                  <p className="text-sm font-medium">{t("practice.deckComplete")}</p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--text-muted)" }}>{t("practice.deckCompleteDesc")}</p>
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setQuestions((prev) => [...prev].sort(() => Math.random() - 0.5));
+                      setCurrentIndex(0);
+                      setQuestionMode("solving");
+                    }}
+                    className="ui-button-secondary text-sm"
+                  >
+                    <Shuffle size={14} />
+                    {t("practice.shuffle")}
+                  </button>
+                  {sessionAnswered > 0 && (
+                    <button onClick={() => setShowSummary(true)} className="ui-button-primary text-sm">
+                      <Flag size={14} />
+                      {t("practice.endSession")}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -570,6 +570,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.accuracy": "accuracy",
     "practice.target85": "target 85%",
     "practice.endSession": "End session",
+    "practice.deckComplete": "You've reached the end of the deck",
+    "practice.deckCompleteDesc": "Shuffle to practice again or end the session.",
 
     // Study Tracker Panel
     "studyTracker.title": "Time Track",
@@ -1289,6 +1291,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.accuracy": "正确率",
     "practice.target85": "目标 85%",
     "practice.endSession": "结束本次练习",
+    "practice.deckComplete": "你已完成全部题目",
+    "practice.deckCompleteDesc": "打乱后继续练习，或结束本次会话。",
 
     // Study Tracker Panel
     "studyTracker.title": "学习时长",
