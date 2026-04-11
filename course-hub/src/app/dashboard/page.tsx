@@ -47,7 +47,7 @@ export default async function DashboardPage() {
   }
 
   const masteryFetch = allKpIds.length > 0
-    ? await supabase.from("element_mastery").select("knowledge_point_id, current_level").in("knowledge_point_id", allKpIds)
+    ? await supabase.from("element_mastery").select("concept_id, current_level").in("concept_id", allKpIds)
     : { data: [] };
 
   const LEARNED_LEVELS = new Set(["practiced", "proficient", "mastered"]);
@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     const kps = kpsByCourse[courseId] ?? [];
     const kpSet = new Set(kps);
     const learned = (masteryFetch.data ?? []).filter(
-      (m) => kpSet.has(m.knowledge_point_id) && LEARNED_LEVELS.has(m.current_level)
+      (m) => kpSet.has(m.concept_id) && LEARNED_LEVELS.has(m.current_level)
     ).length;
     masteryStatsByCourse[courseId] = { learned, total: kps.length };
   }
