@@ -65,6 +65,8 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     if (bookmarkFilterOn && !bookmarkedIds.has(q.id)) return false;
     return true;
   });
+  // Count only bookmarks that belong to this course's question set
+  const courseBookmarkCount = questions.filter((q) => bookmarkedIds.has(q.id)).length;
 
   async function handleExamUpload(result: { storagePath: string }) {
     setGenerating(true);
@@ -332,7 +334,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   <p className="text-sm font-medium">
                     {t("practice.questionOf")} {currentIndex + 1} {t("practice.of")} {filteredQuestions.length}
                   </p>
-                  {bookmarkedIds.size > 0 && (
+                  {courseBookmarkCount > 0 && (
                     <button
                       onClick={() => { setBookmarkFilterOn((v) => !v); setCurrentIndex(0); setQuestionMode("solving"); }}
                       className="text-xs px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
@@ -342,7 +344,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                       }}
                       title={t("practice.bookmarkFilter")}
                     >
-                      ★ {bookmarkFilterOn ? `${filteredQuestions.length}` : bookmarkedIds.size}
+                      ★ {bookmarkFilterOn ? filteredQuestions.length : courseBookmarkCount}
                     </button>
                   )}
                   {sessionAnswered >= 3 && (() => {
