@@ -94,6 +94,14 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     if (q) setSessionItems((prev) => [...prev, { id: questionId, stem: q.stem, correct: isCorrect }]);
   }
 
+  function handleOverrideCorrect(questionId: string) {
+    // Student self-marked a short_answer as correct — fix session tallies
+    setSessionCorrect((n) => n + 1);
+    setSessionItems((prev) =>
+      prev.map((item) => item.id === questionId ? { ...item, correct: true } : item)
+    );
+  }
+
   const progress = filteredQuestions.length > 0 ? ((currentIndex + 1) / filteredQuestions.length) * 100 : 0;
 
   if (loading) {
@@ -419,6 +427,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               key={filteredQuestions[currentIndex].id}
               question={filteredQuestions[currentIndex]}
               onAnswer={handleAnswer}
+              onOverrideCorrect={handleOverrideCorrect}
               bookmarked={bookmarkedIds.has(filteredQuestions[currentIndex].id)}
             />
           </div>

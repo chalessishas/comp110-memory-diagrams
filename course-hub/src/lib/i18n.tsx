@@ -493,6 +493,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reflectSkip": "Skip",
     "questionCard.firstAttempt": "First attempt",
     "questionCard.attemptHistory": "{n} attempt{s} · {pct}% correct",
+    "questionCard.markCorrect": "I got this right",
 
     // Calibration panel
     "calibration.title": "Confidence Calibration",
@@ -1204,6 +1205,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "questionCard.reflectSkip": "跳过",
     "questionCard.firstAttempt": "首次作答",
     "questionCard.attemptHistory": "{n} 次 · {pct}% 正确",
+    "questionCard.markCorrect": "我答对了",
 
     // Calibration panel
     "calibration.title": "信心校准",

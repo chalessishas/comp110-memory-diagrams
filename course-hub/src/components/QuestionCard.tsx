@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/i18n";
 interface QuestionCardProps {
   question: Question;
   onAnswer: (questionId: string, answer: string, isCorrect: boolean) => void;
+  onOverrideCorrect?: (questionId: string) => void;
   bookmarked?: boolean;
 }
 
@@ -22,7 +23,7 @@ const QUESTION_TYPE_I18N_KEYS: Record<Question["type"], string> = {
   short_answer: "questionCard.shortAnswer",
 };
 
-export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked }: QuestionCardProps) {
+export function QuestionCard({ question, onAnswer, onOverrideCorrect, bookmarked: initialBookmarked }: QuestionCardProps) {
   const { t } = useI18n();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
@@ -104,6 +105,15 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
     }
 
     return { backgroundColor: "var(--bg-surface)", color: "var(--text-primary)" };
+  }
+
+  function handleMarkCorrect() {
+    setIsCorrect(true);
+    setReflectionDone(true);
+    setExplanationVisible(true);
+    // Overwrite the Rating.Again written in handleSubmit with Rating.Good
+    updateCard(question.id, Rating.Good);
+    onOverrideCorrect?.(question.id);
   }
 
   async function handleBookmarkToggle() {
@@ -236,6 +246,17 @@ export function QuestionCard({ question, onAnswer, bookmarked: initialBookmarked
               </>
             )}
           </div>
+
+          {/* Self-override for short_answer — keyword matching can miss semantically correct answers */}
+          {!isCorrect && question.type === "short_answer" && (
+            <button
+              onClick={handleMarkCorrect}
+              className="text-xs px-3 py-1.5 rounded-lg cursor-pointer transition-colors w-fit"
+              style={{ backgroundColor: "var(--bg-muted)", color: "var(--text-secondary)" }}
+            >
+              {t("questionCard.markCorrect")}
+            </button>
+          )}
 
           {/* Deliberate error reflection — fires once before explanation gate for wrong answers */}
           {!isCorrect && !reflectionDone && (
