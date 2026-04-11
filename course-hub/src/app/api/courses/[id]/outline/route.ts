@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { NextResponse } from "next/server";
 import { randomUUID } from "crypto";
 import type { ParsedOutlineNode } from "@/types";
@@ -9,8 +10,9 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: courseOwned } = await supabase.from("courses").select("id").eq("id", id).eq("user_id", user.id).single();
-  if (!courseOwned) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   const { data, error } = await supabase
     .from("outline_nodes")
