@@ -17,7 +17,6 @@ export interface MasteryStats {
   levelReachedAt: Date;
   recentAccuracy: number; // last 5 attempts
   recentCount: number;
-  courseConceptsAtLevel2OrAbove: number;
   hasDownstreamDependents: boolean;
 }
 

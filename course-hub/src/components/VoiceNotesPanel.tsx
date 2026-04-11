@@ -501,6 +501,7 @@ export function VoiceNotesPanel({
                         onClick={() => startDictation({ type: "clarification", index })}
                         className="ui-icon-button shrink-0"
                         disabled={!speechSupported}
+                        aria-label={t("voiceNotes.talkNote")}
                       >
                         <Mic size={14} />
                       </button>

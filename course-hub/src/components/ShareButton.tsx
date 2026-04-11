@@ -43,6 +43,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
           onClick={handleCopy}
           className="ui-icon-button"
           title={t("share.copyLink")}
+          aria-label={t("share.copyLink")}
         >
           {copied ? <Check size={14} style={{ color: "var(--success)" }} /> : <Copy size={14} />}
         </button>
@@ -57,6 +58,7 @@ export function ShareButton({ courseId }: { courseId: string }) {
         disabled={loading}
         className="ui-icon-button"
         title={t("share.shareCourse")}
+        aria-label={t("share.shareCourse")}
       >
         {loading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
       </button>

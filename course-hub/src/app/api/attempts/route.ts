@@ -166,7 +166,6 @@ export async function POST(request: Request) {
         levelReachedAt: new Date(mastery.level_reached_at ?? Date.now()),
         recentAccuracy: recentAccuracy,
         recentCount: recentWindow.length,
-        courseConceptsAtLevel2OrAbove: 0,
         hasDownstreamDependents,
       };
 
