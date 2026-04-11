@@ -321,21 +321,21 @@ export function VoiceNotesPanel({
       <div className="rounded-[20px] p-5 mt-6" style={{ backgroundColor: "var(--bg-muted)" }}>
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-sm font-medium">1. Speak or paste the raw note</p>
+            <p className="text-sm font-medium">{t("voiceNotes.step1Label")}</p>
             <p className="text-xs mt-1" style={{ color: "var(--text-secondary)" }}>
-              Use the mic for the main note, then use the smaller mic buttons below if AI asks you to clarify something.
+              {t("voiceNotes.step1Desc")}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             {isRecording ? (
               <button onClick={stopDictation} className="ui-button-primary">
                 <Square size={14} />
-                Stop Recording
+                {t("voiceNotes.stopRecording")}
               </button>
             ) : (
               <button onClick={() => startDictation({ type: "transcript" })} className="ui-button-primary" disabled={!speechSupported}>
                 <Mic size={14} />
-                Talk Note
+                {t("voiceNotes.talkNote")}
               </button>
             )}
             <button onClick={organizeNote} disabled={organizing || !transcript.trim()} className="ui-button-secondary disabled:opacity-40">
@@ -372,7 +372,7 @@ export function VoiceNotesPanel({
 
           <div>
             <label className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-              Transcript
+              {t("voiceNotes.transcriptLabel")}
             </label>
             <textarea
               value={transcript}
@@ -388,7 +388,7 @@ export function VoiceNotesPanel({
             />
             {isRecording && recordingTarget.type === "transcript" && interimText && (
               <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
-                Listening: {interimText}
+                {t("voiceNotes.listeningPrefix")}{interimText}
               </p>
             )}
           </div>
@@ -415,7 +415,7 @@ export function VoiceNotesPanel({
           <div className="ui-panel p-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <div className="ui-kicker mb-3">AI Note Draft</div>
+                <div className="ui-kicker mb-3">{t("voiceNotes.draftKicker")}</div>
                 <h4 className="text-xl font-semibold tracking-wide">{draft.title}</h4>
                 <p className="ui-copy mt-2 max-w-3xl">{draft.summary}</p>
               </div>
@@ -430,7 +430,7 @@ export function VoiceNotesPanel({
             <div className="grid gap-4 mt-5 lg:grid-cols-2">
               <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
                 <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                  Key Points
+                  {t("voiceNotes.keyPoints")}
                 </p>
                 <div className="space-y-2 mt-3">
                   {draft.key_points.map((item) => (
@@ -441,7 +441,7 @@ export function VoiceNotesPanel({
 
               <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
                 <p className="text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
-                  What Still Feels Fuzzy
+                  {t("voiceNotes.fuzzyPoints")}
                 </p>
                 <div className="space-y-2 mt-3">
                   {draft.confusing_points.length > 0 ? (
@@ -450,7 +450,7 @@ export function VoiceNotesPanel({
                     ))
                   ) : (
                     <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                      AI thinks your explanation is already fairly clear.
+                      {t("voiceNotes.alreadyClear")}
                     </p>
                   )}
                 </div>
@@ -461,7 +461,7 @@ export function VoiceNotesPanel({
               <div className="rounded-[20px] p-5 mt-4" style={{ backgroundColor: "var(--bg-muted)" }}>
                 <div className="flex items-center gap-2 text-[11px] font-medium tracking-wide" style={{ color: "var(--text-muted)" }}>
                   <BrainCircuit size={14} />
-                  Next Action
+                  {t("voiceNotes.nextAction")}
                 </div>
                 <p className="text-sm mt-2 leading-relaxed">{draft.next_action}</p>
               </div>
@@ -473,10 +473,10 @@ export function VoiceNotesPanel({
             <div className="rounded-[20px] p-5" style={{ backgroundColor: "var(--bg-muted)" }}>
               <div className="flex items-center gap-2">
                 <MessageCircleQuestion size={16} style={{ color: "var(--accent)" }} />
-                <p className="text-sm font-medium">2. Answer the follow-up questions</p>
+                <p className="text-sm font-medium">{t("voiceNotes.step2Label")}</p>
               </div>
               <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
-                If you do not want to type, click the mic beside a question and answer it out loud.
+                {t("voiceNotes.step2Desc")}
               </p>
 
               <div className="space-y-4 mt-4">
@@ -507,7 +507,7 @@ export function VoiceNotesPanel({
                     </div>
                     {isRecording && recordingTarget.type === "clarification" && recordingTarget.index === index && interimText && (
                       <p className="text-xs mt-2" style={{ color: "var(--text-secondary)" }}>
-                        Listening: {interimText}
+                        {t("voiceNotes.listeningPrefix")}{interimText}
                       </p>
                     )}
                   </div>
@@ -573,7 +573,7 @@ export function VoiceNotesPanel({
 
                 {note.next_action && (
                   <p className="text-sm mt-4 leading-relaxed">
-                    <span className="font-medium">Next:</span> {note.next_action}
+                    <span className="font-medium">{t("voiceNotes.nextPrefix")}</span> {note.next_action}
                   </p>
                 )}
               </div>
