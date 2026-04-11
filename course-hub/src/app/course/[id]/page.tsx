@@ -26,7 +26,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ i
   // Parallel group 2: element_mastery + misconceptions need kpIds; lesson_progress needs lessonIds
   const [{ data: mastery }, { data: misconceptions }, { data: progress }] = await Promise.all([
     kpIds.length > 0
-      ? supabase.from("element_mastery").select("concept_id, current_level, fsrs_retrievability").eq("user_id", user.id).in("concept_id", kpIds)
+      ? supabase.from("element_mastery").select("concept_id, current_level, fsrs_retrievability").eq("user_id", user.id).eq("element_name", "_overall").in("concept_id", kpIds)
       : Promise.resolve({ data: [] as { concept_id: string; current_level: string; fsrs_retrievability: number }[] }),
     kpIds.length > 0
       ? supabase.from("misconceptions").select("*").eq("user_id", user.id).in("concept_id", kpIds).eq("resolved", false)

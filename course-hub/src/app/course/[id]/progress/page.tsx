@@ -48,6 +48,7 @@ export default async function ProgressPage({ params }: { params: Promise<{ id: s
           .from("element_mastery")
           .select("concept_id, current_level, times_tested, times_correct")
           .eq("user_id", user.id)
+          .eq("element_name", "_overall")
           .in("concept_id", kpIds)
       : Promise.resolve({ data: [] as { concept_id: string; current_level: string; times_tested: number; times_correct: number }[] }),
   ]);

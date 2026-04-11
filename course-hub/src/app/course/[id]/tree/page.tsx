@@ -43,6 +43,7 @@ export default async function TreePage({ params }: { params: Promise<{ id: strin
         .from("element_mastery")
         .select("concept_id, current_level, times_tested, times_correct")
         .eq("user_id", user.id)
+        .eq("element_name", "_overall")
         .in("concept_id", kpIds)
     : { data: [] };
 
