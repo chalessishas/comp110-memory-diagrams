@@ -5,10 +5,19 @@ export async function GET(
   _: Request,
   { params }: { params: Promise<{ id: string; lessonId: string }> }
 ) {
-  const { id: _id, lessonId } = await params;
+  const { id, lessonId } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  // Verify lesson belongs to this course before returning chunks
+  const { data: lessonCheck } = await supabase
+    .from("lessons")
+    .select("id")
+    .eq("id", lessonId)
+    .eq("course_id", id)
+    .single();
+  if (!lessonCheck) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const { data, error } = await supabase
     .from("lesson_chunks")
@@ -24,6 +33,7 @@ export async function GET(
       .from("lessons")
       .select("content, title")
       .eq("id", lessonId)
+      .eq("course_id", id)
       .single();
 
     if (!lesson) return NextResponse.json([]);
