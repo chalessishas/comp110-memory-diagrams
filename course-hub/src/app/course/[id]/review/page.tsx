@@ -5,6 +5,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { SessionSummaryModal } from "@/components/SessionSummaryModal";
 import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope, getDesiredRetention, setDesiredRetention, type DesiredRetention } from "@/lib/spaced-repetition";
+import Link from "next/link";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
 import { TeachBackPanel } from "@/components/TeachBackPanel";
@@ -351,9 +352,12 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         <div className="ui-empty rounded-[20px]">
           <Check size={32} className="mx-auto mb-3" style={{ color: "var(--success)" }} />
           <p className="font-medium mb-1">{t("review.allCaughtUp")}</p>
-          <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
             {t("review.allCaughtUpDesc")}
           </p>
+          <Link href={`/course/${id}/practice`} className="ui-button-secondary mb-4">
+            {t("review.goPractice")}
+          </Link>
           <ReviewSparkline questionIds={questions.map((q) => q.id)} />
         </div>
       ) : currentQuestion ? (

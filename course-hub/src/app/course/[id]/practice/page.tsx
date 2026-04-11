@@ -327,6 +327,10 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
               <><Sparkles size={16} /> {t("practice.generateBtn")}</>
             )}
           </button>
+          <Link href={`/course/${id}/library`} className="ui-button-secondary">
+            <Upload size={14} />
+            {t("practice.goToLibrary")}
+          </Link>
         </div>
       ) : (
         <div className="space-y-5">

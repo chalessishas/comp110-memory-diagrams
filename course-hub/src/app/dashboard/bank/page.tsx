@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Bookmark, Loader2, Trash2 } from "lucide-react";
 import type { QuestionWithAnswer } from "@/types";
 import { useI18n } from "@/lib/i18n";
@@ -55,9 +56,12 @@ export default function QuestionBankPage() {
       {bookmarks.length === 0 ? (
         <div className="ui-empty">
           <p style={{ color: "var(--text-secondary)" }}>{t("bank.noSaved")}</p>
-          <p className="text-sm mt-1" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm mt-1 mb-4" style={{ color: "var(--text-secondary)" }}>
             {t("bank.noSavedDesc")}
           </p>
+          <Link href="/dashboard" className="ui-button-secondary">
+            {t("bank.browseCourses")}
+          </Link>
         </div>
       ) : (
         <div className="space-y-3">

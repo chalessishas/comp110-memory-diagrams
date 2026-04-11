@@ -207,6 +207,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExam": "Upload Exam",
     "practice.noQuestions": "No practice questions yet",
     "practice.noQuestionsDesc": "Upload a past exam or practice sheet to generate interactive questions",
+    "practice.goToLibrary": "Upload Materials",
     "practice.converting": "AI is converting questions...",
     "practice.correct": "Correct",
     "practice.incorrect": "Incorrect",
@@ -427,6 +428,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.speechFallbackNote": "Browser speech recognition is not available here, so this panel falls back to typed notes.",
     "review.allCaughtUp": "All caught up",
     "review.allCaughtUpDesc": "No questions due for review right now. Keep practicing to build your review queue.",
+    "review.goPractice": "Go Practice",
     "review.howWell": "How well did you know this?",
     "review.again": "Again",
     "review.againDesc": "Forgot completely",
@@ -529,6 +531,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "bank.answer": "Answer:",
     "bank.saveToBank": "Save to question bank",
     "bank.removeFromBank": "Remove from bank",
+    "bank.browseCourses": "Browse Courses",
 
     // Dashboard - Today section
     "dashboard.today": "Today",
@@ -584,6 +587,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "studyTracker.today": "Today",
     "studyTracker.recordedDevice": "Recorded on this device today.",
     "studyTracker.thisWeek": "This Week",
+    "studyTracker.weekTotal": "Week total: {duration}",
 
     // Study Stats Card
     "studyStats.title": "Study Time",
@@ -942,6 +946,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "practice.uploadExam": "上传试卷",
     "practice.noQuestions": "还没有练习题",
     "practice.noQuestionsDesc": "上传历年试卷或练习册，AI 自动生成交互式题目",
+    "practice.goToLibrary": "上传课程材料",
     "practice.converting": "AI 正在转化题目...",
     "practice.correct": "正确",
     "practice.incorrect": "错误",
@@ -1162,6 +1167,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "voiceNotes.speechFallbackNote": "此浏览器不支持语音识别，面板已切换为文字输入模式。",
     "review.allCaughtUp": "全部完成",
     "review.allCaughtUpDesc": "当前没有需要复习的题目，继续练习来积累复习队列。",
+    "review.goPractice": "去练习",
     "review.howWell": "你对这道题的掌握程度？",
     "review.again": "再来一次",
     "review.againDesc": "完全忘记了",
@@ -1264,6 +1270,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "bank.answer": "答案：",
     "bank.saveToBank": "收藏到题库",
     "bank.removeFromBank": "从题库移除",
+    "bank.browseCourses": "浏览课程",
 
     // Dashboard - Today section
     "dashboard.today": "今天",
@@ -1319,6 +1326,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "studyTracker.today": "今天",
     "studyTracker.recordedDevice": "今天在本设备上记录的时长。",
     "studyTracker.thisWeek": "本周",
+    "studyTracker.weekTotal": "本周总计：{duration}",
 
     // Study Stats Card
     "studyStats.title": "学习时长",
