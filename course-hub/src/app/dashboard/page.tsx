@@ -47,7 +47,7 @@ export default async function DashboardPage() {
   }
 
   const masteryFetch = allKpIds.length > 0
-    ? await supabase.from("element_mastery").select("concept_id, current_level").in("concept_id", allKpIds)
+    ? await supabase.from("element_mastery").select("concept_id, current_level").in("concept_id", allKpIds).eq("element_name", "_overall")
     : { data: [] };
 
   const LEARNED_LEVELS = new Set(["practiced", "proficient", "mastered"]);
