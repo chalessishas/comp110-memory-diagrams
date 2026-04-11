@@ -1,37 +1,30 @@
-# Progress Loop Status — 2026-04-11 16:27:03
+# Progress Loop Status — 2026-04-11 16:32:53
 
-## Status: ADVANCING
+## Status: SECURITY AUDIT COMPLETE
 
 ### Recent commits (last 5)
-- `edb2f8d` refactor: verifyCourseOwnership helper + fix 3 missing ownership checks (uploads/GET, exams/GET)
+- `352b503` fix: upload courseId ownership + parse storage path validation
+- `16a67f8` refactor: outline/GET to verifyCourseOwnership helper
+- `f7da06e` fix: close 3 IDOR gaps + i18n day names
+- `edb2f8d` refactor: verifyCourseOwnership helper + fix 3 missing ownership checks
 - `76a8149` feat: error boundaries for review/learn/practice sub-routes
-- `44c455f` fix(practice): bookmark badge shows course-scoped count not global
-- `84be37a` feat(practice): bookmarked-only filter mode
-- `1f65813` docs: chronicle + research
 
-### What's done this session
-- ✅ Full API security audit: 25+ routes, all IDOR gaps closed (+ 2 new gaps found today)
-- ✅ window.confirm/alert/prompt → in-app components
-- ✅ window.location.reload → router.refresh
-- ✅ ConfirmDialog Escape key
-- ✅ i18n: zero hardcoded strings (only global-error.tsx accepted)
-- ✅ tsc: exit 0
-- ✅ Error boundaries: review, learn, practice sub-routes
-- ✅ verifyCourseOwnership DRY helper (ownership.ts)
+### Security audit summary
+35 authed API routes audited. All ownership-checked. 2 intentional exceptions:
+- `fork/route.ts` — share-token based access by design
+- `preview/learning/route.ts` — operates on client-provided JSON, no DB reads
 
-### Remaining tasks
+Total IDOR fixes this session: **8 routes** (courses GET all, uploads GET, exams GET,
+chunks GET, upload POST courseId, parse POST storagePath + courseId, questions feedback POST)
 
-1. **FSRS desired retention slider** — MEDIUM impact, learning science value
-   - 1 DB column in user_profiles
-   - 1 settings UI slider (0.7–0.97, default 0.9)
-   - Pass to `getFSRS(params)` in mastery-v2.ts
-   
-2. **mastery-summary ownership** — still reads outline_nodes without course ownership check
-   - Leaks KP UUIDs only (no content); accepted as low risk
-   - Easy fix: add course join to the query
+### Remaining work (non-security)
 
-3. **ConfirmDialog focus trap** — Tab can escape modal
-   - a11y gap, non-critical
+1. **ConfirmDialog focus trap** — Tab can escape modal (a11y, non-critical)
+2. **mastery-summary ownership** — leaks KP UUIDs only; accepted low risk
+3. **Vercel env vars** (blocked on user): UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN, SUPABASE_SERVICE_ROLE_KEY
 
-### Blocked items (user action required)
-- Vercel env vars: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`
+### What's left to audit
+None — all routes covered. Next meaningful work would be:
+- Performance: `courseConceptsAtLevel2OrAbove` is a client-side count of all nodes; could be expensive at scale
+- UX: ConfirmDialog focus trap
+- Feature: anything new the user wants to build
