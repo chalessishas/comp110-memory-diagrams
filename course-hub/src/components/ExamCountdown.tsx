@@ -117,7 +117,7 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
                   >
                     {days === 0 ? t("exam.today") : days === 1 ? t("exam.tomorrow") : `${days} ${t("exam.days")}`}
                   </span>
-                  <button onClick={() => handleDelete(exam.id)} className="opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
+                  <button onClick={() => handleDelete(exam.id)} className="opacity-100 md:opacity-0 md:group-hover:opacity-100 cursor-pointer transition-opacity">
                     <Trash2 size={11} style={{ color: "var(--danger)" }} />
                   </button>
                 </div>

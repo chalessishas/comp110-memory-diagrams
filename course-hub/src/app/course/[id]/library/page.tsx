@@ -117,7 +117,7 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                       {typeLabels[upload.upload_type] ?? t("library.typeFile")} · {formatDate(upload.created_at, locale)}
                     </p>
                   </div>
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                     {(upload.file_type === "pdf" || upload.file_type === "image") && !upload.parsed_content && (
                       <button
                         onClick={async () => {

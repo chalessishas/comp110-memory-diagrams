@@ -167,7 +167,7 @@ function EditableNode({
         )}
 
         {!editing && (
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-0.5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <button onClick={startEdit} className="p-1.5 rounded-lg cursor-pointer transition-colors" title={t("misc.rename")} style={{ color: "var(--text-muted)" }}>
               <Pencil size={13} />
             </button>
