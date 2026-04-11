@@ -85,13 +85,14 @@ function EditableNode({
       return;
     }
     setSaving(true);
-    await fetch(`/api/outline-nodes/${node.id}`, {
+    const res = await fetch(`/api/outline-nodes/${node.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: editValue.trim() }),
     });
-    onUpdate(node.id, editValue.trim());
     setSaving(false);
+    if (!res.ok) { setEditValue(node.name); setEditing(false); return; }
+    onUpdate(node.id, editValue.trim());
     setEditing(false);
   }
 
@@ -258,7 +259,8 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
   }, []);
 
   const handleDelete = useCallback(async (id: string) => {
-    await fetch(`/api/outline-nodes/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/outline-nodes/${id}`, { method: "DELETE" });
+    if (!res.ok) return;
     const toRemove = new Set<string>();
     function collectChildren(nodeId: string) {
       toRemove.add(nodeId);

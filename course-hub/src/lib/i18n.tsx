@@ -325,6 +325,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Regenerate Button
     "regenerate.done": "Done!",
+    "regenerate.failed": "Translation failed. Please try again.",
     "regenerate.translate": "Translate course",
     "regenerate.titleEn": "Regenerate all content in English",
     "regenerate.titleZh": "用中文重新生成所有内容",
@@ -362,6 +363,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "archive.archive": "Archive",
     "archive.restore": "Restore",
     "archive.deleteConfirm": "Delete this course and all its data?",
+    "archive.deleteFailed": "Delete failed. Please try again.",
+    "archive.archiveFailed": "Failed to update course. Please try again.",
 
     // Settings
     "settings.title": "Settings",
@@ -702,6 +705,7 @@ const translations: Record<Locale, Record<string, string>> = {
     // Share
     "share.copyLink": "Copy link",
     "share.shareCourse": "Share course",
+    "share.failed": "Failed to create share link. Please try again.",
 
     // Study Buddy
     "studyBuddy.title": "Study Buddy",
@@ -1067,6 +1071,7 @@ const translations: Record<Locale, Record<string, string>> = {
 
     // Regenerate Button
     "regenerate.done": "已完成",
+    "regenerate.failed": "翻译失败，请重试。",
     "regenerate.translate": "汉化课程",
     "regenerate.titleEn": "Regenerate all content in English",
     "regenerate.titleZh": "用中文重新生成所有内容",
@@ -1104,6 +1109,8 @@ const translations: Record<Locale, Record<string, string>> = {
     "archive.archive": "归档",
     "archive.restore": "恢复",
     "archive.deleteConfirm": "删除这门课程及所有数据？",
+    "archive.deleteFailed": "删除失败，请重试。",
+    "archive.archiveFailed": "操作失败，请重试。",
 
     // Settings
     "settings.title": "设置",
@@ -1444,6 +1451,7 @@ const translations: Record<Locale, Record<string, string>> = {
     // Share
     "share.copyLink": "复制链接",
     "share.shareCourse": "分享课程",
+    "share.failed": "创建分享链接失败，请重试。",
 
     // Study Buddy
     "studyBuddy.title": "学习伙伴",

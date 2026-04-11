@@ -9,14 +9,17 @@ export function ShareButton({ courseId }: { courseId: string }) {
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleShare() {
     setLoading(true);
+    setError(null);
     const res = await fetch(`/api/courses/${courseId}/share`, { method: "POST" });
-    const data = await res.json();
+    const data = res.ok ? await res.json() : {};
     if (data.token) {
-      const url = `${window.location.origin}/join/${data.token}`;
-      setShareUrl(url);
+      setShareUrl(`${window.location.origin}/join/${data.token}`);
+    } else {
+      setError(t("share.failed"));
     }
     setLoading(false);
   }
@@ -48,13 +51,18 @@ export function ShareButton({ courseId }: { courseId: string }) {
   }
 
   return (
-    <button
-      onClick={handleShare}
-      disabled={loading}
-      className="ui-icon-button"
-      title={t("share.shareCourse")}
-    >
-      {loading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={handleShare}
+        disabled={loading}
+        className="ui-icon-button"
+        title={t("share.shareCourse")}
+      >
+        {loading ? <Loader2 size={18} className="animate-spin" /> : <Share2 size={18} />}
+      </button>
+      {error && (
+        <p className="text-[10px]" style={{ color: "var(--danger)" }}>{error}</p>
+      )}
+    </div>
   );
 }

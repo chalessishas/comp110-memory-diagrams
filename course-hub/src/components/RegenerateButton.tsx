@@ -10,9 +10,11 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
   const { t, locale } = useI18n();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleRegenerate() {
     setLoading(true);
+    setError(null);
     const res = await fetch(`/api/courses/${courseId}/regenerate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -22,22 +24,29 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
     if (res.ok) {
       setDone(true);
       setTimeout(() => router.refresh(), 1000);
+    } else {
+      setError(t("regenerate.failed"));
     }
   }
 
   return (
-    <button
-      onClick={handleRegenerate}
-      disabled={loading || done}
-      className="ui-button-secondary !text-xs disabled:opacity-50"
-      title={t("regenerate.title")}
-    >
-      {loading ? (
-        <Loader2 size={13} className="animate-spin" />
-      ) : (
-        <Languages size={13} />
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={handleRegenerate}
+        disabled={loading || done}
+        className="ui-button-secondary !text-xs disabled:opacity-50"
+        title={t("regenerate.title")}
+      >
+        {loading ? (
+          <Loader2 size={13} className="animate-spin" />
+        ) : (
+          <Languages size={13} />
+        )}
+        {done ? t("regenerate.done") : t("regenerate.translate")}
+      </button>
+      {error && (
+        <p className="text-[10px]" style={{ color: "var(--danger)" }}>{error}</p>
       )}
-      {done ? t("regenerate.done") : t("regenerate.translate")}
-    </button>
+    </div>
   );
 }
