@@ -30,6 +30,7 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Preferences
   const [semester, setSemester] = useState("");
@@ -142,11 +143,11 @@ export default function SettingsPage() {
         router.push("/login");
       } else {
         const data = await res.json().catch(() => null);
-        alert(data?.error ?? t("settings.deletionFailed"));
+        setDeleteError(data?.error ?? t("settings.deletionFailed"));
         setClearing(null);
       }
     } catch {
-      alert(t("settings.networkError"));
+      setDeleteError(t("settings.networkError"));
       setClearing(null);
     }
   };
@@ -230,6 +231,9 @@ export default function SettingsPage() {
               <Trash2 size={14} className="inline mr-1.5" />
               {t("settings.deleteAccount")}
             </button>
+            {deleteError && (
+              <p className="mt-3 text-sm" style={{ color: "var(--danger)" }}>{deleteError}</p>
+            )}
           </div>
         </div>
       )}
