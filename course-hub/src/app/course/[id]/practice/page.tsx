@@ -21,6 +21,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [showExamPrep, setShowExamPrep] = useState(false);
   const [sessionAnswered, setSessionAnswered] = useState(0);
@@ -303,18 +304,25 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
           <button
             onClick={async () => {
               setGeneratingAI(true);
+              setGenerateError(null);
               const res = await fetch(`/api/courses/${id}/generate-questions`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
               });
-              if (res.ok) {
+              if (res.status === 429) {
+                setGenerateError(t("practice.generateErrRate"));
+              } else if (res.ok) {
                 const data = await res.json();
                 if (data.generated > 0) {
                   const qRes = await fetch(`/api/questions?courseId=${id}`);
                   const qs = await qRes.json();
                   setQuestions(qs);
                   setCurrentIndex(0);
+                } else {
+                  setGenerateError(t("practice.generateErrNone"));
                 }
+              } else {
+                setGenerateError(t("practice.generateErrFail"));
               }
               setGeneratingAI(false);
             }}
@@ -331,6 +339,9 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
             <Upload size={14} />
             {t("practice.goToLibrary")}
           </Link>
+          {generateError && (
+            <p className="text-sm mt-2" style={{ color: "var(--danger)" }}>{generateError}</p>
+          )}
         </div>
       ) : (
         <div className="space-y-5">
