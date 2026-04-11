@@ -522,6 +522,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "exam.tomorrow": "Tomorrow",
     "exam.days": "days",
     "exam.add": "Add",
+    "exam.addFailed": "Failed to save exam. Please try again.",
     "exam.namePlaceholder": "Exam name",
 
     // Streak Badge
@@ -1270,6 +1271,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "exam.tomorrow": "明天",
     "exam.days": "天",
     "exam.add": "添加",
+    "exam.addFailed": "保存考试失败，请重试。",
     "exam.namePlaceholder": "考试名称",
 
     // Streak Badge

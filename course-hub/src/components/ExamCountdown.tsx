@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Calendar, Plus, Trash2, AlertTriangle } from "lucide-react";
+import { Calendar, Plus, Trash2, AlertTriangle, Loader2 } from "lucide-react";
 import type { ExamDate } from "@/types";
 import { useI18n } from "@/lib/i18n";
 
@@ -23,20 +23,27 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
   const [adding, setAdding] = useState(false);
   const [title, setTitle] = useState("");
   const [date, setDate] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
 
   async function handleAdd() {
-    if (!title || !date) return;
+    if (!title || !date || saving) return;
+    setSaving(true);
+    setAddError(null);
     const res = await fetch(`/api/courses/${courseId}/exams`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title, exam_date: date }),
     });
+    setSaving(false);
     if (res.ok) {
       const exam = await res.json();
       setExams((prev) => [...prev, exam].sort((a, b) => a.exam_date.localeCompare(b.exam_date)));
       setTitle("");
       setDate("");
       setAdding(false);
+    } else {
+      setAddError(t("exam.addFailed"));
     }
   }
 
@@ -68,28 +75,40 @@ export function ExamCountdown({ courseId, exams: initialExams }: { courseId: str
       </div>
 
       {adding && (
-        <div className="flex gap-2 mb-4">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={t("exam.namePlaceholder")}
-            className="flex-1 px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
-            onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
-            onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-          />
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
-            style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
-            onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
-            onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
-          />
-          <button onClick={handleAdd} className="px-4 py-2 rounded-xl text-xs font-medium cursor-pointer" style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}>
-            {t("exam.add")}
-          </button>
+        <div className="mb-4 space-y-2">
+          <div className="flex gap-2">
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              placeholder={t("exam.namePlaceholder")}
+              className="flex-1 px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
+              style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAdd()}
+              className="px-3 py-2 rounded-xl text-xs outline-none transition-shadow"
+              style={{ border: "1px solid var(--border)", backgroundColor: "var(--bg-surface)" }}
+              onFocus={(e) => (e.currentTarget.style.boxShadow = "0 0 0 3px var(--accent-light)")}
+              onBlur={(e) => (e.currentTarget.style.boxShadow = "none")}
+            />
+            <button
+              onClick={handleAdd}
+              disabled={saving || !title || !date}
+              className="px-4 py-2 rounded-xl text-xs font-medium cursor-pointer disabled:opacity-50"
+              style={{ backgroundColor: "var(--accent)", color: "var(--bg-surface)" }}
+            >
+              {saving ? <Loader2 size={12} className="animate-spin" /> : t("exam.add")}
+            </button>
+          </div>
+          {addError && (
+            <p className="text-xs" style={{ color: "var(--danger)" }}>{addError}</p>
+          )}
         </div>
       )}
 
