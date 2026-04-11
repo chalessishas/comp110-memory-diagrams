@@ -183,9 +183,9 @@ export default function LibraryPage({ params }: { params: Promise<{ id: string }
                       <div key={i} className="p-3 rounded-xl text-xs" style={{ backgroundColor: "var(--bg-muted)" }}>
                         <p className="font-medium">{section.title}</p>
                         <p className="mt-1" style={{ color: "var(--text-secondary)" }}>{section.summary}</p>
-                        {(section.key_concepts?.length ?? 0) > 0 && (
+                        {section.key_concepts && section.key_concepts.length > 0 && (
                           <div className="flex flex-wrap gap-1 mt-2">
-                            {section.key_concepts!.map((c, j) => (
+                            {section.key_concepts.map((c, j) => (
                               <span key={j} className="ui-badge">
                                 {c}
                               </span>
