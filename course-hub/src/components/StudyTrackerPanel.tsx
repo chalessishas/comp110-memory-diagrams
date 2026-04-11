@@ -47,6 +47,7 @@ function emptySummary(): StudySummary {
 }
 
 function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
+  const { t, locale } = useI18n();
   const [weekly, setWeekly] = useState(() => getWeeklySummary(courseId));
 
   useEffect(() => {
@@ -57,6 +58,7 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
 
   const maxMs = Math.max(...weekly.map((d) => d.totalMs), 1);
   const weekTotal = weekly.reduce((s, d) => s + d.totalMs, 0);
+  const intlLocale = locale === "zh" ? "zh-CN" : "en-US";
 
   return (
     <div>
@@ -65,7 +67,7 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
           const height = day.totalMs > 0 ? Math.max((day.totalMs / maxMs) * 100, 6) : 4;
           const isToday = i === weekly.length - 1;
           const d = new Date(day.day + "T12:00:00");
-          const dayName = ["S", "M", "T", "W", "T", "F", "S"][d.getDay()];
+          const dayName = new Intl.DateTimeFormat(intlLocale, { weekday: "narrow" }).format(d);
           return (
             <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
               <div
@@ -84,7 +86,7 @@ function WeeklyMiniChart({ courseId }: { courseId?: string | null }) {
         })}
       </div>
       <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-        Week total: {formatDuration(weekTotal)}
+        {t("studyTracker.weekTotal", { duration: formatDuration(weekTotal) })}
       </p>
     </div>
   );
