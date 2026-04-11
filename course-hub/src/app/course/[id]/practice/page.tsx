@@ -35,6 +35,7 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
   const [sessionStart] = useState(() => Date.now());
   const [sessionItems, setSessionItems] = useState<{ id: string; stem: string; correct: boolean }[]>([]);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [bookmarkFilterOn, setBookmarkFilterOn] = useState(false);
 
   useEffect(() => {
     const scope = getExamScope(id);
@@ -58,10 +59,12 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
     });
   }, [id]);
 
-  // Filter by exam scope if active
-  const filteredQuestions = scopeKpIds
-    ? questions.filter((q) => q.knowledge_point_id && scopeKpIds.has(q.knowledge_point_id))
-    : questions;
+  // Filter by exam scope and/or bookmarks
+  const filteredQuestions = questions.filter((q) => {
+    if (scopeKpIds && !(q.knowledge_point_id && scopeKpIds.has(q.knowledge_point_id))) return false;
+    if (bookmarkFilterOn && !bookmarkedIds.has(q.id)) return false;
+    return true;
+  });
 
   async function handleExamUpload(result: { storagePath: string }) {
     setGenerating(true);
@@ -271,7 +274,17 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
         </div>
       )}
 
-      {filteredQuestions.length === 0 ? (
+      {filteredQuestions.length === 0 && bookmarkFilterOn ? (
+        <div className="ui-empty">
+          <p className="text-base font-medium mb-2">{t("practice.noBookmarkedQuestions")}</p>
+          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
+            {t("practice.noBookmarkedQuestionsDesc")}
+          </p>
+          <button onClick={() => setBookmarkFilterOn(false)} className="ui-button-secondary">
+            {t("practice.showAll")}
+          </button>
+        </div>
+      ) : filteredQuestions.length === 0 ? (
         <div className="ui-empty">
           <p className="text-base font-medium mb-2">{t("practice.noQuestions")}</p>
           <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
@@ -319,6 +332,19 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                   <p className="text-sm font-medium">
                     {t("practice.questionOf")} {currentIndex + 1} {t("practice.of")} {filteredQuestions.length}
                   </p>
+                  {bookmarkedIds.size > 0 && (
+                    <button
+                      onClick={() => { setBookmarkFilterOn((v) => !v); setCurrentIndex(0); setQuestionMode("solving"); }}
+                      className="text-xs px-2.5 py-1 rounded-lg cursor-pointer transition-colors"
+                      style={{
+                        backgroundColor: bookmarkFilterOn ? "var(--accent)" : "var(--bg-muted)",
+                        color: bookmarkFilterOn ? "white" : "var(--text-muted)",
+                      }}
+                      title={t("practice.bookmarkFilter")}
+                    >
+                      ★ {bookmarkFilterOn ? `${filteredQuestions.length}` : bookmarkedIds.size}
+                    </button>
+                  )}
                   {sessionAnswered >= 3 && (() => {
                     const acc = sessionCorrect / sessionAnswered;
                     const pct = Math.round(acc * 100);
