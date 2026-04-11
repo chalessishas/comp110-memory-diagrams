@@ -41,12 +41,23 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
   if (error) return NextResponse.json([]);
 
+  // Supabase join types aren't inferred for runtime-shaped selects — type the row explicitly
+  type SummaryRow = {
+    concept_id: string;
+    current_level: string;
+    level_reached_at: string;
+    outline_nodes: { title: string } | { title: string }[] | null;
+  };
+
   // Flatten join result: return element_name as the concept title
-  const result = (data ?? []).map((m) => ({
-    element_name: (m.outline_nodes as unknown as { title: string } | null)?.title ?? "Knowledge point",
-    current_level: m.current_level,
-    level_reached_at: m.level_reached_at,
-  }));
+  const result = (data as SummaryRow[] ?? []).map((m) => {
+    const node = Array.isArray(m.outline_nodes) ? m.outline_nodes[0] : m.outline_nodes;
+    return {
+      element_name: node?.title ?? "Knowledge point",
+      current_level: m.current_level,
+      level_reached_at: m.level_reached_at,
+    };
+  });
 
   return NextResponse.json(result);
 }

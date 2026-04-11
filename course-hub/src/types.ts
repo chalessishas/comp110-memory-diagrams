@@ -233,12 +233,17 @@ export interface Misconception {
   created_at: string;
 }
 
+export interface ChallengeTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface ChallengeLog {
   id: string;
   user_id: string;
   concept_id: string;
   session_type: SessionType;
-  turns: unknown[];
+  turns: ChallengeTurn[];
   final_confidence: ConfidenceLevel | null;
   elements_passed: string[];
   elements_failed: string[];
