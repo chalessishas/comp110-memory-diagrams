@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Languages, Loader2 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
 export function RegenerateButton({ courseId }: { courseId: string }) {
+  const router = useRouter();
   const { t, locale } = useI18n();
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
@@ -19,7 +21,7 @@ export function RegenerateButton({ courseId }: { courseId: string }) {
     setLoading(false);
     if (res.ok) {
       setDone(true);
-      setTimeout(() => window.location.reload(), 1000);
+      setTimeout(() => router.refresh(), 1000);
     }
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronRight, ChevronDown, Plus, Trash2, Pencil, Check, X, Loader2, Sparkles } from "lucide-react";
 import type { OutlineNode } from "@/types";
 import { useI18n } from "@/lib/i18n";
@@ -241,6 +242,7 @@ function EditableNode({
 }
 
 export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseId: string }) {
+  const router = useRouter();
   const { t } = useI18n();
   const { confirm, dialog } = useConfirm();
   const [localNodes, setLocalNodes] = useState(nodes);
@@ -301,7 +303,7 @@ export function OutlineTree({ nodes, courseId }: { nodes: OutlineNode[]; courseI
     await fetch(`/api/courses/${courseId}/generate`, { method: "POST" });
     setRegenerating(false);
     setDirty(false);
-    window.location.reload();
+    router.refresh();
   }
 
   if (treeData.length === 0) {
