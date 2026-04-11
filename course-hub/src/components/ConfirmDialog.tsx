@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 
 function ConfirmDialog({
@@ -13,14 +13,38 @@ function ConfirmDialog({
   onCancel: () => void;
 }) {
   const { t } = useI18n();
+  const cancelRef = useRef<HTMLButtonElement>(null);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onCancel(); };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
+    // Save previously focused element; restore on close
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    cancelRef.current?.focus();
+
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { onCancel(); return; }
+      if (e.key !== "Tab") return;
+      // Trap focus between cancel and confirm buttons
+      const first = cancelRef.current;
+      const last = confirmRef.current;
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last?.focus(); }
+      } else {
+        if (document.activeElement === last) { e.preventDefault(); first?.focus(); }
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("keydown", handleKey);
+      previouslyFocused?.focus();
+    };
   }, [onCancel]);
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
       onClick={onCancel}
@@ -34,6 +58,7 @@ function ConfirmDialog({
         </p>
         <div className="flex justify-end gap-2">
           <button
+            ref={cancelRef}
             onClick={onCancel}
             className="px-4 py-2 rounded-xl text-sm cursor-pointer transition-colors"
             style={{ color: "var(--text-secondary)" }}
@@ -41,6 +66,7 @@ function ConfirmDialog({
             {t("misc.cancel")}
           </button>
           <button
+            ref={confirmRef}
             onClick={onConfirm}
             className="px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition-colors"
             style={{ backgroundColor: "var(--danger)", color: "#fff" }}
