@@ -278,6 +278,7 @@ export default function LearnPage({ params }: { params: Promise<{ id: string }> 
           lessonId={activeLessonId}
           totalChunks={isStreaming ? totalChunks : undefined}
           isStreaming={isStreaming}
+          onBack={() => { setActiveLessonId(null); setChunks([]); setRefreshKey(k => k + 1); }}
         />
       </div>
     );

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { MarkdownRenderer } from "@/components/MarkdownRenderer";
-import { Check, X, Loader2, ChevronRight } from "lucide-react";
+import { Check, X, Loader2, ChevronRight, BookOpen, Dumbbell } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { recordActivity } from "@/lib/streaks";
 import type { LessonChunk } from "@/types";
@@ -13,6 +14,7 @@ interface ChunkLessonProps {
   lessonId: string;
   totalChunks?: number; // from SSE outline, for accurate progress during streaming
   isStreaming?: boolean; // true while chunks are still arriving
+  onBack?: () => void; // navigate back to topic list
 }
 
 interface CheckpointState {
@@ -33,7 +35,7 @@ const defaultCheckpointState: CheckpointState = {
   showRemediation: false,
 };
 
-export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreaming }: ChunkLessonProps) {
+export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreaming, onBack }: ChunkLessonProps) {
   const { t } = useI18n();
   const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
   const [checkpointState, setCheckpointState] = useState<Record<number, CheckpointState>>({});
@@ -76,12 +78,26 @@ export function ChunkLesson({ chunks, courseId, lessonId, totalChunks, isStreami
 
   if (isComplete) {
     return (
-      <div className="text-center py-16 space-y-3">
-        <Check size={40} className="mx-auto" style={{ color: "var(--success)" }} />
+      <div className="text-center py-16 space-y-4">
+        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: "var(--success)" }}>
+          <Check size={28} color="white" />
+        </div>
         <h2 className="text-xl font-semibold" style={{ color: "var(--text-primary)" }}>{t("lesson.complete")}</h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           {t("lesson.completeDesc")}
         </p>
+        <div className="flex justify-center gap-3 pt-2 flex-wrap">
+          {onBack && (
+            <button onClick={onBack} className="ui-button-secondary">
+              <BookOpen size={14} />
+              {t("learn.backToTopics")}
+            </button>
+          )}
+          <Link href={`/course/${courseId}/practice`} className="ui-button-primary">
+            <Dumbbell size={14} />
+            {t("practice.title")}
+          </Link>
+        </div>
       </div>
     );
   }
