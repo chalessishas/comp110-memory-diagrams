@@ -7,6 +7,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // Verify the question belongs to a course owned by this user
+  const { data: question } = await supabase.from("questions").select("course_id").eq("id", id).single();
+  if (!question) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const { data: course } = await supabase.from("courses").select("id").eq("id", question.course_id).eq("user_id", user.id).single();
+  if (!course) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   const { reason } = await request.json();
   const validReasons = ["wrong_answer", "unclear", "too_easy", "too_hard", "duplicate", "irrelevant"];
   if (!validReasons.includes(reason)) {

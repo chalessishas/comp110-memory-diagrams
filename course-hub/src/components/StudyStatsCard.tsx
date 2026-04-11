@@ -10,15 +10,15 @@ import {
 } from "@/lib/study-tracker";
 import { useI18n } from "@/lib/i18n";
 
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-function formatShortDate(dateStr: string) {
-  const d = new Date(dateStr + "T12:00:00");
-  return DAY_NAMES[d.getDay()];
-}
+const DAY_KEYS = ["misc.daySun", "misc.dayMon", "misc.dayTue", "misc.dayWed", "misc.dayThu", "misc.dayFri", "misc.daySat"] as const;
 
 export function StudyStatsCard() {
   const { t } = useI18n();
+
+  function formatShortDate(dateStr: string) {
+    const d = new Date(dateStr + "T12:00:00");
+    return t(DAY_KEYS[d.getDay()]);
+  }
   const [weekly, setWeekly] = useState(getWeeklySummary());
   const [allTime, setAllTime] = useState(getAllTimeStats());
 

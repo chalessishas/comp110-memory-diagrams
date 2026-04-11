@@ -614,6 +614,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "error.unexpected": "An unexpected error occurred.",
     "misc.backToDashboard": "Back to Dashboard",
     "misc.or": "or",
+    "misc.daySun": "Sun",
+    "misc.dayMon": "Mon",
+    "misc.dayTue": "Tue",
+    "misc.dayWed": "Wed",
+    "misc.dayThu": "Thu",
+    "misc.dayFri": "Fri",
+    "misc.daySat": "Sat",
 
     // Voice Notes
     "voiceNotes.noBrowserSpeech": "This browser does not expose speech recognition. You can still type into the note box.",
@@ -1326,6 +1333,13 @@ const translations: Record<Locale, Record<string, string>> = {
     "error.unexpected": "发生了意外错误。",
     "misc.backToDashboard": "返回仪表盘",
     "misc.or": "或",
+    "misc.daySun": "日",
+    "misc.dayMon": "一",
+    "misc.dayTue": "二",
+    "misc.dayWed": "三",
+    "misc.dayThu": "四",
+    "misc.dayFri": "五",
+    "misc.daySat": "六",
 
     // Voice Notes
     "voiceNotes.noBrowserSpeech": "此浏览器不支持语音识别。你仍可以在笔记框中直接输入。",

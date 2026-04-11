@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { verifyCourseOwnership } from "@/lib/supabase/ownership";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -9,6 +10,10 @@ export async function GET(
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  if (!await verifyCourseOwnership(supabase, id, user.id)) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
 
   // Verify lesson belongs to this course before returning chunks
   const { data: lessonCheck } = await supabase
