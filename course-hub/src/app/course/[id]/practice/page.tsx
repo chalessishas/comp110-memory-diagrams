@@ -6,7 +6,7 @@ import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { FileDropzone } from "@/components/FileDropzone";
 import { StudyTrackerPanel } from "@/components/StudyTrackerPanel";
-import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target, Flag, Download } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2, Upload, ArrowLeft, Sparkles, Target, Flag, Download, Shuffle } from "lucide-react";
 import type { Question } from "@/types";
 import { trackUsage } from "@/lib/usage-tracker";
 import { useI18n } from "@/lib/i18n";
@@ -351,6 +351,17 @@ export default function PracticePage({ params }: { params: Promise<{ id: string 
                     <Flag size={16} />
                   </button>
                 )}
+                <button
+                  onClick={() => {
+                    setQuestions((prev) => [...prev].sort(() => Math.random() - 0.5));
+                    setCurrentIndex(0);
+                    setQuestionMode("solving");
+                  }}
+                  className="ui-icon-button"
+                  title={t("practice.shuffle")}
+                >
+                  <Shuffle size={16} />
+                </button>
                 <button
                   onClick={() => {
                     setCurrentIndex((i) => Math.max(0, i - 1));
