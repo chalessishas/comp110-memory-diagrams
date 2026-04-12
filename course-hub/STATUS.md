@@ -15,10 +15,11 @@ All data flows required by `mastery-v2.ts evaluateLevel()` are now written on ev
 | `has_teaching_challenge_pass` | teach-back POST | turn 74 |
 | `fsrs_stability`, `fsrs_retrievability` | FSRS sync POST | turn 80 |
 | `evaluateLevel()` call + level write | attempts POST | d690156 |
+| `has_cross_concept_correct` | attempts POST (propagates from child KP correct answer to parent) | 39d77d6 |
+| `has_downstream_dependents` | attempts POST (per-attempt child KP count query for `practiced` level) | 39d77d6 |
 
 Approximations (deliberate, refinable later):
 - `recentAccuracy` = last-5 window via embedded join on questions table ✓ (was: overall accuracy)
-- `courseConceptsAtLevel2OrAbove = 0` (crossConceptOk always passes — avoids per-attempt count query)
 
 ### Evidence-Based Learning Features — Shipped [2026-04-10]
 - **Adaptive difficulty** (85% rule, Wilson 2019): questions sorted by accuracy band
@@ -43,8 +44,7 @@ Approximations (deliberate, refinable later):
 All migrations through `020_drop_duplicate_rls_policies` confirmed applied via Supabase MCP.
 
 ### Known Issues
-- `courseConceptsAtLevel2OrAbove` hardcoded 0 (crossConceptOk always passes — avoids per-attempt count query)
-- SSE lesson streaming untested with live AI calls (build passes)
+- SSE lesson streaming untested with live AI calls end-to-end on Vercel (build passes)
 - Vercel Git integration: manual deploy (`npx vercel deploy --prod`) still required
 
 ## [2026-04-10 04:42] Phase 5 — User-Requested Features (4 of 4 done ✓)
