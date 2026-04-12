@@ -229,6 +229,139 @@ Replace the planned "final-third TTR drop" heuristic with an MTLD approximation 
 
 ---
 
+---
+
+## Research Loop 3 — 2026-04-12 (Reading Questions + text_insertion)
+
+**Focus:** TOEFL 2026 reading section format, `text_insertion` question status, question type distribution, and known design issues with academic passage questions.
+
+---
+
+### Q1 — TOEFL 2026 Reading Section Format: Questions Per Passage and Types Tested
+
+#### Source R1
+- **URL:** https://www.toeflresources.com/toefl-reading/ (TOEFL Resources — primary test-prep authority, updated January 2026)
+- **Core finding:** The January 21, 2026 TOEFL iBT reading section is structurally overhauled into three distinct task types:
+  1. **Complete the Words** — ~100–150 word passage with 10 fill-in-the-blank vocabulary/spelling items per passage. Not multiple-choice comprehension.
+  2. **Read in Daily Life** — short practical texts (15–150 words: emails, announcements, social media). ~5 questions per text, only 5 question types available (factual, vocabulary, inference, negative factual, rhetorical purpose).
+  3. **Read an Academic Passage** — ~200-word scholarly excerpt, followed by exactly **5 multiple-choice questions**. This is the closest equivalent to the pre-2026 academic reading format.
+- **Total questions:** 35–48 across all three task types. The section is multistage adaptive — performance on earlier tasks adjusts difficulty of the academic passage presented.
+- **Key structural change from pre-2026:** Pre-2026 had 3–4 passages of ~700 words with 10 questions each (30–40 questions total, 54–72 min). New format has ~200-word passages with 5 questions each, total ~36 minutes.
+- **Relevance to app:** Our `Reading.jsx` question bank likely models the pre-2026 format (10 questions / 700-word passage). If we're building for current test-takers, question sets should be 5 per passage on ~200-word texts.
+
+#### Source R2
+- **URL:** https://www.toeflresources.com/blog/2026_toefl_format_revealed/ (TOEFL Resources — format announcement)
+- **Core finding:** The new academic passage questions no longer indicate which paragraph to check. Test-takers must scan the full passage for each answer. In the old format, questions were presented with a paragraph reference (e.g., "In paragraph 2..."). This is a significant shift in how factual detail questions work — the answer location is no longer scaffolded.
+- **Relevance:** Our question data model likely stores a `paragraph` or `location` field used to guide users. In the new format, this field is either absent or irrelevant — all questions reference the passage as a whole.
+
+#### Source R3
+- **URL:** https://testsucceed.com/materials/tests/toefl_new/en/description/toefl-2026-new-reading-description.html (TestSucceed, 2026 description)
+- **Core finding:** Confirmed question types for the academic passage in 2026: vocabulary in context, factual details, negative facts, inferences, rhetorical purpose, sentence simplification. **Text insertion (sentence insertion) is explicitly NOT listed** for the new format.
+- **Relevance:** Direct confirmation that `text_insertion` is a deprecated question type as of January 21, 2026.
+
+---
+
+### Q2 — TOEFL text_insertion (Sentence Insertion): Status in 2026 and Design Principles
+
+#### Source R4
+- **URL:** https://toefl.magoosh.com/toefl-2026-changes (Magoosh — comprehensive 2026 change guide)
+- **Core finding:** Explicitly states: *"The new TOEFL 2026 doesn't have sentence insertion questions."* This is listed alongside the removal of 700-word passages and prose summaries as the three defining structural removals. The question type existed in the pre-2026 format where four black square markers [■] were placed at potential insertion points in a paragraph, and test-takers chose which position best fits a provided sentence.
+- **Relevance to app:** Any `text_insertion` questions currently in our reading question bank are **testing a question type that no longer appears on the actual TOEFL**. This is a content accuracy problem, not just a feature gap.
+
+#### Source R5
+- **URL:** https://ieltsix.com/toefl/toefl-reading/insert-text-questions/ (IELTSix — pre-2026 insertion guide)
+- **Core finding (pre-2026 design principles for reference):**
+  - Always **4 answer choices** (positions A/B/C/D marked with ■ in the passage).
+  - Exactly **1 correct answer per question** — a well-designed insertion question has only one logically sound location.
+  - The inserted sentence must connect grammatically AND logically: the sentence before must introduce the topic or context, and the sentence after must follow from it.
+  - Common insertion cue patterns: (a) pronoun reference — the inserted sentence contains "they/it/this" that refers to a noun just introduced in the preceding sentence; (b) contrast markers — the inserted sentence begins with "However/Nevertheless" which must follow a positive claim; (c) logical sequence — general→specific, cause→effect, background→development.
+  - **Distractor design:** Wrong positions typically break pronoun reference chains (referent appears *after* the blank, not before) or split cause/effect pairs that must stay adjacent.
+- **Relevance:** If our app retains `text_insertion` questions as a legacy/practice feature, these are the design standards. The 4-choice, single-correct format is non-negotiable. The key quality signal: if more than one position feels defensible, the question is flawed.
+
+#### Source R6
+- **URL:** https://blog.testglider.com/how-to-answer-toefl-reading-sentence-insertion-questions/ (TestGlider)
+- **Core finding:** The most common design flaw in practice `text_insertion` questions (from test-prep materials, not ETS) is inserting a sentence that could fit 2 or more positions because the passage itself lacks clear cohesion signals (e.g., no pronouns, no discourse markers). ETS-quality insertion questions are identifiable because one position contains a pronoun "this/these/they" that requires the inserted sentence's noun as an antecedent — creating a clear grammatical dependency chain.
+- **Relevance:** For our question quality audit: any `text_insertion` question where the passage doesn't have a clear pronoun-antecedent chain or discourse-marker contrast should be flagged as potentially ambiguous.
+
+---
+
+### Q3 — TOEFL Reading Question Type Distribution (Pre-2026 and 2026)
+
+#### Source R7
+- **URL:** https://magoosh.com/toefl/toefl-reading-question-type-overview/ (Magoosh — question type overview)
+- **Core finding (pre-2026 old format — 10 questions per passage):**
+  - **Factual Information:** 1–3 per passage (most frequent single type, ~15–25% of passage questions)
+  - **Negative Factual (NOT/EXCEPT):** 0–2 per passage (~10–15%)
+  - **Inference:** 1–2 per passage (~10–15%)
+  - **Vocabulary (closest in meaning):** 2–3 per passage (~20–25%, second most frequent)
+  - **Rhetorical Purpose:** 1–2 per passage (~10%)
+  - **Sentence Simplification:** 0–1 per passage (rare, ~5–10%)
+  - **Text Insertion:** 0–1 per passage (rare, ~5–10%)
+  - **Reference:** 0–1 per passage (~5%)
+  - **Prose Summary / Fill-in-Table:** 1 per passage, multi-select, 2–3 points (always final question)
+  - **Note:** ETS does not publish exact percentage breakdowns. These ranges are derived from analysis of official practice tests.
+
+- **2026 new format (5 questions per ~200-word academic passage):**
+  - With only 5 questions, expect approximately: 1–2 vocabulary, 1–2 factual/negative factual, 1 inference or rhetorical purpose, 0–1 sentence simplification. Text insertion and prose summary are confirmed absent.
+  - The compressed format means lower-frequency types (sentence simplification, reference) may appear rarely or not at all on any given passage.
+
+#### Source R8
+- **URL:** https://www.bestmytest.com/blog/toefl/toefl-reading-question-types (BestMyTest — 10 types breakdown)
+- **Core finding:** In the pre-2026 format, vocabulary questions were the most frequently practiced question type in third-party prep materials because they appeared 2–3 per passage and were considered the most trainable. Negative factual questions (NOT/EXCEPT) were rated as the most time-consuming due to requiring elimination of 3 true statements. Sentence simplification appeared at most once per passage and was never repeated within a single passage.
+- **Relevance:** For our question bank balance: if we're modeling the new 5-question format, having more than 1 vocabulary question or 1 negative factual question in a 5-question set is disproportionate to real test distribution.
+
+---
+
+### Q4 — Known Design Issues in Academic Passage Question Design
+
+#### Source R9
+- **URL:** https://blog.testglider.com/toefl-reading-questions-with-examples/ (TestGlider — question design analysis)
+- **Core finding on factual_detail traps:**
+  - The most common trap: answer choices that use **exact words from the passage but recontextualize them** — the vocabulary matches but the relationship between concepts is inverted (e.g., passage says A causes B; trap answer says B causes A).
+  - Second most common trap: **scope mismatch** — a detail that is true in the passage but applies to a different subject than the question asks about (e.g., question asks about organism X, distractor states something true about organism Y mentioned in the same paragraph).
+  - Third: **partial correctness** — the answer is true as far as it goes but omits a critical qualifier from the passage (e.g., passage says "under certain conditions X occurs"; distractor says "X occurs" without the qualifier).
+
+#### Source R10
+- **URL:** https://www.lingomelo.com/blog-page/toefl-reading-practice-guide/ (Lingomelo)
+- **Core finding on pronoun reference questions:**
+  - Reference questions (asking what "it," "they," "this," "which" refers to) are a distinct question type in the old format but are no longer a named type in the 2026 format — reference understanding is now tested implicitly through inference and rhetorical purpose questions.
+  - Common ambiguity in poorly designed reference questions: the passage uses a pronoun that could grammatically refer to two nearby nouns of the same grammatical number and type. ETS-quality reference questions have only one grammatically possible antecedent within the sentence; proximity alone is used to distinguish in borderline cases.
+  - In academic passage question design, pronoun ambiguity most frequently occurs when: (a) two plural nouns appear in the same sentence before a "they," (b) a relative clause creates a nested noun phrase making the closest-noun rule ambiguous, or (c) a demonstrative "this" follows a sentence with two candidate noun phrases.
+
+#### Source R11
+- **URL:** https://www.bestmytest.com/blog/toefl/toefl-reading-question-type-negative-factual-information (BestMyTest — negative factual analysis)
+- **Core finding on negative_fact design issues:**
+  - Negative factual questions are the highest-difficulty factual type because all three wrong answers must be explicitly and unambiguously stated in the passage, while the correct answer must be either directly contradicted OR simply not mentioned at all.
+  - Design flaw in third-party practice materials: correct answers that are "not mentioned" are less valid than correct answers that are "directly contradicted" — "not mentioned" leaves room for the test-taker to argue it could be implied. ETS-quality negative factual questions prefer the directly-contradicted correct answer.
+  - Second flaw: distractors that are only partially stated in the passage create ambiguity about whether they count as "mentioned." All three wrong-answer distractors must each be **fully and unambiguously** stated somewhere in the passage.
+
+#### Source R12
+- **URL:** https://study.com/resources/new-toefl-reading-tips.html (Study.com — 2026 reading guide)
+- **Core finding:** In the new 2026 format, without paragraph references on questions, factual detail question design gains a new difficulty axis: test-takers must locate the relevant section unaided. This means well-designed factual questions for the 2026 format should have answer choices that are distinguishable without reading the entire passage — traps should be answerable by someone who reads carefully, not just someone who can locate the right paragraph quickly. The removal of paragraph scaffolding increases the cognitive load for all factual question types.
+
+---
+
+### Loop 3 Summary: Key Findings for App Development
+
+| Finding | Impact | Action Required |
+|---------|--------|-----------------|
+| `text_insertion` removed from TOEFL as of Jan 21, 2026 | High — question type is now off-test | Flag `text_insertion` questions in bank as legacy; optionally disable or label "not on current TOEFL" |
+| Academic passages are now ~200 words, 5 questions (not 700 words, 10 questions) | High — content structure mismatch | Audit passage length and question count targets in Reading question bank |
+| Paragraph references removed in 2026 format | Medium — UI/data model | If question data stores paragraph location hints, they should not be surfaced to users practicing 2026 format |
+| `sentence_simplification` still included in 2026 | Low — no change needed | No action |
+| Prose summary / fill-in-table removed in 2026 | Medium | Audit for these in question bank; label as legacy if present |
+| `negative_fact` correct answer should be "directly contradicted," not merely "not mentioned" | Medium — question quality | Audit existing `negative_fact` questions: correct answer should point to a contradiction in the passage, not an absence |
+| Factual detail traps: inverted causation and scope mismatch are the canonical distractor patterns | Medium — question quality | Use as checklist when reviewing/generating factual questions |
+| Pronoun reference ambiguity: two same-type nouns before "they/it" is the primary failure mode | Medium — question quality | Any reference or inference question using pronouns should verify single grammatically possible antecedent |
+
+### Loop 3 Key Negative Findings
+
+- **No official ETS percentage distribution exists** for question types per passage. All frequency data is derived from analysis of official practice tests by third-party sources.
+- **Sentence simplification design is unchanged** — still max 1 per passage, still requires the paraphrase to preserve essential meaning while omitting minor details. No 2026 redesign.
+- **text_insertion was not merely de-emphasized — it was fully removed**. No partial version or simplified variant appears in the 2026 format. Any question bank that includes it is testing a discontinued skill for current test-takers.
+
+---
+
 ## Sources
 
 - [ETS How e-rater Works](https://www.ets.org/erater/how.html)
