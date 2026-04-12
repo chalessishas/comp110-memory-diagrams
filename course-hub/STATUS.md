@@ -45,7 +45,7 @@ All migrations through `020_drop_duplicate_rls_policies` confirmed applied via S
 
 ### Known Issues
 - SSE lesson streaming untested with live AI calls end-to-end on Vercel (build passes)
-- Vercel Git integration: manual deploy (`npx vercel deploy --prod`) still required
+- Vercel CI/CD: `.github/workflows/deploy-course-hub.yml` created (`ac3f9ec`) — requires 3 GitHub Secrets to activate (VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID)
 
 ## [2026-04-10 04:42] Phase 5 — User-Requested Features (4 of 4 done ✓)
 
