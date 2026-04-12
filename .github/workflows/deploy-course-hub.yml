@@ -1,0 +1,43 @@
+# Deploys course-hub to Vercel Production on every push to main
+# that touches the course-hub/ directory.
+#
+# Required GitHub Secrets (Settings → Secrets → Actions):
+#   VERCEL_TOKEN      — from https://vercel.com/account/tokens
+#   VERCEL_ORG_ID     — from .vercel/project.json after `vercel link`
+#   VERCEL_PROJECT_ID — from .vercel/project.json after `vercel link`
+
+name: Deploy course-hub
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "course-hub/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: course-hub
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: course-hub/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Deploy to Vercel
+        run: npx vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
