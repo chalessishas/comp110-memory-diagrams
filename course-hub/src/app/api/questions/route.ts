@@ -59,22 +59,36 @@ export async function GET(request: Request) {
     };
   });
 
+  // Fetch active misconceptions for this user — questions on KPs with known misconceptions
+  // get priority -1 (shown first) to maximize correction opportunity.
+  const kpIds = [...new Set(questions.map((q) => q.knowledge_point_id).filter(Boolean))] as string[];
+  const { data: misconceptions } = kpIds.length > 0
+    ? await supabase
+        .from("misconceptions")
+        .select("concept_id")
+        .eq("user_id", user.id)
+        .in("concept_id", kpIds)
+        .eq("resolved", false)
+    : { data: [] as { concept_id: string }[] };
+  const misconceptionKpIds = new Set((misconceptions ?? []).map((m) => m.concept_id));
+
   // Adaptive 85%-rule sort (Wilson et al. 2019, Nature Communications):
   // Target error rate ≈15% → optimal accuracy ≈0.85.
-  // Priority 0 = show first.
+  // Priority -1 = active misconception: surface first to correct competing schemas.
   //   unseen (null)      → priority 1: introduce new material early
   //   accuracy 0.5–0.9   → priority 0: "desirable difficulty" sweet spot — most practice here
   //   accuracy < 0.5     → priority 2: struggling; include but don't overwhelm
   //   accuracy ≥ 0.9     → priority 3: near-mastered; show last
   // Within each band, shuffle for interleaving (Rohrer et al., g=0.42).
-  const band = (acc: number | null): number => {
+  const band = (acc: number | null, kpId: string | null): number => {
+    if (kpId && misconceptionKpIds.has(kpId)) return -1;
     if (acc === null) return 1;
     if (acc >= 0.5 && acc < 0.9) return 0;
     if (acc < 0.5) return 2;
     return 3;
   };
   const sorted = withStats
-    .map((q) => ({ q, band: band(q.user_accuracy), jitter: Math.random() }))
+    .map((q) => ({ q, band: band(q.user_accuracy, q.knowledge_point_id ?? null), jitter: Math.random() }))
     .sort((a, b) => a.band - b.band || a.jitter - b.jitter)
     .map(({ q }) => q);
 

@@ -22,6 +22,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
+  // Verify parent_id (if provided) belongs to the same course — prevents cross-course orphaned nodes
+  if (parent_id) {
+    const { data: parentNode } = await supabase
+      .from("outline_nodes")
+      .select("id")
+      .eq("id", parent_id)
+      .eq("course_id", course_id)
+      .single();
+    if (!parentNode) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   // Get max order for siblings
   const { data: siblings } = await supabase
     .from("outline_nodes")
