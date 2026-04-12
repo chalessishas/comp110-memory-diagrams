@@ -365,7 +365,7 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         if (nextDue) {
           const hoursUntil = (nextDue.getTime() - Date.now()) / 3_600_000;
           const daysUntil = Math.ceil(hoursUntil / 24);
-          if (hoursUntil < 24) {
+          if (hoursUntil > 0 && hoursUntil < 24) {
             nextDueLabel = t("review.nextDueToday", { hours: Math.max(1, Math.round(hoursUntil)) });
           } else if (daysUntil === 1) {
             nextDueLabel = t("review.nextDueTomorrow");
