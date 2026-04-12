@@ -4,7 +4,7 @@ import { useEffect, useState, use } from "react";
 import { CourseTabs } from "@/components/CourseTabs";
 import { QuestionCard } from "@/components/QuestionCard";
 import { SessionSummaryModal } from "@/components/SessionSummaryModal";
-import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope, getDesiredRetention, setDesiredRetention, type DesiredRetention } from "@/lib/spaced-repetition";
+import { getDueCards, getExamPriorityCards, getExamDayRetrievability, interleaveByKey, loadCards, updateCard, pullCardsFromServer, Rating, type ReviewCard, getExamDate, setExamDate, isExamMode, daysUntilExam, getExamScope, setExamScope, hasExamScope, getDesiredRetention, setDesiredRetention, type DesiredRetention, getNextReviewDate } from "@/lib/spaced-repetition";
 import Link from "next/link";
 import { RotateCcw, Loader2, Check, Calendar, Zap, Target } from "lucide-react";
 import { MistakePatterns } from "@/components/MistakePatterns";
@@ -358,19 +358,39 @@ export default function ReviewPage({ params }: { params: Promise<{ id: string }>
         </span>
       </div>
 
-      {dueCards.length === 0 ? (
-        <div className="ui-empty rounded-[20px]">
-          <Check size={32} className="mx-auto mb-3" style={{ color: "var(--success)" }} />
-          <p className="font-medium mb-1">{t("review.allCaughtUp")}</p>
-          <p className="text-sm mb-4" style={{ color: "var(--text-secondary)" }}>
-            {t("review.allCaughtUpDesc")}
-          </p>
-          <Link href={`/course/${id}/practice`} className="ui-button-secondary mb-4">
-            {t("review.goPractice")}
-          </Link>
-          <ReviewSparkline questionIds={questions.map((q) => q.id)} />
-        </div>
-      ) : currentQuestion ? (
+      {dueCards.length === 0 ? (() => {
+        const allCourseCards = loadCards().filter((c) => questions.some((q) => q.id === c.question_id));
+        const nextDue = getNextReviewDate(allCourseCards);
+        let nextDueLabel: string | null = null;
+        if (nextDue) {
+          const hoursUntil = (nextDue.getTime() - Date.now()) / 3_600_000;
+          const daysUntil = Math.ceil(hoursUntil / 24);
+          if (hoursUntil < 24) {
+            nextDueLabel = t("review.nextDueToday", { hours: Math.max(1, Math.round(hoursUntil)) });
+          } else if (daysUntil === 1) {
+            nextDueLabel = t("review.nextDueTomorrow");
+          } else {
+            nextDueLabel = t("review.nextDueFuture", { days: daysUntil });
+          }
+        }
+        return (
+          <div className="ui-empty rounded-[20px]">
+            <Check size={32} className="mx-auto mb-3" style={{ color: "var(--success)" }} />
+            <p className="font-medium mb-1">{t("review.allCaughtUp")}</p>
+            <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+              {t("review.allCaughtUpDesc")}
+            </p>
+            {nextDueLabel && (
+              <p className="text-xs mt-1 mb-4" style={{ color: "var(--accent)" }}>{nextDueLabel}</p>
+            )}
+            {!nextDueLabel && <div className="mb-4" />}
+            <Link href={`/course/${id}/practice`} className="ui-button-secondary mb-4">
+              {t("review.goPractice")}
+            </Link>
+            <ReviewSparkline questionIds={questions.map((q) => q.id)} />
+          </div>
+        );
+      })() : currentQuestion ? (
         <div>
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
