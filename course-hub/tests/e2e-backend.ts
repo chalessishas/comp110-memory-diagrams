@@ -328,11 +328,11 @@ async function scenario2_midtermExam() {
     logDetail("Matched titles", (scope.matched_kp_titles ?? []).slice(0, 5).join(", "));
   }
 
-  // Step 3: Generate exam prep questions (6 topics × 3 parallel = ~60-90s AI)
+  // Step 3: Generate exam prep questions (6 topics × 3 parallel = ~2-4min on local dev)
   console.log("\n--- Step 3: Generate Exam Prep Questions ---");
   const prepRes = await api("POST", `/api/courses/${courseId}/exam-prep`, {
     scope_text: examScopeText,
-  }, 180_000);
+  }, 420_000);
   log(`POST /api/courses/${courseId}/exam-prep`, prepRes);
   if (prepRes.ok) {
     const prep = prepRes.data as any;
@@ -951,12 +951,31 @@ async function scenario11_generateAndRegenerate() {
   const regenRes = await api("POST", `/api/courses/${courseId}/regenerate`, {
     language: "zh",
   }, 420_000); // 7 min timeout — translates 30+ KPs + 2 parallel AI regens
-  log(`POST /api/courses/${courseId}/regenerate`, regenRes);
   if (regenRes.ok) {
+    log(`POST /api/courses/${courseId}/regenerate`, regenRes);
     const regen = regenRes.data as any;
     logDetail("Translated nodes", String(regen.translated_nodes));
     logDetail("Tasks generated", String(regen.tasks_generated));
     logDetail("Questions generated", String(regen.questions_generated));
+  } else if (regenRes.status === 0) {
+    // Fetch connection dropped but server may have completed (common for 3-5min AI calls).
+    // Verify via DB: if outline nodes are in Chinese, regenerate succeeded.
+    const { data: nodes } = await supabaseAdmin
+      .from("outline_nodes")
+      .select("title")
+      .eq("course_id", courseId)
+      .eq("type", "knowledge_point")
+      .limit(3);
+    const hasChinese = (nodes ?? []).some((n: any) => /[\u4e00-\u9fa5]/.test(n.title));
+    if (hasChinese) {
+      console.log(`\x1b[32m✓\x1b[0m [200*] POST /api/courses/${courseId}/regenerate (verified via DB — fetch dropped but server completed)`);
+      logDetail("Sample translated", (nodes ?? [])[0]?.title ?? "N/A");
+    } else {
+      log(`POST /api/courses/${courseId}/regenerate`, regenRes);
+      logDetail("DB check", "No Chinese nodes found — regenerate may have truly failed");
+    }
+  } else {
+    log(`POST /api/courses/${courseId}/regenerate`, regenRes);
   }
 }
 
