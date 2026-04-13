@@ -362,6 +362,130 @@ Replace the planned "final-third TTR drop" heuristic with an MTLD approximation 
 
 ---
 
+---
+
+## Research Loop 4 — 2026-04-12 (Scorer Accuracy)
+
+### Q1 — Additional Grammar Error Types for TOEFL Writing Scorer
+
+#### Source L4-1
+- **URL:** https://aclanthology.org/2024.bea-1.26.pdf (ACL BEA Workshop 2024 — "Automated Essay Scoring Using Grammatical Variety and Errors with Multi-Task Learning and Item Response Theory")
+- **Core finding:** Grammatical features improve AES holistic score prediction; multi-task learning that jointly optimizes grammar error counts and holistic scores yields the largest QWK gains. Error-per-100-words is a stronger signal than binary error presence. Weighted error-free clauses (severity-weighted) outperform raw error counts.
+- **Relevance to app:** Current scorer counts raw SVA and article errors. Adding an errors-per-100-words normalization and severity weighting to the grammar dimension (7%) would align with best-practice AES features without requiring ML.
+- **Limitations:** Study uses ASAP essay dataset, not TOEFL-specific. Severity weights require a labeled error taxonomy to be meaningful.
+
+#### Source L4-2
+- **URL:** https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/automated-analysis-of-common-errors-in-l2-learner-production-prototype-web-application-development/631312E8DD4EB9CE558EFF6FD16C6520 (Studies in Second Language Acquisition — Cambridge Core)
+- **Core finding:** The highest-frequency ESL error types amenable to automated detection are: (1) preposition selection errors (wrong preposition with verb, e.g., "depend of" instead of "depend on"), (2) article errors (beyond a+vowel: zero-article before plural countables used generically, "the" over-generalization before abstract nouns), and (3) tense consistency shifts (oscillation between present/past within a single paragraph). These three types have small enough confusion sets and sufficient surface-level cues to support pattern matching.
+- **Relevance to app:** Current grammar.js detects SVA and a+vowel errors. Adding preposition collocations (depend on/of, consist of/in, interested in/on, result in/from — ~15 high-frequency verb+preposition pairs) and tense-shift detection (past-tense verb following two present-tense verbs in same paragraph) would cover the next highest-precision error layer.
+- **Limitations:** Preposition error detection via regex produces significant false positives for legitimate alternations (e.g., "I believe in X" vs. "I believe X"); patterns must be anchored to specific verb+preposition pairs. Tense-shift detection requires sentence-level segmentation, not just token matching.
+
+#### Source L4-3
+- **URL:** https://eric.ed.gov/?id=EJ1143725 (CALICO Journal 2016 — "Automated Error Detection for Developing Grammar Proficiency of ESL Learners")
+- **Core finding:** Rule-based tools (LanguageTool-class) achieve 84-86% precision on determiner/article errors and ~70% precision on preposition errors in ESL writing. Comma splices and fused sentences (run-ons) are detectable with ~75% precision via punctuation-plus-conjunction pattern matching. Run-ons are consistently among the top-3 error types by frequency in TOEFL-level writing.
+- **Relevance to app:** Comma splice detection (two independent clauses joined by comma without coordinating conjunction) is absent from current scorer and is high-frequency in TOEFL Academic Discussion responses. A regex like `/[a-z],\s+[A-Z][a-z]+(,|\s)/` after basic clause detection gives rough signal.
+- **Limitations:** 2016 data; precision figures are for LanguageTool's full NLP pipeline, not pure regex. Pure regex comma splice detection will have lower precision without clause-boundary identification.
+
+#### Actionable additions (Q1 summary)
+| Error Type | Regex Feasibility | Estimated Precision | Priority |
+|-----------|-------------------|---------------------|----------|
+| Wrong preposition after specific verbs (depend of, consist in) | High — anchor to fixed verb list | ~80% | High |
+| Comma splice (two clauses, comma, no FANBOYS) | Medium — needs clause heuristic | ~65% | Medium |
+| Zero-article before countable singular (e.g., "I am student") | Medium — "am/is/are [vowel-consonant noun]" | ~70% | Medium |
+| Tense shift within paragraph | Low — needs sentence segmentation | ~55% | Low |
+
+---
+
+### Q2 — Argument Structure Scoring Beyond Thesis/Evidence Markers
+
+#### Source L4-4
+- **URL:** https://link.springer.com/article/10.1007/s10044-025-01518-6 (Pattern Analysis and Applications 2025 — "AESPA: Automated Essay Scoring Using Polished Argument Feature Weights")
+- **Core finding:** AESPA introduces "trait attention" — a mechanism that automatically learns how much argument structure (claim, evidence, reasoning, rebuttal) contributes to each scoring dimension. Key result: argument structure is most predictive for the content/development dimension, moderately predictive for organization, and weakly predictive for language use. Treating argument structure as uniformly important across all traits *degrades* performance for language-only traits.
+- **Relevance to app:** Current development.js (28% weight) likely benefits most from argument structure features. However, applying argument-structure signals to mechanics/grammar dimensions would introduce noise. Suggests: isolate argument scoring to development + organization only; do not let it bleed into grammar or vocabulary sub-scores.
+- **Limitations:** AESPA requires labeled argument spans (claim/evidence/reason per sentence) — not achievable with pure regex. The trait attention mechanism is neural; surface-pattern approximation will be a coarser proxy.
+
+#### Source L4-5
+- **URL:** https://arxiv.org/html/2505.22771v1 (arXiv 2025 — "Automated Essay Scoring Incorporating Annotations from Automated Feedback Systems")
+- **Core finding:** AFS-augmented AES — using automated feedback annotations (argument completeness, coherence gaps, evidence-claim alignment) as auxiliary features — improves trait-level QWK by 0.04–0.08 over baseline transformers. The most informative single signal beyond thesis+evidence presence is **counter-argument acknowledgment**: essays that address the opposing view score 0.3–0.5 points higher on development in human rubrics.
+- **Relevance to app:** Current development.js checks for thesis, evidence, and reason markers but not counter-argument acknowledgment. Adding a COUNTER_ARGUMENT pattern set (e.g., "although", "while some argue", "critics claim", "one might argue", "on the other hand…however") as a distinct bonus signal would add meaningful development score differentiation.
+- **Limitations:** Counter-argument patterns are already partially covered by existing discourse markers. Need to audit overlap with current DETAIL_MARKERS to avoid double-counting.
+
+#### Source L4-6
+- **URL:** https://www.researchgate.net/publication/361538088_Argument_Mining_for_Improving_the_Automated_Scoring_of_Persuasive_Essays (ResearchGate — "Argument Mining for Improving the Automated Scoring of Persuasive Essays")
+- **Core finding:** Argument density (number of distinct argument units per 100 words) correlates more strongly with human scores (r=0.61) than argument presence alone (r=0.34). Essays with a single developed argument outperform essays with multiple undeveloped argument sketches — quality over quantity. Argument unit boundaries are more predictive than discourse marker count alone.
+- **Relevance to app:** Current development.js counts marker presence. A simple density proxy — (evidence markers + reason markers) / word count * 100 — would better reward substantive development than raw counts. Cap at a maximum density to avoid gaming.
+- **Limitations:** Argument density via marker counting conflates single dense paragraphs with well-distributed argumentation. Paragraph-level distribution (are markers spread or clustered?) is the better signal but requires structural analysis.
+
+---
+
+### Q3 — 2026 TOEFL Writing Rubric Updates
+
+#### Source L4-7
+- **URL:** https://www.writing30.com/blog/toefl-2026-changes (Writing30 — "TOEFL 2026 Changes: New Writing Format, Tasks & Dates", updated Feb 2026)
+- **Core finding:** The TOEFL writing section was restructured with three tasks: **Build a Sentence** (dichotomous 0/1 per item, word-order accuracy), **Write an Email** (0–5 rubric: goal achievement, register/tone, organization, grammar control), and **Write for an Academic Discussion** (0–5 rubric: position clarity, peer engagement, reasoning, grammar). The peer engagement criterion is new and distinct — responses must reference at least one of the two student posts shown in the prompt, not merely answer the professor's question.
+- **Relevance to app:** The Write an Email task has a goal-achievement criterion that maps directly to current per-goal relevance scoring in the app. The new "peer engagement" criterion for Academic Discussion is not yet implemented — checking whether the response addresses a named peer ("Sarah's point" / "Marcus argues") would be a new signal.
+- **Limitations:** Writing30 is a third-party source. ETS official rubric PDF exists at https://www.ets.org/pdfs/toefl/writing-rubrics.pdf but detailed sub-criterion breakdowns come from third-party analysis.
+
+#### Source L4-8
+- **URL:** https://www.ets.org/pdfs/toefl/writing-rubrics.pdf (ETS official — TOEFL Writing Scoring Guide)
+- **Core finding:** The official ETS rubric for Write an Email uses a 5-point scale with four criteria: (1) communicative goal achievement (are all bullet-point tasks addressed?), (2) register appropriateness (formal/informal tone match), (3) organization and cohesion, (4) grammatical range and accuracy. A score of 3 requires all goals addressed but with "some grammar errors that do not impede communication." A score of 5 requires all goals addressed with "precise vocabulary and a variety of sentence structures."
+- **Relevance to app:** Current scorer already addresses goal achievement (per-goal email relevance) and grammar. The register/tone dimension is not scored — detecting informal markers (contractions like "I'm", "don't", slang, exclamation points in a formal-request email) would add a new scoring axis for the Email task.
+- **Limitations:** Register detection for email is context-dependent — contractions are acceptable in friendly/informal email prompts but penalized in formal request prompts. Implementation would require prompt-level register classification first.
+
+#### Source L4-9
+- **URL:** https://www.toeflprep.ai/guides/toefl-writing-2026 (TOEFLPrep — "TOEFL 2026 Writing Section: Complete Guide")
+- **Core finding:** The Academic Discussion task now explicitly rewards "adding new information" to the discussion thread rather than restating the professor's question. Scoring anchors at 5 require the response to "extend or complicate" what prior student responses said. At score 3, the response "adds relevant information but does not engage with peer perspectives." This is a qualitative shift from the old Discussion Board task which only required answering the professor prompt.
+- **Relevance to app:** The "extend or complicate" criterion at the top score band is currently undetectable without semantic understanding. However, presence of peer-reference phrases (student names from the prompt, "as [Name] mentioned", "building on [Name]'s idea") is a surface-level proxy for engagement that could be added to the relevance dimension.
+- **Limitations:** No official ETS confirmation that this is a scoring criterion rather than prep-site interpretation. Treat as probable until ETS releases updated scorer documentation.
+
+---
+
+### Q4 — Keyword Overlap vs. Semantic Similarity for Relevance Scoring
+
+#### Source L4-10
+- **URL:** https://www.researchgate.net/publication/306093878_Sentence_Similarity_Measures_for_Fine-Grained_Estimation_of_Topical_Relevance_in_Learner_Essays (ResearchGate — "Sentence Similarity Measures for Fine-Grained Estimation of Topical Relevance in Learner Essays")
+- **Core finding:** Evaluated word overlap, neural embeddings, and compositional neural models for sentence-level prompt relevance in learner essays. Neural embeddings consistently outperformed word overlap on recall (more on-topic sentences detected) while word overlap had slightly higher precision (fewer false positives). F1 advantage of embeddings over word overlap: ~8-12 percentage points on ESL datasets. Word overlap misses paraphrased on-topic content entirely.
+- **Relevance to app:** Current keyword-overlap scoring will systematically underreward responses that use synonyms or paraphrases to address the prompt. Example: prompt asks about "economic development"; student response discusses "financial growth" — keyword overlap scores it as off-topic, semantic similarity would score it correctly.
+- **Limitations:** Embedding-based scoring requires either a local model (adds dependency weight) or an API call (adds latency/cost). For a pure front-end app, practical alternatives are limited to: (a) a small pre-bundled word vector lookup, or (b) synonym expansion of the prompt keyword list before matching.
+
+#### Source L4-11
+- **URL:** https://files.eric.ed.gov/fulltext/EJ1406979.pdf (ERIC — "Exploring Effective Methods for Automated Essay Scoring")
+- **Core finding:** Keyword overlap methods ("prompt overlap" features) have high precision (~85%) but low recall (~55%) for relevance detection in short-form essays (100-200 words). The recall gap is largest when test-takers use domain-specific synonyms or academic vocabulary that diverges from prompt surface terms. LSA-based methods improve recall to ~72% at the cost of reduced precision (~76%). The hybrid approach (overlap + LSA cosine) reaches ~80% precision / ~75% recall — best F1 overall.
+- **Relevance to app:** At 100-150 words (Academic Discussion target length), recall matters more than precision — a false negative (unfairly penalizing a relevant response) is worse than a false positive. Current keyword-overlap approach almost certainly has this recall problem. A pragmatic fix: expand each prompt keyword with its top-3 WordNet synonyms before matching. This costs no runtime dependency and would improve recall substantially.
+- **Limitations:** WordNet synonym expansion introduces polysemy errors (wrong senses of ambiguous words). Best applied only to content-word keywords, not function words or names.
+
+#### Source L4-12
+- **URL:** https://www.nature.com/articles/s41598-025-87862-3 (Scientific Reports 2025 — "An LLM-based hybrid approach for enhanced automated essay scoring")
+- **Core finding:** Hybrid relevance scoring (lexical overlap + embedding cosine similarity) outperforms either method alone on TOEFL-style writing tasks. The paper demonstrates precision=0.87, recall=0.83 (F1=0.85) for topic relevance on a TOEFL-format dataset, versus precision=0.85/recall=0.54 (F1=0.66) for keyword overlap alone. The recall gap in pure keyword scoring is consistent with prior work and is especially pronounced for high-scoring essays that use sophisticated paraphrase.
+- **Relevance to app:** Directly confirms the recall problem in current implementation. For a front-end-only app, the minimum viable improvement is: (1) add a synonym expansion step to prompt keyword extraction, (2) optionally weight exact matches higher than synonym matches (e.g., exact=1.0, synonym=0.6) to preserve precision. Full embedding-based scoring would require a backend change.
+- **Limitations:** LLM-hybrid approach not feasible for pure front-end without API. Synonym expansion is the practical middle ground between current approach and full semantic scoring.
+
+---
+
+### Loop 4 Summary: Actionable Improvements by Priority
+
+| Improvement | Dimension | Complexity | Impact |
+|-------------|-----------|------------|--------|
+| Add preposition collocation errors (~15 verb+prep pairs) | Grammar | Low (regex) | Medium |
+| Add comma splice detection | Grammar | Medium (clause heuristic) | Medium |
+| Normalize grammar errors per 100 words instead of raw count | Grammar | Low | Medium |
+| Add counter-argument acknowledgment to development scoring | Development | Low (pattern list) | High |
+| Add argument density (markers/word count) to development | Development | Low (arithmetic) | Medium |
+| Cap redundant marker accumulation in development scoring | Development | Low | Medium |
+| Add peer-reference detection for Academic Discussion | Relevance | Low (regex for student names in prompt) | High |
+| Add register/tone detection for Email task | Organization | Medium (informal marker list) | Medium |
+| Expand prompt keywords with WordNet synonyms before matching | Relevance | Medium (static synonym map) | High |
+| Add peer engagement bonus for naming/quoting peer posts | Relevance | Low (prompt-name extraction) | High |
+
+### Loop 4 Key Negative Findings
+
+- **No 2026 changes to the Academic Discussion rubric content dimensions** — the five scoring bands (0–5) are unchanged in structure. The primary change is the addition of peer engagement as a scored criterion, not a restructuring of the rubric.
+- **Build a Sentence task is dichotomous (0/1 only)** — no partial credit means it is currently unscored by the app. This is correct; partial-credit scoring for Build a Sentence would be inaccurate.
+- **Tense-shift detection via pure regex is not reliable** without sentence segmentation — the recall is too low to be worth adding unless a sentence-tokenization step is already in place.
+- **Embedding-based relevance scoring is not feasible** for the current pure front-end architecture without adding a backend API call or a bundled model. WordNet synonym expansion is the highest-ROI improvement available within the current constraints.
+
+---
+
 ## Sources
 
 - [ETS How e-rater Works](https://www.ets.org/erater/how.html)
@@ -377,3 +501,15 @@ Replace the planned "final-third TTR drop" heuristic with an MTLD approximation 
 - [TOEFL Grammar Mistake: Run-On Sentences — Magoosh](https://magoosh.com/toefl/toefl-grammar-mistake-run-on-sentences/)
 - [Subject-Verb Agreement and the TOEFL — Benchmark Education](https://edubenchmark.com/blog/subject-verb-agreement-and-the-toefl/)
 - [TOEFL 2026 Writing New Tasks Guide — College Council](https://college-council.com/en/blog/toefl-2026-writing-new-tasks-guide)
+- [ACL BEA 2024 — AES Using Grammatical Variety and Errors with Multi-Task Learning](https://aclanthology.org/2024.bea-1.26.pdf)
+- [Cambridge SSLA — Automated Analysis of Common L2 Learner Errors](https://www.cambridge.org/core/journals/studies-in-second-language-acquisition/article/automated-analysis-of-common-errors-in-l2-learner-production-prototype-web-application-development/631312E8DD4EB9CE558EFF6FD16C6520)
+- [CALICO Journal 2016 — Automated Error Detection for ESL Grammar Proficiency](https://eric.ed.gov/?id=EJ1143725)
+- [Pattern Analysis and Applications 2025 — AESPA: Argument Feature Weights](https://link.springer.com/article/10.1007/s10044-025-01518-6)
+- [arXiv 2025 — AES Incorporating Automated Feedback System Annotations](https://arxiv.org/html/2505.22771v1)
+- [ResearchGate — Argument Mining for Improving Automated Scoring of Persuasive Essays](https://www.researchgate.net/publication/361538088_Argument_Mining_for_Improving_the_Automated_Scoring_of_Persuasive_Essays)
+- [Writing30 — TOEFL 2026 Changes: New Writing Format, Tasks & Dates](https://www.writing30.com/blog/toefl-2026-changes)
+- [ETS Official — TOEFL Writing Scoring Guide (Write an Email Rubric)](https://www.ets.org/pdfs/toefl/writing-rubrics.pdf)
+- [TOEFLPrep — TOEFL 2026 Writing Section Complete Guide](https://www.toeflprep.ai/guides/toefl-writing-2026)
+- [ResearchGate — Sentence Similarity Measures for Topical Relevance in Learner Essays](https://www.researchgate.net/publication/306093878_Sentence_Similarity_Measures_for_Fine-Grained_Estimation_of_Topical_Relevance_in_Learner_Essays)
+- [ERIC — Exploring Effective Methods for Automated Essay Scoring](https://files.eric.ed.gov/fulltext/EJ1406979.pdf)
+- [Scientific Reports 2025 — LLM-based Hybrid Approach for Enhanced AES](https://www.nature.com/articles/s41598-025-87862-3)
