@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const loginUrl = new URL("/login", origin);
+  const loginUrl = new URL("/auth/login", origin);
 
   if (searchParams.get("error") || searchParams.get("error_description")) {
     loginUrl.searchParams.set("error", "auth_denied");
@@ -24,5 +24,6 @@ export async function GET(request: Request) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.redirect(`${origin}/dashboard`);
+  const next = searchParams.get("next") ?? "/dashboard";
+  return NextResponse.redirect(new URL(next, origin));
 }

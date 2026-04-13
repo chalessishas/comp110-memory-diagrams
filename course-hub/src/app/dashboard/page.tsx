@@ -6,6 +6,7 @@ import { courses } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2, BookOpen } from "lucide-react";
+import { ThemeToggle } from "@/components/theme/toggle";
 
 export default function DashboardPage() {
   const [courseList, setCourseList] = useState<Course[]>([]);
@@ -23,8 +24,9 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-4xl items-center px-4">
+        <div className="mx-auto flex h-14 max-w-4xl items-center justify-between px-4">
           <h1 className="text-lg font-semibold">CourseHub</h1>
+          <ThemeToggle />
         </div>
       </header>
 
