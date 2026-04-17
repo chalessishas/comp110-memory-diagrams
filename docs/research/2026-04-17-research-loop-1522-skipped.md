@@ -5,3 +5,9 @@
 新 research 主题 = 0。CronDelete 仍 pending。
 
 见 [Turn 21 cost analysis](2026-04-17-research-loop-1124-autoloop-cost.md)。
+
+---
+
+## Continued skips
+
+- **16:XX** (Turn 24): 仍无新方向。若后续 Research Loop 持续触发且无主人介入，所有 session 都应按此模式 append 而非新建文件。
