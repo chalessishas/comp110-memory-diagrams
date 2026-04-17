@@ -13,3 +13,4 @@
 - **16:XX** (Turn 24): 仍无新方向。若后续 Research Loop 持续触发且无主人介入，所有 session 都应按此模式 append 而非新建文件。
 - **17:XX** (Turn 26): 继续 skip，双 loop 同时触发。
 - **18:43** (Research Loop): 无新用户请求，无新 commit（Turn 26 @ 18:42 为最新，fleet HOLD 15h+）。no-op。
+- **18:54** (Turn 28, opus): Research-only 触发（非双 loop）。继续 skip — Turn 21 cost analysis 仍是最新主人决策 input。
