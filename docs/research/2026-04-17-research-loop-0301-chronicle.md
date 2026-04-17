@@ -55,14 +55,14 @@ URL: https://tldraw.dev/
 
 ## 3. 3 条可操作方向
 
-### A. UX 功能借鉴（推荐，3-5 天工作量）
-**内容**：从 Heptabase 借 3 个低成本 UX：
-1. **Markdown 渲染节点内容**（react-markdown，~30 行，~4 小时）
-2. **Tag filter**（节点加 tags 字段 + Toolbar 加 tag chip 筛选）
-3. **Daily notes** 自动创建 today-node（开 app 时）
+### A. UX 功能借鉴（推荐，2-4 天工作量）
+**内容**：从 Heptabase 借 2 个低成本 UX：
+1. ~~**Markdown 渲染节点内容**~~ — **已存在**，见 `src/components/EditorOverlay.tsx` 用 Tiptap + StarterKit 做富文本编辑 (headings / bold / italic / lists)，`node.content` 是 HTML 字符串。Turn 12 原 research 未读代码误判为 plain text，此处作废。
+2. **Tag filter**（节点加 tags 字段 + Toolbar 加 tag chip 筛选，~1.5 天）
+3. **Daily notes** 自动创建 today-node（开 app 时，~0.5 天）
 
-**风险**：低。全是 UI 层，不改 canvas core。
-**收益**：主人自用体验明显提升——markdown 是刚需，没 markdown 知识管理工具很难用。
+**风险**：低。全是 UI 层，不改 canvas core 和 Tiptap editor。
+**收益**：标签筛选让多 domain 节点（Learning/Projects/Health/Ideas）更易导航；daily notes 让 chronicle 变 "每日思考 + 知识沉淀" 复合工具。
 
 ### B. Canvas → Hybrid WebGL 升级（only if 节点 > 500）
 **内容**：React Three Fiber 替换 CanvasRenderer，保留 Canvas 2D UI layer。
@@ -84,16 +84,19 @@ URL: https://tldraw.dev/
 
 ## 4. 下一步命令（主人回来时）
 
-**Min 30 分钟路径**（方向 A 的 markdown 渲染）：
+**Min 30 分钟路径**（方向 A 的 daily notes，最小可行）：
 ```bash
 cd "/Users/shaoq/Desktop/VScode Workspace/chronicle"
-npm install react-markdown
-# 编辑 src/canvas/node-renderer.ts 或 EditorOverlay：content 用 react-markdown 渲染
+# 在 src/store/sync.ts 的 seedStarterNodes 逻辑旁加 ensureTodayNode()
+# 检查 store 里是否有 today-YYYY-MM-DD node，没有就创建
+# 在 CanvasApp mount 时调用 ensureTodayNode()
 npm run dev
-# 测试节点 content 写 `# heading\n\nbody text` 看是否正确渲染
+# 测试：打开 app 看是否自动多了今日节点
 ```
 
-如果方向 A 通过，继续 tag filter + daily notes。
+如果 daily notes 通过，继续 tag filter（需要改 schema 或在 content metadata 里加 tags）。
+
+~~原推荐的 react-markdown~~ 作废（Tiptap 已在）。
 
 ---
 
