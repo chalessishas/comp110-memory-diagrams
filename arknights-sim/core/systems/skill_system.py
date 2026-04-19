@@ -38,9 +38,15 @@ def skill_system(world, dt: float) -> None:
         if sk.sp_gain_mode == SPGainMode.AUTO_TIME and u.can_use_skill():
             sk.sp = min(sk.sp + dt, float(sk.sp_cost))
 
-        # ---- Auto-trigger ----
+        # ---- Auto-trigger with lockout ----
+        # Wiki: AUTO skills hold at full SP and block recovery until a valid target exists.
         if sk.trigger == SkillTrigger.AUTO and sk.sp >= sk.sp_cost:
-            _fire_skill(world, u)
+            has_target = getattr(u, "__target__", None) is not None
+            if has_target:
+                sk.locked_out = False
+                _fire_skill(world, u)
+            else:
+                sk.locked_out = True
 
 
 def _fire_skill(world, u) -> None:

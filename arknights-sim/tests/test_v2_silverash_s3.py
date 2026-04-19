@@ -114,6 +114,10 @@ def test_s3_atk_buff_persists_during_duration():
     sa.skill.sp = float(sa.skill.sp_cost)
     w.add_unit(sa)
 
+    slug = _heavy_slug(path=[(1, 1)])  # dx=1, dy=0 — in GUARD_LORD_RANGE
+    slug.deployed = True
+    w.add_unit(slug)
+
     w.tick()  # S3 fires, buff applied
 
     from core.types import BuffAxis
@@ -130,6 +134,10 @@ def test_s3_atk_buff_removed_on_end():
     sa.skill.sp = float(sa.skill.sp_cost)
     sa.skill.duration = 0.5  # short duration for fast test
     w.add_unit(sa)
+
+    slug = _heavy_slug(path=[(1, 1)])  # dx=1, dy=0 — in GUARD_LORD_RANGE
+    slug.deployed = True
+    w.add_unit(slug)
 
     w.tick()  # S3 fires
 

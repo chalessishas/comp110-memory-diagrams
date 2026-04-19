@@ -59,6 +59,16 @@ def test_silverash_skill_fires_and_applies_buff():
     op.deployed = True
     op.position = (3.0, 1.0)
     w.add_unit(op)
+
+    # Need an enemy in range so lockout doesn't block the skill.
+    # GUARD_LORD_RANGE tile (1,0) → absolute (4,1); high HP + stationary.
+    slug = make_originium_slug(path=[(4 + i, 1) for i in range(4)])
+    slug.deployed = True
+    slug.move_speed = 0.0    # stay in range for full 20s SP charge
+    slug.max_hp = 99_999
+    slug.hp = 99_999
+    w.add_unit(slug)
+
     # run 25 seconds
     for _ in range(250):
         w.tick()
