@@ -12,6 +12,7 @@ class Enemy(Entity):
     speed: float = 1.0  # tiles per second
 
     is_invisible: bool = False   # True = cannot be targeted by ranged without true sight
+    is_aerial: bool = False      # True = cannot be physically blocked by melee operators
 
     _path_progress: float = field(init=False, default=0.0)
 

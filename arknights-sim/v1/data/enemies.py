@@ -18,6 +18,17 @@ def make_originium_slug(path: List[Tuple[int, int]] | None = None) -> Enemy:
     )
 
 
+def make_drone(path: List[Tuple[int, int]] | None = None) -> Enemy:
+    """Originium Drone — aerial unit, cannot be blocked by melee operators."""
+    return Enemy(
+        name="Originium Drone",
+        max_hp=800, atk=150, defence=0, res=0,
+        atk_interval=2.0, attack_type="physical",
+        path=path or [], speed=1.5,
+        is_aerial=True,
+    )
+
+
 def make_arts_master(path: List[Tuple[int, int]] | None = None) -> Enemy:
     """Arts Master — magic-damage elite with moderate bulk.
 

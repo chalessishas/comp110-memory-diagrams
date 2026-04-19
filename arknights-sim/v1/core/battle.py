@@ -45,10 +45,13 @@ class Battle:
     _logged_dead: Set[int] = field(init=False, default_factory=set)          # id(entity)
     _block_assignments: Dict[int, List[Enemy]] = field(init=False, default_factory=dict)  # id(op) → enemies
     _pending_deploy: List[Operator] = field(init=False, default_factory=list)  # queued until DP available
+    _tile_map: Dict = field(init=False, default_factory=dict)                # (x,y) → Tile, built once
 
     def __post_init__(self) -> None:
         self.lives = self.max_lives
         self.spawn_queue = sorted(self.spawn_queue, key=lambda e: e.time)
+        if self.map:
+            self._tile_map = {(t.x, t.y): t for t in self.map.tiles}
 
     def deploy(self, op: Operator) -> bool:
         """Attempt to deploy op now. Returns True if deployed, False if insufficient DP."""
@@ -96,31 +99,28 @@ class Battle:
 
     def _apply_terrain_effects(self) -> None:
         """Refresh terrain-sourced status effects for enemies on special tiles."""
-        if not self.map:
+        if not self._tile_map:
             return
-        tile_map = {(t.x, t.y): t for t in self.map.tiles}
         for enemy in self.enemies:
             if not enemy.alive:
                 continue
             pos = enemy.tile_pos
             if pos is None:
                 continue
-            tile = tile_map.get(pos)
+            tile = self._tile_map.get(pos)
             if tile is None or not tile.terrain_effect:
                 continue
             if tile.terrain_effect == "icy":
-                # Refresh Cold: ASPD -30% (slow_factor 1/0.7 ≈ 1.43); duration=2×DT so it
-                # persists as long as enemy stays on the tile but expires quickly if they leave
                 existing = [se for se in enemy.status_effects
                             if se.kind == "slow" and se.slow_factor == 1.43]
                 if existing:
-                    existing[0].duration = DT * 2   # refresh
+                    existing[0].duration = DT * 2   # refresh, no log
                 else:
                     enemy.apply_status(StatusEffect(kind="slow", duration=DT * 2,
                                                     slow_factor=1.43))
-                self.log.record(
-                    f"t={self.elapsed:.1f}  {enemy.name} chilled on icy tile {pos}"
-                )
+                    self.log.record(
+                        f"t={self.elapsed:.1f}  {enemy.name} enters icy tile {pos}"
+                    )
 
     def _compute_block_assignments(self) -> None:
         """Assign live enemies to melee operators up to their block capacity."""
@@ -134,7 +134,7 @@ class Battle:
             for enemy in self.enemies:
                 if slots == 0:
                     break
-                if enemy.alive and id(enemy) not in assigned:
+                if enemy.alive and not enemy.is_aerial and id(enemy) not in assigned:
                     self._block_assignments[id(op)].append(enemy)
                     assigned.add(id(enemy))
                     slots -= 1
