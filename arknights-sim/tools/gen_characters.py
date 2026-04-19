@@ -94,8 +94,10 @@ def extract_e2_stats(entry: dict, trust100: bool = True) -> dict:
         "ranged":       entry.get("position", "MELEE") == "RANGED",
         "profession":   PROFESSION_MAP.get(entry.get("profession", "WARRIOR"),
                                            "Profession.GUARD"),
-        "cost":         int(entry.get("cost", 0)),
-        "redeploy_cd":  float(entry.get("deployTimeInSeconds", 70.0)),
+        # cost/redeploy_cd removed from character_table.json in newer akgd dumps.
+        # Curated files in data/characters/ must set op.cost and op.redeploy_cd manually.
+        "cost":         0,
+        "redeploy_cd":  70.0,
         "display_name": entry.get("name", "Unknown"),
         "trust100":     trust100,
     }
