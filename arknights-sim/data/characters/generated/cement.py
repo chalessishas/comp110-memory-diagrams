@@ -1,26 +1,26 @@
-"""银灰 — generated from ArknightsGameData char_172_svrash.
+"""洋灰 — generated from ArknightsGameData char_464_cement.
 Source: E2 max-level, trust 100, no potentials, no module.
-Regenerate: python tools/gen_characters.py char_172_svrash
+Regenerate: python tools/gen_characters.py char_464_cement
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState
 from core.types import AttackType, Faction, Profession
 
 
-def make_svrash() -> UnitState:
+def make_cement() -> UnitState:
     return UnitState(
-        name='银灰',
+        name='洋灰',
         faction=Faction.ALLY,
-        max_hp=2560,
-        atk=763,
-        defence=447,
-        res=10.0,
-        atk_interval=1.3,
+        max_hp=3642,
+        atk=1042,
+        defence=688,
+        res=0.0,
+        atk_interval=1.6,
         move_speed=1.0,
         attack_range_melee=True,
-        profession=Profession.GUARD,
+        profession=Profession.DEFENDER,
         attack_type=AttackType.PHYSICAL,
-        block=2,
-        cost=20,
+        block=1,
+        cost=32,
         redeploy_cd=70.0,
     )

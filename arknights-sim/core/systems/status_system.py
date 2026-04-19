@@ -8,7 +8,7 @@ def status_decay_system(world, dt: float) -> None:
     for u in world.units:
         if not u.alive:
             continue
-        # drop expired statuses (keep while expires_at >= now; elapsed is pre-incremented)
-        u.statuses = [s for s in u.statuses if s.expires_at >= now]
-        # drop expired buffs
-        u.buffs = [b for b in u.buffs if b.expires_at >= now]
+        # keep while expires_at + epsilon >= now — guards floating-point accumulation
+        # (e.g. 20 × 0.1 = 2.0000000000000004, not 2.0)
+        u.statuses = [s for s in u.statuses if s.expires_at + 1e-9 >= now]
+        u.buffs = [b for b in u.buffs if b.expires_at + 1e-9 >= now]
