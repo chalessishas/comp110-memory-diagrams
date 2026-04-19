@@ -1,25 +1,28 @@
-"""华法琳 — generated from ArknightsGameData char_171_bldsk.
-Source: E2 max-level, trust 0, no potentials, no module.
-Regenerate: python tools/gen_characters.py char_171_bldsk
+"""Warfarin — 5* Medic (Single-target archetype).
+
+Base stats from ArknightsGameData (E2 max, trust 100).
+S3 ATK Up α adds ATK buff to target ally on heal — not yet wired.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState
-from core.types import AttackType, Faction, Profession
+from core.state.unit_state import UnitState, RangeShape
+from core.types import (
+    AttackType, Faction, Profession, RoleArchetype,
+)
+from data.characters.generated.warfarin import make_warfarin as _base_stats
+
+
+# Medic standard range: 3 tiles in front
+MEDIC_RANGE = RangeShape(tiles=(
+    (1, 0), (2, 0), (3, 0),
+))
 
 
 def make_warfarin() -> UnitState:
-    return UnitState(
-        name='华法琳',
-        faction=Faction.ALLY,
-        max_hp=1520,
-        atk=505,
-        defence=125,
-        res=0.0,
-        atk_interval=2.85,
-        attack_range_melee=False,
-        profession=Profession.MEDIC,
-        attack_type=AttackType.HEAL,
-        block=1,
-        cost=0,
-        redeploy_cd=70.0,
-    )
+    """Warfarin E2 max, trust 100. Base stats from akgd; attack_type overridden to HEAL."""
+    op = _base_stats()
+    op.name = "Warfarin"
+    op.archetype = RoleArchetype.MEDIC_ST
+    op.range_shape = MEDIC_RANGE
+    op.attack_type = AttackType.HEAL
+    op.cost = 12
+    return op
