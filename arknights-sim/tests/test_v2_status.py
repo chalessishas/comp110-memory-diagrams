@@ -50,10 +50,10 @@ def test_stun_halts_movement():
     for _ in range(TICK_RATE * 2):  # 2 simulated seconds
         w.tick()
 
-    # elapsed increments BEFORE systems run, so stun expires exactly at t=2.0 (final tick).
-    # Status decay removes it, then movement gets one free tick. At most 1 tick of movement.
-    assert slug.path_progress <= slug.move_speed * DT + 1e-9, \
-        f"Stunned enemy must barely move (≤1 tick), got path_progress={slug.path_progress}"
+    # elapsed pre-increments; status_decay keeps stun while expires_at >= now.
+    # At t=2.0 the stun is still active (2.0 >= 2.0), so all 20 ticks are frozen.
+    assert slug.path_progress == 0.0, \
+        f"Stunned enemy must not move, got path_progress={slug.path_progress}"
 
 
 def test_stun_expires_and_movement_resumes():
