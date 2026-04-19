@@ -1,0 +1,63 @@
+id: main_0-2
+name: "Crossroads"
+starting_dp: 20
+map:
+  width: 9
+  height: 5
+  tiles:
+    # Top lane (y=4) — entrance left, turns south at x=4
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: ground}
+    - {x: 4, y: 4, type: ground}
+    # Vertical drop — top to center
+    - {x: 4, y: 3, type: ground}
+    # Bottom lane (y=0) — entrance left, turns north at x=4
+    - {x: 0, y: 0, type: ground}
+    - {x: 1, y: 0, type: ground}
+    - {x: 2, y: 0, type: deployment_melee}
+    - {x: 3, y: 0, type: ground}
+    - {x: 4, y: 0, type: ground}
+    # Vertical rise — bottom to center
+    - {x: 4, y: 1, type: ground}
+    # Shared center corridor (both lanes converge at x=4,y=2)
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: ground}
+    - {x: 8, y: 2, type: goal}
+enemies:
+  - id: originium_slug
+    count: 3
+    interval: 4.0
+    first_delay: 0.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [2, 4]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [4, 2]
+      - [5, 2]
+      - [6, 2]
+      - [7, 2]
+      - [8, 2]
+  - id: originium_slug
+    count: 3
+    interval: 4.0
+    first_delay: 2.0
+    path:
+      - [0, 0]
+      - [1, 0]
+      - [2, 0]
+      - [3, 0]
+      - [4, 0]
+      - [4, 1]
+      - [4, 2]
+      - [5, 2]
+      - [6, 2]
+      - [7, 2]
+      - [8, 2]
+max_lives: 3
