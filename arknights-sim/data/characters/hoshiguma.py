@@ -1,25 +1,31 @@
-"""星熊 — generated from ArknightsGameData char_136_hsguma.
-Source: E2 max-level, trust 0, no potentials, no module.
-Regenerate: python tools/gen_characters.py char_136_hsguma
+"""Hoshiguma — 6* Defender (Juggernaut archetype).
+
+Base stats from ArknightsGameData (E2 max, trust 100).
+Talent "Overweight": when HP > 50%, reduce damage taken by 20% (E2 rank).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState
-from core.types import AttackType, Faction, Profession
+from core.state.unit_state import UnitState, RangeShape, TalentComponent
+from core.types import (
+    AttackType, Faction, Profession, RoleArchetype,
+)
+from data.characters.generated.hoshiguma import make_hoshiguma as _base_stats
+
+
+DEFENDER_MELEE_BLOCK3 = RangeShape(tiles=((0, 0),))
+
+_OVERWEIGHT_TAG = "hoshiguma_overweight"
 
 
 def make_hoshiguma() -> UnitState:
-    return UnitState(
-        name='星熊',
-        faction=Faction.ALLY,
-        max_hp=3850,
-        atk=430,
-        defence=723,
-        res=0.0,
-        atk_interval=1.2,
-        attack_range_melee=True,
-        profession=Profession.DEFENDER,
-        attack_type=AttackType.PHYSICAL,
-        block=3,
-        cost=23,
-        redeploy_cd=70.0,
-    )
+    """Hoshiguma E2 max, trust 100. Base stats from akgd; Overweight talent wired."""
+    op = _base_stats()
+    op.name = "Hoshiguma"
+    op.archetype = RoleArchetype.DEF_JUGGERNAUT
+    op.range_shape = DEFENDER_MELEE_BLOCK3
+    op.cost = 23
+    op.talents = [TalentComponent(
+        name="Overweight",
+        behavior_tag=_OVERWEIGHT_TAG,
+        params={"reduction": 0.20, "hp_threshold": 0.5},
+    )]
+    return op

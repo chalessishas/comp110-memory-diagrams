@@ -129,6 +129,7 @@ class UnitState:
     facing: Tuple[int, int] = (1, 0)     # 干员朝向 (dx, dy) — 影响 range_shape 旋转
     atk_cd: float = 0.0                  # 攻击冷却剩余
     deploy_time: float = -1.0            # 部署时刻；-1 表示未部署
+    redeploy_available_at: float = 0.0   # 可再部署的游戏时间；0 = 立即可用
 
     # 敌人路径
     path: List[Tuple[int, int]] = field(default_factory=list)
@@ -229,8 +230,18 @@ class UnitState:
 
     # ---- damage / heal ----------------------------------------------------
 
+    def talent_damage_reduction(self) -> float:
+        """Returns total passive damage reduction [0, 1) from talents (e.g. Hoshiguma)."""
+        total = 0.0
+        for t in self.talents:
+            if t.behavior_tag == "hoshiguma_overweight":
+                if self.max_hp > 0 and self.hp / self.max_hp > t.params.get("hp_threshold", 0.5):
+                    total += t.params.get("reduction", 0.0)
+        return min(total, 0.99)  # cap so at least 1% damage goes through
+
     def take_damage(self, amount: int) -> int:
-        actual = max(1, int(amount))
+        dr = self.talent_damage_reduction()
+        actual = max(1, int(amount * (1.0 - dr)))
         self.hp = max(0, self.hp - actual)
         if self.hp == 0:
             self.alive = False

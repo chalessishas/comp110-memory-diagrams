@@ -68,14 +68,32 @@ class World:
     # --------------------------------------------------------------------
 
     def deploy(self, unit: UnitState) -> bool:
-        """Spend DP and mark unit as deployed. Returns False if insufficient DP."""
+        """Spend DP and mark unit as deployed. Returns False if insufficient DP or in cooldown."""
+        if self.global_state.elapsed < unit.redeploy_available_at - 1e-9:
+            return False  # still in redeploy cooldown
         if not self.global_state.try_spend_dp(unit.cost):
             return False
         unit.deployed = True
+        unit.deploy_time = self.global_state.elapsed
+        unit.redeploy_available_at = 0.0
         if unit not in self.units:
             self.units.append(unit)
         self.log(f"{unit.name} deployed  dp={self.global_state.dp}")
         return True
+
+    def retreat(self, unit: UnitState) -> None:
+        """Remove operator from field, start redeploy cooldown, refund half DP."""
+        if not unit.deployed or unit.faction == Faction.ENEMY:
+            return  # enemies cannot retreat; only deployed allies
+        unit.deployed = False
+        unit.redeploy_available_at = self.global_state.elapsed + unit.redeploy_cd
+        # Arknights refunds 50% of DP cost on retreat (floor)
+        refund = unit.cost // 2
+        self.global_state.dp += refund
+        self.log(
+            f"{unit.name} retreated  cd={unit.redeploy_cd:.0f}s  "
+            f"refund={refund}  dp={self.global_state.dp}"
+        )
 
     def tick(self, dt: float = DT) -> None:
         self.global_state.elapsed += dt
