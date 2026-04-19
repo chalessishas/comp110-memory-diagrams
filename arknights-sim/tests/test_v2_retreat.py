@@ -93,3 +93,22 @@ def test_redeploy_allowed_after_cooldown():
     result = w.deploy(op)
     assert result is True, "Must allow redeploy after cooldown expires"
     assert op.deployed
+
+
+def test_retreat_no_op_on_dead_operator():
+    """Retreating a dead operator must be a no-op — no DP refund, no cooldown set."""
+    w = _world(dp=50)
+    op = make_liskarm()
+    op.position = (1.0, 0.0)
+    op.cost = 22
+    w.deploy(op)
+
+    dp_after_deploy = w.global_state.dp
+    op.alive = False   # simulate operator killed in combat
+    op.deployed = True  # cleanup_system doesn't clear deployed for allies
+
+    w.retreat(op)
+
+    assert op.deployed, "deployed should stay True — retreat was no-op"
+    assert w.global_state.dp == dp_after_deploy, "no DP refund for dead operator"
+    assert op.redeploy_available_at == 0.0, "no cooldown set for dead operator"

@@ -83,8 +83,8 @@ class World:
 
     def retreat(self, unit: UnitState) -> None:
         """Remove operator from field, start redeploy cooldown, refund half DP."""
-        if not unit.deployed or unit.faction == Faction.ENEMY:
-            return  # enemies cannot retreat; only deployed allies
+        if not unit.alive or not unit.deployed or unit.faction == Faction.ENEMY:
+            return  # dead units and enemies cannot retreat
         unit.deployed = False
         unit.redeploy_available_at = self.global_state.elapsed + unit.redeploy_cd
         # Arknights refunds 50% of DP cost on retreat (floor)

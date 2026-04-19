@@ -1,0 +1,49 @@
+id: main_0-3
+name: "Sky and Ground"
+starting_dp: 15
+map:
+  width: 8
+  height: 3
+  tiles:
+    # Main ground corridor (y=1)
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: goal}
+    # Elevated tiles for ranged operators
+    - {x: 2, y: 2, type: deployment_ranged}
+    - {x: 4, y: 2, type: deployment_ranged}
+enemies:
+  # Wave 1: ground slugs — can be blocked
+  - id: originium_slug
+    count: 3
+    interval: 5.0
+    first_delay: 0.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [2, 1]
+      - [3, 1]
+      - [4, 1]
+      - [5, 1]
+      - [6, 1]
+      - [7, 1]
+  # Wave 2: aerial drones — bypass ground block, must be killed by attacks
+  - id: originium_drone
+    count: 3
+    interval: 5.0
+    first_delay: 2.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [2, 1]
+      - [3, 1]
+      - [4, 1]
+      - [5, 1]
+      - [6, 1]
+      - [7, 1]
+max_lives: 3
