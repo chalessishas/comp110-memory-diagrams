@@ -114,7 +114,7 @@ max_lives: 3
 
 ## Status
 
-**ALL 6 PHASES COMPLETE.** 41 tests passing (0.34s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
+**ALL 7 PHASES COMPLETE.** 48 tests passing (0.28s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
 
 | Phase | Scope | Tests |
 |-------|-------|-------|
@@ -124,3 +124,4 @@ max_lives: 3
 | P4 | Skill system (SP, buffs, auto/manual) | 7/7 ✅ |
 | P5 | CLI + JSON log + full test suite | 7/7 ✅ |
 | P6 | AOE splash (Euclidean radius) + two-stage buff pipeline | 14/14 ✅ |
+| P7 | Targeting priority (path_progress) + SP lockout (orange meter) | 7/7 ✅ |
