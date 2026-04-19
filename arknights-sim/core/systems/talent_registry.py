@@ -8,18 +8,21 @@ Talent callbacks:
     Called after attacker deals damage to target (e.g. Angelina slow).
 
   on_kill(world, killer, killed) → None
-    Called when killer lands the killing blow (e.g. Vanguard Pioneer DP on kill).
+    Called when killer lands the killing blow (e.g. Charger class DP on kill).
+
+  on_battle_start(world, unit) → None
+    Called once when a unit is added to the world (e.g. Texas Tactical Delivery +2 DP).
 
 Usage:
-    register_talent("texas_dp_on_kill", on_kill=_dp_cb)
+    register_talent("texas_tactical_delivery", on_battle_start=_dp_cb)
 """
 from __future__ import annotations
 from typing import Callable, Dict, Optional, Tuple
 
 _Fn = Callable  # type alias shorthand
 
-_REGISTRY: Dict[str, Tuple[Optional[_Fn], Optional[_Fn], Optional[_Fn]]] = {}
-# value: (on_hit_received, on_attack_hit, on_kill)
+_REGISTRY: Dict[str, Tuple[Optional[_Fn], Optional[_Fn], Optional[_Fn], Optional[_Fn]]] = {}
+# value: (on_hit_received, on_attack_hit, on_kill, on_battle_start)
 
 
 def register_talent(
@@ -28,8 +31,9 @@ def register_talent(
     on_hit_received: Optional[_Fn] = None,
     on_attack_hit: Optional[_Fn] = None,
     on_kill: Optional[_Fn] = None,
+    on_battle_start: Optional[_Fn] = None,
 ) -> None:
-    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill)
+    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill, on_battle_start)
 
 
 def fire_on_hit_received(world, defender, attacker, damage: int) -> None:
@@ -51,3 +55,10 @@ def fire_on_kill(world, killer, killed) -> None:
         entry = _REGISTRY.get(talent.behavior_tag)
         if entry and entry[2]:
             entry[2](world, killer, killed)
+
+
+def fire_on_battle_start(world, unit) -> None:
+    for talent in unit.talents:
+        entry = _REGISTRY.get(talent.behavior_tag)
+        if entry and len(entry) > 3 and entry[3]:
+            entry[3](world, unit)

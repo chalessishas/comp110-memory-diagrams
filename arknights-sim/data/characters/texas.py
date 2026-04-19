@@ -1,7 +1,8 @@
 """Texas — 6* Vanguard (Pioneer archetype).
 
 Base stats from ArknightsGameData (E2 max, trust 100).
-Trait: Vanguard Pioneer — generates 1 DP when killing an enemy.
+Talent: Tactical Delivery (E2) — grants +2 DP at operation start when in squad.
+  (NOT DP on kill; Pioneer class trait is just Block 2. Charger archetype gets DP on kill.)
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, RangeShape, TalentComponent
@@ -14,19 +15,18 @@ from data.characters.generated.texas import make_texas as _base_stats
 
 PIONEER_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 
-_DP_ON_KILL_TAG = "vanguard_pioneer_dp_on_kill"
+_TACTICAL_DELIVERY_TAG = "texas_tactical_delivery"
 
 
-def _on_kill(world, killer, killed) -> None:
-    if killed.faction.value == "enemy":
-        world.global_state.refund_dp(1)
+def _on_battle_start(world, unit) -> None:
+    world.global_state.refund_dp(2)  # E2 rank: +2 DP at operation start
 
 
-register_talent(_DP_ON_KILL_TAG, on_kill=_on_kill)
+register_talent(_TACTICAL_DELIVERY_TAG, on_battle_start=_on_battle_start)
 
 
 def make_texas() -> UnitState:
-    """Texas E2 max, trust 100. Pioneer DP-on-kill trait wired."""
+    """Texas E2 max, trust 100. Tactical Delivery: +2 DP at operation start."""
     op = _base_stats()
     op.name = "Texas"
     op.archetype = RoleArchetype.VAN_PIONEER
@@ -34,7 +34,7 @@ def make_texas() -> UnitState:
     op.block = 2
     op.cost = 13
     op.talents = [TalentComponent(
-        name="Pioneer (DP on kill)",
-        behavior_tag=_DP_ON_KILL_TAG,
+        name="Tactical Delivery",
+        behavior_tag=_TACTICAL_DELIVERY_TAG,
     )]
     return op

@@ -15,6 +15,7 @@ from .events.event_queue import EventQueue
 from .state.global_state import GlobalState
 from .state.tile_state import TileGrid
 from .state.unit_state import UnitState
+from .systems.talent_registry import fire_on_battle_start
 from .types import DT, TICK_PHASE_ORDER, TICK_RATE, Faction, TickPhase, TileType
 
 
@@ -50,6 +51,8 @@ class World:
 
     def add_unit(self, unit: UnitState) -> None:
         self.units.append(unit)
+        if unit.faction == Faction.ALLY and unit.talents:
+            fire_on_battle_start(self, unit)
 
     def allies(self) -> List[UnitState]:
         return [u for u in self.units if u.alive and u.faction == Faction.ALLY]
