@@ -19,7 +19,7 @@ def make_surtr() -> UnitState:
         move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.GUARD,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
         cost=21,
         redeploy_cd=70.0,

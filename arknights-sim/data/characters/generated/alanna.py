@@ -19,7 +19,7 @@ def make_alanna() -> UnitState:
         move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.SUPPORTER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=2,
         cost=18,
         redeploy_cd=80.0,

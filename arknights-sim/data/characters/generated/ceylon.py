@@ -19,7 +19,7 @@ def make_ceylon() -> UnitState:
         move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.MEDIC,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.HEAL,
         block=1,
         cost=22,
         redeploy_cd=80.0,

@@ -49,6 +49,30 @@ PROFESSION_MAP = {
 
 PLAYABLE_PROFESSIONS = set(PROFESSION_MAP.keys())
 
+
+def _infer_attack_type(entry: dict) -> str:
+    """Map akgd profession/subProfessionId → AttackType enum literal.
+
+    Heuristics (best-effort; curated factories override when wrong):
+    - MEDIC → HEAL (healers restore HP rather than deal damage)
+    - CASTER → ARTS (all casters deal magic damage)
+    - SUPPORT → ARTS (decel/hexer/bard/summoner are all arts)
+    - subProfessionId contains "arts" → ARTS
+      (artsfghter/artsprotector/artsmaster/merchant edge cases)
+    - Everything else → PHYSICAL
+    """
+    profession = entry.get("profession", "WARRIOR")
+    subprof = (entry.get("subProfessionId") or "").lower()
+    if profession == "MEDIC":
+        return "AttackType.HEAL"
+    if profession == "CASTER":
+        return "AttackType.ARTS"
+    if profession == "SUPPORT":
+        return "AttackType.ARTS"
+    if "arts" in subprof:
+        return "AttackType.ARTS"
+    return "AttackType.PHYSICAL"
+
 OUT_DIR = Path(__file__).parent.parent / "data" / "characters" / "generated"
 
 
@@ -108,6 +132,7 @@ def extract_stats(entry: dict, *, phase: int = 2, trust100: bool = True) -> dict
         "ranged":       entry.get("position", "MELEE") == "RANGED",
         "profession":   PROFESSION_MAP.get(entry.get("profession", "WARRIOR"),
                                            "Profession.GUARD"),
+        "attack_type":  _infer_attack_type(entry),
         "display_name": entry.get("name", "Unknown"),
         "rarity":       entry.get("rarity", ""),
         "phase_used":   phase,
@@ -166,7 +191,7 @@ def render_py(char_id: str, filename: str, s: dict) -> str:
                 move_speed={s['move_speed']},
                 {ranged_line}
                 profession={s['profession']},
-                attack_type=AttackType.PHYSICAL,
+                attack_type={s['attack_type']},
                 block={s['block']},
                 cost={s['cost']},
                 redeploy_cd={s['redeploy_cd']},

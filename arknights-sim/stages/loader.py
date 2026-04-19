@@ -23,17 +23,23 @@ from core.systems import register_default_systems
 from core.systems.spawn_system import register_spawn_handler
 from core.types import TileType
 from core.world import World
-from data.enemies import make_drone, make_originium_slug
+from data.enemies.registry import get_enemy, has_enemy, enemy_count
 
 
 # --------------------------------------------------------------------------
-# Enemy registry — maps YAML "id" → factory callable (path=...) -> UnitState
+# Enemy registry alias — YAML "id" resolves via data.enemies.registry
+# which merges data/enemies/*.py (curated) + data/enemies/generated/*.py (akgd)
 # --------------------------------------------------------------------------
-ENEMY_FACTORIES: Dict[str, Callable[..., UnitState]] = {
-    "originium_slug": make_originium_slug,
-    "originium_drone": make_drone,
-    "drone": make_drone,
-}
+def _enemy_factory(enemy_id: str) -> Callable[..., UnitState]:
+    """Return a path-aware factory for the given enemy id."""
+    if not has_enemy(enemy_id):
+        raise ValueError(
+            f"Unknown enemy id {enemy_id!r}. Registry has {enemy_count()} enemies."
+        )
+    def _build(path):
+        return get_enemy(enemy_id, path=path)
+    _build.__name__ = f"_enemy_factory_{enemy_id}"
+    return _build
 
 
 # --------------------------------------------------------------------------
@@ -136,9 +142,7 @@ def build_world(stage: StageSpec) -> World:
 
     # Schedule spawn events
     for wave in stage.waves:
-        factory = ENEMY_FACTORIES.get(wave.enemy_id)
-        if factory is None:
-            raise ValueError(f"Unknown enemy id {wave.enemy_id!r}")
+        factory = _enemy_factory(wave.enemy_id)
         for i in range(wave.count):
             fire_at = wave.first_delay + wave.interval * i
             world.event_queue.schedule(

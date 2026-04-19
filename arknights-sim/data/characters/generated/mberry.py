@@ -19,7 +19,7 @@ def make_mberry() -> UnitState:
         move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.MEDIC,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.HEAL,
         block=1,
         cost=15,
         redeploy_cd=70.0,

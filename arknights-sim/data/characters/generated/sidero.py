@@ -19,7 +19,7 @@ def make_sidero() -> UnitState:
         move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.GUARD,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
         cost=23,
         redeploy_cd=80.0,

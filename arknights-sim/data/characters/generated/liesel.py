@@ -19,7 +19,7 @@ def make_liesel() -> UnitState:
         move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.CASTER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
         cost=33,
         redeploy_cd=70.0,

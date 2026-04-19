@@ -19,7 +19,7 @@ def make_slbell() -> UnitState:
         move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.SUPPORTER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
         cost=12,
         redeploy_cd=70.0,

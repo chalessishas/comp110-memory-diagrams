@@ -19,7 +19,7 @@ def make_aprot2() -> UnitState:
         move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.DEFENDER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=3,
         cost=25,
         redeploy_cd=70.0,

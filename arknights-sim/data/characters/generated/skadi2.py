@@ -19,7 +19,7 @@ def make_skadi2() -> UnitState:
         move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.SUPPORTER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
         cost=8,
         redeploy_cd=70.0,

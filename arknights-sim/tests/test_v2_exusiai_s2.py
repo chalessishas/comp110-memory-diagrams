@@ -72,6 +72,42 @@ def test_s2_halves_attack_interval():
         f"Expected {base_interval/2.0}s interval, got {exa.current_atk_interval}"
 
 
+def test_aspd_clamp_minimum():
+    """ASPD below 20 is clamped to 20 — interval cannot exceed atk_interval * 5."""
+    from core.state.unit_state import Buff
+    from core.types import BuffStack
+
+    exa = make_exusiai()
+    base_interval = exa.atk_interval  # 1.0s
+
+    # -500 ASPD → effective = 100 - 500 = -400, clamped to 20
+    exa.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=-500.0, source_tag="test",
+    ))
+    expected = base_interval * 100.0 / 20.0  # = 5.0s
+    assert abs(exa.current_atk_interval - expected) < 1e-9, \
+        f"Expected {expected}s (clamp-min), got {exa.current_atk_interval}"
+
+
+def test_aspd_clamp_maximum():
+    """ASPD above 600 is clamped to 600 — interval cannot drop below atk_interval / 6."""
+    from core.state.unit_state import Buff
+    from core.types import BuffStack
+
+    exa = make_exusiai()
+    base_interval = exa.atk_interval  # 1.0s
+
+    # +900 ASPD → effective = 100 + 900 = 1000, clamped to 600
+    exa.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=900.0, source_tag="test",
+    ))
+    expected = base_interval * 100.0 / 600.0  # ≈ 0.1667s
+    assert abs(exa.current_atk_interval - expected) < 1e-9, \
+        f"Expected {expected:.4f}s (clamp-max), got {exa.current_atk_interval}"
+
+
 def test_s2_buff_removed_on_end():
     """ASPD buff must be cleaned up when S2 expires."""
     w = _world()
