@@ -7,3 +7,4 @@ dist/
 
 # akgd pipeline cache — large JSON, not version-controlled
 tools/.char_table_cache.json
+tools/.level_cache/
