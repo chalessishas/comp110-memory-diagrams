@@ -61,6 +61,16 @@ def make_silverash() -> Operator:
     return op
 
 
+def make_warfarin() -> Operator:
+    """Warfarin E2 — Medic healer. Restores HP to most-injured ally."""
+    return Operator(
+        name="Warfarin",
+        max_hp=1900, atk=420, defence=62, res=0,
+        atk_interval=2.85, block=1, attack_type="heal",
+        attack_range="ranged",
+    )
+
+
 def make_angelina() -> Operator:
     """Angelina E2 — AOE magic Supporter. splash_radius=1.2 tiles."""
     return Operator(

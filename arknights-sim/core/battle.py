@@ -96,7 +96,10 @@ class Battle:
         for op in self.operators:
             if not op.alive:
                 continue
-            target = self._blocked_enemy(op)
+            if op.attack_type == "heal":
+                target = self._heal_target(op)
+            else:
+                target = self._blocked_enemy(op)
             op.update_skill(DT, has_target=target is not None)
             if op._skill_just_fired and op.skill:
                 self.log.record(
@@ -108,10 +111,16 @@ class Battle:
                 )
             if target and op.tick(DT):
                 dmg = op.attack(target)
-                self.log.record(
-                    f"t={self.elapsed:.1f}  {op.name} → {target.name}  -{dmg}hp  "
-                    f"({target.hp}/{target.max_hp})"
-                )
+                if op.attack_type == "heal":
+                    self.log.record(
+                        f"t={self.elapsed:.1f}  {op.name} heals {target.name}  "
+                        f"+{dmg}hp  ({target.hp}/{target.max_hp})"
+                    )
+                else:
+                    self.log.record(
+                        f"t={self.elapsed:.1f}  {op.name} → {target.name}  -{dmg}hp  "
+                        f"({target.hp}/{target.max_hp})"
+                    )
                 if op.splash_radius > 0:
                     self._apply_splash(op, target)
 
@@ -185,6 +194,11 @@ class Battle:
                     f"t={self.elapsed:.1f}  {op.name} splash → {enemy.name}  "
                     f"-{splash_dmg}hp  ({enemy.hp}/{enemy.max_hp})"
                 )
+
+    def _heal_target(self, op: Operator) -> Optional[Operator]:
+        """Return most-injured living operator (lowest hp/max_hp); None if all full."""
+        injured = [o for o in self.operators if o.alive and o.hp < o.max_hp]
+        return min(injured, key=lambda o: o.hp / o.max_hp) if injured else None
 
     def _blocking_operator(self, enemy: Enemy) -> Optional[Operator]:
         """Return the melee operator physically blocking this enemy, if any."""
