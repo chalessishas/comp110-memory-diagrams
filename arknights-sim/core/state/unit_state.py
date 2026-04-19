@@ -247,24 +247,30 @@ class UnitState:
             self.alive = False
         return actual
 
+    def _fragile_mult(self) -> float:
+        """Wiki rule: same source_tag → take max; different sources → multiply."""
+        by_source: Dict[str, float] = {}
+        for s in self.statuses:
+            if s.kind != StatusKind.FRAGILE:
+                continue
+            amount = s.params.get("amount", 0.3)
+            key = s.source_tag or "__default__"
+            if key not in by_source or amount > by_source[key]:
+                by_source[key] = amount
+        mult = 1.0
+        for amount in by_source.values():
+            mult *= 1.0 + amount
+        return mult
+
     def take_physical(self, raw_atk: int) -> int:
         effective_def = self.effective_def
         dmg = max(int(raw_atk * 0.05), raw_atk - effective_def)
-        # Fragile status: +30% received damage (default value)
-        fragile_mult = 1.0
-        for s in self.statuses:
-            if s.kind == StatusKind.FRAGILE:
-                fragile_mult *= 1.0 + s.params.get("amount", 0.3)
-        return self.take_damage(int(dmg * fragile_mult))
+        return self.take_damage(int(dmg * self._fragile_mult()))
 
     def take_arts(self, raw_atk: int) -> int:
         res = self.effective_stat(BuffAxis.RES, base=self.res)
         dmg = max(1, int(raw_atk * (1.0 - res / 100.0)))
-        fragile_mult = 1.0
-        for s in self.statuses:
-            if s.kind == StatusKind.FRAGILE:
-                fragile_mult *= 1.0 + s.params.get("amount", 0.3)
-        return self.take_damage(int(dmg * fragile_mult))
+        return self.take_damage(int(dmg * self._fragile_mult()))
 
     def take_true(self, raw_atk: int) -> int:
         return self.take_damage(raw_atk)

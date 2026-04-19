@@ -35,6 +35,27 @@ def _s3_on_start(world, carrier: UnitState) -> None:
         axis=BuffAxis.ATK, stack=BuffStack.RATIO,
         value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
     ))
+    # Truesilver Slash: 3 rapid strikes to all enemies in range (uses boosted ATK)
+    if carrier.position is None:
+        return
+    ox, oy = carrier.position
+    shape = carrier.range_shape
+    tiles = set(shape.tiles) | set(shape.extended_tiles)
+    targets = [
+        e for e in world.enemies()
+        if e.alive and e.position is not None
+        and (round(e.position[0]) - round(ox), round(e.position[1]) - round(oy)) in tiles
+    ]
+    for strike in range(3):
+        for t in targets:
+            if not t.alive:
+                continue
+            dmg = t.take_physical(carrier.effective_atk)
+            world.global_state.total_damage_dealt += dmg
+            world.log(
+                f"SilverAsh S3 strike {strike + 1}/3 → {t.name}  "
+                f"dmg={dmg}  ({t.hp}/{t.max_hp})"
+            )
 
 
 def _s3_on_end(world, carrier: UnitState) -> None:
