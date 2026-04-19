@@ -1,37 +1,24 @@
 """Liskarm — 5* Defender (Sentinel archetype).
 
-SOURCE: PRTS wiki, E2 L90, 信赖 100, no potentials, no module.
-VERIFY: replace with akgd values next iteration.
-
-Sentinel special: electric arc damage to attacker on being hit (talent).
-TODO: implement the reflective damage via a hit_received event hook once
-event_queue supports damage events.
+Base stats from ArknightsGameData (E2 max, trust 100).
+Talent: electric arc to attacker on being hit — not yet wired (needs hit_received event).
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, RangeShape
 from core.types import (
     AttackType, Faction, Profession, RoleArchetype,
 )
+from data.characters.generated.liskarm import make_liskarm as _base_stats
 
 
 DEFENDER_MELEE_1 = RangeShape(tiles=((0, 0),))
 
 
 def make_liskarm() -> UnitState:
-    return UnitState(
-        name="Liskarm",
-        faction=Faction.ALLY,
-        max_hp=2200,
-        atk=495,
-        defence=431,
-        res=20.0,
-        atk_interval=1.2,
-        profession=Profession.DEFENDER,
-        archetype=RoleArchetype.DEF_SENTINEL,
-        attack_type=AttackType.PHYSICAL,
-        attack_range_melee=True,
-        block=1,
-        range_shape=DEFENDER_MELEE_1,
-        cost=21,
-        redeploy_cd=70.0,
-    )
+    """Liskarm E2 max, trust 100. Base stats from akgd."""
+    op = _base_stats()
+    op.name = "Liskarm"
+    op.archetype = RoleArchetype.DEF_SENTINEL
+    op.range_shape = DEFENDER_MELEE_1
+    op.cost = 21
+    return op

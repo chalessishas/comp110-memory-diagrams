@@ -87,7 +87,7 @@ def test_silverash_beats_lone_slug():
 
 
 def test_liskarm_survives_slug():
-    """Regression: Liskarm 2200 HP tanks 1300 HP slug's attacks."""
+    """Regression: Liskarm 3240 HP (akgd E2 trust-100) tanks slug's attacks."""
     w = _fresh_world()
     op = make_liskarm()
     op.deployed = True

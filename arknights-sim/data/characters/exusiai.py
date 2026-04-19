@@ -1,13 +1,14 @@
 """Exusiai — 6* Sniper (Marksman archetype).
 
-SOURCE: PRTS wiki, E2 L90, 信赖 100, no potentials, no module.
-VERIFY: replace with akgd values next iteration.
+Base stats from ArknightsGameData (E2 max, trust 100).
+S2 "Only Orange II" reduces atk_interval — not yet wired.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, RangeShape
 from core.types import (
     AttackType, Faction, Profession, RoleArchetype,
 )
+from data.characters.generated.exusiai import make_exusiai as _base_stats
 
 
 # Marksman sniper standard range: 3×3 centered forward (simplified)
@@ -17,20 +18,10 @@ MARKSMAN_RANGE = RangeShape(tiles=tuple(
 
 
 def make_exusiai() -> UnitState:
-    return UnitState(
-        name="Exusiai",
-        faction=Faction.ALLY,
-        max_hp=2348,
-        atk=705,
-        defence=124,
-        res=0.0,
-        atk_interval=1.0,  # base; S2 Only Orange reduces it
-        profession=Profession.SNIPER,
-        archetype=RoleArchetype.SNIPER_MARKSMAN,
-        attack_type=AttackType.PHYSICAL,
-        attack_range_melee=False,
-        block=0,
-        range_shape=MARKSMAN_RANGE,
-        cost=16,
-        redeploy_cd=70.0,
-    )
+    """Exusiai E2 max, trust 100. Base stats from akgd."""
+    op = _base_stats()
+    op.name = "Exusiai"
+    op.archetype = RoleArchetype.SNIPER_MARKSMAN
+    op.range_shape = MARKSMAN_RANGE
+    op.cost = 16
+    return op
