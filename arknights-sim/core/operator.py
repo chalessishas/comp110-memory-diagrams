@@ -21,6 +21,7 @@ class Operator(Entity):
     # Two-stage buff pipeline: ratio buffs sum additively; multiplier buffs multiply
     _atk_ratio_buffs: List[float] = field(init=False, default_factory=list)
     _atk_multiplier_buffs: List[float] = field(init=False, default_factory=list)
+    _sp_locked: bool = field(init=False, default=False)   # True = SP full, no target (orange meter)
     _skill_just_fired: bool = field(init=False, default=False)
     _skill_just_ended: bool = field(init=False, default=False)
 
@@ -46,7 +47,7 @@ class Operator(Entity):
             self.sp = min(self.sp + self.sp_gain_per_attack, self.skill.sp_cost)
         return dmg
 
-    def update_skill(self, dt: float) -> None:
+    def update_skill(self, dt: float, has_target: bool = True) -> None:
         self._skill_just_fired = False
         self._skill_just_ended = False
         if not self.skill or not self.alive:
@@ -66,6 +67,10 @@ class Operator(Entity):
             self.sp = min(self.sp + self.sp_gain_rate * dt, self.skill.sp_cost)
 
         if self.sp >= self.skill.sp_cost:
+            if not has_target:
+                self._sp_locked = True   # orange meter: SP full, no target, hold fire
+                return
+            self._sp_locked = False
             self.sp = 0.0
             self._skill_remaining = self.skill.duration
             if self.skill.on_start:

@@ -44,10 +44,14 @@ def test_splash_hits_adjacent_enemy():
 
 
 def test_splash_misses_distant_enemy():
-    """Enemy at tile 3 (dist=3.0 > 1.2) should NOT take splash damage."""
+    """Enemy far from primary target should not take splash damage.
+
+    With priority targeting, the enemy with highest _path_progress is attacked.
+    primary (progress=3.0) is targeted; far (progress=0.0, dist=3.0) is outside radius.
+    """
     op = make_angelina()
-    primary = _slug(hp=5000, progress=0.0)    # tile (0,2)
-    far = _slug(hp=5000, progress=3.0)        # tile (3,2), dist=3.0 > 1.2
+    primary = _slug(hp=5000, progress=3.0)    # tile (3,2) — highest progress, targeted
+    far = _slug(hp=5000, progress=0.0)        # tile (0,2), dist=3.0 > 1.2 from primary
     far_hp_before = far.hp
 
     battle = Battle(operators=[op], enemies=[primary, far], max_lives=3)

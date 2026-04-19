@@ -96,7 +96,8 @@ class Battle:
         for op in self.operators:
             if not op.alive:
                 continue
-            op.update_skill(DT)
+            target = self._blocked_enemy(op)
+            op.update_skill(DT, has_target=target is not None)
             if op._skill_just_fired and op.skill:
                 self.log.record(
                     f"t={self.elapsed:.1f}  {op.name} activates {op.skill.name}!"
@@ -105,7 +106,6 @@ class Battle:
                 self.log.record(
                     f"t={self.elapsed:.1f}  {op.name}'s {op.skill.name} ends"
                 )
-            target = self._blocked_enemy(op)
             if target and op.tick(DT):
                 dmg = op.attack(target)
                 self.log.record(
@@ -154,10 +154,8 @@ class Battle:
         Melee operators only attack enemies assigned to their block slot.
         """
         if op.attack_range == "ranged":
-            for enemy in self.enemies:
-                if enemy.alive:
-                    return enemy
-            return None
+            live = [e for e in self.enemies if e.alive]
+            return max(live, key=lambda e: e._path_progress) if live else None
         # melee: first alive enemy in the block assignment
         for enemy in self._block_assignments.get(id(op), []):
             if enemy.alive:
