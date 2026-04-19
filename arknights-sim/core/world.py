@@ -90,6 +90,8 @@ class World:
         unit.deployed = True
         unit.deploy_time = self.global_state.elapsed
         unit.redeploy_available_at = 0.0
+        if unit.skill is not None and unit.skill.initial_sp > 0:
+            unit.skill.sp = float(unit.skill.initial_sp)
         if unit not in self.units:
             self.units.append(unit)
         self.log(f"{unit.name} deployed  dp={self.global_state.dp}")
