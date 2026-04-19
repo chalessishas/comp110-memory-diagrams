@@ -114,7 +114,7 @@ max_lives: 3
 
 ## Status
 
-**ALL 10 PHASES COMPLETE.** 64 tests passing (0.27s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
+**ALL 11 PHASES COMPLETE.** 68 tests passing (0.33s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
 
 | Phase | Scope | Tests |
 |-------|-------|-------|
@@ -128,3 +128,4 @@ max_lives: 3
 | P8 | Healer HP recovery (Medic → lowest hp/max_hp ally) | 3/3 ✅ |
 | P9 | DP/cost system (accumulate + deploy gate) | 4/4 ✅ |
 | P10 | Stun/Slow status effects (timed debuffs, stacking, expiry) | 4/4 ✅ |
+| P11 | Terrain effects (icy → Cold slow, tile-refresh model) | 4/4 ✅ |

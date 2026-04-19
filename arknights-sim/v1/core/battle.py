@@ -4,6 +4,8 @@ from math import sqrt
 from typing import Dict, List, Optional, Set
 from .operator import Operator
 from .enemy import Enemy
+from .map import Map
+from .status_effect import StatusEffect
 
 
 @dataclass
@@ -34,6 +36,7 @@ class Battle:
     spawn_queue: List[SpawnEvent] = field(default_factory=list)
     dp: float = 0.0           # current deployment points
     dp_rate: float = 1.0      # DP gained per simulated second
+    map: Optional[Map] = None  # if set, terrain effects are applied each tick
 
     lives: int = field(init=False)
     elapsed: float = field(init=False, default=0.0)
@@ -81,6 +84,7 @@ class Battle:
         self.dp += self.dp_rate * DT
         self._spawn_waves()
         self._tick_status_effects()
+        self._apply_terrain_effects()
         self._compute_block_assignments()
         self._resolve_operators()
         self._resolve_enemies()
@@ -89,6 +93,34 @@ class Battle:
     def _tick_status_effects(self) -> None:
         for entity in list(self.operators) + list(self.enemies):
             entity.tick_status(DT)
+
+    def _apply_terrain_effects(self) -> None:
+        """Refresh terrain-sourced status effects for enemies on special tiles."""
+        if not self.map:
+            return
+        tile_map = {(t.x, t.y): t for t in self.map.tiles}
+        for enemy in self.enemies:
+            if not enemy.alive:
+                continue
+            pos = enemy.tile_pos
+            if pos is None:
+                continue
+            tile = tile_map.get(pos)
+            if tile is None or not tile.terrain_effect:
+                continue
+            if tile.terrain_effect == "icy":
+                # Refresh Cold: ASPD -30% (slow_factor 1/0.7 ≈ 1.43); duration=2×DT so it
+                # persists as long as enemy stays on the tile but expires quickly if they leave
+                existing = [se for se in enemy.status_effects
+                            if se.kind == "slow" and se.slow_factor == 1.43]
+                if existing:
+                    existing[0].duration = DT * 2   # refresh
+                else:
+                    enemy.apply_status(StatusEffect(kind="slow", duration=DT * 2,
+                                                    slow_factor=1.43))
+                self.log.record(
+                    f"t={self.elapsed:.1f}  {enemy.name} chilled on icy tile {pos}"
+                )
 
     def _compute_block_assignments(self) -> None:
         """Assign live enemies to melee operators up to their block capacity."""

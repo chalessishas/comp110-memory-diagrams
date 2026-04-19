@@ -8,6 +8,7 @@ class Tile:
     x: int
     y: int
     type: str  # ground | elevated | goal | deployment_melee | deployment_ranged
+    terrain_effect: str = ""  # "" | "icy" | "oil"
 
 
 @dataclass
