@@ -7,6 +7,7 @@ from .movement_system import movement_system
 from .targeting_system import targeting_system
 from .combat_system import combat_system
 from .skill_system import skill_system
+from .passive_talent_system import passive_talent_system
 from .goal_system import goal_system
 from .cleanup_system import cleanup_system
 
@@ -19,5 +20,6 @@ def register_default_systems(world) -> None:
     world.register_system(TickPhase.TARGETING, targeting_system)
     world.register_system(TickPhase.COMBAT, combat_system)
     world.register_system(TickPhase.SKILL, skill_system)
+    world.register_system(TickPhase.SKILL, passive_talent_system)
     world.register_system(TickPhase.GOAL, goal_system)
     world.register_system(TickPhase.CLEANUP, cleanup_system)
