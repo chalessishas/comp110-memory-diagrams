@@ -4,7 +4,7 @@ Terra Wiki 优先级栈（从高到低）:
   1. Blocked unit           —— 被阻挡的敌人优先
   2. Special Priority       —— 低抗性 / 高威胁 / 职业分支特定
   3. Highest aggression     —— a = 1000*(t+s) 近似：部署时间大的 + 路径进度深的
-  4. Closest to destination —— 我们用 _path_progress 最大
+  4. Closest to destination —— min path_distance_remaining (correct for multi-route stages)
   5. Highest negative aggression —— 隐身等特殊负优先
 
 本实现覆盖 1 + 3 + 4（最常用的三条），Special 预留 hook.
@@ -57,13 +57,17 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
     if not candidates:
         return None
 
-    # Rule 1: blocked enemies first
+    def _dist_remaining(e: UnitState) -> float:
+        path_len = len(e.path) - 1 if e.path else 0
+        return max(0.0, path_len - e.path_progress)
+
+    # Rule 1: blocked enemies first — min path_distance_remaining
     blocked = [e for e in candidates if op.unit_id in e.blocked_by_unit_ids]
     if blocked:
-        return max(blocked, key=lambda e: e.path_progress)
+        return min(blocked, key=_dist_remaining)
 
-    # Rule 3/4: highest aggression ≈ highest path_progress
-    return max(candidates, key=lambda e: e.path_progress)
+    # Rule 3/4: closest to destination — min path_distance_remaining
+    return min(candidates, key=_dist_remaining)
 
 
 def _targeting_for_enemy(world, enemy: UnitState) -> Optional[UnitState]:
@@ -115,7 +119,7 @@ def _update_block_assignments(world) -> None:
             and abs(round(e.position[1]) - round(oy)) <= 0
             and len(e.blocked_by_unit_ids) == 0  # not already blocked
         ]
-        # Sort by path_progress descending (block the furthest-along first)
-        nearby.sort(key=lambda e: -e.path_progress)
+        # Block the enemy closest to exit first (min remaining distance)
+        nearby.sort(key=lambda e: max(0.0, (len(e.path) - 1 if e.path else 0) - e.path_progress))
         for e in nearby[: op.block]:
             e.blocked_by_unit_ids.append(op.unit_id)
