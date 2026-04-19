@@ -114,12 +114,13 @@ max_lives: 3
 
 ## Status
 
-**ALL 5 PHASES COMPLETE.** 27 tests passing (0.28s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
+**ALL 6 PHASES COMPLETE.** 41 tests passing (0.34s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
 
-| Phase | Commit | Tests |
-|-------|--------|-------|
-| P1 | ed49524 | 4/4 ✅ |
-| P2 | fcdbc61 | 4/4 ✅ |
-| P3 | 4aa8f30 | 5/5 ✅ |
-| P4 | a3c2cfa | 7/7 ✅ |
-| P5 | 48dc1ce | 7/7 ✅ |
+| Phase | Scope | Tests |
+|-------|-------|-------|
+| P1 | Entity + 1v1 combat | 4/4 ✅ |
+| P2 | Map + Stage loader + wave spawning | 4/4 ✅ |
+| P3 | Ranged targeting + block count | 5/5 ✅ |
+| P4 | Skill system (SP, buffs, auto/manual) | 7/7 ✅ |
+| P5 | CLI + JSON log + full test suite | 7/7 ✅ |
+| P6 | AOE splash (Euclidean radius) + two-stage buff pipeline | 14/14 ✅ |
