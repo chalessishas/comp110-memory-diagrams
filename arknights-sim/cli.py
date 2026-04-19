@@ -16,12 +16,15 @@ from stages.loader import load_stage, stage_to_battle
 _OP_REGISTRY: dict = {}
 
 try:
-    from data.operators import make_liskarm, make_hoshiguma, make_exusiai, make_silverash
+    from data.operators import (
+        make_liskarm, make_hoshiguma, make_exusiai, make_silverash, make_angelina,
+    )
     _OP_REGISTRY = {
         "liskarm": make_liskarm,
         "hoshiguma": make_hoshiguma,
         "exusiai": make_exusiai,
         "silverash": make_silverash,
+        "angelina": make_angelina,
     }
 except ImportError:
     pass

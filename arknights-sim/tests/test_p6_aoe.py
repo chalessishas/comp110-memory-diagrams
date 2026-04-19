@@ -100,7 +100,6 @@ def test_splash_damage_uses_magic_formula():
 
 def test_aoe_caster_clears_clustered_wave():
     """Angelina should clear a cluster of low-HP enemies faster than single-target."""
-    import copy
     op_aoe = make_angelina()
     op_single = make_angelina()
     op_single.splash_radius = 0.0   # strip AOE
