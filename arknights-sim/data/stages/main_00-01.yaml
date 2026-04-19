@@ -1,0 +1,101 @@
+id: main_00-01
+name: "main_00-01"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 9
+  height: 6
+  tiles:
+    - {x: 0, y: 3, type: goal}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: ground}
+enemies:
+  - id: slime
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: slime
+    count: 2
+    interval: 2.0
+    first_delay: 11.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: slime
+    count: 2
+    interval: 0.7
+    first_delay: 11.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: slime
+    count: 2
+    interval: 0.7
+    first_delay: 11.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [8, 2]
+      - [7, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: slime
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
+  - id: slime
+    count: 2
+    interval: 0.7
+    first_delay: 18.0
+    path:
+      - [8, 2]
+      - [3, 3]
+      - [3, 2]
+      - [1, 2]
+      - [1, 3]
+      - [0, 3]
