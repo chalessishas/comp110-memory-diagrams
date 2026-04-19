@@ -114,4 +114,12 @@ max_lives: 3
 
 ## Status
 
-**Design approved, implementation not started.** Run `python -m arknights_sim` once P1 is complete to verify.
+**ALL 5 PHASES COMPLETE.** 27 tests passing (0.28s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
+
+| Phase | Commit | Tests |
+|-------|--------|-------|
+| P1 | ed49524 | 4/4 ✅ |
+| P2 | fcdbc61 | 4/4 ✅ |
+| P3 | 4aa8f30 | 5/5 ✅ |
+| P4 | a3c2cfa | 7/7 ✅ |
+| P5 | 48dc1ce | 7/7 ✅ |
