@@ -36,10 +36,18 @@ def _enemy_in_range(op: UnitState, enemy: UnitState) -> bool:
 
 
 def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
+    from ..types import AttackType
     if not op.can_act():
         return None
     if not op.deployed or op.position is None:
         return None
+
+    # Healer: target most-injured ally (lowest hp/max_hp ratio)
+    if op.attack_type == AttackType.HEAL:
+        candidates = [u for u in world.allies() if u.alive and u.hp < u.max_hp]
+        if not candidates:
+            return None
+        return min(candidates, key=lambda u: u.hp / u.max_hp)
 
     # Collect in-range live enemies
     candidates: List[UnitState] = [
@@ -52,7 +60,6 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
     # Rule 1: blocked enemies first
     blocked = [e for e in candidates if op.unit_id in e.blocked_by_unit_ids]
     if blocked:
-        # Among blocked, pick the one with highest path_progress (closest to goal)
         return max(blocked, key=lambda e: e.path_progress)
 
     # Rule 3/4: highest aggression ≈ highest path_progress

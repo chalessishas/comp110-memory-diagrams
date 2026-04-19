@@ -10,5 +10,6 @@ pipeline lands. Any value here is a TODO against the canonical source.
 from .silverash import make_silverash
 from .liskarm import make_liskarm
 from .exusiai import make_exusiai
+from .warfarin import make_warfarin
 
-__all__ = ["make_silverash", "make_liskarm", "make_exusiai"]
+__all__ = ["make_silverash", "make_liskarm", "make_exusiai", "make_warfarin"]
