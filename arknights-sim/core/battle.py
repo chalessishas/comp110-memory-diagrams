@@ -1,5 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
+from math import sqrt
 from typing import Dict, List, Optional, Set
 from .operator import Operator
 from .enemy import Enemy
@@ -111,6 +112,8 @@ class Battle:
                     f"t={self.elapsed:.1f}  {op.name} → {target.name}  -{dmg}hp  "
                     f"({target.hp}/{target.max_hp})"
                 )
+                if op.splash_radius > 0:
+                    self._apply_splash(op, target)
 
     def _resolve_enemies(self) -> None:
         for enemy in self.enemies:
@@ -160,6 +163,30 @@ class Battle:
             if enemy.alive:
                 return enemy
         return None
+
+    def _apply_splash(self, op: Operator, primary: Enemy) -> None:
+        """Deal AOE damage to enemies within op.splash_radius tiles of primary."""
+        primary_pos = primary.tile_pos
+        if primary_pos is None:
+            return
+        px, py = primary_pos
+        for enemy in self.enemies:
+            if not enemy.alive or enemy is primary:
+                continue
+            epos = enemy.tile_pos
+            if epos is None:
+                continue
+            dist = sqrt((epos[0] - px) ** 2 + (epos[1] - py) ** 2)
+            if dist <= op.splash_radius:
+                raw = op.effective_atk()
+                if op.attack_type == "magic":
+                    splash_dmg = enemy.take_magic(raw)
+                else:
+                    splash_dmg = enemy.take_physical(raw)
+                self.log.record(
+                    f"t={self.elapsed:.1f}  {op.name} splash → {enemy.name}  "
+                    f"-{splash_dmg}hp  ({enemy.hp}/{enemy.max_hp})"
+                )
 
     def _blocking_operator(self, enemy: Enemy) -> Optional[Operator]:
         """Return the melee operator physically blocking this enemy, if any."""
