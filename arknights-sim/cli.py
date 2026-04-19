@@ -15,33 +15,8 @@ import sys
 from typing import Callable, Dict, List, Tuple
 
 from core.state.unit_state import UnitState
-from data.characters import (
-    make_silverash, make_liskarm, make_exusiai, make_warfarin,
-)
-try:
-    from data.characters.angelina import make_angelina
-    _has_angelina = True
-except ImportError:
-    _has_angelina = False
-try:
-    from data.characters.hoshiguma import make_hoshiguma
-    _has_hoshiguma = True
-except ImportError:
-    _has_hoshiguma = False
-
+from data.characters.registry import get_operator, has_operator, list_operators, operator_count
 from stages.loader import load_and_build
-
-
-_OP_REGISTRY: Dict[str, Callable[..., UnitState]] = {
-    "silverash": make_silverash,
-    "liskarm":   make_liskarm,
-    "exusiai":   make_exusiai,
-    "warfarin":  make_warfarin,
-}
-if _has_angelina:
-    _OP_REGISTRY["angelina"] = make_angelina
-if _has_hoshiguma:
-    _OP_REGISTRY["hoshiguma"] = make_hoshiguma
 
 
 _DEFAULT_OPS = ["silverash", "liskarm"]
@@ -72,9 +47,13 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--ops", default=",".join(_DEFAULT_OPS),
-        help=f"Comma-separated operator names "
+        help=f"Comma-separated operator handles "
              f"(default: {','.join(_DEFAULT_OPS)}). "
-             f"Available: {', '.join(sorted(_OP_REGISTRY))}",
+             f"Registry has {operator_count()} operators — use --list to browse.",
+    )
+    parser.add_argument(
+        "--list", action="store_true",
+        help="List all available operator handles and exit.",
     )
     parser.add_argument(
         "--at", action="append", default=[], type=_parse_deploy_spec,
@@ -86,6 +65,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
+    if args.list:
+        handles = list_operators()
+        print(f"# {len(handles)} operators available:")
+        for h in handles:
+            try:
+                op = get_operator(h)
+                print(f"  {h:15s} {op.name:<12s}  HP={op.max_hp:5d} ATK={op.atk:4d}")
+            except Exception as e:
+                print(f"  {h:15s} <error: {e}>")
+        return 0
+
     # Resolve operator + position pairs
     pairs: List[Tuple[int, int, str]] = list(args.at)
     if not pairs:
@@ -96,12 +86,11 @@ def main(argv: list[str] | None = None) -> int:
     # Validate + build operators
     operators: List[Tuple[Tuple[int, int], UnitState]] = []
     for x, y, name in pairs:
-        factory = _OP_REGISTRY.get(name)
-        if factory is None:
-            print(f"Unknown operator: {name!r}. Available: {sorted(_OP_REGISTRY)}",
+        if not has_operator(name):
+            print(f"Unknown operator: {name!r}. Use --list to browse {operator_count()} options.",
                   file=sys.stderr)
             return 2
-        operators.append(((x, y), factory()))
+        operators.append(((x, y), get_operator(name)))
 
     # Build world from stage + deploy operators pre-battle
     stage, world = load_and_build(args.stage)
