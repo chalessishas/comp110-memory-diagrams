@@ -1,0 +1,134 @@
+id: main_00-03
+name: "main_00-03"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 10
+  height: 6
+  tiles:
+    - {x: 0, y: 3, type: ground}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 8, y: 0, type: goal}
+enemies:
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 3.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 9.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 2]
+      - [2, 3]
+      - [8, 0]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 3]
+      - [4, 3]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 15.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 2]
+      - [2, 3]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 16.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 21.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 23.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 27.0
+    path:
+      - [0, 2]
+      - [8, 0]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 3]
+      - [4, 3]
+      - [8, 0]
+  - id: slime
+    count: 2
+    interval: 1.2
+    first_delay: 29.0
+    path:
+      - [0, 2]
+      - [8, 0]

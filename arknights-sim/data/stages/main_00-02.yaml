@@ -1,0 +1,115 @@
+id: main_00-02
+name: "main_00-02"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 10
+  height: 6
+  tiles:
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: ground}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: ground}
+enemies:
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 4.0
+    path:
+      - [9, 2]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: nsabr
+    count: 2
+    interval: 2.0
+    first_delay: 4.0
+    path:
+      - [9, 2]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [9, 3]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 2
+    interval: 1.0
+    first_delay: 12.0
+    path:
+      - [9, 3]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [9, 2]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [9, 3]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [9, 2]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 2
+    interval: 2.0
+    first_delay: 19.0
+    path:
+      - [9, 3]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [9, 2]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]
+  - id: slime
+    count: 2
+    interval: 3.0
+    first_delay: 27.0
+    path:
+      - [9, 3]
+      - [6, 2]
+      - [3, 3]
+      - [0, 2]

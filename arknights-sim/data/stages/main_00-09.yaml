@@ -1,0 +1,232 @@
+id: main_00-09
+name: "main_00-09"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 8
+  height: 7
+  tiles:
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: goal}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+enemies:
+  - id: slime
+    count: 1
+    interval: 5.0
+    first_delay: 5.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 1
+    interval: 5.0
+    first_delay: 5.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 5
+    interval: 5.0
+    first_delay: 12.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 5
+    interval: 5.0
+    first_delay: 12.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 6
+    interval: 4.0
+    first_delay: 20.5
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 4
+    interval: 4.0
+    first_delay: 25.5
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 2
+    interval: 6.0
+    first_delay: 34.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 2
+    interval: 9.0
+    first_delay: 35.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 3
+    interval: 2.0
+    first_delay: 39.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: shdsbr
+    count: 1
+    interval: 1.0
+    first_delay: 42.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 2
+    interval: 1.0
+    first_delay: 43.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: shdsbr
+    count: 1
+    interval: 2.0
+    first_delay: 56.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: shdsbr
+    count: 1
+    interval: 1.0
+    first_delay: 56.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: nsabr
+    count: 2
+    interval: 10.0
+    first_delay: 63.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: nsabr
+    count: 2
+    interval: 8.5
+    first_delay: 67.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 4
+    interval: 2.3
+    first_delay: 77.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 6
+    interval: 4.7
+    first_delay: 77.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 2
+    interval: 4.0
+    first_delay: 79.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 7
+    interval: 1.7
+    first_delay: 79.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: shdsbr
+    count: 2
+    interval: 10.0
+    first_delay: 86.0
+    path:
+      - [0, 2]
+      - [5, 2]
+      - [5, 3]
+      - [7, 3]
+  - id: shdsbr
+    count: 2
+    interval: 9.0
+    first_delay: 93.0
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
+  - id: slime
+    count: 3
+    interval: 1.7
+    first_delay: 96.5
+    path:
+      - [0, 4]
+      - [5, 4]
+      - [5, 3]
+      - [7, 3]
