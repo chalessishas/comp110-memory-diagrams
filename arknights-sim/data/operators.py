@@ -13,6 +13,16 @@ def make_liskarm() -> Operator:
     )
 
 
+def make_exusiai() -> Operator:
+    """Exusiai E2 L90 — fast ranged sniper deployed on elevated tile."""
+    return Operator(
+        name="Exusiai",
+        max_hp=2000, atk=720, defence=65, res=0,
+        atk_interval=0.6, block=0, attack_type="physical",
+        attack_range="ranged",
+    )
+
+
 def make_hoshiguma() -> Operator:
     return Operator(
         name="Hoshiguma",

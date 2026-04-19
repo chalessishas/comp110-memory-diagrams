@@ -8,7 +8,8 @@ from .skill import Skill
 @dataclass
 class Operator(Entity):
     """A deployed operator. Attacks the first enemy it is blocking."""
-    attack_type: str = "physical"  # "physical" | "magic" | "heal"
+    attack_type: str = "physical"   # "physical" | "magic" | "heal"
+    attack_range: str = "melee"     # "melee" | "ranged"
 
     skill: Optional[Skill] = None
     sp: float = 0.0

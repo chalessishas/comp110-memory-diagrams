@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 from .operator import Operator
 from .enemy import Enemy
 
@@ -35,7 +35,8 @@ class Battle:
     lives: int = field(init=False)
     elapsed: float = field(init=False, default=0.0)
     log: BattleLog = field(default_factory=BattleLog)
-    _goal_reachers: Set[int] = field(init=False, default_factory=set)  # id(enemy)
+    _goal_reachers: Set[int] = field(init=False, default_factory=set)       # id(enemy)
+    _block_assignments: Dict[int, List[Enemy]] = field(init=False, default_factory=dict)  # id(op) → enemies
 
     def __post_init__(self) -> None:
         self.lives = self.max_lives
@@ -63,9 +64,27 @@ class Battle:
     def _tick(self) -> None:
         self.elapsed += DT
         self._spawn_waves()
+        self._compute_block_assignments()
         self._resolve_operators()
         self._resolve_enemies()
         self._cleanup_dead()
+
+    def _compute_block_assignments(self) -> None:
+        """Assign live enemies to melee operators up to their block capacity."""
+        self._block_assignments = {id(op): [] for op in self.operators
+                                   if op.alive and op.block > 0 and op.attack_range == "melee"}
+        assigned: Set[int] = set()
+        for op in self.operators:
+            if not op.alive or op.block == 0 or op.attack_range != "melee":
+                continue
+            slots = op.block
+            for enemy in self.enemies:
+                if slots == 0:
+                    break
+                if enemy.alive and id(enemy) not in assigned:
+                    self._block_assignments[id(op)].append(enemy)
+                    assigned.add(id(enemy))
+                    slots -= 1
 
     def _spawn_waves(self) -> None:
         while self.spawn_queue and self.spawn_queue[0].time <= self.elapsed:
@@ -123,16 +142,28 @@ class Battle:
                 )
 
     def _blocked_enemy(self, op: Operator) -> Optional[Enemy]:
-        """Return the first live enemy that this operator is blocking."""
-        for enemy in self.enemies:
+        """Return a live enemy for this operator to attack.
+
+        Ranged operators can hit any live enemy (shoot over melee).
+        Melee operators only attack enemies assigned to their block slot.
+        """
+        if op.attack_range == "ranged":
+            for enemy in self.enemies:
+                if enemy.alive:
+                    return enemy
+            return None
+        # melee: first alive enemy in the block assignment
+        for enemy in self._block_assignments.get(id(op), []):
             if enemy.alive:
-                return enemy  # P1: single-lane, first enemy
+                return enemy
         return None
 
     def _blocking_operator(self, enemy: Enemy) -> Optional[Operator]:
-        """Return the first live operator blocking this enemy."""
+        """Return the melee operator physically blocking this enemy, if any."""
         for op in self.operators:
-            if op.alive and op.block > 0:
+            if not op.alive:
+                continue
+            if enemy in self._block_assignments.get(id(op), []):
                 return op
         return None
 
