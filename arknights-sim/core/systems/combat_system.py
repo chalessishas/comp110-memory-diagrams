@@ -2,6 +2,7 @@
 from __future__ import annotations
 from ..types import AttackType, Faction
 from ..state.unit_state import SPGainMode
+from .talent_registry import fire_on_hit_received
 
 
 def combat_system(world, dt: float) -> None:
@@ -74,3 +75,7 @@ def combat_system(world, dt: float) -> None:
             if sk_t is not None and sk_t.sp_gain_mode == SPGainMode.AUTO_DEFENSIVE:
                 if not sk_t.active_remaining > 0:
                     sk_t.sp = min(sk_t.sp + 1.0, float(sk_t.sp_cost))
+
+        # Talent on_hit_received hooks (e.g. Liskarm electric arc)
+        if u.attack_type != AttackType.HEAL and target.talents:
+            fire_on_hit_received(world, target, u, dealt)
