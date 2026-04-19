@@ -67,3 +67,10 @@ def combat_system(world, dt: float) -> None:
         if u.skill is not None:
             if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
                 u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
+
+        # SP on being hit (AUTO_DEFENSIVE): charge target's SP when it takes damage
+        if u.attack_type != AttackType.HEAL and target.alive:
+            sk_t = getattr(target, "skill", None)
+            if sk_t is not None and sk_t.sp_gain_mode == SPGainMode.AUTO_DEFENSIVE:
+                if not sk_t.active_remaining > 0:
+                    sk_t.sp = min(sk_t.sp + 1.0, float(sk_t.sp_cost))
