@@ -114,7 +114,7 @@ max_lives: 3
 
 ## Status
 
-**ALL 9 PHASES COMPLETE.** 60 tests passing (0.32s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
+**ALL 10 PHASES COMPLETE.** 64 tests passing (0.27s). Run `python cli.py data/stages/main_0-1.yaml` to verify.
 
 | Phase | Scope | Tests |
 |-------|-------|-------|
@@ -127,3 +127,4 @@ max_lives: 3
 | P7 | Targeting priority (path_progress) + SP lockout (orange meter) | 7/7 ✅ |
 | P8 | Healer HP recovery (Medic → lowest hp/max_hp ally) | 3/3 ✅ |
 | P9 | DP/cost system (accumulate + deploy gate) | 4/4 ✅ |
+| P10 | Stun/Slow status effects (timed debuffs, stacking, expiry) | 4/4 ✅ |
