@@ -45,10 +45,10 @@ def make_silverash() -> Operator:
     )
 
     def s3_on_start(carrier: Operator) -> None:
-        carrier._atk_bonus = int(carrier.atk * 1.80)
+        carrier._atk_ratio_buffs.append(1.80)
 
     def s3_on_end(carrier: Operator) -> None:
-        carrier._atk_bonus = 0
+        carrier._atk_ratio_buffs.remove(1.80)
 
     op.skill = Skill(
         name="Truesilver Slash",
@@ -59,3 +59,14 @@ def make_silverash() -> Operator:
         on_end=s3_on_end,
     )
     return op
+
+
+def make_angelina() -> Operator:
+    """Angelina E2 — AOE magic Supporter. splash_radius=1.2 tiles."""
+    return Operator(
+        name="Angelina",
+        max_hp=2600, atk=580, defence=120, res=30,
+        atk_interval=2.85, block=1, attack_type="magic",
+        attack_range="ranged",
+        splash_radius=1.2,
+    )

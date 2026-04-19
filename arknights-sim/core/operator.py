@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import List, Optional
 from .entity import Entity
 from .skill import Skill
 
@@ -10,6 +10,7 @@ class Operator(Entity):
     """A deployed operator. Attacks the first enemy it is blocking."""
     attack_type: str = "physical"   # "physical" | "magic" | "heal"
     attack_range: str = "melee"     # "melee" | "ranged"
+    splash_radius: float = 0.0      # Euclidean tile radius; 0 = no AOE
 
     skill: Optional[Skill] = None
     sp: float = 0.0
@@ -17,12 +18,18 @@ class Operator(Entity):
     sp_gain_per_attack: float = 1.0  # SP per hit for auto_attack
 
     _skill_remaining: float = field(init=False, default=0.0)
-    _atk_bonus: int = field(init=False, default=0)
+    # Two-stage buff pipeline: ratio buffs sum additively; multiplier buffs multiply
+    _atk_ratio_buffs: List[float] = field(init=False, default_factory=list)
+    _atk_multiplier_buffs: List[float] = field(init=False, default_factory=list)
     _skill_just_fired: bool = field(init=False, default=False)
     _skill_just_ended: bool = field(init=False, default=False)
 
     def effective_atk(self) -> int:
-        return self.atk + self._atk_bonus
+        intermediate = self.atk * (1.0 + sum(self._atk_ratio_buffs))
+        mult = 1.0
+        for m in self._atk_multiplier_buffs:
+            mult *= m
+        return int(intermediate * mult)
 
     def attack(self, target: Entity) -> int:
         raw = self.effective_atk()

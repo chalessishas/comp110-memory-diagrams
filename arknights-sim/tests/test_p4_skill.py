@@ -35,7 +35,7 @@ def test_skill_fires_on_full_sp():
     assert op.skill_active, "Skill should fire when SP reaches cost"
     assert op._skill_just_fired
     assert op.sp == 0.0, "SP resets on activation"
-    assert op._atk_bonus > 0, "ATK bonus applied via on_start"
+    assert sum(op._atk_ratio_buffs) > 0, "ATK buff applied via on_start"
 
 
 def test_atk_buff_applied_and_removed():
@@ -50,7 +50,7 @@ def test_atk_buff_applied_and_removed():
     for _ in range(150):
         op.update_skill(DT)
     assert not op.skill_active, "Skill should have ended"
-    assert op._atk_bonus == 0, "on_end should clear the bonus"
+    assert not op._atk_ratio_buffs, "on_end should clear ratio buffs"
     assert op.effective_atk() == base_atk
 
 
