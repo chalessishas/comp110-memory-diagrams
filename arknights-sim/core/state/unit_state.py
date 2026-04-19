@@ -209,9 +209,9 @@ class UnitState:
 
     @property
     def current_atk_interval(self) -> float:
-        """考虑攻速 buff 后的实际攻击间隔."""
-        aspd = self.effective_aspd
-        return self.atk_interval * 100.0 / max(1.0, aspd)
+        """考虑攻速 buff 后的实际攻击间隔. ASPD clamped to [20, 600] per wiki."""
+        aspd = max(20.0, min(600.0, self.effective_aspd))
+        return self.atk_interval * 100.0 / aspd
 
     # ---- status helpers ---------------------------------------------------
 
