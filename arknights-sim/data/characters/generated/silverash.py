@@ -20,6 +20,6 @@ def make_silverash() -> UnitState:
         profession=Profession.GUARD,
         attack_type=AttackType.PHYSICAL,
         block=2,
-        cost=0,
+        cost=20,
         redeploy_cd=70.0,
     )

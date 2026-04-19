@@ -20,6 +20,6 @@ def make_exusiai() -> UnitState:
         profession=Profession.SNIPER,
         attack_type=AttackType.PHYSICAL,
         block=1,
-        cost=0,
+        cost=31,
         redeploy_cd=70.0,
     )

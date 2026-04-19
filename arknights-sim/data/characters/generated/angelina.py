@@ -20,6 +20,6 @@ def make_angelina() -> UnitState:
         profession=Profession.SUPPORTER,
         attack_type=AttackType.PHYSICAL,
         block=1,
-        cost=0,
+        cost=14,
         redeploy_cd=70.0,
     )

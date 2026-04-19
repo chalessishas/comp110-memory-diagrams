@@ -20,6 +20,6 @@ def make_hoshiguma() -> UnitState:
         profession=Profession.DEFENDER,
         attack_type=AttackType.PHYSICAL,
         block=3,
-        cost=0,
+        cost=23,
         redeploy_cd=70.0,
     )

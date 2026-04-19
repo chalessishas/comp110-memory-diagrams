@@ -148,6 +148,16 @@ class UnitState:
     def __post_init__(self) -> None:
         if self.hp == 0:
             self.hp = self.max_hp
+        # Profession-aware default range for allies when factory didn't set one.
+        # Enemies don't use range_shape (they attack their blocker directly).
+        if (self.faction == Faction.ALLY
+                and not self.range_shape.tiles
+                and self.range_shape.radius == 0.0):
+            self.range_shape = _default_range_for(
+                melee=self.attack_range_melee,
+                profession=self.profession,
+                block=self.block,
+            )
 
     # ---- stats pipeline ---------------------------------------------------
 
@@ -252,3 +262,34 @@ class UnitState:
         healed = min(int(amount), self.max_hp - self.hp)
         self.hp += healed
         return healed
+
+
+def _default_range_for(*, melee: bool, profession, block: int) -> RangeShape:
+    """Profession-level range templates for generated factories that don't set one."""
+    from ..types import Profession
+    if melee and block > 0:
+        tiles = [(0, 0)]
+        if profession == Profession.GUARD:
+            tiles.append((1, 0))
+        return RangeShape(tiles=tuple(tiles))
+    if profession == Profession.SNIPER:
+        return RangeShape(tiles=tuple(
+            (dx, dy) for dx in range(-1, 4) for dy in range(-1, 2)
+        ))
+    if profession == Profession.CASTER:
+        return RangeShape(tiles=tuple(
+            (dx, dy) for dx in range(-1, 3) for dy in range(-1, 2)
+        ))
+    if profession == Profession.MEDIC:
+        return RangeShape(tiles=tuple(
+            (dx, dy) for dx in range(-1, 2) for dy in range(-1, 2)
+        ))
+    if profession == Profession.SUPPORTER:
+        return RangeShape(tiles=tuple(
+            (dx, dy) for dx in range(-1, 3) for dy in range(-1, 2)
+        ))
+    if profession == Profession.SPECIALIST:
+        return RangeShape(tiles=((0, 0), (1, 0)))
+    if profession == Profession.VANGUARD:
+        return RangeShape(tiles=((0, 0), (1, 0)))
+    return RangeShape(tiles=((0, 0),))

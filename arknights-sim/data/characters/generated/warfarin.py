@@ -20,6 +20,6 @@ def make_warfarin() -> UnitState:
         profession=Profession.MEDIC,
         attack_type=AttackType.PHYSICAL,
         block=1,
-        cost=0,
+        cost=19,
         redeploy_cd=70.0,
     )
