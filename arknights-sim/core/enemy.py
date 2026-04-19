@@ -1,6 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from .entity import Entity
 
 
@@ -22,6 +22,14 @@ class Enemy(Entity):
             return True
         self._path_progress += self.speed * dt
         return self._path_progress >= path_len
+
+    @property
+    def tile_pos(self) -> Optional[Tuple[int, int]]:
+        """Current grid tile, snapped to nearest integer path index."""
+        if not self.path:
+            return None
+        idx = min(int(self._path_progress), len(self.path) - 1)
+        return self.path[idx]
 
     @property
     def at_goal(self) -> bool:
