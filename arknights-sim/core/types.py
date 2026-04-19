@@ -127,6 +127,7 @@ class RoleArchetype(str, Enum):
     DEF_ARTS_PROTECTOR = "def_arts_protector"
     DEF_GUARDIAN = "def_guardian"
     DEF_SENTINEL = "def_sentinel"                # 哨兵（Liskarm）
+    DEF_FORTRESS = "def_fortress"                # 堡垒（Horn/Ashlock）ranged AoE ↔ melee toggle
     # Sniper 狙击分支
     SNIPER_MARKSMAN = "sniper_marksman"          # 速射手（Exusiai）
     SNIPER_HEAVY = "sniper_heavy"

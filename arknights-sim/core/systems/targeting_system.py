@@ -11,7 +11,7 @@ Terra Wiki 优先级栈（从高到低）:
 """
 from __future__ import annotations
 from typing import List, Optional
-from ..types import Faction, StatusKind
+from ..types import Faction, RoleArchetype, StatusKind
 from ..state.unit_state import UnitState
 
 
@@ -84,19 +84,49 @@ def _targeting_for_enemy(world, enemy: UnitState) -> Optional[UnitState]:
     return None
 
 
+def _is_fortress_blocking(world, op: UnitState) -> bool:
+    """True when this Fortress Defender is currently blocking at least one enemy."""
+    return any(op.unit_id in e.blocked_by_unit_ids for e in world.enemies())
+
+
 def targeting_system(world, dt: float) -> None:
-    """Writes to unit.__current_target__ (a dynamic attribute, cleared each tick)."""
-    # 更新 blocked_by
+    """Writes to unit.__target__ and (for Fortress) __targets__ each tick."""
     _update_block_assignments(world)
 
     for u in world.units:
         if not u.alive:
             setattr(u, "__target__", None)
+            setattr(u, "__targets__", [])
             continue
         if u.faction == Faction.ALLY:
-            setattr(u, "__target__", _targeting_for_operator(world, u))
+            if u.archetype == RoleArchetype.DEF_FORTRESS:
+                # Fortress Defender: ranged-AoE when not blocking, melee single when blocking
+                if _is_fortress_blocking(world, u):
+                    # Melee mode: temporarily use melee range for target selection
+                    melee_range = getattr(u, "_melee_range", u.range_shape)
+                    saved_range = u.range_shape
+                    u.range_shape = melee_range
+                    setattr(u, "__target__", _targeting_for_operator(world, u))
+                    u.range_shape = saved_range
+                    setattr(u, "__targets__", [])
+                else:
+                    # Ranged mode: range_shape is already the ranged shape
+                    # Attack ALL in-range enemies simultaneously
+                    candidates = [
+                        e for e in world.enemies()
+                        if u.deployed and u.position is not None
+                        and _enemy_in_range(u, e)
+                        and not e.has_status(StatusKind.CAMOUFLAGE)
+                        and e.alive
+                    ]
+                    setattr(u, "__target__", None)
+                    setattr(u, "__targets__", candidates)
+            else:
+                setattr(u, "__target__", _targeting_for_operator(world, u))
+                setattr(u, "__targets__", [])
         else:
             setattr(u, "__target__", _targeting_for_enemy(world, u))
+            setattr(u, "__targets__", [])
 
 
 def _update_block_assignments(world) -> None:

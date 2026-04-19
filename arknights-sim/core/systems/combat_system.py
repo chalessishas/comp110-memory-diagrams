@@ -18,6 +18,13 @@ def combat_system(world, dt: float) -> None:
             continue
 
         target = getattr(u, "__target__", None)
+        multi_targets = getattr(u, "__targets__", [])
+
+        # Fortress Defender ranged mode: __targets__ is populated, __target__ is None
+        if multi_targets:
+            _apply_fortress_ranged(world, u, multi_targets)
+            continue
+
         if target is None or not target.alive:
             continue
 
@@ -90,3 +97,28 @@ def combat_system(world, dt: float) -> None:
                 fire_on_attack_hit(world, u, target, dealt)
             if not target.alive and u.talents:
                 fire_on_kill(world, u, target)
+
+
+def _apply_fortress_ranged(world, u, targets) -> None:
+    """Fortress Defender ranged mode: hit every enemy in targets list simultaneously."""
+    alive_targets = [t for t in targets if t.alive]
+    if not alive_targets:
+        return
+    raw = u.effective_atk
+    for target in alive_targets:
+        if u.attack_type == AttackType.PHYSICAL:
+            dealt = target.take_physical(raw)
+        elif u.attack_type == AttackType.ARTS:
+            dealt = target.take_arts(raw)
+        else:
+            dealt = target.take_true(raw)
+        world.global_state.total_damage_dealt += dealt
+        world.log(f"{u.name} (ranged) → {target.name}  dmg={dealt}  ({target.hp}/{target.max_hp})")
+        if u.talents:
+            fire_on_attack_hit(world, u, target, dealt)
+        if not target.alive and u.talents:
+            fire_on_kill(world, u, target)
+    u.atk_cd = u.current_atk_interval
+    if u.skill is not None:
+        if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
+            u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))

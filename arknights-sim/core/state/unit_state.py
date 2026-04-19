@@ -193,9 +193,14 @@ class UnitState:
             elif b.stack == BuffStack.FLAT:
                 flats += b.value
 
-        from math import floor
-        intermediate = floor(base * (1.0 + ratios))
-        return floor(intermediate * mults) + flats
+        # FLOOR only applies to integer stats; float stats (MOVE_SPEED, RES) use raw float arithmetic
+        _int_axes = {BuffAxis.ATK, BuffAxis.DEF, BuffAxis.MAX_HP, BuffAxis.ASPD}
+        if axis in _int_axes:
+            from math import floor
+            intermediate = floor(base * (1.0 + ratios))
+            return floor(intermediate * mults) + flats
+        else:
+            return base * (1.0 + ratios) * mults + flats
 
     @property
     def effective_atk(self) -> int:
