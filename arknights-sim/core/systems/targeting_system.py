@@ -121,6 +121,17 @@ def targeting_system(world, dt: float) -> None:
                     ]
                     setattr(u, "__target__", None)
                     setattr(u, "__targets__", candidates)
+            elif getattr(u, "_attack_all_in_range", False):
+                # Generic AOE attack override (e.g. Thorns S3) — hit every enemy in range
+                candidates = [
+                    e for e in world.enemies()
+                    if u.deployed and u.position is not None
+                    and _enemy_in_range(u, e)
+                    and not e.has_status(StatusKind.CAMOUFLAGE)
+                    and e.alive
+                ]
+                setattr(u, "__target__", None)
+                setattr(u, "__targets__", candidates)
             else:
                 setattr(u, "__target__", _targeting_for_operator(world, u))
                 setattr(u, "__targets__", [])

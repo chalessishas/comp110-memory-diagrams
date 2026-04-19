@@ -79,6 +79,7 @@ def make_thorns(slot: str = "S3") -> UnitState:
             duration=30.0,
             sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.AUTO,
+            requires_target=False,
             behavior_tag=_S3_TAG,
         )
     return op
