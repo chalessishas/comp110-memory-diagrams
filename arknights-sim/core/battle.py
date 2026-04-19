@@ -49,7 +49,7 @@ class Battle:
 
     def deploy(self, op: Operator) -> bool:
         """Attempt to deploy op now. Returns True if deployed, False if insufficient DP."""
-        if self.dp < op.cost:
+        if self.dp < op.cost - 1e-9:   # epsilon absorbs float accumulation error
             return False
         self.dp -= op.cost
         if op not in self.operators:
