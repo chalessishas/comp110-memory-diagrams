@@ -1,0 +1,28 @@
+id: main_0-1
+name: "Abandoned Frontline"
+map:
+  width: 8
+  height: 5
+  tiles:
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: ground}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: goal}
+enemies:
+  - id: originium_slug
+    count: 5
+    interval: 4.0
+    path:
+      - [0, 2]
+      - [1, 2]
+      - [2, 2]
+      - [3, 2]
+      - [4, 2]
+      - [5, 2]
+      - [6, 2]
+      - [7, 2]
+max_lives: 3

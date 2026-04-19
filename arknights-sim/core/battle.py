@@ -1,8 +1,14 @@
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Set
 from .operator import Operator
 from .enemy import Enemy
+
+
+@dataclass
+class SpawnEvent:
+    time: float
+    enemy: Enemy
 
 TICK_RATE = 10       # ticks per simulated second
 DT = 1.0 / TICK_RATE
@@ -24,13 +30,16 @@ class Battle:
     operators: List[Operator]
     enemies: List[Enemy]
     max_lives: int = 3
+    spawn_queue: List[SpawnEvent] = field(default_factory=list)
 
     lives: int = field(init=False)
     elapsed: float = field(init=False, default=0.0)
     log: BattleLog = field(default_factory=BattleLog)
+    _goal_reachers: Set[int] = field(init=False, default_factory=set)  # id(enemy)
 
     def __post_init__(self) -> None:
         self.lives = self.max_lives
+        self.spawn_queue = sorted(self.spawn_queue, key=lambda e: e.time)
 
     # ------------------------------------------------------------------
     # Public API
@@ -41,10 +50,10 @@ class Battle:
         max_ticks = int(max_seconds * TICK_RATE)
         for _ in range(max_ticks):
             self._tick()
-            if self._is_won():
-                return "win"
             if self._is_lost():
                 return "loss"
+            if self._is_won():
+                return "win"
         return "timeout"
 
     # ------------------------------------------------------------------
@@ -53,14 +62,28 @@ class Battle:
 
     def _tick(self) -> None:
         self.elapsed += DT
+        self._spawn_waves()
         self._resolve_operators()
         self._resolve_enemies()
         self._cleanup_dead()
+
+    def _spawn_waves(self) -> None:
+        while self.spawn_queue and self.spawn_queue[0].time <= self.elapsed:
+            self.enemies.append(self.spawn_queue.pop(0).enemy)
 
     def _resolve_operators(self) -> None:
         for op in self.operators:
             if not op.alive:
                 continue
+            op.update_skill(DT)
+            if op._skill_just_fired and op.skill:
+                self.log.record(
+                    f"t={self.elapsed:.1f}  {op.name} activates {op.skill.name}!"
+                )
+            if op._skill_just_ended and op.skill:
+                self.log.record(
+                    f"t={self.elapsed:.1f}  {op.name}'s {op.skill.name} ends"
+                )
             target = self._blocked_enemy(op)
             if target and op.tick(DT):
                 dmg = op.attack(target)
@@ -82,17 +105,19 @@ class Battle:
                         f"({target.hp}/{target.max_hp})"
                     )
             else:
-                # No blocker — enemy reaches goal, lose a life
-                enemy.alive = False
-                self.lives -= 1
-                self.log.record(
-                    f"t={self.elapsed:.1f}  {enemy.name} reached goal  "
-                    f"lives={self.lives}/{self.max_lives}"
-                )
+                # No blocker — enemy advances along path
+                if enemy.advance(DT):
+                    enemy.alive = False
+                    self.lives -= 1
+                    self._goal_reachers.add(id(enemy))
+                    self.log.record(
+                        f"t={self.elapsed:.1f}  {enemy.name} reached goal  "
+                        f"lives={self.lives}/{self.max_lives}"
+                    )
 
     def _cleanup_dead(self) -> None:
         for entity in list(self.operators) + list(self.enemies):
-            if not entity.alive and entity in self.enemies:
+            if not entity.alive and entity in self.enemies and id(entity) not in self._goal_reachers:
                 self.log.record(
                     f"t={self.elapsed:.1f}  {entity.name} defeated"
                 )
@@ -112,7 +137,8 @@ class Battle:
         return None
 
     def _is_won(self) -> bool:
-        return all(not e.alive for e in self.enemies)
+        return not self.spawn_queue and all(not e.alive for e in self.enemies)
 
     def _is_lost(self) -> bool:
-        return self.lives <= 0 or all(not op.alive for op in self.operators)
+        all_ops_dead = bool(self.operators) and all(not op.alive for op in self.operators)
+        return self.lives <= 0 or all_ops_dead
