@@ -118,6 +118,7 @@ class UnitState:
     block: int = 0                       # 阻挡数 (0 表示不阻挡)
     range_shape: RangeShape = field(default_factory=RangeShape)
     splash_radius: float = 0.0           # 溅射半径（非零即 AOE）
+    splash_atk_multiplier: float = 1.0   # 溅射伤害倍率（撼地者=0.5，法师=1.0）
     cost: int = 0                        # 部署费用
     redeploy_cd: float = 70.0            # 再部署冷却 (秒)
 

@@ -42,10 +42,12 @@ def combat_system(world, dt: float) -> None:
             f"({target.hp}/{target.max_hp})"
         )
 
-        # AOE splash
+        # AOE splash — splash_atk_multiplier lets 撼地者 do 50% splash while
+        # standard splash casters (Eyjafjalla/Angelina) keep 100%.
         if u.splash_radius > 0.0 and u.attack_type != AttackType.HEAL:
             if target.position is not None:
                 tx, ty = target.position
+                splash_raw = int(raw * u.splash_atk_multiplier)
                 splash_faction = Faction.ENEMY if u.faction == Faction.ALLY else Faction.ALLY
                 for other in world.units:
                     if other is target or not other.alive or other.faction != splash_faction:
@@ -55,12 +57,16 @@ def combat_system(world, dt: float) -> None:
                     ox, oy = other.position
                     if (ox - tx) ** 2 + (oy - ty) ** 2 <= u.splash_radius ** 2:
                         if u.attack_type == AttackType.PHYSICAL:
-                            s = other.take_physical(raw)
+                            s = other.take_physical(splash_raw)
                         elif u.attack_type == AttackType.ARTS:
-                            s = other.take_arts(raw)
+                            s = other.take_arts(splash_raw)
                         else:
-                            s = other.take_true(raw)
+                            s = other.take_true(splash_raw)
                         world.global_state.total_damage_dealt += s
+                        world.log(
+                            f"{u.name} splash → {other.name}  "
+                            f"dmg={s}  ({other.hp}/{other.max_hp})"
+                        )
 
         u.atk_cd = u.current_atk_interval
 
