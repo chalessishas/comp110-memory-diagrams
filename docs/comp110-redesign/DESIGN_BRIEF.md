@@ -273,6 +273,7 @@ const systemPrompt = SYSTEM_PROMPT_TEMPLATE
 3. **memory_diagrams_v0.pdf 的规则要单独喂给 AI TA 作为 rubric**，不是一般内容，是考试评分标准。
 4. **不要追 Gradescope autograder**，那是闭源 SaaS，学生端也看不到，照做没意义。
 5. **"Dark Mode 按钮" 别抄**，用 `prefers-color-scheme` media query 就够，省一个组件。
+6. **Tailwind v4 配置方式彻底变了**（2026-04 确认）：不要生成 `tailwind.config.ts`，改用 CSS `@theme {}` 块定义 tokens；PostCSS 插件换成 `@tailwindcss/postcss`；安装命令：`npm install tailwindcss@latest @tailwindcss/postcss@latest`。把 mockup.html 里的 CSS 变量（`--color-brand: #F5B700` 等）直接翻译到 `@theme {}` 即可，一一对应无需重写逻辑。
 
 ---
 
