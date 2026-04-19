@@ -66,6 +66,14 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
     if blocked:
         return min(blocked, key=_dist_remaining)
 
+    # Archetype-specific priority overrides (applied to unblocked candidates)
+    if op.archetype == RoleArchetype.SNIPER_DEADEYE:
+        # Deadeye Sniper trait: target enemy with lowest DEF
+        return min(candidates, key=lambda e: (e.defence, _dist_remaining(e)))
+    if op.archetype == RoleArchetype.SNIPER_SIEGE:
+        # Besieger Sniper trait: target enemy with highest weight
+        return max(candidates, key=lambda e: (e.weight, -_dist_remaining(e)))
+
     # Rule 3/4: closest to destination — min path_distance_remaining
     return min(candidates, key=_dist_remaining)
 

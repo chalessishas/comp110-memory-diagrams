@@ -138,6 +138,7 @@ class UnitState:
     path: List[Tuple[int, int]] = field(default_factory=list)
     path_progress: float = 0.0           # tile 单位，允许非整数（插值）
     move_speed: float = 1.0              # tiles/s (敌人)
+    weight: int = 1                      # 敌人重量 (0=轻, 1=标准, 2=重, 3=特重); 用于 Besieger 优先级
     blocked_by_unit_ids: List[int] = field(default_factory=list)  # 被谁阻挡着
 
     # 技能/天赋/模组

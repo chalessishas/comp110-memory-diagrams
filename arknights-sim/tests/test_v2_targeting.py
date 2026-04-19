@@ -187,3 +187,109 @@ def test_among_blocked_pick_min_remaining():
         "Among blocked enemies, target the one with minimum path_distance_remaining "
         "(near_exit=0.2 vs far_exit=4.0)"
     )
+
+
+# ---------------------------------------------------------------------------
+# Test 5: Deadeye Sniper targets lowest-DEF enemy in range
+# ---------------------------------------------------------------------------
+
+def _deadeye_op(x: int, y: int) -> UnitState:
+    from core.types import RoleArchetype
+    op = _static_op(x, y, block=0)
+    op.archetype = RoleArchetype.SNIPER_DEADEYE
+    return op
+
+
+def test_deadeye_targets_lowest_def():
+    """Deadeye Sniper trait: targets the enemy with the lowest DEF value."""
+    w = _world()
+    op = _deadeye_op(5, 0)
+    w.add_unit(op)
+
+    path = [(i, 0) for i in range(10)]
+    low_def  = _slug_at_progress(path, 3.0)   # remaining = 6.0 — would normally be deprioritized
+    high_def = _slug_at_progress(path, 7.0)   # remaining = 2.0 — would normally win
+    low_def.defence  = 50
+    high_def.defence = 300
+
+    w.add_unit(low_def)
+    w.add_unit(high_def)
+
+    result = _targeting_for_operator(w, op)
+    assert result is low_def, (
+        "Deadeye Sniper must target enemy with lowest DEF (50), not closest to exit (DEF=300)"
+    )
+
+
+def test_deadeye_falls_back_to_dist_on_equal_def():
+    """When two enemies have equal DEF, Deadeye falls back to min distance remaining."""
+    w = _world()
+    op = _deadeye_op(5, 0)
+    w.add_unit(op)
+
+    path = [(i, 0) for i in range(10)]
+    close_slug = _slug_at_progress(path, 7.5)   # remaining = 1.5
+    far_slug   = _slug_at_progress(path, 3.0)   # remaining = 6.0
+    close_slug.defence = 100
+    far_slug.defence   = 100   # equal DEF
+
+    w.add_unit(close_slug)
+    w.add_unit(far_slug)
+
+    result = _targeting_for_operator(w, op)
+    assert result is close_slug, (
+        "Equal DEF tie-break: Deadeye picks closer-to-exit (remaining=1.5 vs 6.0)"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 6: Besieger Sniper targets heaviest enemy in range
+# ---------------------------------------------------------------------------
+
+def _besieger_op(x: int, y: int) -> UnitState:
+    from core.types import RoleArchetype
+    op = _static_op(x, y, block=0)
+    op.archetype = RoleArchetype.SNIPER_SIEGE
+    return op
+
+
+def test_besieger_targets_heaviest():
+    """Besieger Sniper trait: targets the enemy with the highest weight."""
+    w = _world()
+    op = _besieger_op(5, 0)
+    w.add_unit(op)
+
+    path = [(i, 0) for i in range(10)]
+    heavy  = _slug_at_progress(path, 3.0)   # remaining = 6.0 — far from exit
+    light  = _slug_at_progress(path, 7.0)   # remaining = 2.0 — close to exit
+    heavy.weight = 3
+    light.weight = 1
+
+    w.add_unit(heavy)
+    w.add_unit(light)
+
+    result = _targeting_for_operator(w, op)
+    assert result is heavy, (
+        "Besieger Sniper must target heaviest enemy (weight=3), not closest to exit (weight=1)"
+    )
+
+
+def test_besieger_falls_back_to_dist_on_equal_weight():
+    """When two enemies have equal weight, Besieger picks closest to exit."""
+    w = _world()
+    op = _besieger_op(5, 0)
+    w.add_unit(op)
+
+    path = [(i, 0) for i in range(10)]
+    close_slug = _slug_at_progress(path, 7.5)   # remaining = 1.5
+    far_slug   = _slug_at_progress(path, 3.0)   # remaining = 6.0
+    close_slug.weight = 2
+    far_slug.weight   = 2   # equal weight
+
+    w.add_unit(close_slug)
+    w.add_unit(far_slug)
+
+    result = _targeting_for_operator(w, op)
+    assert result is close_slug, (
+        "Equal weight tie-break: Besieger picks closer-to-exit (remaining=1.5 vs 6.0)"
+    )
