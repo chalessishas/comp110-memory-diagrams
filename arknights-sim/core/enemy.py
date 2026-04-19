@@ -11,6 +11,8 @@ class Enemy(Entity):
     path: List[Tuple[int, int]] = field(default_factory=list)
     speed: float = 1.0  # tiles per second
 
+    is_invisible: bool = False   # True = cannot be targeted by ranged without true sight
+
     _path_progress: float = field(init=False, default=0.0)
 
     def advance(self, dt: float) -> bool:

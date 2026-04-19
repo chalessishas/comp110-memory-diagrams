@@ -32,6 +32,8 @@ class Battle:
     enemies: List[Enemy]
     max_lives: int = 3
     spawn_queue: List[SpawnEvent] = field(default_factory=list)
+    dp: float = 0.0           # current deployment points
+    dp_rate: float = 1.0      # DP gained per simulated second
 
     lives: int = field(init=False)
     elapsed: float = field(init=False, default=0.0)
@@ -39,10 +41,21 @@ class Battle:
     _goal_reachers: Set[int] = field(init=False, default_factory=set)        # id(enemy)
     _logged_dead: Set[int] = field(init=False, default_factory=set)          # id(entity)
     _block_assignments: Dict[int, List[Enemy]] = field(init=False, default_factory=dict)  # id(op) → enemies
+    _pending_deploy: List[Operator] = field(init=False, default_factory=list)  # queued until DP available
 
     def __post_init__(self) -> None:
         self.lives = self.max_lives
         self.spawn_queue = sorted(self.spawn_queue, key=lambda e: e.time)
+
+    def deploy(self, op: Operator) -> bool:
+        """Attempt to deploy op now. Returns True if deployed, False if insufficient DP."""
+        if self.dp < op.cost:
+            return False
+        self.dp -= op.cost
+        if op not in self.operators:
+            self.operators.append(op)
+        self.log.record(f"t={self.elapsed:.1f}  {op.name} deployed  dp={self.dp:.1f}")
+        return True
 
     # ------------------------------------------------------------------
     # Public API
@@ -65,6 +78,7 @@ class Battle:
 
     def _tick(self) -> None:
         self.elapsed += DT
+        self.dp += self.dp_rate * DT
         self._spawn_waves()
         self._compute_block_assignments()
         self._resolve_operators()
@@ -163,7 +177,8 @@ class Battle:
         Melee operators only attack enemies assigned to their block slot.
         """
         if op.attack_range == "ranged":
-            live = [e for e in self.enemies if e.alive]
+            live = [e for e in self.enemies if e.alive
+                    and (not e.is_invisible or op.has_true_sight)]
             return max(live, key=lambda e: e._path_progress) if live else None
         # melee: first alive enemy in the block assignment
         for enemy in self._block_assignments.get(id(op), []):

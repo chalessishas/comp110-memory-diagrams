@@ -11,6 +11,8 @@ class Operator(Entity):
     attack_type: str = "physical"   # "physical" | "magic" | "heal"
     attack_range: str = "melee"     # "melee" | "ranged"
     splash_radius: float = 0.0      # Euclidean tile radius; 0 = no AOE
+    has_true_sight: bool = False    # True = can target invisible enemies
+    cost: int = 0                   # DP cost to deploy
 
     skill: Optional[Skill] = None
     sp: float = 0.0
