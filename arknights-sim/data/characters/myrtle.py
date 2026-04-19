@@ -2,10 +2,12 @@
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 S1 "Tactical Delivery I": 14 DP over 8s while not blocking (block=0 during skill).
-  sp_cost=12, initial_sp=6, duration=8s, requires_target=False (fires unconditionally).
+  sp_cost=12, initial_sp=6, duration=8s, requires_target=False.
+S2 "Healing Wings": 16 DP over 16s + heals most-injured adjacent ally at 50% ATK/s.
+  sp_cost=18, initial_sp=9, duration=16s, requires_target=False.
+  Heal range: cross (5-tile) centered on Myrtle.
 
-Arknights wiki: Standard Bearer stops blocking and attacking during skill activation.
-Attack suppression is not modeled yet (low impact — Myrtle's ATK rarely matters).
+Arknights wiki: Standard Bearer stops blocking during skill activation.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, RangeShape
@@ -45,6 +47,72 @@ def _s1_on_end(world, unit) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_tick=_s1_on_tick, on_end=_s1_on_end)
 
 
+# ---------------------------------------------------------------------------
+# S2 "Healing Wings"
+# ---------------------------------------------------------------------------
+
+_S2_TAG = "myrtle_s2_healing_wings"
+_S2_DP_RATE  = 16.0 / 16.0   # 1.0 DP/s over 16s
+_S2_HEAL_RATE = 0.50          # 50% ATK/s
+_S2_DP_FRAC_ATTR   = "_myrtle_s2_dp_frac"
+_S2_HEAL_FRAC_ATTR = "_myrtle_s2_heal_frac"
+
+# Heal range: 5-tile cross around Myrtle (independent of her attack range_shape)
+_S2_HEAL_RANGE = frozenset(((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)))
+
+
+def _s2_find_heal_target(world, unit):
+    """Most-injured (lowest HP%) ally within S2 heal range."""
+    if unit.position is None:
+        return None
+    ox, oy = unit.position
+    candidates = [
+        u for u in world.allies()
+        if u is not unit and u.alive and u.deployed
+        and u.position is not None
+        and (round(u.position[0]) - round(ox), round(u.position[1]) - round(oy)) in _S2_HEAL_RANGE
+        and u.hp < u.max_hp
+    ]
+    if not candidates:
+        return None
+    return min(candidates, key=lambda u: u.hp / u.max_hp)
+
+
+def _s2_on_start(world, unit) -> None:
+    unit._saved_block = unit.block
+    unit.block = 0
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    setattr(unit, _S2_HEAL_FRAC_ATTR, 0.0)
+
+
+def _s2_on_tick(world, unit, dt: float) -> None:
+    # DP drip
+    dp_frac = getattr(unit, _S2_DP_FRAC_ATTR, 0.0) + _S2_DP_RATE * dt
+    dp_gained = int(dp_frac)
+    if dp_gained > 0:
+        world.global_state.refund_dp(dp_gained)
+    setattr(unit, _S2_DP_FRAC_ATTR, dp_frac - dp_gained)
+
+    # HoT — 50% ATK/s applied to most-injured adjacent ally
+    heal_frac = getattr(unit, _S2_HEAL_FRAC_ATTR, 0.0) + _S2_HEAL_RATE * unit.effective_atk * dt
+    heal_amount = int(heal_frac)
+    if heal_amount > 0:
+        target = _s2_find_heal_target(world, unit)
+        if target is not None:
+            actual = target.heal(heal_amount)
+            world.global_state.total_healing_done += actual
+    setattr(unit, _S2_HEAL_FRAC_ATTR, heal_frac - heal_amount)
+
+
+def _s2_on_end(world, unit) -> None:
+    unit.block = getattr(unit, "_saved_block", 1)
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    setattr(unit, _S2_HEAL_FRAC_ATTR, 0.0)
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
+
+
 def make_myrtle(slot: str = "S1") -> UnitState:
     """Myrtle E2 max. S1 Tactical Delivery: 14 DP / 8s, block=0 during skill."""
     op = _base_stats()
@@ -65,6 +133,18 @@ def make_myrtle(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S1_TAG,
+        )
+    elif slot == "S2":
+        op.skill = SkillComponent(
+            name="Healing Wings",
+            slot="S2",
+            sp_cost=18,
+            initial_sp=9,
+            duration=16.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
         )
 
     return op
