@@ -42,14 +42,14 @@ def test_world_imports_and_constructs():
 
 def test_buff_pipeline_two_stage():
     """Terra Wiki pipeline: FLOOR(atk*(1+Σratio)) * Π mult."""
-    op = make_silverash()  # base atk 723
+    op = make_silverash()  # base atk 763 (akgd E2 trust-100)
     op.buffs.append(Buff(axis=BuffAxis.ATK, stack=BuffStack.RATIO, value=1.80, source_tag="s3"))
-    # +180% ratio → 723 * 2.80 = 2024.4 → floor 2024
-    assert op.effective_atk == 2024
+    # +180% ratio → 763 * 2.80 = 2136.4 → floor 2136
+    assert op.effective_atk == 2136
 
     op.buffs.append(Buff(axis=BuffAxis.ATK, stack=BuffStack.MULTIPLIER, value=1.20, source_tag="teamA"))
-    # 2024 * 1.20 = 2428.8 → floor 2428
-    assert op.effective_atk == 2428
+    # 2136 * 1.20 = 2563.2 → floor 2563
+    assert op.effective_atk == 2563
 
 
 def test_silverash_skill_fires_and_applies_buff():

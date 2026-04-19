@@ -97,6 +97,7 @@ def targeting_system(world, dt: float) -> None:
 
 def _update_block_assignments(world) -> None:
     """Each melee ally blocks up to `block` enemies currently on/near its tile."""
+    from ..types import Mobility
     # 清空所有 enemy.blocked_by_unit_ids
     for e in world.enemies():
         e.blocked_by_unit_ids = []
@@ -109,6 +110,7 @@ def _update_block_assignments(world) -> None:
         nearby = [
             e for e in world.enemies()
             if e.position is not None
+            and e.mobility != Mobility.AIRBORNE           # aerial bypasses block
             and abs(round(e.position[0]) - round(ox)) <= 0
             and abs(round(e.position[1]) - round(oy)) <= 0
             and len(e.blocked_by_unit_ids) == 0  # not already blocked

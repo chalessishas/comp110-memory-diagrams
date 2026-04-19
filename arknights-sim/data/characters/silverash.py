@@ -1,7 +1,8 @@
 """SilverAsh — 6* Guard (Lord archetype).
 
-SOURCE: PRTS wiki, E2 L90, 信赖 100, no potentials, no module.
-VERIFY: replace with akgd character_table.json derived values next iteration.
+Base stats from ArknightsGameData (E2 max, trust 100).
+Skill behaviour hand-authored here; regenerate base via:
+  python tools/gen_characters.py char_172_svrash
 """
 from __future__ import annotations
 from core.state.unit_state import (
@@ -12,6 +13,7 @@ from core.types import (
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from data.characters.generated.silverash import make_silverash as _base_stats
 
 
 # Guard 分支「领主」标准远程 2-格范围：前一格 + 前后邻居（十字形）
@@ -43,24 +45,12 @@ register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_silverash(slot: str = "S3") -> UnitState:
-    """SilverAsh E2 L90. slot='S3' is the canonical 'Truesilver Slash' build."""
-    op = UnitState(
-        name="SilverAsh",
-        faction=Faction.ALLY,
-        max_hp=2671,
-        atk=723,
-        defence=360,
-        res=10.0,
-        atk_interval=1.6,
-        profession=Profession.GUARD,
-        archetype=RoleArchetype.GUARD_LORD,
-        attack_type=AttackType.PHYSICAL,
-        attack_range_melee=True,
-        block=2,
-        range_shape=GUARD_LORD_RANGE,
-        cost=31,
-        redeploy_cd=70.0,
-    )
+    """SilverAsh E2 max, trust 100. Base stats from akgd; S3 skill hand-authored."""
+    op = _base_stats()
+    op.name = "SilverAsh"
+    op.archetype = RoleArchetype.GUARD_LORD
+    op.range_shape = GUARD_LORD_RANGE
+    op.cost = 31
     if slot == "S3":
         op.skill = SkillComponent(
             name="Truesilver Slash",

@@ -4,3 +4,6 @@ __pycache__/
 .pytest_cache/
 *.egg-info/
 dist/
+
+# akgd pipeline cache — large JSON, not version-controlled
+tools/.char_table_cache.json
