@@ -43,7 +43,7 @@ class GlobalState:
         if self.dp >= self.dp_cap:
             return
         self._dp_fractional += self.dp_gain_rate * dt
-        while self._dp_fractional >= 1.0 and self.dp < self.dp_cap:
+        while self._dp_fractional >= 1.0 - 1e-9 and self.dp < self.dp_cap:
             self.dp += 1
             self._dp_fractional -= 1.0
 

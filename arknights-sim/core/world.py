@@ -67,9 +67,20 @@ class World:
     # Tick loop
     # --------------------------------------------------------------------
 
+    def deploy(self, unit: UnitState) -> bool:
+        """Spend DP and mark unit as deployed. Returns False if insufficient DP."""
+        if not self.global_state.try_spend_dp(unit.cost):
+            return False
+        unit.deployed = True
+        if unit not in self.units:
+            self.units.append(unit)
+        self.log(f"{unit.name} deployed  dp={self.global_state.dp}")
+        return True
+
     def tick(self, dt: float = DT) -> None:
         self.global_state.elapsed += dt
         self.global_state.tick_count += 1
+        self.global_state.tick_dp(dt)
         for phase in TICK_PHASE_ORDER:
             for fn in self._systems.get(phase, ()):
                 fn(self, dt)
