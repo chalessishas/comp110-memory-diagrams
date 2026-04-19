@@ -80,10 +80,15 @@ class Battle:
         self.elapsed += DT
         self.dp += self.dp_rate * DT
         self._spawn_waves()
+        self._tick_status_effects()
         self._compute_block_assignments()
         self._resolve_operators()
         self._resolve_enemies()
         self._cleanup_dead()
+
+    def _tick_status_effects(self) -> None:
+        for entity in list(self.operators) + list(self.enemies):
+            entity.tick_status(DT)
 
     def _compute_block_assignments(self) -> None:
         """Assign live enemies to melee operators up to their block capacity."""

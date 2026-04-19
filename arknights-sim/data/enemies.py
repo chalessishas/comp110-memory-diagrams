@@ -4,6 +4,11 @@ from typing import List, Tuple
 from core.enemy import Enemy
 
 
+def make_slug(path: List[Tuple[int, int]] | None = None) -> Enemy:
+    """Alias used by status-effect tests."""
+    return make_originium_slug(path)
+
+
 def make_originium_slug(path: List[Tuple[int, int]] | None = None) -> Enemy:
     return Enemy(
         name="Originium Slug",
