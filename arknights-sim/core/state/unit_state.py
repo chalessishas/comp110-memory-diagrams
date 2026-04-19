@@ -58,6 +58,7 @@ class SkillComponent:
 
     # Behavior hooks (by tag name — resolved via Skill registry)
     behavior_tag: str = ""               # e.g. "silverash_s3" → maps to on_start/on_tick/on_end funcs
+    requires_target: bool = True         # False = fires on SP full regardless of target (buff-only skills)
 
 
 @dataclass
