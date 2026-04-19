@@ -35,7 +35,8 @@ class Battle:
     lives: int = field(init=False)
     elapsed: float = field(init=False, default=0.0)
     log: BattleLog = field(default_factory=BattleLog)
-    _goal_reachers: Set[int] = field(init=False, default_factory=set)       # id(enemy)
+    _goal_reachers: Set[int] = field(init=False, default_factory=set)        # id(enemy)
+    _logged_dead: Set[int] = field(init=False, default_factory=set)          # id(entity)
     _block_assignments: Dict[int, List[Enemy]] = field(init=False, default_factory=dict)  # id(op) → enemies
 
     def __post_init__(self) -> None:
@@ -136,10 +137,12 @@ class Battle:
 
     def _cleanup_dead(self) -> None:
         for entity in list(self.operators) + list(self.enemies):
-            if not entity.alive and entity in self.enemies and id(entity) not in self._goal_reachers:
-                self.log.record(
-                    f"t={self.elapsed:.1f}  {entity.name} defeated"
-                )
+            if (not entity.alive
+                    and entity in self.enemies
+                    and id(entity) not in self._goal_reachers
+                    and id(entity) not in self._logged_dead):
+                self.log.record(f"t={self.elapsed:.1f}  {entity.name} defeated")
+                self._logged_dead.add(id(entity))
 
     def _blocked_enemy(self, op: Operator) -> Optional[Enemy]:
         """Return a live enemy for this operator to attack.
