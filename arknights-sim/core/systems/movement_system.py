@@ -1,9 +1,10 @@
-"""Movement — 敌人沿路径前进（考虑减速/阻挡/控制状态）."""
+"""Movement — 敌人沿路径前进（考虑减速/阻挡/控制状态/地形效果）."""
 from __future__ import annotations
 from ..types import BuffAxis, Faction, StatusKind
 
 
 def movement_system(world, dt: float) -> None:
+    now = world.global_state.elapsed
     for u in world.units:
         if not u.alive or u.faction != Faction.ENEMY:
             continue
@@ -24,6 +25,16 @@ def movement_system(world, dt: float) -> None:
                 speed *= 1.0 - s.params.get("amount", 0.3)
             elif s.kind == StatusKind.COLD:
                 speed *= 0.7
+
+        # 地形效果 — 查当前格的 TileEffect
+        if u.position is not None and world.tile_grid is not None:
+            tile = world.tile_grid.get(round(u.position[0]), round(u.position[1]))
+            if tile is not None:
+                for te in tile.effects:
+                    if te.expires_at <= now:
+                        continue
+                    if te.kind == "icy":
+                        speed *= 1.0 - te.params.get("amount", 0.3)
 
         u.path_progress += max(0.0, speed) * dt
 
