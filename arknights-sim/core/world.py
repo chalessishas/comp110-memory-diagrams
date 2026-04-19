@@ -15,7 +15,7 @@ from .events.event_queue import EventQueue
 from .state.global_state import GlobalState
 from .state.tile_state import TileGrid
 from .state.unit_state import UnitState
-from .types import DT, TICK_PHASE_ORDER, TICK_RATE, Faction, TickPhase
+from .types import DT, TICK_PHASE_ORDER, TICK_RATE, Faction, TickPhase, TileType
 
 
 SystemFn = Callable[["World", float], None]   # (world, dt) -> None
@@ -68,11 +68,25 @@ class World:
     # --------------------------------------------------------------------
 
     def deploy(self, unit: UnitState) -> bool:
-        """Spend DP and mark unit as deployed. Returns False if insufficient DP or in cooldown."""
+        """Spend DP and mark unit as deployed. Returns False if invalid."""
         if self.global_state.elapsed < unit.redeploy_available_at - 1e-9:
             return False  # still in redeploy cooldown
         if not self.global_state.try_spend_dp(unit.cost):
             return False
+        # Tile type enforcement: melee on GROUND, ranged on ELEVATED
+        if unit.position is not None and self.tile_grid is not None:
+            tx, ty = round(unit.position[0]), round(unit.position[1])
+            tile = self.tile_grid.get(tx, ty)
+            if tile is not None:
+                if tile.type in (TileType.BLOCKED, TileType.HOLE):
+                    self.global_state.dp += unit.cost   # refund
+                    return False
+                if unit.attack_range_melee and tile.type == TileType.ELEVATED:
+                    self.global_state.dp += unit.cost   # refund
+                    return False  # melee cannot deploy on elevated
+                if not unit.attack_range_melee and tile.type == TileType.GROUND:
+                    self.global_state.dp += unit.cost   # refund
+                    return False  # ranged cannot deploy on ground
         unit.deployed = True
         unit.deploy_time = self.global_state.elapsed
         unit.redeploy_available_at = 0.0

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from ..types import AttackType, Faction
 from ..state.unit_state import SPGainMode
-from .talent_registry import fire_on_attack_hit, fire_on_hit_received
+from .talent_registry import fire_on_attack_hit, fire_on_hit_received, fire_on_kill
 
 
 def combat_system(world, dt: float) -> None:
@@ -88,3 +88,5 @@ def combat_system(world, dt: float) -> None:
                 fire_on_hit_received(world, target, u, dealt)
             if u.talents:
                 fire_on_attack_hit(world, u, target, dealt)
+            if not target.alive and u.talents:
+                fire_on_kill(world, u, target)

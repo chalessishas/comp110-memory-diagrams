@@ -127,6 +127,7 @@ class UnitState:
     hp: int = 0
     alive: bool = True
     deployed: bool = False               # 干员：是否已部署；敌人：已入场=True
+    counted_death: bool = False          # cleanup_system sets True to prevent double-counting
     position: Optional[Tuple[float, float]] = None  # 干员部署位置 / 敌人当前位置（浮点，插值）
     facing: Tuple[int, int] = (1, 0)     # 干员朝向 (dx, dy) — 影响 range_shape 旋转
     atk_cd: float = 0.0                  # 攻击冷却剩余

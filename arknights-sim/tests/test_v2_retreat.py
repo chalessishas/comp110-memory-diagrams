@@ -7,6 +7,7 @@ from core.state.tile_state import TileGrid, TileState
 from core.types import TileType, TICK_RATE, DT
 from core.systems import register_default_systems
 from data.characters import make_liskarm
+from data.characters.angelina import make_angelina
 
 
 def _world(dp: float = 30.0) -> World:
@@ -112,3 +113,64 @@ def test_retreat_no_op_on_dead_operator():
     assert op.deployed, "deployed should stay True — retreat was no-op"
     assert w.global_state.dp == dp_after_deploy, "no DP refund for dead operator"
     assert op.redeploy_available_at == 0.0, "no cooldown set for dead operator"
+
+
+def _world_with_elevated(dp: float = 100.0) -> World:
+    grid = TileGrid(width=3, height=2)
+    for i in range(3):
+        grid.set_tile(TileState(x=i, y=0, type=TileType.GROUND))
+        grid.set_tile(TileState(x=i, y=1, type=TileType.ELEVATED))
+    w = World(tile_grid=grid)
+    w.global_state.dp = dp
+    register_default_systems(w)
+    return w
+
+
+def test_melee_blocked_from_elevated_tile():
+    """Melee operator (attack_range_melee=True) cannot deploy on ELEVATED tile."""
+    w = _world_with_elevated()
+    op = make_liskarm()   # Defender — melee
+    op.position = (1.0, 1.0)   # elevated tile
+    result = w.deploy(op)
+    assert result is False, "Melee must not deploy on elevated"
+    assert not op.deployed
+
+
+def test_ranged_blocked_from_ground_tile():
+    """Ranged operator (attack_range_melee=False) cannot deploy on GROUND tile."""
+    w = _world_with_elevated()
+    ang = make_angelina()   # Supporter — ranged
+    ang.position = (1.0, 0.0)   # ground tile
+    result = w.deploy(ang)
+    assert result is False, "Ranged must not deploy on ground"
+    assert not ang.deployed
+
+
+def test_melee_allowed_on_ground_tile():
+    """Melee operator can deploy on GROUND tile."""
+    w = _world_with_elevated()
+    op = make_liskarm()
+    op.position = (1.0, 0.0)   # ground tile
+    result = w.deploy(op)
+    assert result is True, "Melee must be allowed on ground"
+    assert op.deployed
+
+
+def test_ranged_allowed_on_elevated_tile():
+    """Ranged operator can deploy on ELEVATED tile."""
+    w = _world_with_elevated()
+    ang = make_angelina()
+    ang.position = (1.0, 1.0)   # elevated tile
+    result = w.deploy(ang)
+    assert result is True, "Ranged must be allowed on elevated"
+    assert ang.deployed
+
+
+def test_tile_rejection_refunds_dp():
+    """DP is refunded when deployment is rejected due to wrong tile type."""
+    w = _world_with_elevated(dp=100)
+    op = make_liskarm()
+    op.position = (1.0, 1.0)   # wrong tile (elevated for melee)
+    dp_before = w.global_state.dp
+    w.deploy(op)
+    assert w.global_state.dp == dp_before, "DP must be fully refunded on tile-type rejection"

@@ -7,6 +7,6 @@ def cleanup_system(world, dt: float) -> None:
     for u in world.units:
         if not u.alive and u.deployed and u.faction == Faction.ENEMY:
             # If died from damage (not goal leak), count as defeated
-            if getattr(u, "_counted_death", False) is False:
+            if not u.counted_death:
                 world.global_state.enemies_defeated += 1
-                setattr(u, "_counted_death", True)
+                u.counted_death = True
