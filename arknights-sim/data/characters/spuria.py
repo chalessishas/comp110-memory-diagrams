@@ -39,6 +39,32 @@ _SUBSTITUTE_DRAIN_DPS = 80.0      # HP drain per second in substitute form
 _SUBSTITUTE_DURATION = 20.0       # substitute body lasts up to 20s
 _SUBSTITUTE_DOT_TAG = "spuria_substitute_drain"
 
+# --- S2: Puppet Control ---
+_S2_TAG = "spuria_s2_puppet_control"
+_S2_ATK_RATIO = 1.20         # ATK +120% for duration
+_S2_BUFF_TAG = "spuria_s2_atk"
+_S2_DURATION = 15.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    # Restore substitute charge if it has been spent
+    if carrier.undying_charges == 0:
+        carrier.undying_charges = 1
+        world.log(f"Spuria S2 — substitute charge restored")
+    world.log(f"Spuria S2 Puppet Control — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # --- S1: Hollow Burst ---
 _S1_TAG = "spuria_s1_hollow_burst"
 _S1_ATK_RATIO = 0.80
@@ -106,7 +132,20 @@ def make_spuria(slot: str = "S1") -> UnitState:
         behavior_tag=_TALENT_TAG,
     )]
 
-    if slot == "S1":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Puppet Control",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S1":
         op.skill = SkillComponent(
             name="Hollow Burst",
             slot="S1",
