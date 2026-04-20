@@ -11,9 +11,9 @@ Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
 from math import floor
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    AttackType, Faction, Profession,
+    AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
@@ -27,8 +27,15 @@ GUARD_RANGE = RangeShape(tiles=(
 ))
 
 _TALENT_TAG = "thorns_thorn_prick"
-_S3_TAG = "thorns_s3_annihilation"
 _COUNTER_RATE = 1.80   # 180% ATK arts counter per hit received
+
+# --- S2: Thorn Field ---
+_S2_TAG = "thorns_s2_thorn_field"
+_S2_ATK_RATIO = 0.30     # ATK +30%
+_S2_BUFF_TAG = "thorns_s2_atk"
+_S2_DURATION = 25.0
+
+_S3_TAG = "thorns_s3_annihilation"
 
 
 # --- Talent: Thorn Prick ---
@@ -44,6 +51,23 @@ def _talent_on_hit_received(world, defender: UnitState, attacker: UnitState, dam
 
 
 register_talent(_TALENT_TAG, on_hit_received=_talent_on_hit_received)
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    setattr(carrier, "_attack_all_in_range", True)
+    world.log(f"Thorns S2 Thorn Field — ATK+{_S2_ATK_RATIO:.0%}, AoE for {_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+    setattr(carrier, "_attack_all_in_range", False)
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 # --- S3: Annihilation ---
@@ -70,7 +94,20 @@ def make_thorns(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Thorn Prick", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Thorn Field",
+            slot="S2",
+            sp_cost=35,
+            initial_sp=20,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Annihilation",
             slot="S3",

@@ -28,6 +28,12 @@ _MARCH_ATK_RATIO = 0.25
 _MARCH_BUFF_TAG = "bagpipe_march_atk_buff"
 _MARCH_REFRESH_DT = 0.3   # expires 0.3s; on_tick refreshes every 0.1s
 
+# --- S2: Pump Up ---
+_S2_TAG = "bagpipe_s2_pump_up"
+_S2_ATK_RATIO = 1.00     # ATK +100%
+_S2_BUFF_TAG = "bagpipe_s2_atk"
+_S2_DURATION = 15.0
+
 # S3 constants
 _S3_TAG = "bagpipe_s3_last_wish"
 _S3_ATK_RATIO = 2.00
@@ -70,6 +76,21 @@ def _march_on_attack_hit(world, attacker, target, damage: int) -> None:
 register_talent(_BAGPIPE_TAG, on_tick=_march_on_tick, on_attack_hit=_march_on_attack_hit)
 
 
+def _s2_on_start(world, unit: UnitState) -> None:
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Bagpipe S2 Pump Up — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, unit: UnitState) -> None:
+    unit.buffs = [b for b in unit.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # --- S3: Last Wish ---
 def _s3_on_start(world, unit) -> None:
     unit.buffs.append(Buff(
@@ -98,7 +119,20 @@ def make_bagpipe(slot: str = "S3") -> UnitState:
     op.cost = 13
     op.talents = [TalentComponent(name="Glorious March", behavior_tag=_BAGPIPE_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Pump Up",
+            slot="S2",
+            sp_cost=20,
+            initial_sp=5,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Last Wish",
             slot="S3",
