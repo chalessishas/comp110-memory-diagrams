@@ -10,12 +10,33 @@ S2 "Flagship Order": 20 DP over 20s + global HoT at 35% ATK/s to all allies.
 Base stats: E2 max, trust 100 (from generated/sidero.py).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.sidero import make_sidero as _base_stats
+
+
+# --- Talent: Vanguard's Ruse ---
+_VANGUARDS_RUSE_TAG = "saileach_vanguards_ruse"
+_SP_GRANT = 2.0    # E2 max: +2 SP to all deployed Vanguard allies at battle start
+
+
+def _vanguards_ruse_on_battle_start(world, carrier: UnitState) -> None:
+    for ally in world.allies():
+        if not ally.deployed or not ally.alive:
+            continue
+        if ally.profession != Profession.VANGUARD:
+            continue
+        sk = ally.skill
+        if sk is None:
+            continue
+        sk.sp = min(sk.sp + _SP_GRANT, float(sk.sp_cost))
+
+
+register_talent(_VANGUARDS_RUSE_TAG, on_battle_start=_vanguards_ruse_on_battle_start)
 
 
 STANDARD_BEARER_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -108,6 +129,7 @@ def make_saileach(slot: str = "S2") -> UnitState:
     op.range_shape = STANDARD_BEARER_RANGE
     op.block = 1
     op.cost = 23
+    op.talents = [TalentComponent(name="Vanguard's Ruse", behavior_tag=_VANGUARDS_RUSE_TAG)]
 
     if slot == "S1":
         op.skill = SkillComponent(
