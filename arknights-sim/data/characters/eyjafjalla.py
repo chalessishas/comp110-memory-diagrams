@@ -1,5 +1,9 @@
 """Eyjafjalla (艾雅法拉) — 6* Caster (Core archetype).
 
+Talent "Pyrobreath": While Eyjafjalla is deployed, all CASTER allies gain ATK +14%.
+  Applied continuously via on_tick (covers Casters deployed after Eyjafjalla).
+  Removed from all units when Eyjafjalla retreats or dies.
+
 S2 "Volcanic Activity": ATK +160%, all attacks become AoE with radius 1.3.
   Duration 40s, sp_cost=40, initial_sp=20. Standard ARTS damage with 100% splash.
   On end: reverts ATK and splash_radius to base.
@@ -10,13 +14,44 @@ S3 "Pyroclastic Eruption": ATK +220%, AoE radius 2.0, converts attack to TRUE da
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
     AttackType, BuffAxis, BuffStack, Profession, RoleArchetype,
     SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.amgoat import make_amgoat as _base_stats
+
+
+# --- Talent: Pyrobreath (faction-wide ATK aura for Casters) ---
+_PYROBREATH_TAG = "eyjafjalla_pyrobreath"
+_PYROBREATH_BUFF_TAG = "eyjafjalla_pyrobreath_atk"
+_PYROBREATH_ATK_RATIO = 0.14  # +14% ATK to all Caster allies
+
+
+def _pyrobreath_on_tick(world, carrier, dt: float) -> None:
+    for ally in world.allies():
+        if ally.profession != Profession.CASTER or ally is carrier:
+            continue
+        if not any(b.source_tag == _PYROBREATH_BUFF_TAG for b in ally.buffs):
+            ally.buffs.append(Buff(
+                axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                value=_PYROBREATH_ATK_RATIO, source_tag=_PYROBREATH_BUFF_TAG,
+            ))
+
+
+def _pyrobreath_cleanup(world, carrier) -> None:
+    for u in world.units:
+        u.buffs = [b for b in u.buffs if b.source_tag != _PYROBREATH_BUFF_TAG]
+
+
+register_talent(
+    _PYROBREATH_TAG,
+    on_tick=_pyrobreath_on_tick,
+    on_retreat=_pyrobreath_cleanup,
+    on_death=_pyrobreath_cleanup,
+)
 
 
 CORE_CASTER_RANGE = RangeShape(tiles=(
@@ -76,7 +111,7 @@ register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_eyjafjalla(slot: str = "S2") -> UnitState:
-    """Eyjafjalla E2 max. S2: +160% ATK + AoE r=1.3. S3: +220% ATK + AoE r=2.0 TRUE."""
+    """Eyjafjalla E2 max. Talent: Pyrobreath +14% ATK aura to all Casters. S2/S3 skills."""
     op = _base_stats()
     op.name = "Eyjafjalla"
     op.archetype = RoleArchetype.CASTER_CORE
@@ -84,6 +119,8 @@ def make_eyjafjalla(slot: str = "S2") -> UnitState:
     op.range_shape = CORE_CASTER_RANGE
     op.block = 1
     op.cost = 21
+
+    op.talents = [TalentComponent(name="Pyrobreath", behavior_tag=_PYROBREATH_TAG)]
 
     if slot == "S2":
         op.skill = SkillComponent(
