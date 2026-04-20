@@ -123,6 +123,7 @@ class RoleArchetype(str, Enum):
     GUARD_SWORDMASTER = "guard_swordmaster"
     GUARD_MUSHA = "guard_musha"                  # 武士
     GUARD_LIBERATOR = "guard_liberator"          # 解放者（Mountain）
+    GUARD_EARTHSHAKER = "guard_earthshaker"      # 撼动者（Flint）: ATK×2 when not blocking
     GUARD_REAPER = "guard_reaper"                # 收割者（Surtr）
     GUARD_FIGHTER = "guard_fighter"
     GUARD_CENTURION = "guard_centurion"
