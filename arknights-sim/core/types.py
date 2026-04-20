@@ -78,6 +78,7 @@ class BuffStack(str, Enum):
     RATIO = "ratio"              # 加法：+% 与其他 ratio 相加
     MULTIPLIER = "multiplier"    # 乘法：与其他 multiplier 相乘
     FLAT = "flat"                # 定值加减（如潜能 +40 ATK）
+    INSPIRATION = "inspiration"  # 最高值生效（Bard 鼓舞），多个来源只取最大值
 
 
 class Faction(str, Enum):

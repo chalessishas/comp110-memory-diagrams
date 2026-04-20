@@ -6,7 +6,9 @@ Bard Supporter trait: Never attacks. Instead, all allied operators within
   skill SP on every tick, as long as skill is not already active.
 
 Talent "Mellow Flow" (E2): +0.5 additional SP/s bonus to the aura (total +1.5 SP/s).
-  Implemented as second talent component stacking on top of the trait aura.
+  Also grants Inspiration: allies in range receive a flat ATK +_INSPIRATION_ATK bonus.
+  Inspiration uses highest-wins semantics: multiple Bards deployed → only the largest
+  Inspiration value applies to each ally (BuffStack.INSPIRATION in effective_stat).
 
 S2 "Encore" (simplified): 20s duration; while active, Sora's SP aura doubles to +3 SP/s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger.
@@ -15,9 +17,9 @@ Base stats from ArknightsGameData (E2 max, trust 100, char_101_sora).
   HP=1356, ATK=385, DEF=258, RES=0, atk_interval=1.3s, cost=7, block=1.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    AttackType, Profession, RoleArchetype, SkillTrigger, SPGainMode,
+    AttackType, BuffAxis, BuffStack, Profession, RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -32,9 +34,14 @@ BARD_RANGE = RangeShape(tiles=tuple(
 _TRAIT_TAG = "sora_bard_trait"
 _TRAIT_SP_RATE = 1.0   # SP per second
 
-# E2 talent: additional +0.5 SP/s bonus
+# E2 talent: additional +0.5 SP/s bonus + Inspiration ATK aura
 _TALENT_TAG = "sora_mellow_flow"
 _TALENT_SP_BONUS = 0.5
+
+# Inspiration: flat ATK buff pushed to in-range allies each tick (highest-wins)
+# Sora E2 approximate: ~40 flat ATK (ArknightsGameData char_101_sora E2 rank)
+_INSPIRATION_ATK = 40
+_INSPIRATION_SOURCE_TAG = "sora_inspiration_atk"
 
 # S2: doubles aura to +3 SP/s total while active
 _S2_TAG = "sora_s2_encore"
@@ -76,12 +83,40 @@ def _trait_on_tick(world, carrier: UnitState, dt: float) -> None:
     _bard_sp_aura(world, carrier, dt, _TRAIT_SP_RATE)
 
 
+def _push_inspiration(world, carrier: UnitState) -> None:
+    """Push flat ATK Inspiration buff to each in-range ally (replace each tick)."""
+    if not carrier.deployed or carrier.position is None:
+        return
+    for ally in world.allies():
+        if ally is carrier or not ally.alive or not ally.deployed:
+            continue
+        if not _ally_in_range(carrier, ally):
+            continue
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _INSPIRATION_SOURCE_TAG]
+        ally.buffs.append(Buff(
+            axis=BuffAxis.ATK, stack=BuffStack.INSPIRATION,
+            value=float(_INSPIRATION_ATK), source_tag=_INSPIRATION_SOURCE_TAG,
+        ))
+
+
+def _remove_inspiration(world, carrier: UnitState) -> None:
+    """Remove Sora's Inspiration buff from all allies on death or retreat."""
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _INSPIRATION_SOURCE_TAG]
+
+
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
     _bard_sp_aura(world, carrier, dt, _TALENT_SP_BONUS)
+    _push_inspiration(world, carrier)
 
 
 register_talent(_TRAIT_TAG, on_tick=_trait_on_tick)
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
+register_talent(
+    _TALENT_TAG,
+    on_tick=_talent_on_tick,
+    on_death=_remove_inspiration,
+    on_retreat=_remove_inspiration,
+)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
