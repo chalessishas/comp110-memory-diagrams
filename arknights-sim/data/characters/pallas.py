@@ -9,9 +9,11 @@ Talent "Battle Inspiration" (战斗激励): After each attack that deals damage,
   If a buff is already present, its duration is refreshed rather than stacked.
 
 S2 "Blessing of the Muses" (缪斯的祝福): 25s duration. Converts Pallas's
-  attack damage to Arts, and adds ATK+30%. Wider swing + elemental shift
-  lets her cut through armored enemies.
+  attack damage to Arts, and adds ATK+30%.
   sp_cost=35, initial_sp=15, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "War Ode" (战曲): 30s duration. ATK +200%, attack type → Arts, block +2.
+  sp_cost=50, initial_sp=25, AUTO_TIME, AUTO trigger, requires_target=True.
 
 Base stats from ArknightsGameData (E2 max, trust 100, char_485_pallas).
   HP=2263, ATK=737, DEF=455, RES=0, atk_interval=1.05s, cost=17, block=2.
@@ -37,11 +39,18 @@ _TALENT_BUFF_TAG = "pallas_inspire_atk"
 _TALENT_ATK_FLAT = 80          # +80 flat ATK to in-range allies per hit
 _TALENT_BUFF_DURATION = 5.0    # buff window in seconds
 
-# S2: Blessing of the Muses
+# --- S2: Blessing of the Muses ---
 _S2_TAG = "pallas_s2_muses_blessing"
-_S2_ATK_RATIO = 0.30           # +30% ATK
+_S2_ATK_RATIO = 0.30
 _S2_ATK_BUFF_TAG = "pallas_s2_atk"
 _S2_DURATION = 25.0
+
+# --- S3: War Ode ---
+_S3_TAG = "pallas_s3_war_ode"
+_S3_ATK_RATIO = 2.00           # +200% ATK
+_S3_ATK_BUFF_TAG = "pallas_s3_atk"
+_S3_BLOCK_BONUS = 2            # block +2 (2 → 4)
+_S3_DURATION = 30.0
 
 
 def _ally_in_range(op: UnitState, ally: UnitState) -> bool:
@@ -100,8 +109,27 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.attack_type = AttackType.ARTS
+    carrier.block += _S3_BLOCK_BONUS
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Pallas S3 War Ode — ATK+{_S3_ATK_RATIO:.0%} Arts block={carrier.block}/{_S3_DURATION}s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.attack_type = AttackType.PHYSICAL
+    carrier.block -= _S3_BLOCK_BONUS
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_pallas(slot: str = "S2") -> UnitState:
-    """Pallas E2 max. GUARD_INSTRUCTOR: melee + inspire in-range allies. S2: Arts+ATK+30%."""
+    """Pallas E2 max. GUARD_INSTRUCTOR: inspire in-range allies. S3: Arts+ATK+200%+block+2."""
     op = _base_stats()
     op.name = "Pallas"
     op.archetype = RoleArchetype.GUARD_INSTRUCTOR
@@ -125,6 +153,19 @@ def make_pallas(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="War Ode",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=25,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
