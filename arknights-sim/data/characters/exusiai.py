@@ -7,13 +7,26 @@ S3 "Light-Speed Strike II": ATK+70%, ASPD+20, ATK_INTERVAL -0.40s for 40s.
   Combined formula: max(0.067, (1.0 - 0.4) * 100/(100+20)) ≈ 0.50s interval.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
     AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.exusiai import make_exusiai as _base_stats
+
+
+# --- Talent: Eagle Eye ---
+_EAGLE_EYE_TAG = "exusiai_eagle_eye"
+_CRIT_CHANCE = 0.15    # E2 max: 15% crit on all attacks
+
+
+def _eagle_eye_on_battle_start(world, carrier: UnitState) -> None:
+    carrier.crit_chance = _CRIT_CHANCE
+
+
+register_talent(_EAGLE_EYE_TAG, on_battle_start=_eagle_eye_on_battle_start)
 
 
 MARKSMAN_RANGE = RangeShape(tiles=tuple(
@@ -74,6 +87,7 @@ def make_exusiai(slot: str = "S2") -> UnitState:
     op.archetype = RoleArchetype.SNIPER_MARKSMAN
     op.range_shape = MARKSMAN_RANGE
     op.cost = 16
+    op.talents = [TalentComponent(name="Eagle Eye", behavior_tag=_EAGLE_EYE_TAG)]
     if slot == "S2":
         op.skill = SkillComponent(
             name="Only Orange",
