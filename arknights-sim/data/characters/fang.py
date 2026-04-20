@@ -5,6 +5,9 @@ Charger class trait: gains 1 DP when this unit kills an enemy.
 
 S1 "Assault": ATK +50% for 40s.
   sp_cost=25, initial_sp=0, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S2 "Assault Formation": 20 DP over 15s (DP drip), block=0 during skill.
+  sp_cost=30, initial_sp=0, AUTO_TIME, AUTO trigger, requires_target=False.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
@@ -48,8 +51,40 @@ def _s1_on_end(world, carrier: UnitState) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
+# --- S2: Assault Formation — 20 DP / 15s drip, block=0 ---
+_S2_TAG = "fang_s2_assault_formation"
+_S2_DP_TOTAL = 20
+_S2_DURATION = 15.0
+_S2_DP_RATE = _S2_DP_TOTAL / _S2_DURATION   # 4/3 DP/s
+_S2_DP_FRAC_ATTR = "_fang_s2_dp_frac"
+
+
+def _s2_on_start(world, unit: UnitState) -> None:
+    unit._saved_block = unit.block
+    unit.block = 0
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    world.log(f"Fang S2 Assault Formation — {_S2_DP_TOTAL} DP / {_S2_DURATION}s, block=0")
+
+
+def _s2_on_tick(world, unit: UnitState, dt: float) -> None:
+    frac = getattr(unit, _S2_DP_FRAC_ATTR, 0.0) + _S2_DP_RATE * dt
+    gained = int(frac)
+    if gained > 0:
+        world.global_state.refund_dp(gained)
+    setattr(unit, _S2_DP_FRAC_ATTR, frac - gained)
+
+
+def _s2_on_end(world, unit: UnitState) -> None:
+    unit.block = getattr(unit, "_saved_block", 2)
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    world.log("Fang S2 ended — block restored")
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
+
+
 def make_fang(slot: str = "S1") -> UnitState:
-    """Fang E1 max. Charger class trait: +1 DP on kill. S1 Assault: ATK+50% 40s."""
+    """Fang E1 max. Charger: +1 DP on kill. S1: ATK+50% 40s. S2: 20 DP / 15s drip."""
     op = _base_stats()
     op.name = "Fang"
     op.archetype = RoleArchetype.VAN_CHARGER
@@ -72,6 +107,19 @@ def make_fang(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S1_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
+        op.skill = SkillComponent(
+            name="Assault Formation",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=0,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
