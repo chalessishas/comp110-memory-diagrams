@@ -265,6 +265,10 @@ class UnitState:
             if t.behavior_tag == "hoshiguma_overweight":
                 if self.max_hp > 0 and self.hp / self.max_hp > t.params.get("hp_threshold", 0.5):
                     total += t.params.get("reduction", 0.0)
+            # Generic timed deploy shield: talent sets params["deploy_shield"] = {"active": True, "reduction": 0.x}
+            shield = t.params.get("deploy_shield")
+            if shield and shield.get("active", False):
+                total += shield.get("reduction", 0.0)
         return min(total, 0.99)  # cap so at least 1% damage goes through
 
     def take_damage(self, amount: int) -> int:
