@@ -129,6 +129,19 @@ def targeting_system(world, dt: float) -> None:
                     ]
                     setattr(u, "__target__", None)
                     setattr(u, "__targets__", candidates)
+            elif u.archetype == RoleArchetype.GUARD_CENTURION:
+                # Centurion Guard trait: attack all currently-blocked enemies simultaneously
+                blocked = [
+                    e for e in world.enemies()
+                    if u.unit_id in e.blocked_by_unit_ids and e.alive
+                ]
+                if blocked:
+                    setattr(u, "__target__", None)
+                    setattr(u, "__targets__", blocked)
+                else:
+                    # No blocked enemies — fall back to normal single-target
+                    setattr(u, "__target__", _targeting_for_operator(world, u))
+                    setattr(u, "__targets__", [])
             elif getattr(u, "_attack_all_in_range", False):
                 # Generic AOE attack override (e.g. Thorns S3) — hit every enemy in range
                 candidates = [

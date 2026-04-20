@@ -46,7 +46,8 @@ def skill_system(world, dt: float) -> None:
                 sk.locked_out = False
                 _fire_skill(world, u)
             else:
-                has_target = getattr(u, "__target__", None) is not None
+                has_target = (getattr(u, "__target__", None) is not None
+                              or bool(getattr(u, "__targets__", [])))
                 if has_target:
                     sk.locked_out = False
                     _fire_skill(world, u)
