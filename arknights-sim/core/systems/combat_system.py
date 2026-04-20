@@ -1,8 +1,10 @@
 """Combat — 攻击冷却倒数 + 命中目标 + 伤害结算."""
 from __future__ import annotations
-from ..types import AttackType, Faction
+from ..types import AttackType, Faction, RoleArchetype
 from ..state.unit_state import SPGainMode
 from .talent_registry import fire_on_attack_hit, fire_on_hit_received, fire_on_kill
+
+_BESIEGER_BLOCKED_MULT = 1.5   # Besieger Sniper trait: 1.5× ATK vs blocked enemies
 
 
 def combat_system(world, dt: float) -> None:
@@ -30,6 +32,9 @@ def combat_system(world, dt: float) -> None:
 
         # Damage / heal
         raw = u.effective_atk
+        # Besieger Sniper trait: 1.5× ATK when target is blocked by an ally
+        if u.archetype == RoleArchetype.SNIPER_SIEGE and target.blocked_by_unit_ids:
+            raw = int(raw * _BESIEGER_BLOCKED_MULT)
         if u.attack_type == AttackType.PHYSICAL:
             dealt = target.take_physical(raw)
         elif u.attack_type == AttackType.ARTS:
