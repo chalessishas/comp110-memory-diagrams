@@ -38,6 +38,11 @@ def _activate_shield(world, carrier: UnitState) -> None:
         return
     t.params["deploy_shield"] = {"active": True, "reduction": _TALENT_REDUCE}
 
+    # Cancel any pending expiry from a prior deployment cycle.
+    prev_event = t.params.get("_pending_expire_event")
+    if prev_event is not None:
+        world.event_queue.cancel(prev_event)
+
     expire_kind = f"{_TALENT_EXPIRE_PREFIX}{carrier.unit_id}"
     if expire_kind not in world.event_queue._handlers:
         def _on_expire(w, ev) -> None:
@@ -47,14 +52,16 @@ def _activate_shield(world, carrier: UnitState) -> None:
             talent = _find_talent(c)
             if talent is not None:
                 talent.params["deploy_shield"] = {"active": False, "reduction": 0.0}
+                talent.params["_pending_expire_event"] = None
         world.event_queue.register(expire_kind, _on_expire)
 
     now = world.global_state.elapsed
-    world.event_queue.schedule(
+    ev = world.event_queue.schedule(
         now + _TALENT_DURATION,
         expire_kind,
         carrier_id=carrier.unit_id,
     )
+    t.params["_pending_expire_event"] = ev
 
 
 def _talent_on_battle_start(world, carrier: UnitState) -> None:

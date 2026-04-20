@@ -24,6 +24,7 @@ class Event:
     kind: str                            # e.g. "hammer_strike" / "spawn" / "splash_damage"
     payload: Dict[str, Any] = field(default_factory=dict)
     _seq: int = 0                        # tie-breaker for stable ordering (set by queue)
+    cancelled: bool = False              # lazy-deletion: skipped by dispatch_due if True
 
     def __lt__(self, other: "Event") -> bool:
         # min-heap 按 (fire_at, _seq) 排序 — seq 保证同时刻事件 FIFO
@@ -64,6 +65,10 @@ class EventQueue:
         """Fire the same event `count` times at `first_at, first_at+interval, ...`."""
         return [self.schedule(first_at + interval * i, kind, **payload) for i in range(count)]
 
+    def cancel(self, event: Event) -> None:
+        """Mark a previously scheduled event as cancelled; it will be skipped at dispatch."""
+        event.cancelled = True
+
     # ---- registration -----------------------------------------------------
 
     def register(self, kind: str, handler: EventHandler) -> None:
@@ -72,9 +77,11 @@ class EventQueue:
     # ---- draining ---------------------------------------------------------
 
     def drain_due(self, now: float) -> Iterator[Event]:
-        """Yield (and remove) every event with fire_at <= now, in order."""
+        """Yield (and remove) every event with fire_at <= now, in order. Skips cancelled events."""
         while self._heap and self._heap[0].fire_at <= now:
-            yield heappop(self._heap)
+            ev = heappop(self._heap)
+            if not ev.cancelled:
+                yield ev
 
     def dispatch_due(self, world: Any, now: float) -> int:
         """Drain and dispatch. Returns count dispatched."""

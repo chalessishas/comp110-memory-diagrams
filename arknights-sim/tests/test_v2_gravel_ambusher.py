@@ -246,6 +246,43 @@ def test_shield_reactivates_on_redeploy():
 # Test 8: on_deploy fires but shield does not double-stack
 # ---------------------------------------------------------------------------
 
+def test_stale_expiry_cancelled_on_redeploy():
+    """Stale expiry event from first deploy must not deactivate shield after re-deploy.
+
+    Without the EventQueue.cancel() fix, the stale expiry at t=10 would fire
+    and set shield inactive even though a newer expiry at t=19 was scheduled.
+    """
+    w = _world()
+    w.global_state.dp = 100.0
+
+    g = make_gravel()
+    g.redeploy_cd = 0.0   # allow instant redeploy to expose the race
+    g.position = (2.0, 1.0)
+
+    # Deploy at t=0 → expiry1 scheduled at t=10
+    assert w.deploy(g)
+
+    # Run 9s → shield still active, expiry1 not yet fired
+    for _ in range(int(TICK_RATE * 9)):
+        w.tick()
+
+    # Retreat + immediate redeploy → _activate_shield cancels expiry1, schedules expiry2 at t=19
+    w.retreat(g)
+    w.global_state.dp = 100.0
+    assert w.deploy(g), "Instant redeploy (cd=0) must succeed"
+
+    # Run 2 more seconds (now t≈11): stale expiry1 would have fired here without fix
+    for _ in range(int(TICK_RATE * 2)):
+        w.tick()
+
+    talent = next(t for t in g.talents if t.behavior_tag == _TALENT_TAG)
+    shield = talent.params.get("deploy_shield", {})
+    assert shield.get("active", False), (
+        "Shield must still be active at t≈11: stale expiry1 was cancelled, "
+        "new expiry2 fires at t≈19"
+    )
+
+
 def test_shield_does_not_double_stack_on_first_deploy():
     """world.deploy() on a newly added unit fires on_deploy + (on_battle_start if deployed=True).
     Reduction must still be exactly _TALENT_REDUCE, not doubled."""
