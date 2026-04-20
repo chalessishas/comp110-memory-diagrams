@@ -73,7 +73,8 @@ register_skill(_S1_TAG, on_start=_s1_on_start, on_tick=_s1_on_tick, on_end=_s1_o
 # ---------------------------------------------------------------------------
 
 _S2_TAG = "myrtle_s2_healing_wings"
-_S2_DP_RATE  = 16.0 / 16.0   # 1.0 DP/s over 16s
+_S2_DURATION = 16.0
+_S2_DP_RATE  = 16.0 / _S2_DURATION   # 1.0 DP/s over 16s
 _S2_HEAL_RATE = 0.50          # 50% ATK/s
 _S2_DP_FRAC_ATTR   = "_myrtle_s2_dp_frac"
 _S2_HEAL_FRAC_ATTR = "_myrtle_s2_heal_frac"
