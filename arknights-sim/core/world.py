@@ -16,7 +16,7 @@ from .events.event_queue import EventQueue
 from .state.global_state import GlobalState
 from .state.tile_state import TileGrid
 from .state.unit_state import UnitState
-from .systems.talent_registry import fire_on_battle_start, fire_on_deploy
+from .systems.talent_registry import fire_on_battle_start, fire_on_deploy, fire_on_retreat
 from .types import DT, TICK_PHASE_ORDER, TICK_RATE, Faction, TickPhase, TileType
 
 
@@ -118,6 +118,7 @@ class World:
             f"{unit.name} retreated  cd={unit.redeploy_cd:.0f}s  "
             f"refund={refund}  dp={self.global_state.dp}"
         )
+        fire_on_retreat(self, unit)
 
     def tick(self, dt: float = DT) -> None:
         self.global_state.elapsed += dt

@@ -262,3 +262,28 @@ def test_death_cascade_fires_once():
     assert not token.alive or not token.deployed, "Token must remain despawned"
     # _just_died must not linger
     assert not getattr(m, "_just_died", False), "_just_died flag must be cleared after one tick"
+
+
+# ---------------------------------------------------------------------------
+# Test 11: on_retreat cascade — Mayer retreats → tokens despawn
+# ---------------------------------------------------------------------------
+
+def test_tokens_despawn_when_mayer_retreats():
+    """When Mayer is retreated, all mech-otter tokens must be despawned."""
+    w = _world()
+    m = make_mayer(slot=None)   # no skill, just talent
+    m.deployed = True; m.position = (0.0, 1.0)
+    w.add_unit(m)
+
+    tokens = [u for u in w.units if u.name == _TOKEN_NAME]
+    assert len(tokens) == 1, "Mayer must have spawned 1 token on deploy"
+    token = tokens[0]
+    assert token.alive, "Token must be alive before retreat"
+
+    # Retreat Mayer — on_retreat fires synchronously
+    w.retreat(m)
+
+    assert not m.deployed, "Mayer must no longer be deployed"
+    assert not token.alive or not token.deployed, (
+        f"Token must despawn when Mayer retreats; alive={token.alive}, deployed={token.deployed}"
+    )

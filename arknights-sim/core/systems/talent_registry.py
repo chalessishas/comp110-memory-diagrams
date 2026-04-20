@@ -25,10 +25,14 @@ Talent callbacks:
     Called once the tick after a unit's HP reaches 0 (cleanup_system dispatch).
     Use to cascade-despawn summons, remove linked buffs, etc.
 
+  on_retreat(world, unit) → None
+    Called synchronously inside world.retreat() before the function returns.
+    Use to cascade-despawn summons when the summoner is manually retreated.
+
 Usage:
     register_talent("texas_tactical_delivery", on_battle_start=_dp_cb)
     register_talent("gravel_tactical_concealment", on_deploy=_shield_cb)
-    register_talent("mayer_summon", on_death=_despawn_tokens)
+    register_talent("mayer_summon", on_death=_despawn_tokens, on_retreat=_despawn_tokens)
 """
 from __future__ import annotations
 from typing import Callable, Dict, Optional, Tuple
@@ -36,7 +40,7 @@ from typing import Callable, Dict, Optional, Tuple
 _Fn = Callable  # type alias shorthand
 
 _REGISTRY: Dict[str, Tuple] = {}
-# value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death)
+# value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death, on_retreat)
 
 
 def register_talent(
@@ -49,8 +53,9 @@ def register_talent(
     on_tick: Optional[_Fn] = None,
     on_deploy: Optional[_Fn] = None,
     on_death: Optional[_Fn] = None,
+    on_retreat: Optional[_Fn] = None,
 ) -> None:
-    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death)
+    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death, on_retreat)
 
 
 def fire_on_hit_received(world, defender, attacker, damage: int) -> None:
@@ -100,3 +105,10 @@ def fire_on_death(world, unit) -> None:
         entry = _REGISTRY.get(talent.behavior_tag)
         if entry and len(entry) > 6 and entry[6]:
             entry[6](world, unit)
+
+
+def fire_on_retreat(world, unit) -> None:
+    for talent in unit.talents:
+        entry = _REGISTRY.get(talent.behavior_tag)
+        if entry and len(entry) > 7 and entry[7]:
+            entry[7](world, unit)

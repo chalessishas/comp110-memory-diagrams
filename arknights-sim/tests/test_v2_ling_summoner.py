@@ -289,3 +289,139 @@ def test_no_aura_after_recall():
     assert len(aura_buffs) == 0, (
         f"Dragon's Blood aura must be gone after recall; buffs={aura_buffs}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Test 9: on_death cascade — Ling dies → Long Xian despawns
+# ---------------------------------------------------------------------------
+
+def test_long_xian_despawns_when_ling_dies():
+    """When Ling is killed while S3 is active, Long Xian must also be despawned."""
+    w = _world()
+    l = make_ling()
+    l.deployed = True; l.position = (0.0, 2.0)
+    w.add_unit(l)
+
+    e = _slug(pos=(4, 2))
+    w.add_unit(e)
+
+    l.skill.sp = float(l.skill.sp_cost)
+    w.tick()  # S3 activates → Long Xian spawns
+    assert l.skill.active_remaining > 0.0
+
+    dragon = w.unit_by_id(l._ling_summon_id)
+    assert dragon is not None and dragon.alive, "Long Xian must be alive before Ling's death"
+
+    # Kill Ling
+    l.take_damage(l.max_hp + 1000)
+    assert not l.alive, "Ling must be dead"
+
+    # Cleanup_system dispatches on_death next tick
+    w.tick()
+
+    assert not dragon.alive or not dragon.deployed, (
+        f"Long Xian must despawn when Ling dies; alive={dragon.alive}, deployed={dragon.deployed}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 10: on_death fires once — Long Xian stays despawned
+# ---------------------------------------------------------------------------
+
+def test_long_xian_despawn_fires_once():
+    w = _world()
+    l = make_ling()
+    l.deployed = True; l.position = (0.0, 2.0)
+    w.add_unit(l)
+
+    e = _slug(pos=(4, 2))
+    w.add_unit(e)
+
+    l.skill.sp = float(l.skill.sp_cost)
+    w.tick()
+
+    dragon = w.unit_by_id(l._ling_summon_id)
+
+    l.take_damage(l.max_hp + 1000)
+    for _ in range(TICK_RATE * 3):
+        w.tick()
+
+    assert not dragon.alive or not dragon.deployed, "Long Xian must remain despawned"
+    assert not getattr(l, "_just_died", False), "_just_died must be cleared after one tick"
+
+
+# ---------------------------------------------------------------------------
+# Test 11: on_retreat cascade — Ling retreats → Long Xian despawns
+# ---------------------------------------------------------------------------
+
+def test_long_xian_despawns_when_ling_retreats():
+    """When Ling is retreated while S3 is active, Long Xian must be despawned."""
+    w = _world()
+    l = make_ling()
+    l.deployed = True; l.position = (0.0, 2.0)
+    w.add_unit(l)
+
+    e = _slug(pos=(4, 2))
+    w.add_unit(e)
+
+    l.skill.sp = float(l.skill.sp_cost)
+    w.tick()  # S3 activates
+    assert l.skill.active_remaining > 0.0
+
+    dragon = w.unit_by_id(l._ling_summon_id)
+    assert dragon is not None and dragon.alive, "Long Xian must be alive before retreat"
+
+    # Retreat Ling — on_retreat fires synchronously inside world.retreat()
+    w.retreat(l)
+
+    assert not l.deployed, "Ling must no longer be deployed"
+    assert not dragon.alive or not dragon.deployed, (
+        f"Long Xian must despawn on retreat; alive={dragon.alive}, deployed={dragon.deployed}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 12: Retreat without active S3 — no error, no dragon to despawn
+# ---------------------------------------------------------------------------
+
+def test_retreat_without_active_s3_is_safe():
+    """Retreating Ling when S3 was never activated must not raise errors."""
+    w = _world()
+    l = make_ling()
+    l.deployed = True; l.position = (0.0, 2.0)
+    w.add_unit(l)
+
+    # Do NOT activate S3
+    w.retreat(l)
+
+    assert not l.deployed, "Ling must be retreated"
+    dragons = [u for u in w.units if u.name == "Long Xian"]
+    assert len(dragons) == 0, "No Long Xian should exist if S3 was never activated"
+
+
+# ---------------------------------------------------------------------------
+# Test 13: Retreat cascade does not affect unrelated allies
+# ---------------------------------------------------------------------------
+
+def test_retreat_cascade_only_affects_ling_summon():
+    """Unrelated allied units must NOT be affected by Ling's retreat cascade."""
+    w = _world()
+    l = make_ling()
+    l.deployed = True; l.position = (0.0, 2.0)
+    w.add_unit(l)
+
+    innocent = _ally(pos=(3, 2))
+    w.add_unit(innocent)
+
+    e = _slug(pos=(4, 2))
+    w.add_unit(e)
+
+    l.skill.sp = float(l.skill.sp_cost)
+    w.tick()  # S3 activates
+
+    hp_before = innocent.hp
+    w.retreat(l)
+
+    assert innocent.alive, "Unrelated ally must not be killed by Ling's retreat cascade"
+    assert innocent.deployed, "Unrelated ally must still be deployed"
+    assert innocent.hp == hp_before, "Unrelated ally HP must be unchanged"

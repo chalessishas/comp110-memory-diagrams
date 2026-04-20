@@ -91,7 +91,24 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
             ))
 
 
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
+def _talent_on_death(world, carrier: UnitState) -> None:
+    """Ling dies → despawn Long Xian if still alive (S3 may have been active)."""
+    summon_id = getattr(carrier, "_ling_summon_id", None)
+    if summon_id is not None:
+        unit = world.unit_by_id(summon_id)
+        if unit is not None and unit.alive:
+            unit.alive = False
+            unit.hp = 0
+            unit.deployed = False
+    carrier._ling_summon_id = None
+
+
+def _talent_on_retreat(world, carrier: UnitState) -> None:
+    """Ling retreats → despawn Long Xian if still alive."""
+    _talent_on_death(world, carrier)
+
+
+register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_death=_talent_on_death, on_retreat=_talent_on_retreat)
 
 
 def _make_long_xian(position: tuple[float, float]) -> UnitState:

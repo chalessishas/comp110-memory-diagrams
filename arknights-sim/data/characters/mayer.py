@@ -92,7 +92,12 @@ def _talent_on_death(world, carrier: UnitState) -> None:
             unit.deployed = False
 
 
-register_talent(_TALENT_TAG, on_battle_start=_talent_on_battle_start, on_death=_talent_on_death)
+def _talent_on_retreat(world, carrier: UnitState) -> None:
+    """Mayer retreats → despawn all mech-otter tokens."""
+    _talent_on_death(world, carrier)
+
+
+register_talent(_TALENT_TAG, on_battle_start=_talent_on_battle_start, on_death=_talent_on_death, on_retreat=_talent_on_retreat)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
