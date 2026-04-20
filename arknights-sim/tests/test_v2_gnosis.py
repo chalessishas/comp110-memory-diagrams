@@ -1,4 +1,4 @@
-"""Gnosis — Theoretical Analysis RES_DOWN-on-hit talent + S2 ATK burst."""
+"""Gnosis — Theoretical Analysis RES_DOWN-on-hit + COLD/FREEZE chain + S2 ATK burst."""
 from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -11,6 +11,7 @@ from core.systems import register_default_systems
 from data.characters.gnosis import (
     make_gnosis, _TALENT_TAG, _RES_DOWN_AMOUNT, _RES_DOWN_DURATION,
     _S2_ATK_RATIO, _S2_DURATION,
+    _COLD_DURATION, _FREEZE_DURATION,
 )
 from data.enemies import make_originium_slug
 
@@ -247,3 +248,109 @@ def test_gnosis_s2_buff_removed_on_end():
 
     assert g.skill.active_remaining == 0.0, "S2 must have expired"
     assert g.effective_atk == atk_base, "ATK must revert to base after S2"
+
+
+# ---------------------------------------------------------------------------
+# Test 9: First hit applies COLD (in addition to RES_DOWN)
+# ---------------------------------------------------------------------------
+
+def test_theoretical_analysis_applies_cold():
+    """First hit: enemy has both RES_DOWN and COLD."""
+    w = _world()
+    g = make_gnosis()
+    g.deployed = True
+    g.position = (0.0, 1.0)
+    g.atk_cd = 0.0
+    g.skill = None
+    w.add_unit(g)
+
+    slug = _slug(pos=(1, 1))
+    w.add_unit(slug)
+
+    w.tick()
+
+    assert slug.has_status(StatusKind.RES_DOWN), "Enemy must have RES_DOWN after hit"
+    assert slug.has_status(StatusKind.COLD), "Enemy must have COLD after first hit"
+    assert not slug.has_status(StatusKind.FREEZE), "FREEZE must not appear on first hit"
+
+
+# ---------------------------------------------------------------------------
+# Test 10: Second hit upgrades COLD to FREEZE
+# ---------------------------------------------------------------------------
+
+def test_second_hit_upgrades_cold_to_freeze():
+    """Second hit while COLD is active upgrades to FREEZE."""
+    w = _world()
+    g = make_gnosis()
+    g.deployed = True
+    g.position = (0.0, 1.0)
+    g.atk_cd = 0.0
+    g.skill = None
+    w.add_unit(g)
+
+    slug = _slug(pos=(1, 1), hp=999999)
+    w.add_unit(slug)
+
+    w.tick()  # first hit → COLD + RES_DOWN
+    assert slug.has_status(StatusKind.COLD), "COLD must be present after first hit"
+
+    # Advance to second attack (COLD still active within 2s window)
+    for _ in range(int(g.atk_interval * TICK_RATE) + 1):
+        w.tick()
+
+    assert slug.has_status(StatusKind.FREEZE), "FREEZE must replace COLD on second hit"
+    assert not slug.has_status(StatusKind.COLD), "COLD must be consumed/removed by FREEZE"
+
+
+# ---------------------------------------------------------------------------
+# Test 11: FREEZE blocks action (can_act = False)
+# ---------------------------------------------------------------------------
+
+def test_gnosis_freeze_blocks_action():
+    """FREEZE applied by Gnosis's second hit causes can_act() = False."""
+    w = _world()
+    g = make_gnosis()
+    g.deployed = True
+    g.position = (0.0, 1.0)
+    g.atk_cd = 0.0
+    g.skill = None
+    w.add_unit(g)
+
+    slug = _slug(pos=(1, 1), hp=999999)
+    w.add_unit(slug)
+
+    w.tick()  # first hit → COLD
+
+    for _ in range(int(g.atk_interval * TICK_RATE) + 1):
+        w.tick()  # second hit → FREEZE
+
+    assert slug.has_status(StatusKind.FREEZE), "FREEZE must be active"
+    assert not slug.can_act(), "FROZEN enemy must not be able to act"
+
+
+# ---------------------------------------------------------------------------
+# Test 12: COLD expires after _COLD_DURATION without second hit
+# ---------------------------------------------------------------------------
+
+def test_gnosis_cold_expires_without_second_hit():
+    """COLD expires after _COLD_DURATION if no second hit refreshes or upgrades it."""
+    w = _world()
+    g = make_gnosis()
+    g.deployed = True
+    g.position = (0.0, 1.0)
+    g.atk_cd = 0.0
+    g.skill = None
+    w.add_unit(g)
+
+    slug = _slug(pos=(1, 1))
+    w.add_unit(slug)
+
+    w.tick()  # first hit → COLD
+    assert slug.has_status(StatusKind.COLD), "COLD must be present"
+
+    g.atk_cd = 999.0  # prevent further hits
+    for _ in range(int(TICK_RATE * (_COLD_DURATION + 1))):
+        w.tick()
+
+    assert not slug.has_status(StatusKind.COLD), "COLD must expire"
+    assert slug.can_act(), "Enemy must be able to act after COLD expires"

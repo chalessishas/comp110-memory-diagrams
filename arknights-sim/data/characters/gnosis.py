@@ -1,14 +1,15 @@
 """Gnosis (灵知) — 6* Supporter (Hexer archetype).
 
-Talent "Theoretical Analysis" (simplified): Each attack reduces the target's
-  RES by 15 (flat) for 2s. Applied as both a StatusEffect (visibility) and a
-  timed Buff (mechanical: BuffAxis.RES, FLAT, -15). Refreshes on each hit.
+Talent "Theoretical Analysis": Each attack reduces the target's RES by 15
+  (flat) for 2s AND applies COLD for 2s. Stacks toward FREEZE: if target is
+  already COLD, upgrades to FREEZE (1.5s, can_act=False) instead.
+  Applied as both a StatusEffect (visibility) and a timed Buff (mechanical).
+  Refreshes on each hit (both RES_DOWN and COLD/FREEZE).
 
 S2 "Frozen Silence" (simplified): 20s duration, ATK +80%.
   sp_cost=30, initial_sp=15, AUTO_TIME, AUTO trigger, requires_target=True.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
-Note: COLD/FREEZE chain (actual talent second effect) deferred.
 """
 from __future__ import annotations
 from core.state.unit_state import (
@@ -34,6 +35,12 @@ _RES_DOWN_AMOUNT = 15.0       # flat RES reduction
 _RES_DOWN_DURATION = 2.0
 _RES_DOWN_TAG = "gnosis_res_down"
 
+# COLD / FREEZE chain
+_COLD_DURATION = 2.0
+_COLD_TAG = "gnosis_cold"
+_FREEZE_DURATION = 1.5
+_FREEZE_TAG = "gnosis_freeze"
+
 # --- S2: Frozen Silence ---
 _S2_TAG = "gnosis_s2_frozen_silence"
 _S2_ATK_RATIO = 0.80
@@ -42,29 +49,54 @@ _S2_DURATION = 20.0
 
 
 def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
-    expires = world.global_state.elapsed + _RES_DOWN_DURATION
-    # Remove stale RES_DOWN status + buff (refresh semantics)
+    elapsed = world.global_state.elapsed
+
+    # --- RES_DOWN (refresh semantics) ---
+    expires_rd = elapsed + _RES_DOWN_DURATION
     target.statuses = [s for s in target.statuses if s.source_tag != _RES_DOWN_TAG]
     target.buffs = [b for b in target.buffs if b.source_tag != _RES_DOWN_TAG]
-    # StatusEffect for visibility / has_status() checks
     target.statuses.append(StatusEffect(
         kind=StatusKind.RES_DOWN,
         source_tag=_RES_DOWN_TAG,
-        expires_at=expires,
+        expires_at=expires_rd,
         params={"amount": _RES_DOWN_AMOUNT},
     ))
-    # Buff for mechanical effect — negative FLAT reduces effective RES
     target.buffs.append(Buff(
         axis=BuffAxis.RES,
         stack=BuffStack.FLAT,
         value=-_RES_DOWN_AMOUNT,
         source_tag=_RES_DOWN_TAG,
-        expires_at=expires,
+        expires_at=expires_rd,
     ))
-    world.log(
-        f"Gnosis Theoretical Analysis → {target.name}  "
-        f"RES -{_RES_DOWN_AMOUNT:.0f} ({_RES_DOWN_DURATION}s)"
-    )
+
+    # --- COLD → FREEZE chain (check kind, not source_tag — cross-operator) ---
+    if target.has_status(StatusKind.COLD):
+        # Upgrade: remove COLD and any prior FREEZE, apply fresh FREEZE
+        target.statuses = [
+            s for s in target.statuses
+            if s.source_tag not in (_COLD_TAG, _FREEZE_TAG)
+        ]
+        target.statuses.append(StatusEffect(
+            kind=StatusKind.FREEZE,
+            source_tag=_FREEZE_TAG,
+            expires_at=elapsed + _FREEZE_DURATION,
+        ))
+        world.log(
+            f"Gnosis Theoretical Analysis → {target.name}  "
+            f"FREEZE ({_FREEZE_DURATION}s)  RES -{_RES_DOWN_AMOUNT:.0f}"
+        )
+    else:
+        # First hit: apply/refresh COLD
+        target.statuses = [s for s in target.statuses if s.source_tag != _COLD_TAG]
+        target.statuses.append(StatusEffect(
+            kind=StatusKind.COLD,
+            source_tag=_COLD_TAG,
+            expires_at=elapsed + _COLD_DURATION,
+        ))
+        world.log(
+            f"Gnosis Theoretical Analysis → {target.name}  "
+            f"COLD ({_COLD_DURATION}s)  RES -{_RES_DOWN_AMOUNT:.0f}"
+        )
 
 
 register_talent(_TALENT_TAG, on_attack_hit=_talent_on_attack_hit)
@@ -85,7 +117,7 @@ register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def make_gnosis(slot: str = "S2") -> UnitState:
-    """Gnosis E2 max. Talent: RES_DOWN -15 on every hit. S2: ATK burst."""
+    """Gnosis E2 max. Talent: RES_DOWN -15 + COLD/FREEZE chain on every hit. S2: ATK burst."""
     op = _base_stats()
     op.name = "Gnosis"
     op.archetype = RoleArchetype.SUP_HEXER
