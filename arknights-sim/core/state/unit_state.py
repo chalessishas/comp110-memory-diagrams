@@ -152,6 +152,8 @@ class UnitState:
     undying_charges: int = 0    # 防死次数 (Specter/Chen 等)；>0 时致命伤改为留 1 HP
     crit_chance: float = 0.0    # 暴击概率 0.0-1.0；暴击时伤害×crit_multiplier
     crit_multiplier: float = 1.5  # 暴击倍率 (Arknights default × 1.5)
+    chain_count: int = 0        # 连锁攻击额外目标数 (Chain Caster 职业特性=2)
+    chain_damage_ratio: float = 1.0  # 连锁伤害比率 (相对于主目标伤害)
 
     def __post_init__(self) -> None:
         if self.hp == 0:

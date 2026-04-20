@@ -84,6 +84,10 @@ def combat_system(world, dt: float) -> None:
                             f"dmg={s}  ({other.hp}/{other.max_hp})"
                         )
 
+        # Chain attack — Chain Caster trait: after primary hit, jump to N nearest enemies
+        if u.chain_count > 0 and u.attack_type != AttackType.HEAL and target.position is not None:
+            _apply_chain(world, u, target, raw)
+
         u.atk_cd = u.current_atk_interval
 
         # SP on attack
@@ -131,3 +135,41 @@ def _apply_fortress_ranged(world, u, targets) -> None:
     if u.skill is not None:
         if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
             u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
+
+
+def _apply_chain(world, attacker, primary_target, primary_raw: int) -> None:
+    """Chain Caster: after primary hit, chain to N nearest enemies (by distance to primary target)."""
+    chain_raw = int(primary_raw * attacker.chain_damage_ratio)
+    already_hit = {primary_target.unit_id}
+    tx, ty = primary_target.position
+
+    for _ in range(attacker.chain_count):
+        candidates = [
+            e for e in world.enemies()
+            if e.alive and e.unit_id not in already_hit and e.position is not None
+        ]
+        if not candidates:
+            break
+        # Nearest enemy to the current chain position (position of last-hit enemy)
+        next_target = min(
+            candidates,
+            key=lambda e: (e.position[0] - tx) ** 2 + (e.position[1] - ty) ** 2,
+        )
+        already_hit.add(next_target.unit_id)
+        if attacker.attack_type == AttackType.PHYSICAL:
+            dealt = next_target.take_physical(chain_raw)
+        elif attacker.attack_type == AttackType.ARTS:
+            dealt = next_target.take_arts(chain_raw)
+        else:
+            dealt = next_target.take_true(chain_raw)
+        world.global_state.total_damage_dealt += dealt
+        world.log(
+            f"{attacker.name} chain → {next_target.name}  "
+            f"dmg={dealt}  ({next_target.hp}/{next_target.max_hp})"
+        )
+        if attacker.talents:
+            fire_on_attack_hit(world, attacker, next_target, dealt)
+        if not next_target.alive and attacker.talents:
+            fire_on_kill(world, attacker, next_target)
+        # Update chain origin to new target's position
+        tx, ty = next_target.position
