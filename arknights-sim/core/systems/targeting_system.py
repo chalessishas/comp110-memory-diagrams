@@ -147,6 +147,10 @@ def targeting_system(world, dt: float) -> None:
                     ]
                     setattr(u, "__target__", None)
                     setattr(u, "__targets__", candidates)
+            elif u.archetype == RoleArchetype.SUP_BARD:
+                # Bard Supporter trait: never attacks; SP aura handled by on_tick talent
+                setattr(u, "__target__", None)
+                setattr(u, "__targets__", [])
             elif u.archetype == RoleArchetype.GUARD_CENTURION:
                 # Centurion Guard trait: attack all currently-blocked enemies simultaneously
                 blocked = [
