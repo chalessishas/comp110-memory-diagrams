@@ -15,8 +15,9 @@ from __future__ import annotations
 from core.state.unit_state import (
     UnitState, SkillComponent, RangeShape, TalentComponent, StatusEffect,
 )
+from core.state.unit_state import Buff
 from core.types import (
-    AttackType, Faction, Profession, RoleArchetype,
+    AttackType, BuffAxis, BuffStack, Faction, Profession, RoleArchetype,
     SkillTrigger, SPGainMode, StatusKind, TICK_RATE,
 )
 from core.systems.skill_system import register_skill
@@ -28,6 +29,14 @@ EXECUTOR_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 CLONE_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 
 _CLONE_TALENT_TAG = "phantom_shadow_death_burst"
+
+# --- S2: Etude ---
+_S2_TAG = "phantom_s2_etude"
+_S2_ATK_RATIO = 1.00
+_S2_ASPD_FLAT = 30.0
+_S2_BUFF_TAG = "phantom_s2_buff"
+_S2_DURATION = 20.0
+
 _S3_TAG = "phantom_s3_the_spring"
 
 # Talent: Infiltration — CAMOUFLAGE while S3 inactive, removed when S3 fires
@@ -108,6 +117,25 @@ def _make_shadow_clone(position: tuple[float, float]) -> UnitState:
     return clone
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S2_ASPD_FLAT, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Phantom S2 Etude — ATK+{_S2_ATK_RATIO:.0%}, ASPD+{_S2_ASPD_FLAT}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # ---------------------------------------------------------------------------
 # S3: The Spring — deploy shadow clone
 # ---------------------------------------------------------------------------
@@ -152,7 +180,20 @@ def make_phantom(slot: str = "S3") -> UnitState:
     op.cost = 10
     op.talents = [TalentComponent(name="Infiltration", behavior_tag=_INFILTRATION_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Etude",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="The Spring",
             slot="S3",

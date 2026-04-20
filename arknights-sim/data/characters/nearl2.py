@@ -32,6 +32,12 @@ _TALENT_ATK_PER_STACK = 0.30   # +30% ATK per blocked enemy
 _TALENT_MAX_STACKS = 3
 _TALENT_BUFF_TAG = "penance_talent_atk"
 
+# --- S2: Disciplina ---
+_S2_TAG = "penance_s2_disciplina"
+_S2_ATK_RATIO = 0.80
+_S2_BUFF_TAG = "penance_s2_atk"
+_S2_DURATION = 25.0
+
 _S3_TAG = "penance_s3_purgatorio"
 _S3_BLOCK = 3
 _S3_ATK_RATIO = 0.20
@@ -65,6 +71,21 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
 register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Penance S2 Disciplina — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 def _s3_on_start(world, carrier: UnitState) -> None:
     carrier.block = _S3_BLOCK
     carrier.buffs.append(Buff(
@@ -95,7 +116,20 @@ def make_penance(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Penitence, Absolution", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Disciplina",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=15,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Purgatorio",
             slot="S3",

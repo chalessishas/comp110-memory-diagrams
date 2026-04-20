@@ -46,6 +46,12 @@ _MON3TR_STUN_DURATION = 3.0  # seconds
 _MON3TR_BURST_TAG = "mon3tr_death_burst"
 _MON3TR_OOR_DEF_TAG = "mon3tr_out_of_range_def"  # -100% DEF when outside Kal'tsit range
 
+# --- S2: Guiding Light ---
+_S2_TAG = "kal_tsit_s2_guiding_light"
+_S2_ATK_RATIO = 0.60
+_S2_BUFF_TAG = "kal_tsit_s2_atk"
+_S2_DURATION = 30.0
+
 _S3_TAG = "kal_tsit_s3_all_out"
 _S3_ATK_RATIO = 0.80
 _S3_ATK_BUFF_TAG = "kal_tsit_s3_atk"
@@ -162,6 +168,21 @@ register_talent(
 )
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Kal'tsit S2 Guiding Light — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # ---------------------------------------------------------------------------
 # S3: All-Out
 # ---------------------------------------------------------------------------
@@ -198,7 +219,20 @@ def make_kal_tsit(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Mon3tr", behavior_tag=_KAL_TSIT_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Guiding Light",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=15,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="All-Out",
             slot="S3",

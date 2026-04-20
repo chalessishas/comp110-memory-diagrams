@@ -31,6 +31,13 @@ _TALENT_FRAGILE_AMOUNT = 0.20    # target takes +20% damage
 _TALENT_FRAGILE_DURATION = 2.0   # seconds
 _TALENT_FRAGILE_TAG = "irene_talent_fragile"
 
+# --- S2: Swift Judgement ---
+_S2_TAG = "irene_s2_swift_judgement"
+_S2_ATK_RATIO = 0.50
+_S2_ASPD_FLAT = 20.0
+_S2_BUFF_TAG = "irene_s2_buff"
+_S2_DURATION = 20.0
+
 # --- S3: Sword of Vengeance ---
 _S3_TAG = "irene_s3_sword_of_vengeance"
 _S3_ATK_RATIO = 0.80
@@ -54,6 +61,25 @@ def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> No
 
 
 register_talent(_TALENT_TAG, on_attack_hit=_talent_on_attack_hit)
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S2_ASPD_FLAT, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Irene S2 Swift Judgement — ATK+{_S2_ATK_RATIO:.0%}, ASPD+{_S2_ASPD_FLAT}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
@@ -82,7 +108,20 @@ def make_irene(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Blade of Judgement", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Swift Judgement",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Sword of Vengeance",
             slot="S3",
