@@ -47,8 +47,14 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
         return None
 
     # Healer: target most-injured ally (lowest hp/max_hp ratio)
+    # Musha Guards with heal_block_threshold > 0 are excluded when above their threshold
     if op.attack_type == AttackType.HEAL:
-        candidates = [u for u in world.allies() if u.alive and u.hp < u.max_hp]
+        candidates = [
+            u for u in world.allies()
+            if u.alive and u.hp < u.max_hp
+            and (u.heal_block_threshold == 0.0
+                 or u.hp / u.max_hp < u.heal_block_threshold)
+        ]
         if not candidates:
             return None
         return min(candidates, key=lambda u: u.hp / u.max_hp)
@@ -166,8 +172,14 @@ def targeting_system(world, dt: float) -> None:
                     setattr(u, "__targets__", [])
             elif u.attack_type == AttackType.HEAL and u.heal_targets > 1:
                 # Multi-target medic: heal top-N most-injured allies simultaneously
+                # Exclude Musha Guards above their heal-block threshold
                 injured = sorted(
-                    [a for a in world.allies() if a.alive and a.hp < a.max_hp],
+                    [
+                        a for a in world.allies()
+                        if a.alive and a.hp < a.max_hp
+                        and (a.heal_block_threshold == 0.0
+                             or a.hp / a.max_hp < a.heal_block_threshold)
+                    ],
                     key=lambda a: a.hp / a.max_hp,
                 )
                 setattr(u, "__target__", None)
@@ -197,7 +209,13 @@ def _update_block_assignments(world) -> None:
     for e in world.enemies():
         e.blocked_by_unit_ids = []
 
-    for op in world.allies():
+    # CAMOUFLAGE operators are preferred last for block assignment —
+    # enemies "don't see" them when a visible operator is available.
+    allies_sorted = sorted(
+        world.allies(),
+        key=lambda u: 1 if u.has_status(StatusKind.CAMOUFLAGE) else 0,
+    )
+    for op in allies_sorted:
         if not op.deployed or op.block == 0 or op.position is None:
             continue
         ox, oy = op.position
