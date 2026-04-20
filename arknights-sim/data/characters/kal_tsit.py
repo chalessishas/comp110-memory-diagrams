@@ -2,6 +2,8 @@
 
 Talent "Mon3tr": Kal'tsit is always accompanied by Mon3tr, a powerful summon that
   deploys alongside her at battle start. Mon3tr vanishes if Kal'tsit dies or retreats.
+  DEF range rule: if Mon3tr is outside Kal'tsit's attack range, Mon3tr's DEF drops to 0
+  (applied as a -100% RATIO debuff, toggled per tick).
 
 Mon3tr talent "Non-Damaging Restructuring":
   On Mon3tr's death: deals _MON3TR_TRUE_DAMAGE True damage and applies _MON3TR_STUN_DURATION
@@ -42,6 +44,7 @@ _MON3TR_DEF = 400
 _MON3TR_TRUE_DAMAGE = 700     # true damage per enemy on Mon3tr's death
 _MON3TR_STUN_DURATION = 3.0  # seconds
 _MON3TR_BURST_TAG = "mon3tr_death_burst"
+_MON3TR_OOR_DEF_TAG = "mon3tr_out_of_range_def"  # -100% DEF when outside Kal'tsit range
 
 _S3_TAG = "kal_tsit_s3_all_out"
 _S3_ATK_RATIO = 0.80
@@ -52,6 +55,29 @@ _S3_DURATION = 40.0
 # ---------------------------------------------------------------------------
 # Mon3tr unit + its own talent (death burst)
 # ---------------------------------------------------------------------------
+
+def _mon3tr_on_tick(world, unit: UnitState, dt: float) -> None:
+    """Toggle -100% DEF debuff based on whether Mon3tr is in Kal'tsit's attack range."""
+    carrier_id = getattr(unit, "_kal_tsit_carrier_id", None)
+    if carrier_id is None:
+        return
+    carrier = world.unit_by_id(carrier_id)
+    if carrier is None or not carrier.alive or carrier.position is None or unit.position is None:
+        return
+    cx, cy = carrier.position
+    mx, my = unit.position
+    dx = round(mx) - round(cx)
+    dy = round(my) - round(cy)
+    in_range = (dx, dy) in set(carrier.range_shape.tiles)
+    has_debuff = any(b.source_tag == _MON3TR_OOR_DEF_TAG for b in unit.buffs)
+    if not in_range and not has_debuff:
+        unit.buffs.append(Buff(
+            axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+            value=-1.0, source_tag=_MON3TR_OOR_DEF_TAG,
+        ))
+    elif in_range and has_debuff:
+        unit.buffs = [b for b in unit.buffs if b.source_tag != _MON3TR_OOR_DEF_TAG]
+
 
 def _mon3tr_on_death(world, unit: UnitState) -> None:
     """Mon3tr dies → True damage + Stun to all enemies in surrounding 8 tiles."""
@@ -78,7 +104,7 @@ def _mon3tr_on_death(world, unit: UnitState) -> None:
             )
 
 
-register_talent(_MON3TR_TALENT_TAG, on_death=_mon3tr_on_death)
+register_talent(_MON3TR_TALENT_TAG, on_tick=_mon3tr_on_tick, on_death=_mon3tr_on_death)
 
 
 def _make_mon3tr(position: tuple[float, float]) -> UnitState:
@@ -122,6 +148,7 @@ def _despawn_mon3tr(world, carrier: UnitState) -> None:
 def _kal_tsit_on_battle_start(world, carrier: UnitState) -> None:
     pos = carrier.position if carrier.position is not None else (0.0, 0.0)
     mon3tr = _make_mon3tr(pos)
+    mon3tr._kal_tsit_carrier_id = carrier.unit_id  # needed for DEF range check
     world.add_unit(mon3tr)
     carrier._kal_tsit_mon3tr_id = mon3tr.unit_id
     world.log(f"Kal'tsit: Mon3tr deployed  HP={mon3tr.hp}  pos={pos}")

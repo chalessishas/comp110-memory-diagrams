@@ -331,3 +331,94 @@ def test_no_burst_when_mon3tr_despawned_by_retreat():
     assert e.hp == hp_before, (
         "No True damage burst must fire when Mon3tr is silently despawned via retreat"
     )
+
+# Need the new constant
+from data.characters.kal_tsit import _MON3TR_OOR_DEF_TAG, KAL_TSIT_RANGE
+
+
+# ---------------------------------------------------------------------------
+# Test 11: Mon3tr within Kal'tsit's range → normal DEF
+# ---------------------------------------------------------------------------
+
+def test_mon3tr_in_range_has_normal_def():
+    """Mon3tr inside Kal'tsit's attack range must have full DEF (no debuff)."""
+    w = _world()
+    kal = make_kal_tsit()
+    kal.deployed = True; kal.position = (0.0, 2.0)
+    w.add_unit(kal)
+
+    w.tick()  # battle_start → Mon3tr deployed at (0,2) = inside range tile (0,0)
+
+    mon3tr_id = getattr(kal, "_kal_tsit_mon3tr_id", None)
+    mon3tr = w.unit_by_id(mon3tr_id)
+
+    # Mon3tr starts at Kal'tsit's position (0,0 offset) — within range
+    w.tick()  # on_tick fires for Mon3tr
+
+    assert not any(b.source_tag == _MON3TR_OOR_DEF_TAG for b in mon3tr.buffs), (
+        "Mon3tr inside Kal'tsit range must NOT have the OOR DEF debuff"
+    )
+    assert mon3tr.effective_def == _MON3TR_DEF, (
+        f"Mon3tr in range must have full DEF={_MON3TR_DEF}; got {mon3tr.effective_def}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 12: Mon3tr outside Kal'tsit's range → DEF drops to 0
+# ---------------------------------------------------------------------------
+
+def test_mon3tr_out_of_range_def_drops_to_zero():
+    """Mon3tr placed outside Kal'tsit's range must have DEF = 0."""
+    w = _world()
+    kal = make_kal_tsit()
+    kal.deployed = True; kal.position = (0.0, 2.0)
+    w.add_unit(kal)
+
+    w.tick()  # Mon3tr deployed
+
+    mon3tr_id = getattr(kal, "_kal_tsit_mon3tr_id", None)
+    mon3tr = w.unit_by_id(mon3tr_id)
+
+    # Move Mon3tr far outside Kal'tsit's range (dx=5 is outside range(0,3))
+    mon3tr.position = (5.0, 2.0)
+    w.tick()  # on_tick detects out-of-range → applies -100% DEF
+
+    assert any(b.source_tag == _MON3TR_OOR_DEF_TAG for b in mon3tr.buffs), (
+        "Mon3tr outside range must have the OOR DEF debuff"
+    )
+    assert mon3tr.effective_def == 0, (
+        f"Mon3tr out of range must have DEF=0; got {mon3tr.effective_def}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 13: Mon3tr returns to range → DEF restored
+# ---------------------------------------------------------------------------
+
+def test_mon3tr_def_restored_when_returns_to_range():
+    """When Mon3tr moves back inside Kal'tsit's range, DEF must be fully restored."""
+    w = _world()
+    kal = make_kal_tsit()
+    kal.deployed = True; kal.position = (0.0, 2.0)
+    w.add_unit(kal)
+
+    w.tick()  # Mon3tr deployed
+
+    mon3tr_id = getattr(kal, "_kal_tsit_mon3tr_id", None)
+    mon3tr = w.unit_by_id(mon3tr_id)
+
+    # Move Mon3tr outside range → DEF drops
+    mon3tr.position = (5.0, 2.0)
+    w.tick()
+    assert mon3tr.effective_def == 0, "DEF must be 0 outside range"
+
+    # Move Mon3tr back inside range (dx=1 is in range(0,3), dy=0)
+    mon3tr.position = (1.0, 2.0)
+    w.tick()  # on_tick detects in-range → removes debuff
+
+    assert not any(b.source_tag == _MON3TR_OOR_DEF_TAG for b in mon3tr.buffs), (
+        "OOR DEF debuff must be removed when Mon3tr returns to range"
+    )
+    assert mon3tr.effective_def == _MON3TR_DEF, (
+        f"DEF must be fully restored to {_MON3TR_DEF}; got {mon3tr.effective_def}"
+    )
