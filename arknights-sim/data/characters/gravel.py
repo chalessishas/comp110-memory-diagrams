@@ -107,8 +107,30 @@ def _s1_on_end(world, carrier: UnitState) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
+# --- S2: Concealment — ATK +150% 20s, auto-retreat at skill end ---
+_S2_TAG = "gravel_s2_concealment"
+_S2_ATK_RATIO = 1.50
+_S2_SOURCE_TAG = "gravel_s2_concealment"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_SOURCE_TAG,
+    ))
+    world.log(f"Gravel S2 Concealment — ATK +{_S2_ATK_RATIO:.0%}")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_SOURCE_TAG]
+    world.retreat(carrier)
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 def make_gravel(slot: str = "S1") -> UnitState:
-    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy. S1: ATK+100% 15s."""
+    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy. S1: ATK+100% 15s. S2: ATK+150% 20s, auto-retreat."""
     op = _base_stats()
     op.name = "Gravel"
     op.archetype = RoleArchetype.SPEC_AMBUSHER
@@ -135,6 +157,19 @@ def make_gravel(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S1_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
+        op.skill = SkillComponent(
+            name="Concealment",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
