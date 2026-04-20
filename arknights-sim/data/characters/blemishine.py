@@ -11,6 +11,11 @@ S2 "Iron Aegis": MANUAL.
   ATK +_S2_ATK_RATIO, DEF +_S2_DEF_RATIO for _S2_DURATION seconds.
   sp_cost=45, initial_sp=25, AUTO_TIME, MANUAL trigger.
 
+S3 "Holy Flash": MANUAL.
+  ATK +300%, converts attacks to True damage (bypasses DEF/RES).
+  After each attack, heals all allies within 1 tile for 100% of ATK.
+  sp_cost=35, initial_sp=15, AUTO_TIME, 15s duration.
+
 Base stats from ArknightsGameData (E2 max, trust 100, char_423_blemsh):
   HP=3242, ATK=581, DEF=601, RES=10, atk_interval=1.2s, cost=22, block=3.
 """
@@ -19,7 +24,7 @@ from core.state.unit_state import (
     UnitState, SkillComponent, Buff, RangeShape, TalentComponent,
 )
 from core.types import (
-    AttackType, BuffAxis, BuffStack, Profession,
+    AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
@@ -41,6 +46,13 @@ _S2_DEF_RATIO = 0.60
 _S2_ATK_BUFF_TAG = "blemsh_s2_atk"
 _S2_DEF_BUFF_TAG = "blemsh_s2_def"
 _S2_DURATION = 25.0
+
+_S3_TAG = "blemsh_s3_holy_flash"
+_S3_ATK_RATIO = 3.00        # ATK +300%
+_S3_BUFF_TAG = "blemsh_s3_atk"
+_S3_HEAL_RATIO = 1.00       # heal 100% ATK to allies within 1 tile after each attack
+_S3_DURATION = 15.0
+_S3_ACTIVE: set[str] = set()   # unit_ids with Holy Flash active
 
 
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
@@ -72,7 +84,24 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
         carrier.buffs = [b for b in carrier.buffs if b.source_tag != _TALENT_DEF_TAG]
 
 
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
+def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
+    if attacker.unit_id not in _S3_ACTIVE or attacker.position is None:
+        return
+    heal_amount = int(attacker.effective_atk * _S3_HEAL_RATIO)
+    ax, ay = attacker.position
+    for ally in world.units:
+        if not ally.alive or ally.faction != Faction.ALLY:
+            continue
+        if ally.position is None:
+            continue
+        ox, oy = ally.position
+        if max(abs(ox - ax), abs(oy - ay)) <= 1:   # Chebyshev distance ≤ 1 (8-tile Moore neighborhood)
+            actual = ally.heal(heal_amount)
+            world.global_state.total_healing_done += actual
+            world.log(f"Blemishine Holy Flash heal → {ally.name} +{actual}")
+
+
+register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_attack_hit=_talent_on_attack_hit)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
@@ -94,8 +123,27 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    carrier._blemsh_original_attack_type = carrier.attack_type
+    carrier.attack_type = AttackType.TRUE
+    _S3_ACTIVE.add(carrier.unit_id)
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    carrier.attack_type = getattr(carrier, "_blemsh_original_attack_type", AttackType.PHYSICAL)
+    _S3_ACTIVE.discard(carrier.unit_id)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_blemishine(slot: str = "S2") -> UnitState:
-    """Blemishine E2 max. Trait+Talent: DEF bonus when fully blocking. S2: ATK+DEF burst."""
+    """Blemishine E2 max. Trait+Talent: DEF bonus when fully blocking. S2: ATK+DEF burst. S3: True dmg + heal."""
     op = _base_stats()
     op.name = "Blemishine"
     op.archetype = RoleArchetype.DEF_PROTECTOR
@@ -119,5 +167,17 @@ def make_blemishine(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.MANUAL,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Holy Flash",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op

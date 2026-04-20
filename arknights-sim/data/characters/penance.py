@@ -7,6 +7,8 @@ Talent "Blood Weaving":
     the attacker (counter-strike fires even while skill is active).
 
 S2 "Verdict": ATK +60% for 35s (sp_cost=25, AUTO trigger, requires_target=True).
+S3 "Purgation": ATK +100%, attacks deal Arts damage, counter-strike ratio ×0.65 ATK.
+  Duration 40s, MANUAL. sp_cost=40, initial_sp=20, AUTO_ATTACK SP gain.
 """
 from __future__ import annotations
 
@@ -35,12 +37,19 @@ _S2_TAG = "penance_s2_verdict"
 _S2_ATK_RATIO = 0.60
 _S2_BUFF_TAG = "penance_s2_atk"
 
+_S3_TAG = "penance_s3_purgation"
+_S3_ATK_RATIO = 1.00          # ATK +100%
+_S3_DURATION = 40.0
+_S3_ATK_BUFF_TAG = "penance_s3_atk"
+_S3_COUNTER_RATIO = 0.65      # enhanced counter-strike during S3 (vs 0.35 base)
+
 
 def _on_hit_received(world, carrier: UnitState, attacker, damage: int) -> None:
     """Counter-strike: reflect Arts damage to the attacker."""
     if attacker is None:
         return
-    arts_dmg = attacker.take_arts(int(carrier.effective_atk * _COUNTER_RATIO))
+    ratio = _S3_COUNTER_RATIO if getattr(carrier, "_penance_s3_active", False) else _COUNTER_RATIO
+    arts_dmg = attacker.take_arts(int(carrier.effective_atk * ratio))
     world.global_state.total_damage_dealt += arts_dmg
     world.log(f"Penance counter → {attacker.name}  arts={arts_dmg}")
 
@@ -86,6 +95,26 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._penance_s3_active = True
+    carrier._penance_original_attack_type = carrier.attack_type
+    carrier.attack_type = AttackType.ARTS
+    world.log(f"Penance S3 Purgation — ATK +{_S3_ATK_RATIO:.0%}, Arts mode, counter ×{_S3_COUNTER_RATIO}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._penance_s3_active = False
+    carrier.attack_type = getattr(carrier, "_penance_original_attack_type", AttackType.PHYSICAL)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_penance(slot: str = "S2") -> UnitState:
     """Penance E2 max (overriding generated bena stats). Talent: Blood Weaving. S2: Verdict."""
     op = _base_stats()
@@ -114,6 +143,18 @@ def make_penance(slot: str = "S2") -> UnitState:
             sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.AUTO,
             behavior_tag=_S2_TAG,
+            requires_target=True,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Purgation",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.MANUAL,
+            behavior_tag=_S3_TAG,
             requires_target=True,
         )
     return op

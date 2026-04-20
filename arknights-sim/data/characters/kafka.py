@@ -8,9 +8,14 @@ Talent "Anticipation": each normal attack applies a DOT (electric discharge,
 S2 "Electrocute": ATK +50%, 15s duration.
   sp_cost=20, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
 
+S3 "Iron Judgment": Instant MANUAL burst. Deals 500% ATK arts damage to all
+  enemies in range, then stuns each hit enemy for 2.5s.
+  sp_cost=30, initial_sp=10, AUTO_TIME.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
+from math import floor
 from core.state.unit_state import (
     UnitState, SkillComponent, Buff, RangeShape,
     TalentComponent, StatusEffect,
@@ -37,6 +42,11 @@ _S2_TAG = "kafka_s2_electrocute"
 _S2_ATK_RATIO = 0.50
 _S2_BUFF_TAG = "kafka_s2_atk"
 _S2_DURATION = 15.0
+
+# --- S3: Iron Judgment ---
+_S3_TAG = "kafka_s3_iron_judgment"
+_S3_ATK_MULTIPLIER = 5.00    # 500% ATK arts burst
+_S3_STUN_DURATION = 2.5      # seconds
 
 
 def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
@@ -74,8 +84,36 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    if carrier.position is None:
+        return
+    ox, oy = carrier.position
+    tiles = set(carrier.range_shape.tiles)
+    raw = int(floor(carrier.effective_atk * _S3_ATK_MULTIPLIER))
+    now = world.global_state.elapsed
+    stun_tag = f"{_S3_TAG}_stun"
+    for enemy in world.enemies():
+        if not enemy.alive or not enemy.deployed or enemy.position is None:
+            continue
+        dx = round(enemy.position[0]) - round(ox)
+        dy = round(enemy.position[1]) - round(oy)
+        if (dx, dy) not in tiles:
+            continue
+        dealt = enemy.take_arts(raw)
+        world.global_state.total_damage_dealt += dealt
+        enemy.statuses.append(StatusEffect(
+            kind=StatusKind.STUN,
+            source_tag=stun_tag,
+            expires_at=now + _S3_STUN_DURATION,
+        ))
+        world.log(f"Kafka S3 Iron Judgment → {enemy.name}  dmg={dealt}  stun {_S3_STUN_DURATION}s")
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
 def make_kafka(slot: str = "S2") -> UnitState:
-    """Kafka E2 max. Talent: DOT 100 DPS / 2s on every hit. S2: ATK +50%."""
+    """Kafka E2 max. Talent: DOT 100 DPS / 2s on every hit. S2: ATK +50%. S3: 500% AoE Arts + Stun."""
     op = _base_stats()
     op.name = "Kafka"
     op.archetype = RoleArchetype.SPEC_EXECUTOR
@@ -98,4 +136,17 @@ def make_kafka(slot: str = "S2") -> UnitState:
             requires_target=True,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Iron Judgment",
+            slot="S3",
+            sp_cost=30,
+            initial_sp=10,
+            duration=0.0,   # instant — fires once
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
