@@ -1,7 +1,7 @@
 """Combat — 攻击冷却倒数 + 命中目标 + 伤害结算."""
 from __future__ import annotations
-from ..types import AttackType, Faction, RoleArchetype
-from ..state.unit_state import SPGainMode
+from ..types import AttackType, BuffAxis, BuffStack, ElementType, Faction, RoleArchetype
+from ..state.unit_state import Buff, SPGainMode
 from .talent_registry import fire_on_attack_hit, fire_on_hit_received, fire_on_kill
 
 _BESIEGER_BLOCKED_MULT = 1.5   # Besieger Sniper trait: 1.5× ATK vs blocked enemies
@@ -49,10 +49,19 @@ def combat_system(world, dt: float) -> None:
         elif u.attack_type == AttackType.HEAL:
             dealt = target.heal(raw)
             world.global_state.total_healing_done += dealt
+        elif u.attack_type == AttackType.ELEMENTAL:
+            # Elemental attacks charge the target's elemental bar; no direct HP damage
+            dealt = 0
+            if u.element_type is not None:
+                now = world.global_state.elapsed
+                proc = target.accumulate_elemental(float(raw), u.element_type, now)
+                if proc:
+                    _apply_elemental_proc(world, target, u.element_type)
+                    dealt = raw  # record proc burst as "dealt" for logging
         else:
             dealt = target.take_true(raw)
 
-        if u.attack_type != AttackType.HEAL:
+        if u.attack_type not in (AttackType.HEAL, AttackType.ELEMENTAL):
             world.global_state.total_damage_dealt += dealt
 
         world.log(
@@ -118,6 +127,45 @@ def combat_system(world, dt: float) -> None:
                 fire_on_kill(world, u, target)
         if u.talents:
             fire_on_attack_hit(world, u, target, dealt)
+
+
+_NECROSIS_PROC_HP_RATIO = 0.15   # Arts damage = 15% max HP
+_NECROSIS_PROC_MIN = 600         # minimum proc damage
+_EROSION_PROC_PHYS = 800         # Physical true damage on proc
+_EROSION_DEF_DEBUFF = 100        # permanent flat DEF reduction
+_COMBUSTION_PROC_ARTS = 1200     # Arts damage on proc
+_COMBUSTION_RES_DEBUFF = 20.0    # permanent RES% reduction
+
+
+def _apply_elemental_proc(world, target, element: ElementType) -> None:
+    """Execute burst effects when an elemental bar fills to 1000."""
+    if element == ElementType.NECROSIS:
+        dmg = max(_NECROSIS_PROC_MIN, int(target.max_hp * _NECROSIS_PROC_HP_RATIO))
+        dealt = target.take_arts(dmg)
+        world.global_state.total_damage_dealt += dealt
+        world.log(f"[NECROSIS PROC] {target.name}  arts_dmg={dealt}")
+    elif element == ElementType.EROSION:
+        dealt = target.take_true(_EROSION_PROC_PHYS)
+        world.global_state.total_damage_dealt += dealt
+        # Permanent DEF reduction (expires_at = infinity)
+        target.buffs.append(Buff(
+            axis=BuffAxis.DEF, stack=BuffStack.FLAT,
+            value=-_EROSION_DEF_DEBUFF,
+            source_tag=f"erosion_proc_{id(target)}",
+            expires_at=float("inf"),
+        ))
+        world.log(f"[EROSION PROC] {target.name}  true_dmg={dealt}  def-{_EROSION_DEF_DEBUFF}")
+    elif element == ElementType.COMBUSTION:
+        dealt = target.take_arts(_COMBUSTION_PROC_ARTS)
+        world.global_state.total_damage_dealt += dealt
+        # Permanent RES reduction (expires_at = infinity)
+        target.buffs.append(Buff(
+            axis=BuffAxis.RES, stack=BuffStack.FLAT,
+            value=-_COMBUSTION_RES_DEBUFF,
+            source_tag=f"combustion_proc_{id(target)}",
+            expires_at=float("inf"),
+        ))
+        world.log(f"[COMBUSTION PROC] {target.name}  arts_dmg={dealt}  res-{_COMBUSTION_RES_DEBUFF}")
 
 
 def _apply_multi_heal(world, u, targets) -> None:

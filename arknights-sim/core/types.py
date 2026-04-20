@@ -24,6 +24,11 @@ class ElementType(str, Enum):
     COMBUSTION = "combustion"    # 灼燃
 
 
+# Elemental Injury system constants (Terra Wiki)
+ELEMENTAL_PROC_THRESHOLD: float = 1000.0
+ELEMENTAL_IMMUNITY_DURATION: float = 10.0   # seconds of immunity after a proc
+
+
 class StatusKind(str, Enum):
     """可挂在 Unit 上的状态效果种类。
 

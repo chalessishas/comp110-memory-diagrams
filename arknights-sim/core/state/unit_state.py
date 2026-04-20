@@ -9,8 +9,9 @@ from itertools import count
 from typing import Dict, List, Optional, Tuple
 
 from ..types import (
-    AttackType, BuffAxis, BuffStack, Faction, Mobility, Profession,
+    AttackType, BuffAxis, BuffStack, ElementType, Faction, Mobility, Profession,
     RoleArchetype, SPGainMode, SkillTrigger, StatusKind,
+    ELEMENTAL_PROC_THRESHOLD, ELEMENTAL_IMMUNITY_DURATION,
 )
 
 
@@ -156,6 +157,9 @@ class UnitState:
     chain_damage_ratio: float = 1.0  # 连锁伤害比率 (相对于主目标伤害)
     push_distance: int = 0      # 击退距离 (tiles)；>0 时每次攻击推退目标 N 格 (SPEC_PUSHER)
     heal_targets: int = 1       # MEDIC_MULTI: 每次攻击同时治疗的目标数（默认 1）
+    element_type: Optional[ElementType] = None  # 干员元素类型（ELEMENTAL 攻击时填充敌人元素条）
+    elemental_bars: Dict[str, float] = field(default_factory=dict)        # element_name → [0, 1000]
+    elemental_immune_until: Dict[str, float] = field(default_factory=dict)  # element_name → time
 
     def __post_init__(self) -> None:
         if self.hp == 0:
@@ -313,6 +317,18 @@ class UnitState:
 
     def take_true(self, raw_atk: int) -> int:
         return self.take_damage(raw_atk)
+
+    def accumulate_elemental(self, damage: float, element: ElementType, now: float) -> bool:
+        """Add elemental damage to bar. Returns True if proc threshold reached (bar resets)."""
+        key = element.value
+        if now < self.elemental_immune_until.get(key, 0.0):
+            return False  # immunity window active
+        self.elemental_bars[key] = self.elemental_bars.get(key, 0.0) + damage
+        if self.elemental_bars[key] >= ELEMENTAL_PROC_THRESHOLD:
+            self.elemental_bars[key] = 0.0
+            self.elemental_immune_until[key] = now + ELEMENTAL_IMMUNITY_DURATION
+            return True
+        return False
 
     def heal(self, amount: int) -> int:
         healed = min(int(amount), self.max_hp - self.hp)
