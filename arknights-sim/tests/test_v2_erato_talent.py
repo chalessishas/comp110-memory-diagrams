@@ -1,11 +1,11 @@
-"""Erato talent "Precision Strike" — 10% crit chance set on deployment.
+"""Erato talent "Song of Dreams" — 50% DEF ignore on sleeping targets, don't wake.
 
 Tests cover:
-  - Talent configured correctly
-  - Default crit_chance is 0 before deployment
-  - crit_chance is set to 0.10 after add_unit
-  - slot=None still applies talent
-  - crit_chance persists after several ticks
+  - Talent configured correctly (Song of Dreams name + tag)
+  - No crit_chance set (crit_chance stays 0.0 after deployment)
+  - No DEF-ignore bonus when target is NOT sleeping
+  - DEF-ignore bonus (50% of DEF) when target IS sleeping
+  - Target stays asleep after Erato's hit (don't wake)
 """
 from __future__ import annotations
 import sys, os
@@ -13,11 +13,14 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.world import World
 from core.state.tile_state import TileGrid, TileState
-from core.types import TileType, TICK_RATE
+from core.state.unit_state import StatusEffect
+from core.types import TileType, TICK_RATE, StatusKind
 from core.systems import register_default_systems
+from core.systems.talent_registry import fire_on_pre_attack_hit, fire_on_attack_hit
 from data.characters.erato import (
-    make_erato, _TALENT_TAG, _CRIT_CHANCE,
+    make_erato, _TALENT_TAG, _DEF_IGNORE_RATIO,
 )
+from data.enemies import make_originium_slug
 
 
 def _world() -> World:
@@ -36,6 +39,10 @@ def _ticks(w: World, seconds: float) -> None:
         w.tick()
 
 
+def _slug() -> object:
+    return make_originium_slug(path=[(2, 1)] * 20)
+
+
 # ---------------------------------------------------------------------------
 # Test 1: Talent configured correctly
 # ---------------------------------------------------------------------------
@@ -43,61 +50,110 @@ def _ticks(w: World, seconds: float) -> None:
 def test_erato_talent_configured():
     e = make_erato(slot="S1")
     assert len(e.talents) == 1
-    assert e.talents[0].name == "Precision Strike"
+    assert e.talents[0].name == "Song of Dreams"
     assert e.talents[0].behavior_tag == _TALENT_TAG
 
 
 # ---------------------------------------------------------------------------
-# Test 2: Default crit_chance is 0 before deployment
+# Test 2: crit_chance stays 0.0 after deployment
 # ---------------------------------------------------------------------------
 
-def test_erato_default_crit_chance():
+def test_erato_no_crit_chance():
+    w = _world()
     e = make_erato(slot="S1")
+    e.deployed = True; e.position = (0.0, 1.0)
+    w.add_unit(e)
     assert e.crit_chance == 0.0, (
-        f"crit_chance must be 0 before deployment; got {e.crit_chance}"
+        f"Song of Dreams must not set crit_chance; got {e.crit_chance}"
     )
 
 
 # ---------------------------------------------------------------------------
-# Test 3: crit_chance set to 0.10 after add_unit
+# Test 3: No DEF-ignore bonus when target is NOT sleeping
 # ---------------------------------------------------------------------------
 
-def test_precision_strike_sets_crit_chance():
+def test_song_no_bonus_when_not_sleeping():
     w = _world()
     e = make_erato(slot="S1")
     e.deployed = True; e.position = (0.0, 1.0)
     w.add_unit(e)
 
-    assert e.crit_chance == _CRIT_CHANCE, (
-        f"Precision Strike must set crit_chance to {_CRIT_CHANCE}; got {e.crit_chance}"
+    enemy = _slug()
+    enemy.deployed = True; enemy.position = (2.0, 1.0); enemy.move_speed = 0.0
+    w.add_unit(enemy)
+
+    assert not any(s.kind == StatusKind.SLEEP for s in enemy.statuses)
+
+    dmg_before = w.global_state.total_damage_dealt
+    fire_on_pre_attack_hit(w, e, enemy)
+    phys = enemy.take_physical(e.effective_atk)
+    w.global_state.total_damage_dealt += phys
+    fire_on_attack_hit(w, e, enemy, phys)
+    dmg_after = w.global_state.total_damage_dealt
+
+    bonus_dealt = dmg_after - dmg_before - phys
+    assert bonus_dealt == 0, f"No DEF-ignore bonus expected when not sleeping; got {bonus_dealt}"
+
+
+# ---------------------------------------------------------------------------
+# Test 4: DEF-ignore bonus (50% of DEF) when target IS sleeping
+# ---------------------------------------------------------------------------
+
+def test_song_def_ignore_when_sleeping():
+    w = _world()
+    e = make_erato(slot="S1")
+    e.deployed = True; e.position = (0.0, 1.0)
+    w.add_unit(e)
+
+    enemy = _slug()
+    enemy.deployed = True; enemy.position = (2.0, 1.0); enemy.move_speed = 0.0
+    w.add_unit(enemy)
+
+    # Apply SLEEP to enemy
+    enemy.statuses.append(StatusEffect(
+        kind=StatusKind.SLEEP,
+        source_tag="test_sleep",
+        expires_at=w.global_state.elapsed + 10.0,
+    ))
+    enemy_def = enemy.effective_def
+
+    dmg_before = w.global_state.total_damage_dealt
+    fire_on_pre_attack_hit(w, e, enemy)
+    phys = enemy.take_physical(e.effective_atk)
+    w.global_state.total_damage_dealt += phys
+    fire_on_attack_hit(w, e, enemy, phys)
+    dmg_after = w.global_state.total_damage_dealt
+
+    bonus_dealt = dmg_after - dmg_before - phys
+    expected_bonus = int(enemy_def * _DEF_IGNORE_RATIO)
+    assert abs(bonus_dealt - expected_bonus) <= 1, (
+        f"DEF-ignore bonus must be ≈{expected_bonus}; got {bonus_dealt}"
     )
 
 
 # ---------------------------------------------------------------------------
-# Test 4: slot=None still applies talent
+# Test 5: Target stays asleep after Erato's hit (don't wake)
 # ---------------------------------------------------------------------------
 
-def test_precision_strike_no_skill_slot():
+def test_song_target_stays_asleep():
     w = _world()
-    e = make_erato(slot=None)
+    e = make_erato(slot="S1")
     e.deployed = True; e.position = (0.0, 1.0)
     w.add_unit(e)
 
-    assert e.crit_chance == _CRIT_CHANCE
+    enemy = _slug()
+    enemy.deployed = True; enemy.position = (2.0, 1.0); enemy.move_speed = 0.0
+    w.add_unit(enemy)
 
+    enemy.statuses.append(StatusEffect(
+        kind=StatusKind.SLEEP,
+        source_tag="test_sleep",
+        expires_at=w.global_state.elapsed + 10.0,
+    ))
 
-# ---------------------------------------------------------------------------
-# Test 5: crit_chance persists after ticks
-# ---------------------------------------------------------------------------
+    fire_on_pre_attack_hit(w, e, enemy)
+    phys = enemy.take_physical(e.effective_atk)
+    fire_on_attack_hit(w, e, enemy, phys)
 
-def test_precision_strike_persists():
-    w = _world()
-    e = make_erato(slot=None)
-    e.deployed = True; e.position = (0.0, 1.0)
-    w.add_unit(e)
-
-    _ticks(w, 2.0)
-
-    assert e.crit_chance == _CRIT_CHANCE, (
-        f"crit_chance must persist after ticks; got {e.crit_chance}"
-    )
+    still_asleep = any(s.kind == StatusKind.SLEEP for s in enemy.statuses)
+    assert still_asleep, "Song of Dreams must keep target asleep after hit"

@@ -2,7 +2,7 @@
 from __future__ import annotations
 from ..types import AttackType, BuffAxis, BuffStack, ElementType, Faction, RoleArchetype
 from ..state.unit_state import Buff, SPGainMode
-from .talent_registry import fire_on_attack_hit, fire_on_hit_received, fire_on_kill
+from .talent_registry import fire_on_attack_hit, fire_on_hit_received, fire_on_kill, fire_on_pre_attack_hit
 
 _BESIEGER_BLOCKED_MULT = 1.5   # Besieger Sniper trait: 1.5× ATK vs blocked enemies
 
@@ -42,6 +42,10 @@ def combat_system(world, dt: float) -> None:
         if u.crit_chance > 0.0 and u.attack_type != AttackType.HEAL:
             if world.rng.random() < u.crit_chance:
                 raw = int(raw * u.crit_multiplier)
+        # Pre-attack hook — fires before damage so talents can inspect target state
+        if u.talents and u.attack_type not in (AttackType.HEAL, AttackType.ELEMENTAL):
+            fire_on_pre_attack_hit(world, u, target)
+
         if u.attack_type == AttackType.PHYSICAL:
             dealt = target.take_physical(raw)
         elif u.attack_type == AttackType.ARTS:

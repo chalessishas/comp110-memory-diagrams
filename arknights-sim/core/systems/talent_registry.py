@@ -51,11 +51,27 @@ _REGISTRY: Dict[str, Tuple] = {}
 # value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death, on_retreat)
 
 _ENEMY_KILLED_WATCHERS: Dict[str, _Fn] = {}
+_PRE_ATTACK_REGISTRY: Dict[str, _Fn] = {}
 
 
 def register_enemy_killed_watcher(tag: str, fn: _Fn) -> None:
     """Register a callback for 'any enemy in my range dies' events."""
     _ENEMY_KILLED_WATCHERS[tag] = fn
+
+
+def register_pre_attack_hook(tag: str, fn: _Fn) -> None:
+    """Register a pre-attack callback: fires before damage is dealt to target.
+    Signature: fn(world, attacker, target) -> None
+    Use to inspect target state (e.g. SLEEP) before take_physical clears it.
+    """
+    _PRE_ATTACK_REGISTRY[tag] = fn
+
+
+def fire_on_pre_attack_hit(world, attacker, target) -> None:
+    for tc in getattr(attacker, "talents", []):
+        fn = _PRE_ATTACK_REGISTRY.get(tc.behavior_tag)
+        if fn is not None:
+            fn(world, attacker, target)
 
 
 def fire_on_enemy_killed(world, killed_unit) -> None:

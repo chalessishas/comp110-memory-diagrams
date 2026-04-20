@@ -2,6 +2,10 @@
 
 Class trait: Prioritizes attacking heaviest enemy; deals 1.5× ATK to blocked enemies.
 
+Talent "Song of Dreams" (E2): Attacks do not wake sleeping enemies.
+  When hitting a SLEEP target: ignores 50% of target's DEF (bonus true damage).
+  Target remains asleep after the hit (SLEEP status re-applied).
+
 S1 "Strafing Fire": ATK +100% for 20s.
   sp_cost=30, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
 
@@ -9,23 +13,41 @@ Base stats: E2 max, trust 100 (generated/erato.py).
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
-from core.types import AttackType, BuffAxis, BuffStack, Profession, RoleArchetype, SPGainMode, SkillTrigger
+from core.types import AttackType, BuffAxis, BuffStack, Profession, RoleArchetype, SPGainMode, SkillTrigger, StatusKind
 from core.systems.skill_system import register_skill
-from core.systems.talent_registry import register_talent
+from core.systems.talent_registry import register_talent, register_pre_attack_hook
 from data.characters.generated.erato import make_erato as _base_stats
 
 
-# --- Talent: Precision Strike — 10% crit chance on attacks ---
-_TALENT_TAG = "erato_precision_strike"
-_CRIT_CHANCE = 0.10
+# --- Talent: Song of Dreams — 50% DEF ignore on sleeping targets, don't wake ---
+_TALENT_TAG = "erato_song_of_dreams"
+_DEF_IGNORE_RATIO = 0.50
 
 
-def _precision_on_battle_start(world, carrier: UnitState) -> None:
-    carrier.crit_chance = _CRIT_CHANCE
-    world.log(f"Erato Precision Strike — crit_chance = {_CRIT_CHANCE:.0%}")
+def _song_pre_attack(world, attacker: UnitState, target) -> None:
+    sleep_statuses = [s for s in target.statuses if s.kind == StatusKind.SLEEP]
+    attacker._erato_sleep_snapshot = sleep_statuses  # empty list = not sleeping
 
 
-register_talent(_TALENT_TAG, on_battle_start=_precision_on_battle_start)
+def _song_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
+    saved = getattr(attacker, "_erato_sleep_snapshot", [])
+    if not saved:
+        return
+    # 50% DEF ignore as bonus true damage
+    bonus = int(target.effective_def * _DEF_IGNORE_RATIO)
+    if bonus > 0:
+        extra = target.take_true(bonus)
+        world.global_state.total_damage_dealt += extra
+        world.log(f"Erato Song of Dreams DEF-ignore → {target.name} +{extra}")
+    # Don't wake: re-apply the SLEEP status (take_physical cleared it)
+    if target.alive:
+        target.statuses.extend(saved)
+        world.log(f"Erato Song of Dreams — {target.name} stays asleep")
+    attacker._erato_sleep_snapshot = []
+
+
+register_pre_attack_hook(_TALENT_TAG, _song_pre_attack)
+register_talent(_TALENT_TAG, on_attack_hit=_song_on_attack_hit)
 
 # Standard Besieger Sniper range: 3 forward + flanking tiles
 BESIEGER_RANGE_5STAR = RangeShape(tiles=(
@@ -85,7 +107,7 @@ def make_erato(slot: str = "S1") -> UnitState:
     op.range_shape = BESIEGER_RANGE_5STAR
     op.block = 1
     op.cost = 23
-    op.talents = [TalentComponent(name="Precision Strike", behavior_tag=_TALENT_TAG)]
+    op.talents = [TalentComponent(name="Song of Dreams", behavior_tag=_TALENT_TAG)]
 
     if slot == "S2":
         op.skill = SkillComponent(
