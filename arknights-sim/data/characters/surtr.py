@@ -47,6 +47,28 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
 register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
 
 
+# --- S2: Radiant Phoenix ---
+_S2_TAG = "surtr_s2_radiant_phoenix"
+_S2_ATK_RATIO = 0.70     # ATK +70%
+_S2_BUFF_TAG = "surtr_s2_atk_buff"
+_S2_DURATION = 20.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Surtr S2 Radiant Phoenix — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # --- S3: Tyrant of the Undying Flames ---
 _S3_TAG = "surtr_s3_tyrant"
 _S3_DURATION = 40.0
@@ -109,7 +131,20 @@ def make_surtr(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Dainsleif", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Radiant Phoenix",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Tyrant of the Undying Flames",
             slot="S3",
