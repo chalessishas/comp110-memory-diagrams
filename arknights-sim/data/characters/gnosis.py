@@ -71,10 +71,10 @@ def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> No
 
     # --- COLD → FREEZE chain (check kind, not source_tag — cross-operator) ---
     if target.has_status(StatusKind.COLD):
-        # Upgrade: remove COLD and any prior FREEZE, apply fresh FREEZE
+        # Upgrade: remove ALL COLD (any source) and any prior FREEZE, apply fresh FREEZE
         target.statuses = [
             s for s in target.statuses
-            if s.source_tag not in (_COLD_TAG, _FREEZE_TAG)
+            if s.kind != StatusKind.COLD and s.source_tag != _FREEZE_TAG
         ]
         target.statuses.append(StatusEffect(
             kind=StatusKind.FREEZE,

@@ -88,6 +88,11 @@ def combat_system(world, dt: float) -> None:
         if u.chain_count > 0 and u.attack_type != AttackType.HEAL and target.position is not None:
             _apply_chain(world, u, target, raw)
 
+        # Push-back — SPEC_PUSHER trait: retreat target along its path
+        if u.push_distance > 0 and target.alive:
+            _apply_push(target, u.push_distance)
+            world.log(f"{u.name} pushes {target.name} back {u.push_distance} tiles")
+
         u.atk_cd = u.current_atk_interval
 
         # SP on attack
@@ -173,3 +178,14 @@ def _apply_chain(world, attacker, primary_target, primary_raw: int) -> None:
             fire_on_kill(world, attacker, next_target)
         # Update chain origin to new target's position
         tx, ty = next_target.position
+
+
+def _apply_push(target, distance: int) -> None:
+    """Push target backward along its path by `distance` tiles (reduce path_progress)."""
+    new_progress = max(0.0, target.path_progress - float(distance))
+    target.path_progress = new_progress
+    # Snap position to the new path tile so blocking stays consistent
+    if target.path:
+        tile_idx = min(int(new_progress), len(target.path) - 1)
+        tx, ty = target.path[tile_idx]
+        target.position = (float(tx), float(ty))
