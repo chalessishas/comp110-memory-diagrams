@@ -9,13 +9,31 @@ S3 "Thunderstruck Mane": ATK +50%, chain count increases to 5 (6 total), 20s.
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
     AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.leizi import make_leizi as _base_stats
+
+
+# --- Talent: Voltage ---
+_VOLTAGE_TAG = "leizi_voltage"
+_SP_PER_CHAIN = 10        # every 10 SP gives +1 extra chain
+_MAX_BONUS_CHAINS = 3     # max +3 chains beyond base (base=2 → max=5)
+
+
+def _voltage_on_tick(world, carrier: UnitState, dt: float) -> None:
+    sk = carrier.skill
+    if sk is None or sk.active_remaining > 0:
+        return   # S3 active — S3 manages chain_count itself
+    bonus = min(int(sk.sp / _SP_PER_CHAIN), _MAX_BONUS_CHAINS)
+    carrier.chain_count = _BASE_CHAIN_COUNT + bonus
+
+
+register_talent(_VOLTAGE_TAG, on_tick=_voltage_on_tick)
 
 
 CHAIN_CASTER_RANGE = RangeShape(tiles=tuple(
@@ -60,6 +78,7 @@ def make_leizi(slot: str = "S3") -> UnitState:
     op.cost = 32
     op.chain_count = _BASE_CHAIN_COUNT
     op.chain_damage_ratio = 1.0
+    op.talents = [TalentComponent(name="Voltage", behavior_tag=_VOLTAGE_TAG)]
 
     if slot == "S3":
         op.skill = SkillComponent(

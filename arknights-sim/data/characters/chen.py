@@ -6,13 +6,54 @@ sp_cost=20, initial_sp=10.
 """
 from __future__ import annotations
 from math import floor
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     AttackType, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill, manual_trigger
+from core.systems.talent_registry import register_talent
 from data.characters.generated.chen import make_chen as _base_stats
+
+
+# --- Talent: Swordsman ---
+_TALENT_TAG = "chen_swordsman"
+_SWORD_SPAWNED_ATTR = "_chen_sword_spawned"
+_SWORD_NAME = "Heartless Act"
+_SWORD_HP = 1500
+_SWORD_ATK = 600
+_SWORD_DEF = 200
+
+
+def _make_sword(position: tuple) -> UnitState:
+    t = UnitState(
+        name=_SWORD_NAME,
+        faction=Faction.ALLY,
+        max_hp=_SWORD_HP, hp=_SWORD_HP,
+        atk=_SWORD_ATK, defence=_SWORD_DEF, res=0.0,
+        atk_interval=1.3,
+        attack_range_melee=True,
+        block=2,
+        profession=Profession.GUARD,
+        attack_type=AttackType.PHYSICAL,
+    )
+    t.range_shape = RangeShape(tiles=((0, 0), (1, 0)))
+    t.deployed = True
+    t.position = position
+    return t
+
+
+def _swordsman_on_kill(world, killer: UnitState, victim) -> None:
+    if getattr(killer, _SWORD_SPAWNED_ATTR, False):
+        return   # only first kill triggers
+    if killer.position is None:
+        return
+    setattr(killer, _SWORD_SPAWNED_ATTR, True)
+    world.add_unit(_make_sword(killer.position))
+    world.log(f"Ch'en Swordsman — Heartless Act summoned at {killer.position}")
+
+
+register_talent(_TALENT_TAG, on_kill=_swordsman_on_kill)
 
 
 LORD_RANGE = RangeShape(tiles=((0, 0), (1, 0), (2, 0)))
@@ -52,6 +93,7 @@ def make_chen(slot: str = "S2") -> UnitState:
     op.archetype = RoleArchetype.GUARD_LORD
     op.range_shape = LORD_RANGE
     op.cost = 23
+    op.talents = [TalentComponent(name="Swordsman", behavior_tag=_TALENT_TAG)]
     if slot == "S2":
         op.skill = SkillComponent(
             name="Sheathed Strike",
