@@ -149,6 +149,7 @@ class UnitState:
     # 状态效果 + Buff
     buffs: List[Buff] = field(default_factory=list)
     statuses: List[StatusEffect] = field(default_factory=list)
+    undying_charges: int = 0    # 防死次数 (Specter/Chen 等)；>0 时致命伤改为留 1 HP
 
     def __post_init__(self) -> None:
         if self.hp == 0:
@@ -249,6 +250,8 @@ class UnitState:
         return min(total, 0.99)  # cap so at least 1% damage goes through
 
     def take_damage(self, amount: int) -> int:
+        if self.has_status(StatusKind.DAMAGE_IMMUNE):
+            return 0
         dr = self.talent_damage_reduction()
         actual = max(1, int(amount * (1.0 - dr)))
         # SHIELD absorbs damage before HP (largest shield pool used first)
@@ -263,7 +266,13 @@ class UnitState:
                 self.statuses = [x for x in self.statuses if x is not s]
             if actual == 0:
                 return 0
-        self.hp = max(0, self.hp - actual)
+        new_hp = self.hp - actual
+        if new_hp <= 0 and self.undying_charges > 0:
+            self.undying_charges -= 1
+            self.hp = 1
+            self._undying_just_triggered = True
+            return actual
+        self.hp = max(0, new_hp)
         if self.hp == 0:
             self.alive = False
         return actual
