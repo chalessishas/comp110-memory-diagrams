@@ -1,4 +1,9 @@
-"""SilverAsh S3 Truesilver Slash — 3-hit burst mechanics."""
+"""SilverAsh S3 Truesilver Slash — 3-hit burst via EventQueue (0.15s intervals).
+
+Strike 1 fires in the same tick as S3 activation (fire_at == elapsed).
+Strikes 2 and 3 fire at +0.15s and +0.30s respectively, requiring
+int(TICK_RATE * _STRIKE_COUNT * _STRIKE_INTERVAL) + 1 additional ticks.
+"""
 from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -9,8 +14,14 @@ from core.world import World
 from core.state.tile_state import TileGrid, TileState
 from core.types import TileType, TICK_RATE
 from core.systems import register_default_systems
-from data.characters.silverash import make_silverash
+from data.characters.silverash import make_silverash, _STRIKE_COUNT, _STRIKE_INTERVAL
 from data.enemies import make_originium_slug
+
+
+def _run_all_strikes(w: World) -> None:
+    """Advance world far enough for all 3 S3 strikes to fire after activation."""
+    for _ in range(int(TICK_RATE * _STRIKE_COUNT * _STRIKE_INTERVAL) + 1):
+        w.tick()
 
 
 def _world() -> World:
@@ -23,16 +34,19 @@ def _world() -> World:
     return w
 
 
-def _heavy_slug(path) -> object:
-    """Slug with high HP so it survives 3 hits for assertion."""
-    slug = make_originium_slug(path=path)
+def _heavy_slug(path=None) -> object:
+    """Slug with high HP and a looping path so it stays alive across multiple ticks."""
+    # Repeat a single-tile path 20× so the GOAL system doesn't kill it before strikes fire.
+    # With DT=0.1 and TICK_RATE=10, 20 waypoints keeps the slug alive for ~2s.
+    effective_path = path if path is not None else [(1, 1)] * 20
+    slug = make_originium_slug(path=effective_path)
     slug.max_hp = 99_999
     slug.hp = 99_999
     return slug
 
 
 def test_s3_burst_hits_3_times_on_activation():
-    """S3 activation fires 3 rapid strikes immediately (using boosted ATK)."""
+    """S3 activation schedules 3 strikes via EventQueue; all 3 must fire within ~0.45s."""
     w = _world()
     sa = make_silverash("S3")
     sa.deployed = True
@@ -41,11 +55,12 @@ def test_s3_burst_hits_3_times_on_activation():
     sa.skill.sp = float(sa.skill.sp_cost)    # S3 fires on first tick
     w.add_unit(sa)
 
-    slug = _heavy_slug(path=[(1, 1)])        # dx=1, dy=0 — in GUARD_LORD_RANGE
+    slug = _heavy_slug()                     # dx=1, dy=0 — in GUARD_LORD_RANGE
     slug.deployed = True
     w.add_unit(slug)
 
-    w.tick()
+    w.tick()          # S3 activates; strike 1 fires (fire_at == elapsed)
+    _run_all_strikes(w)  # advance until strikes 2 and 3 have fired
 
     # Expected per-hit damage: effective_atk (boosted) vs def=0
     boosted_atk = int(floor(sa.atk * (1 + 1.80)))
@@ -65,15 +80,16 @@ def test_s3_burst_uses_boosted_atk():
     sa.skill.sp = float(sa.skill.sp_cost)
     w.add_unit(sa)
 
-    slug = _heavy_slug(path=[(1, 1)])
+    slug = _heavy_slug()
     slug.deployed = True
     w.add_unit(slug)
 
-    w.tick()
+    base_atk = sa.atk
+    w.tick()           # S3 activates; strike 1 fires
+    _run_all_strikes(w)  # strikes 2 and 3 fire
 
     # If base ATK were used (no buff): 617 per hit × 3 hits
     # With +180% buff: floor(617 × 2.80) = 1727 per hit × 3 hits
-    base_atk = sa.atk
     per_hit_base = max(int(base_atk * 0.05), base_atk - slug.defence)
     per_hit_boosted = max(int(floor(base_atk * 2.80) * 0.05), int(floor(base_atk * 2.80)) - slug.defence)
 
@@ -91,15 +107,16 @@ def test_s3_burst_only_hits_enemies_in_range():
     sa.skill.sp = float(sa.skill.sp_cost)
     w.add_unit(sa)
 
-    slug_in = _heavy_slug(path=[(1, 1)])    # dx=1 — in range
+    slug_in = _heavy_slug()                       # dx=1 — in range (default pos (1,1))
     slug_in.deployed = True
     w.add_unit(slug_in)
 
-    slug_out = _heavy_slug(path=[(3, 1)])   # dx=3 — NOT in GUARD_LORD_RANGE {(0,0),(1,0)}
+    slug_out = _heavy_slug(path=[(3, 1)] * 20)   # dx=3 — NOT in GUARD_LORD_RANGE {(0,0),(1,0)}
     slug_out.deployed = True
     w.add_unit(slug_out)
 
-    w.tick()
+    w.tick()           # S3 activates; strike 1 fires
+    _run_all_strikes(w)  # strikes 2 and 3 fire
 
     assert slug_in.hp < slug_in.max_hp, "In-range slug should take damage"
     assert slug_out.hp == slug_out.max_hp, "Out-of-range slug must not be hit"

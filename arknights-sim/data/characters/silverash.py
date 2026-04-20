@@ -28,6 +28,31 @@ GUARD_LORD_RANGE = RangeShape(tiles=(
 _S3_TAG = "silverash_s3_truesilver_slash"
 _S3_ATK_RATIO = 1.80   # +180% at rank III
 _S3_BUFF_TAG = "silverash_s3_atk_buff"
+_STRIKE_COUNT = 3
+_STRIKE_INTERVAL = 0.15   # seconds between each of the 3 strikes (~game animation timing)
+
+
+def _make_strike_handler(carrier: UnitState):
+    """Returns an EventQueue handler that sweeps all enemies in carrier's range."""
+    def _handler(world, event) -> None:
+        if not carrier.alive or not carrier.deployed:
+            return
+        if carrier.position is None:
+            return
+        ox, oy = carrier.position
+        tiles = set(carrier.range_shape.tiles) | set(carrier.range_shape.extended_tiles)
+        strike_num = event.payload.get("strike_num", "?")
+        for e in world.enemies():
+            if not e.alive or e.position is None:
+                continue
+            if (round(e.position[0]) - round(ox), round(e.position[1]) - round(oy)) in tiles:
+                dmg = e.take_physical(carrier.effective_atk)
+                world.global_state.total_damage_dealt += dmg
+                world.log(
+                    f"SilverAsh S3 strike {strike_num}/{_STRIKE_COUNT} → {e.name}  "
+                    f"dmg={dmg}  ({e.hp}/{e.max_hp})"
+                )
+    return _handler
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
@@ -35,27 +60,18 @@ def _s3_on_start(world, carrier: UnitState) -> None:
         axis=BuffAxis.ATK, stack=BuffStack.RATIO,
         value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
     ))
-    # Truesilver Slash: 3 rapid strikes to all enemies in range (uses boosted ATK)
-    if carrier.position is None:
-        return
-    ox, oy = carrier.position
-    shape = carrier.range_shape
-    tiles = set(shape.tiles) | set(shape.extended_tiles)
-    targets = [
-        e for e in world.enemies()
-        if e.alive and e.position is not None
-        and (round(e.position[0]) - round(ox), round(e.position[1]) - round(oy)) in tiles
-    ]
-    for strike in range(3):
-        for t in targets:
-            if not t.alive:
-                continue
-            dmg = t.take_physical(carrier.effective_atk)
-            world.global_state.total_damage_dealt += dmg
-            world.log(
-                f"SilverAsh S3 strike {strike + 1}/3 → {t.name}  "
-                f"dmg={dmg}  ({t.hp}/{t.max_hp})"
-            )
+
+    strike_kind = f"silverash_s3_strike_{carrier.unit_id}"
+    if strike_kind not in world.event_queue._handlers:
+        world.event_queue.register(strike_kind, _make_strike_handler(carrier))
+
+    now = world.global_state.elapsed
+    for i in range(_STRIKE_COUNT):
+        world.event_queue.schedule(
+            now + i * _STRIKE_INTERVAL,
+            strike_kind,
+            strike_num=i + 1,
+        )
 
 
 def _s3_on_end(world, carrier: UnitState) -> None:
