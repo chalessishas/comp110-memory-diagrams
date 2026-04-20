@@ -304,3 +304,39 @@ def test_w_s3_bomb_hits_multiple_enemies():
 
     assert e1.hp < hp1_at_throw, "Bomb AoE must hit primary target"
     assert e2.hp < hp2_at_throw, "Bomb AoE must hit nearby enemy within radius"
+
+
+def test_w_s3_schedules_separate_bomb_per_target():
+    """4 enemies in range → 4 bombs scheduled, each at a different position.
+    SNIPER_RANGE covers dx in [0..4], dy in [-1,0,1] from W's tile.
+    All 4 enemies placed at (1..4, 0) — within range — each gets its own bomb."""
+    world = _world()
+    w = make_w(slot="S3")
+    w.deployed = True; w.position = (0.0, 1.0); w.atk_cd = 999.0
+    world.add_unit(w)
+
+    # Place 4 enemies within W's range, spread across y=0 row (dy=-1 from W at y=1)
+    enemies = []
+    for x in range(1, 5):   # x in [1,2,3,4]: all within dx=1..4 of W
+        e = _slug(pos=(x, 0), hp=99999)
+        world.add_unit(e)
+        enemies.append(e)
+
+    events_before = len(world.event_queue)
+    w.skill.sp = float(w.skill.sp_cost)
+    world.tick()  # S3 fires
+
+    events_added = len(world.event_queue) - events_before
+    assert events_added == 4, (
+        f"4 enemies in range must schedule 4 separate bomb events; got {events_added}"
+    )
+
+    # Run past bomb delay — all 4 enemies must be hit
+    hp_snapshots = [e.hp for e in enemies]
+    for _ in range(int(TICK_RATE * (_BOMB_DELAY + 0.5))):
+        world.tick()
+
+    for i, (e, hp_snap) in enumerate(zip(enemies, hp_snapshots)):
+        assert e.hp < hp_snap, (
+            f"Enemy {i} at x={i+1} must be hit by its dedicated bomb; hp unchanged at {e.hp}"
+        )
