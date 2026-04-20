@@ -6,10 +6,14 @@ when blocking, attacks single target (melee mode). Identical archetype behavior 
 Range shapes follow the same pattern as Horn (ArknightsGameData Fortress Defender grid):
   - Ranged: 3-tile forward line + side tiles
   - Melee:  operator tile + 1 tile forward
+
+S2 "Torrent": ATK +80%, forces ranged mode even while blocking, for 25s.
+  sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=False.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, RangeShape
-from core.types import AttackType, Faction, Profession, RoleArchetype
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.types import AttackType, BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger
+from core.systems.skill_system import register_skill
 from data.characters.generated.ashlok import make_ashlok as _base_stats
 
 
@@ -22,9 +26,31 @@ _MELEE_RANGE = RangeShape(tiles=(
     (0, 0), (1, 0),
 ))
 
+# --- S2: Torrent ---
+_S2_TAG = "ashlock_s2_torrent"
+_S2_ATK_RATIO = 0.80     # ATK +80%
+_S2_SOURCE_TAG = "ashlock_s2_torrent"
 
-def make_ashlock() -> UnitState:
-    """Ashlock E2 max. Fortress class trait: ranged AoE ↔ melee single based on blocking state."""
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_SOURCE_TAG,
+    ))
+    carrier._force_ranged_mode = True
+    world.log(f"Ashlock S2 Torrent — ATK +{_S2_ATK_RATIO:.0%}, forced ranged mode")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_SOURCE_TAG]
+    carrier._force_ranged_mode = False
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
+def make_ashlock(slot: str = "S2") -> UnitState:
+    """Ashlock E2 max. Fortress: ranged AoE ↔ melee toggle. S2: ATK+80% + forced ranged 25s."""
     op = _base_stats()
     op.name = "Ashlock"
     op.archetype = RoleArchetype.DEF_FORTRESS
@@ -36,4 +62,17 @@ def make_ashlock() -> UnitState:
     op.range_shape = _RANGED_RANGE
     op._melee_range = _MELEE_RANGE
 
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Torrent",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=25.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
