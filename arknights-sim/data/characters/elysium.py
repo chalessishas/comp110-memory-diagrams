@@ -7,12 +7,16 @@ S1 "Support γ": 18 DP over 8s while not blocking (block=0 during skill).
   sp_cost=35, initial_sp=10 (base/M0), duration=8s, requires_target=False.
   DP rate: 18/8 = 2.25 DP/s — higher than Myrtle S1 (1.75 DP/s).
 
+S2 "Tactical Gear": ATK+60% + 24 DP over 12s, block=0 during skill.
+  sp_cost=28, initial_sp=12, duration=12s, requires_target=False.
+  DP rate: 24/12 = 2.0 DP/s. More total DP than S1 at a lower burst rate.
+
 Arknights wiki: Standard Bearer stops blocking during skill activation.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
+    BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -80,8 +84,47 @@ def _s1_on_end(world, unit) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_tick=_s1_on_tick, on_end=_s1_on_end)
 
 
+# --- S2: Tactical Gear — ATK+60% + 24 DP / 12s, block=0 ---
+_S2_TAG = "elysium_s2_tactical_gear"
+_S2_ATK_RATIO = 0.60
+_S2_SOURCE_TAG = "elysium_s2_tg"
+_S2_DP_TOTAL = 24
+_S2_DURATION = 12.0
+_S2_DP_RATE = _S2_DP_TOTAL / _S2_DURATION   # 2.0 DP/s
+_S2_DP_FRAC_ATTR = "_elysium_s2_dp_frac"
+
+
+def _s2_on_start(world, unit) -> None:
+    unit._saved_block = unit.block
+    unit.block = 0
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_SOURCE_TAG,
+    ))
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    world.log(f"Elysium S2 Tactical Gear — ATK+{_S2_ATK_RATIO:.0%}, {_S2_DP_TOTAL} DP / {_S2_DURATION}s")
+
+
+def _s2_on_tick(world, unit, dt: float) -> None:
+    frac = getattr(unit, _S2_DP_FRAC_ATTR, 0.0) + _S2_DP_RATE * dt
+    gained = int(frac)
+    if gained > 0:
+        world.global_state.refund_dp(gained)
+    setattr(unit, _S2_DP_FRAC_ATTR, frac - gained)
+
+
+def _s2_on_end(world, unit) -> None:
+    unit.block = getattr(unit, "_saved_block", 1)
+    unit.buffs = [b for b in unit.buffs if b.source_tag != _S2_SOURCE_TAG]
+    setattr(unit, _S2_DP_FRAC_ATTR, 0.0)
+    world.log("Elysium S2 ended — block restored, ATK buff cleared")
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
+
+
 def make_elysium(slot: str = "S1") -> UnitState:
-    """Elysium E2 max. Talent: +0.3 SP/s to all Vanguards. S1 Support γ: 18 DP / 8s."""
+    """Elysium E2 max. Talent: +0.3 SP/s to all Vanguards. S1 Support γ: 18 DP/8s. S2 Tactical Gear: ATK+60% + 24 DP/12s."""
     op = _base_stats()
     op.name = "Elysium"
     op.archetype = RoleArchetype.VAN_STANDARD_BEARER
@@ -102,5 +145,18 @@ def make_elysium(slot: str = "S1") -> UnitState:
             requires_target=False,
             behavior_tag=_S1_TAG,
         )
+    elif slot == "S2":
+        op.skill = SkillComponent(
+            name="Tactical Gear",
+            slot="S2",
+            sp_cost=28,
+            initial_sp=12,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
 
     return op
