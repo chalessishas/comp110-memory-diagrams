@@ -71,6 +71,33 @@ register_talent(
 )
 
 
+# --- S2: Frost Suppression ---
+_S2_TAG = "silverash_s2_frost_suppression"
+_S2_ATK_RATIO = 1.00     # ATK +100%
+_S2_ASPD_BONUS = 30.0    # +30 ASPD (attacks faster)
+_S2_BUFF_TAG = "silverash_s2_buff"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    from core.types import BuffAxis, BuffStack
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S2_ASPD_BONUS, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"SilverAsh S2 Frost Suppression — ATK+{_S2_ATK_RATIO:.0%}, ASPD+{_S2_ASPD_BONUS:.0f}")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # --- S3 Truesilver Slash behavior ---
 _S3_TAG = "silverash_s3_truesilver_slash"
 _S3_ATK_RATIO = 1.80   # +180% at rank III
@@ -136,7 +163,20 @@ def make_silverash(slot: str = "S3") -> UnitState:
     op.range_shape = GUARD_LORD_RANGE
     op.cost = 31
     op.talents = [TalentComponent(name="Silver Sword", behavior_tag=_TALENT_TAG)]
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Frost Suppression",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=10,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Truesilver Slash",
             slot="S3",
