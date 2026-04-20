@@ -11,6 +11,10 @@ S2 "All In": MANUAL.
   ATK +_S2_ATK_RATIO, DEF +_S2_DEF_RATIO for _S2_DURATION seconds.
   sp_cost=40, initial_sp=20, AUTO_TIME + AUTO trigger.
 
+S3 "Decisive Battle": MANUAL.
+  ATK +160%, DEF +75% for 25s. splash_atk_multiplier boosted to 1.5.
+  sp_cost=40, initial_sp=20, AUTO_TIME.
+
 Base stats from ArknightsGameData (E2 max, trust 100, char_356_broca):
   HP=2335, ATK=842, DEF=366, RES=0, atk_interval=1.2s, cost=23, block=3.
 """
@@ -86,6 +90,39 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Decisive Battle — ATK+160%, DEF+75%, splash boost, 25s MANUAL ---
+_S3_TAG = "broca_s3_decisive_battle"
+_S3_ATK_RATIO = 1.60
+_S3_DEF_RATIO = 0.75
+_S3_SPLASH_MULT = 1.5           # enhanced splash during S3
+_S3_ATK_BUFF_TAG = "broca_s3_atk"
+_S3_DEF_BUFF_TAG = "broca_s3_def"
+_S3_DURATION = 25.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+        value=_S3_DEF_RATIO, source_tag=_S3_DEF_BUFF_TAG,
+    ))
+    carrier._broca_s3_splash = carrier.splash_atk_multiplier
+    carrier.splash_atk_multiplier = _S3_SPLASH_MULT
+    world.log(f"Broca S3 Decisive Battle — ATK+{_S3_ATK_RATIO:.0%}, DEF+{_S3_DEF_RATIO:.0%}, splash×{_S3_SPLASH_MULT}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs
+                     if b.source_tag not in (_S3_ATK_BUFF_TAG, _S3_DEF_BUFF_TAG)]
+    carrier.splash_atk_multiplier = getattr(carrier, "_broca_s3_splash", 1.0)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_broca(slot: str = "S2") -> UnitState:
     """Broca E2 max. Trait: splash to adjacent enemies. Talent: HoT aura while blocking."""
     op = _base_stats()
@@ -114,5 +151,17 @@ def make_broca(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Decisive Battle",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
     return op

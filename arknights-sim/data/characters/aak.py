@@ -1,4 +1,4 @@
-"""Aak (阿) — 6★ Specialist (Geek archetype).
+"""Aak (阿梓) — 6★ Specialist (Geek archetype).
 
 SPEC_GEEK trait: Aak's normal attacks deal Arts damage (rare for a Specialist).
 
@@ -12,6 +12,10 @@ S2 "Medical Protocol": 15s duration. Enhanced syringe: deals _S2_SYRINGE_DMG Tru
   damage to the ally target but grants +_S2_ATK_RATIO% ATK for _S2_DURATION seconds.
   Also grants Aak +_S2_SELF_ATK_RATIO% self-ATK during the skill window.
   sp_cost=30, initial_sp=15, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "Fatal Dose": Instant MANUAL. Injects ALL in-range allies simultaneously.
+  Each ally takes 50% max HP as True damage and gains +_S3_ATK_RATIO ATK for 25s.
+  sp_cost=50, initial_sp=25, AUTO_TIME, requires_target=False.
 
 Base stats from ArknightsGameData (E2 max, trust 100, char_225_haak):
   HP=2334, ATK=753, DEF=152, RES=10, atk_interval=1.3, block=1.
@@ -127,6 +131,43 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Fatal Dose — instant, ALL in-range allies take 50% max HP true + ATK +45% for 25s ---
+_S3_TAG = "aak_s3_fatal_dose"
+_S3_HP_RATIO = 0.50             # 50% max HP as true damage to each ally
+_S3_ATK_RATIO = 0.45            # +45% ATK buff
+_S3_BUFF_DURATION = 25.0
+_S3_BUFF_TAG = "aak_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    now = world.global_state.elapsed
+    expires_at = now + _S3_BUFF_DURATION
+    for ally in world.allies():
+        if ally is carrier or not ally.alive or not ally.deployed:
+            continue
+        if not _in_geek_range(carrier, ally):
+            continue
+        dmg = int(ally.max_hp * _S3_HP_RATIO)
+        if dmg > 0:
+            dealt = ally.take_true(dmg)
+            world.log(f"Aak S3 Fatal Dose → {ally.name}  true_dmg={dealt}  ({ally.hp}/{ally.max_hp})")
+        if ally.alive:
+            existing = next((b for b in ally.buffs if b.source_tag == _S3_BUFF_TAG), None)
+            if existing is not None:
+                existing.value = _S3_ATK_RATIO
+                existing.expires_at = expires_at
+            else:
+                ally.buffs.append(Buff(
+                    axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                    value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+                    expires_at=expires_at,
+                ))
+    world.log(f"Aak S3 Fatal Dose — all in-range allies: {_S3_HP_RATIO:.0%} maxHP dmg, ATK+{_S3_ATK_RATIO:.0%} for {_S3_BUFF_DURATION}s")
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
 def make_aak(slot: str = "S2") -> UnitState:
     """Aak E2 max. SPEC_GEEK: ARTS attacks; talent injects ally (true dmg + ATK buff). S2: enhanced."""
     op = _base_stats()
@@ -152,6 +193,19 @@ def make_aak(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Fatal Dose",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=25,
+            duration=0.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
