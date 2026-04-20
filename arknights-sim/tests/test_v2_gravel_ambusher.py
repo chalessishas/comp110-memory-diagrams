@@ -203,3 +203,62 @@ def test_fast_redeploy_cd():
         w.tick()
     w.global_state.dp = 100.0  # replenish DP
     assert w.deploy(g), "Must redeploy after 18s cooldown"
+
+
+# ---------------------------------------------------------------------------
+# Test 7: Shield re-activates on re-deploy (on_deploy hook)
+# ---------------------------------------------------------------------------
+
+def test_shield_reactivates_on_redeploy():
+    """After retreat + redeploy, Gravel's shield must be active again."""
+    w = _world()
+    w.global_state.dp = 100.0
+
+    g = make_gravel()
+    g.position = (2.0, 1.0)
+    w.deploy(g)  # triggers on_deploy → shield active
+
+    # Let shield expire
+    for _ in range(int(TICK_RATE * (_TALENT_DURATION + 1))):
+        w.tick()
+
+    talent = next(t for t in g.talents if t.behavior_tag == _TALENT_TAG)
+    assert not talent.params.get("deploy_shield", {}).get("active", False), (
+        "Shield must have expired after 10s"
+    )
+
+    # Retreat and re-deploy
+    w.retreat(g)
+    for _ in range(int(TICK_RATE * 19)):  # wait out 18s redeploy CD
+        w.tick()
+    w.global_state.dp = 100.0
+    assert w.deploy(g), "Re-deploy must succeed"
+
+    # Shield must be active again
+    shield = talent.params.get("deploy_shield", {})
+    assert shield.get("active", False), (
+        "Shield must re-activate after re-deploy via on_deploy hook"
+    )
+    assert abs(shield.get("reduction", 0.0) - _TALENT_REDUCE) < 0.01
+
+
+# ---------------------------------------------------------------------------
+# Test 8: on_deploy fires but shield does not double-stack
+# ---------------------------------------------------------------------------
+
+def test_shield_does_not_double_stack_on_first_deploy():
+    """world.deploy() on a newly added unit fires on_deploy + (on_battle_start if deployed=True).
+    Reduction must still be exactly _TALENT_REDUCE, not doubled."""
+    w = _world()
+    w.global_state.dp = 100.0
+
+    g = make_gravel()
+    g.position = (2.0, 1.0)
+    w.deploy(g)  # fires on_deploy → shield
+
+    talent = next(t for t in g.talents if t.behavior_tag == _TALENT_TAG)
+    shield = talent.params.get("deploy_shield", {})
+    assert shield.get("active", False)
+    assert abs(shield.get("reduction", 0.0) - _TALENT_REDUCE) < 0.01, (
+        f"Reduction must be {_TALENT_REDUCE}, not doubled; got {shield.get('reduction')}"
+    )

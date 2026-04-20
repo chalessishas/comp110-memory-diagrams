@@ -16,8 +16,14 @@ Talent callbacks:
   on_tick(world, unit, dt) → None
     Called every tick for each deployed alive ally (e.g. Nearl passive HoT).
 
+  on_deploy(world, unit) → None
+    Called every time world.deploy() succeeds for this unit (including re-deploys).
+    Distinct from on_battle_start: fires on each deployment, not just the first.
+    Use for effects that reset every deployment cycle (e.g. Gravel's deploy shield).
+
 Usage:
     register_talent("texas_tactical_delivery", on_battle_start=_dp_cb)
+    register_talent("gravel_tactical_concealment", on_deploy=_shield_cb)
 """
 from __future__ import annotations
 from typing import Callable, Dict, Optional, Tuple
@@ -25,7 +31,7 @@ from typing import Callable, Dict, Optional, Tuple
 _Fn = Callable  # type alias shorthand
 
 _REGISTRY: Dict[str, Tuple] = {}
-# value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick)
+# value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy)
 
 
 def register_talent(
@@ -36,8 +42,9 @@ def register_talent(
     on_kill: Optional[_Fn] = None,
     on_battle_start: Optional[_Fn] = None,
     on_tick: Optional[_Fn] = None,
+    on_deploy: Optional[_Fn] = None,
 ) -> None:
-    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick)
+    _REGISTRY[tag] = (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy)
 
 
 def fire_on_hit_received(world, defender, attacker, damage: int) -> None:
@@ -73,3 +80,10 @@ def fire_on_tick(world, unit, dt: float) -> None:
         entry = _REGISTRY.get(talent.behavior_tag)
         if entry and len(entry) > 4 and entry[4]:
             entry[4](world, unit, dt)
+
+
+def fire_on_deploy(world, unit) -> None:
+    for talent in unit.talents:
+        entry = _REGISTRY.get(talent.behavior_tag)
+        if entry and len(entry) > 5 and entry[5]:
+            entry[5](world, unit)

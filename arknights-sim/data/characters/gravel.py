@@ -4,12 +4,10 @@ Fast Redeploy trait: redeploy cooldown is 18s (vs 70s normal).
   Cost 8 DP, block=1 — disposable frontline anchor.
 
 Talent "Tactical Concealment" (E2):
-  For the first 10s after deployment, takes 80% reduced damage (damage_taken × 0.20).
-  Implemented via the generic deploy_shield params on TalentComponent, which
-  talent_damage_reduction() picks up. An EventQueue event at deploy_time + 10s
-  marks the shield inactive.
-
-No active skill — Gravel's value is entirely in the talent + fast redeploy cycle.
+  For the first 10s after each deployment, takes 80% reduced damage (damage_taken × 0.20).
+  Activated via on_deploy hook (fires on every world.deploy() call, including re-deploys).
+  An EventQueue event at deploy_time + 10s marks the shield inactive.
+  on_battle_start is kept to handle the pattern where a unit is added pre-deployed.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, TalentComponent, RangeShape
@@ -20,7 +18,7 @@ from data.characters.generated.gravel import make_gravel as _base_stats
 
 _TALENT_TAG = "gravel_tactical_concealment"
 _TALENT_REDUCE = 0.80           # 80% damage reduction while shield is active
-_TALENT_DURATION = 10.0         # seconds after deploy
+_TALENT_DURATION = 10.0         # seconds after each deploy
 _TALENT_EXPIRE_PREFIX = "gravel_shield_expire_"
 
 AMBUSHER_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -33,9 +31,8 @@ def _find_talent(carrier: UnitState) -> TalentComponent | None:
     return None
 
 
-def _talent_on_battle_start(world, carrier: UnitState) -> None:
-    if not carrier.deployed:
-        return
+def _activate_shield(world, carrier: UnitState) -> None:
+    """Activate deploy shield and schedule its expiry. Called on every deploy."""
     t = _find_talent(carrier)
     if t is None:
         return
@@ -60,11 +57,26 @@ def _talent_on_battle_start(world, carrier: UnitState) -> None:
     )
 
 
-register_talent(_TALENT_TAG, on_battle_start=_talent_on_battle_start)
+def _talent_on_battle_start(world, carrier: UnitState) -> None:
+    """Initial add to world — if already deployed (test setup), activate shield."""
+    if carrier.deployed:
+        _activate_shield(world, carrier)
+
+
+def _talent_on_deploy(world, carrier: UnitState) -> None:
+    """Every world.deploy() call — activate/refresh the shield."""
+    _activate_shield(world, carrier)
+
+
+register_talent(
+    _TALENT_TAG,
+    on_battle_start=_talent_on_battle_start,
+    on_deploy=_talent_on_deploy,
+)
 
 
 def make_gravel() -> UnitState:
-    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on deploy."""
+    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy."""
     op = _base_stats()
     op.name = "Gravel"
     op.archetype = RoleArchetype.SPEC_AMBUSHER

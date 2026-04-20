@@ -16,7 +16,7 @@ from .events.event_queue import EventQueue
 from .state.global_state import GlobalState
 from .state.tile_state import TileGrid
 from .state.unit_state import UnitState
-from .systems.talent_registry import fire_on_battle_start
+from .systems.talent_registry import fire_on_battle_start, fire_on_deploy
 from .types import DT, TICK_PHASE_ORDER, TICK_RATE, Faction, TickPhase, TileType
 
 
@@ -101,6 +101,7 @@ class World:
             unit.skill.sp = float(unit.skill.initial_sp)
         if unit not in self.units:
             self.units.append(unit)
+        fire_on_deploy(self, unit)
         self.log(f"{unit.name} deployed  dp={self.global_state.dp}")
         return True
 
