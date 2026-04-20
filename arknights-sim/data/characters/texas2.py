@@ -18,11 +18,11 @@ Base stats from ArknightsGameData (E2 max, trust 100, char_1028_texas2).
 """
 from __future__ import annotations
 from core.state.unit_state import (
-    UnitState, SkillComponent, RangeShape,
+    UnitState, SkillComponent, Buff, RangeShape,
     TalentComponent, StatusEffect,
 )
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode, StatusKind,
 )
 from core.systems.skill_system import register_skill
@@ -33,6 +33,12 @@ from data.characters.generated.texas2 import make_texas2 as _base_stats
 EXECUTOR_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 
 _TALENT_TAG = "texas2_surging_current"
+
+# --- S2: Gale Rush ---
+_S2_TAG = "texas2_s2_gale_rush"
+_S2_ATK_RATIO = 1.00
+_S2_BUFF_TAG = "texas2_s2_atk"
+_S2_DURATION = 15.0
 
 _S3_TAG = "texas2_s3_sword_rain"
 _S3_SILENCE_DURATION = 6.0
@@ -76,6 +82,21 @@ def _s3_on_start(world, carrier: UnitState) -> None:
         ))
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Texas Alter S2 Gale Rush — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 register_skill(_S3_TAG, on_start=_s3_on_start)
 
 
@@ -93,7 +114,20 @@ def make_texas_alter(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Surging Current", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Gale Rush",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Sword Rain",
             slot="S3",

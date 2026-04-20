@@ -71,12 +71,12 @@ def test_external_heal_blocked_above_threshold():
     """Warfarin must not restore HP to Hellagur when he is above 50% HP."""
     w = _world()
     h = make_hellagur()
-    h.deployed = True; h.position = (0.0, 1.0)
+    h.deployed = True; h.position = (1.0, 1.0)
     h.hp = int(h.max_hp * 0.80)  # 80% HP — above threshold
     w.add_unit(h)
 
     healer = make_warfarin()
-    healer.deployed = True; healer.position = (1.0, 1.0); healer.atk_cd = 0.0
+    healer.deployed = True; healer.position = (0.0, 1.0); healer.atk_cd = 0.0
     w.add_unit(healer)
 
     hp_before = h.hp
@@ -98,12 +98,12 @@ def test_external_heal_allowed_below_threshold():
     """Warfarin must heal Hellagur when his HP drops to or below 50%."""
     w = _world()
     h = make_hellagur()
-    h.deployed = True; h.position = (0.0, 1.0)
+    h.deployed = True; h.position = (1.0, 1.0)
     h.hp = int(h.max_hp * 0.40)  # 40% HP — below threshold
     w.add_unit(h)
 
     healer = make_warfarin()
-    healer.deployed = True; healer.position = (1.0, 1.0); healer.atk_cd = 0.0
+    healer.deployed = True; healer.position = (0.0, 1.0); healer.atk_cd = 0.0
     w.add_unit(healer)
 
     hp_before = h.hp
@@ -123,7 +123,7 @@ def test_healer_heals_other_ally_when_musha_blocked():
     """When Hellagur is above threshold, healer should target the other injured ally."""
     w = _world()
     h = make_hellagur()
-    h.deployed = True; h.position = (0.0, 1.0)
+    h.deployed = True; h.position = (1.0, 1.0)
     h.hp = int(h.max_hp * 0.80)  # above threshold — no heal
     w.add_unit(h)
 
@@ -133,7 +133,7 @@ def test_healer_heals_other_ally_when_musha_blocked():
     w.add_unit(normal_ally)
 
     healer = make_warfarin()
-    healer.deployed = True; healer.position = (1.0, 1.0); healer.atk_cd = 0.0
+    healer.deployed = True; healer.position = (0.0, 1.0); healer.atk_cd = 0.0
     w.add_unit(healer)
 
     ally_hp_before = normal_ally.hp

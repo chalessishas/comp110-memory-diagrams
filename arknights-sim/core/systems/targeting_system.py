@@ -50,12 +50,13 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
         if op.skill is None or op.skill.active_remaining <= 0:
             return None
 
-    # Healer: target most-injured ally (lowest hp/max_hp ratio)
+    # Healer: target most-injured ally within range (lowest hp/max_hp ratio)
     # Musha Guards with heal_block_threshold > 0 are excluded when above their threshold
     if op.attack_type == AttackType.HEAL:
         candidates = [
             u for u in world.allies()
             if u.alive and u.hp < u.max_hp
+            and _enemy_in_range(op, u)
             and (u.heal_block_threshold == 0.0
                  or u.hp / u.max_hp < u.heal_block_threshold)
         ]
@@ -178,12 +179,13 @@ def targeting_system(world, dt: float) -> None:
                     setattr(u, "__target__", _targeting_for_operator(world, u))
                     setattr(u, "__targets__", [])
             elif u.attack_type == AttackType.HEAL and u.heal_targets > 1:
-                # Multi-target medic: heal top-N most-injured allies simultaneously
+                # Multi-target medic: heal top-N most-injured allies within range simultaneously
                 # Exclude Musha Guards above their heal-block threshold
                 injured = sorted(
                     [
                         a for a in world.allies()
                         if a.alive and a.hp < a.max_hp
+                        and _enemy_in_range(u, a)
                         and (a.heal_block_threshold == 0.0
                              or a.hp / a.max_hp < a.heal_block_threshold)
                     ],

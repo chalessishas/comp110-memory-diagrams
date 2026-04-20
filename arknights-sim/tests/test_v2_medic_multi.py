@@ -62,7 +62,7 @@ def test_multi_heal_heals_three_allies():
     w = _world()
     lm = make_lumen()
     lm.deployed = True
-    lm.position = (2.0, 1.0)
+    lm.position = (0.0, 1.0)
     lm.atk_cd = 0.0
     w.add_unit(lm)
 
@@ -88,7 +88,7 @@ def test_multi_heal_priority_lowest_hp_ratio():
     """When there are 4 injured and heal_targets=3, the 3 most-injured get healed."""
     w = _world()
     lm = make_lumen()
-    lm.deployed = True; lm.position = (2.0, 1.0); lm.atk_cd = 0.0
+    lm.deployed = True; lm.position = (0.0, 1.0); lm.atk_cd = 0.0
     w.add_unit(lm)
 
     # 4 injured allies at different HP ratios; T4 at 90% should NOT be healed this tick
@@ -116,7 +116,7 @@ def test_multi_heal_skips_full_hp_allies():
     """Lumen does not waste a heal slot on a full-HP ally."""
     w = _world()
     lm = make_lumen()
-    lm.deployed = True; lm.position = (2.0, 1.0); lm.atk_cd = 0.0
+    lm.deployed = True; lm.position = (0.0, 1.0); lm.atk_cd = 0.0
     w.add_unit(lm)
 
     full = _tank(pos=(0, 1), hp_ratio=1.0, name="Full")  # full HP
@@ -138,7 +138,7 @@ def test_multi_heal_fewer_than_capacity():
     """When only 1 ally is injured and heal_targets=3, Lumen heals just that 1."""
     w = _world()
     lm = make_lumen()
-    lm.deployed = True; lm.position = (2.0, 1.0); lm.atk_cd = 0.0
+    lm.deployed = True; lm.position = (0.0, 1.0); lm.atk_cd = 0.0
     w.add_unit(lm)
 
     lone = _tank(pos=(0, 1), hp_ratio=0.5, name="Lone")

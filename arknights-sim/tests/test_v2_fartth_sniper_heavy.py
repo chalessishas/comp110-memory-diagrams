@@ -27,6 +27,7 @@ from core.state.tile_state import TileGrid, TileState
 from core.state.unit_state import UnitState
 from core.types import TileType, TICK_RATE, DT, RoleArchetype, AttackType
 from core.systems import register_default_systems
+from core.systems.skill_system import manual_trigger
 from data.characters.fartth import (
     make_fartth,
     _TALENT_TAG, _TALENT_ARTS_RATIO, _TALENT_ARTS_RATIO_S3,
@@ -260,4 +261,35 @@ def test_s3_buff_cleared_on_end():
     assert len(s3_buffs) == 0, "S3 ATK buff must be cleared"
     assert abs(f.effective_atk - base_atk) <= 1, (
         f"ATK must return to base {base_atk}; got {f.effective_atk}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# S2: Aimed Shot — ATK+50%
+# ---------------------------------------------------------------------------
+
+def test_s2_atk_buff():
+    """S2 must apply ATK +50% and revert on end."""
+    w = _world()
+    f = make_fartth(slot="S2")
+    f.deployed = True; f.position = (5.0, 1.0); f.atk_cd = 999.0
+    w.add_unit(f)
+
+    from data.characters.fartth import _S2_ATK_RATIO, _S2_BUFF_TAG, _S2_DURATION
+    base_atk = f.effective_atk
+    f.skill.sp = f.skill.sp_cost
+    manual_trigger(w, f)
+
+    expected_atk = int(base_atk * (1.0 + _S2_ATK_RATIO))
+    assert f.skill.active_remaining > 0.0
+    assert f.effective_atk == expected_atk, (
+        f"S2 ATK should be {expected_atk}; got {f.effective_atk}"
+    )
+
+    for _ in range(int(TICK_RATE * (_S2_DURATION + 1))):
+        w.tick()
+
+    assert f.skill.active_remaining == 0.0
+    assert abs(f.effective_atk - base_atk) <= 1, (
+        f"ATK must revert after S2; expected {base_atk}, got {f.effective_atk}"
     )

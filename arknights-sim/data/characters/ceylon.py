@@ -38,6 +38,13 @@ _TALENT_DEF_TAG = "ceylon_talent_def"
 _TALENT_DEF_FLAT = 30          # +30 flat DEF to nearby allies
 _TALENT_RANGE = 3              # Manhattan distance threshold
 
+# --- S2: Soothing Waves ---
+_S2_TAG = "ceylon_s2_soothing_waves"
+_S2_ATK_RATIO = 0.30
+_S2_BUFF_TAG = "ceylon_s2_atk"
+_S2_HEAL_TARGETS = 4    # +1 more than base (3→4; S3 goes to 5)
+_S2_DURATION = 20.0
+
 # --- S3: Quiet Recovery ---
 _S3_TAG = "ceylon_s3_quiet_recovery"
 _S3_ATK_RATIO = 0.20           # +20% ATK to Ceylon
@@ -115,6 +122,23 @@ def _s3_on_end(world, carrier: UnitState) -> None:
         ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_INTERVAL_BUFF_TAG]
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.heal_targets = _S2_HEAL_TARGETS
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Ceylon S2 Soothing Waves — ATK+{_S2_ATK_RATIO:.0%}, heal_targets=4/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.heal_targets = _BASE_HEAL_TARGETS
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
@@ -136,7 +160,19 @@ def make_ceylon(slot: str = "S3") -> UnitState:
         behavior_tag=_TALENT_TAG,
     )]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Soothing Waves",
+            slot="S2",
+            sp_cost=20,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Quiet Recovery",
             slot="S3",

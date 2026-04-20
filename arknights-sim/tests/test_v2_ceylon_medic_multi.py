@@ -27,6 +27,7 @@ from core.systems.skill_system import manual_trigger
 from data.characters.ceylon import (
     make_ceylon,
     _TALENT_TAG, _TALENT_DEF_TAG, _TALENT_DEF_FLAT, _TALENT_RANGE,
+    _S2_ATK_RATIO, _S2_BUFF_TAG, _S2_HEAL_TARGETS, _S2_DURATION,
     _S3_ATK_RATIO, _S3_ATK_BUFF_TAG, _S3_INTERVAL_OFFSET, _S3_INTERVAL_BUFF_TAG,
     _S3_HEAL_TARGETS, _S3_DURATION,
 )
@@ -225,3 +226,51 @@ def test_s3_buffs_cleared_on_end():
     assert len(atk_buffs) == 0, "S3 ATK buff must be cleared"
     interval_buffs = [b for b in ally.buffs if b.source_tag == _S3_INTERVAL_BUFF_TAG]
     assert len(interval_buffs) == 0, "S3 ATK_INTERVAL buff must be cleared from ally"
+
+
+# ---------------------------------------------------------------------------
+# S2: Soothing Waves — ATK+30%, heal_targets 3→4
+# ---------------------------------------------------------------------------
+
+def test_s2_atk_buff_and_heal_targets():
+    """S2 raises ATK by 30% and heal_targets from 3 to 4."""
+    w = _world()
+    c = make_ceylon(slot="S2")
+    c.deployed = True; c.position = (0.0, 1.0); c.atk_cd = 999.0
+    w.add_unit(c)
+
+    assert c.heal_targets == 3
+
+    base_atk = c.effective_atk
+    c.skill.sp = c.skill.sp_cost
+    w.tick()
+
+    assert c.skill.active_remaining > 0.0
+    assert c.heal_targets == _S2_HEAL_TARGETS == 4, (
+        f"S2 must raise heal_targets to 4; got {c.heal_targets}"
+    )
+    expected_atk = int(base_atk * (1.0 + _S2_ATK_RATIO))
+    assert c.effective_atk == expected_atk, (
+        f"S2 ATK should be {expected_atk}; got {c.effective_atk}"
+    )
+
+
+def test_s2_reverts_on_end():
+    """After S2 expires, heal_targets returns to 3 and ATK buff is removed."""
+    w = _world()
+    c = make_ceylon(slot="S2")
+    c.deployed = True; c.position = (0.0, 1.0); c.atk_cd = 999.0
+    w.add_unit(c)
+
+    base_atk = c.effective_atk
+    c.skill.sp = c.skill.sp_cost
+    w.tick()
+
+    for _ in range(int(TICK_RATE * (_S2_DURATION + 1))):
+        w.tick()
+
+    assert c.skill.active_remaining == 0.0
+    assert c.heal_targets == 3, f"heal_targets must revert to 3; got {c.heal_targets}"
+    assert abs(c.effective_atk - base_atk) <= 1, (
+        f"ATK must revert to {base_atk}; got {c.effective_atk}"
+    )

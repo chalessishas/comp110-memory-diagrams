@@ -38,6 +38,12 @@ _TALENT_ARTS_RATIO = 0.40       # arts chaser: 40% ATK normally
 _TALENT_ARTS_RATIO_S3 = 0.70   # arts chaser: 70% ATK during S3
 _TALENT_ARTS_TAG = "fartth_arts_chaser"
 
+# --- S2: Aimed Shot ---
+_S2_TAG = "fartth_s2_aimed_shot"
+_S2_ATK_RATIO = 0.50
+_S2_BUFF_TAG = "fartth_s2_atk"
+_S2_DURATION = 20.0
+
 _S3_TAG = "fartth_s3_predator"
 _S3_ATK_RATIO = 0.80
 _S3_ATK_BUFF_TAG = "fartth_s3_atk"
@@ -57,6 +63,21 @@ def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> No
 
 
 register_talent(_TALENT_TAG, on_attack_hit=_talent_on_attack_hit)
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Fartooth S2 Aimed Shot — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
@@ -87,7 +108,19 @@ def make_fartth(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Mark of the Hunt", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Aimed Shot",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=15,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Predator",
             slot="S3",

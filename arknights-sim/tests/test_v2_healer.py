@@ -20,14 +20,14 @@ def _world() -> World:
 
 def test_healer_restores_injured_ally():
     w = _world()
+    healer = make_warfarin()
+    healer.position = (0.0, 0.0)  # healer at origin; range (1,0),(2,0),(3,0) → tank ahead
+    healer.deployed = True
+
     tank = make_liskarm()
-    tank.position = (0.0, 0.0)
+    tank.position = (1.0, 0.0)   # tank at dx=1 — inside Warfarin's range
     tank.deployed = True
     tank.hp = tank.max_hp - 500
-
-    healer = make_warfarin()
-    healer.position = (1.0, 0.0)
-    healer.deployed = True
 
     w.add_unit(tank)
     w.add_unit(healer)
@@ -63,19 +63,19 @@ def test_healer_idles_when_all_full_hp():
 
 def test_healer_targets_lowest_hp_ratio():
     w = _world()
+    healer = make_warfarin()
+    healer.position = (0.0, 0.0)  # healer at origin; tanks at dx=1,2 are both in range
+    healer.deployed = True
+
     tank1 = make_liskarm()
-    tank1.position = (0.0, 0.0)
+    tank1.position = (1.0, 0.0)   # dx=1 — in range
     tank1.deployed = True
     tank1.hp = int(tank1.max_hp * 0.25)  # 25% HP
 
     tank2 = make_liskarm()
-    tank2.position = (2.0, 0.0)
+    tank2.position = (2.0, 0.0)   # dx=2 — in range
     tank2.deployed = True
     tank2.hp = int(tank2.max_hp * 0.50)  # 50% HP
-
-    healer = make_warfarin()
-    healer.position = (1.0, 0.0)
-    healer.deployed = True
 
     w.add_unit(tank1)
     w.add_unit(tank2)

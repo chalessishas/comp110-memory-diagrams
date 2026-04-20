@@ -10,8 +10,8 @@ S3 "Storm Strike": 5 consecutive hits each dealing 200% ATK physical damage,
   sp_cost=45, initial_sp=20, duration=5.0s, MANUAL trigger, AUTO_TIME SP gain.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, TalentComponent
-from core.types import RoleArchetype, SPGainMode, SkillTrigger
+from core.state.unit_state import UnitState, SkillComponent, Buff, TalentComponent
+from core.types import BuffAxis, BuffStack, RoleArchetype, SPGainMode, SkillTrigger
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
 from data.characters.generated.headb2 import make_headb2 as _base_stats
@@ -30,6 +30,12 @@ def _shockwave_on_battle_start(world, carrier: UnitState) -> None:
 
 register_talent(_TALENT_TAG, on_battle_start=_shockwave_on_battle_start)
 
+
+# --- S2: Shockwave Burst ---
+_S2_TAG = "headb2_s2_shockwave_burst"
+_S2_ATK_RATIO = 0.80
+_S2_BUFF_TAG = "headb2_s2_atk"
+_S2_DURATION = 15.0
 
 _S3_TAG = "headb2_s3_storm_strike"
 _S3_EVENT_KIND = "headb2_smash_hit"
@@ -69,6 +75,21 @@ def _s3_on_start(world, carrier) -> None:
     )
 
 
+def _s2_on_start(world, carrier) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"headb2 S2 Shockwave Burst — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 register_skill(_S3_TAG, on_start=_s3_on_start)
 
 
@@ -80,7 +101,19 @@ def make_headb2(slot: str | None = None) -> UnitState:
     op.splash_atk_multiplier = 0.5
     op.talents = [TalentComponent(name="Shockwave", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Shockwave Burst",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Storm Strike",
             slot="S3",
