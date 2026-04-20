@@ -1,4 +1,4 @@
-"""Vigna — Fierce Stabbing crit mechanic.
+"""Vigna — Fierce Stabbing crit mechanic + S2 Hammer-On.
 
 Tests use world.rng = random.Random(seed) for determinism,
 or force crit_chance to 0.0 / 1.0 for exact boundary assertions.
@@ -10,9 +10,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.world import World
 from core.state.tile_state import TileGrid, TileState
-from core.types import TileType, TICK_RATE
+from core.types import TileType, TICK_RATE, BuffAxis, BuffStack
 from core.systems import register_default_systems
-from data.characters.vigna import make_vigna, _CRIT_BASE, _CRIT_SKILL
+from core.systems.skill_system import manual_trigger
+from data.characters.vigna import (
+    make_vigna, _CRIT_BASE, _CRIT_SKILL, _S2_ATK_RATIO, _S2_INTERVAL,
+)
 from data.enemies import make_originium_slug
 
 
@@ -162,3 +165,88 @@ def test_fierce_stabbing_crit_rate_statistical():
 
     # With seed=42 and 10% rate: expected ~10 crits; 5-20 is a safe statistical range
     assert 5 <= crits <= 20, f"Expected 5–20 crits out of 100 with seed=42; got {crits}"
+
+
+# ---------------------------------------------------------------------------
+# S2 "Hammer-On" — skill component and buff tests
+# ---------------------------------------------------------------------------
+
+def test_vigna_s2_skill_registered():
+    """make_vigna() ships with S2 'Hammer-On' skill attached."""
+    v = make_vigna()
+    assert v.skill is not None
+    assert v.skill.name == "Hammer-On"
+    assert v.skill.sp_cost == 25
+    assert v.skill.duration == 30.0
+    assert v.skill.sp == 10.0   # initial_sp
+
+
+def test_s2_applies_atk_and_interval_buffs_on_start():
+    """On S2 activation, ATK RATIO +200% and ATK_INTERVAL FLAT +0.5s are applied."""
+    w = _world()
+    v = make_vigna()
+    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    w.add_unit(v)
+
+    atk_before = v.effective_atk
+    interval_before = v.current_atk_interval
+
+    v.skill.sp = float(v.skill.sp_cost)
+    manual_trigger(w, v)
+
+    assert v.skill.active_remaining > 0.0, "Skill must be active after manual_trigger"
+
+    expected_atk = int(atk_before * (1.0 + _S2_ATK_RATIO))
+    assert v.effective_atk == expected_atk, (
+        f"ATK with S2 should be {expected_atk}, got {v.effective_atk}"
+    )
+    expected_interval = interval_before + _S2_INTERVAL
+    assert abs(v.current_atk_interval - expected_interval) < 1e-9, (
+        f"ATK_INTERVAL with S2 should be {expected_interval:.3f}s, got {v.current_atk_interval:.4f}s"
+    )
+
+
+def test_s2_removes_buffs_on_end():
+    """When S2 expires, ATK and ATK_INTERVAL return to pre-skill values."""
+    w = _world()
+    v = make_vigna()
+    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    w.add_unit(v)
+
+    atk_before = v.effective_atk
+    interval_before = v.current_atk_interval
+
+    v.skill.sp = float(v.skill.sp_cost)
+    manual_trigger(w, v)
+
+    # Tick past duration to expire the skill
+    ticks = int(v.skill.duration / (1.0 / TICK_RATE)) + TICK_RATE
+    for _ in range(ticks):
+        w.tick()
+
+    assert v.skill.active_remaining == 0.0, "Skill must have expired"
+    assert v.effective_atk == atk_before, (
+        f"ATK must revert after S2 ends; expected {atk_before}, got {v.effective_atk}"
+    )
+    assert abs(v.current_atk_interval - interval_before) < 1e-9, (
+        f"ATK_INTERVAL must revert after S2 ends; expected {interval_before:.4f}s"
+    )
+
+
+def test_s2_active_raises_crit_to_30_percent():
+    """During S2, Fierce Stabbing's crit_chance must be 30% (not 10%)."""
+    w = _world()
+    v = make_vigna()
+    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    w.add_unit(v)
+
+    v.skill.sp = float(v.skill.sp_cost)
+    manual_trigger(w, v)
+
+    # Tick once so talent on_tick updates crit_chance
+    w.tick()
+
+    assert v.skill.active_remaining > 0.0, "Skill must still be active"
+    assert v.crit_chance == _CRIT_SKILL, (
+        f"During S2, crit_chance must be {_CRIT_SKILL}; got {v.crit_chance}"
+    )
