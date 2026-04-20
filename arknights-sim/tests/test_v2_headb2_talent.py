@@ -17,6 +17,7 @@ from core.types import TileType, TICK_RATE
 from core.systems import register_default_systems
 from data.characters.headb2 import (
     make_headb2, _TALENT_TAG, _BASE_SPLASH_RADIUS, _TALENT_SPLASH_RADIUS,
+    _WARD_TAG,
 )
 
 
@@ -42,9 +43,11 @@ def _ticks(w: World, seconds: float) -> None:
 
 def test_headb2_talent_configured():
     h = make_headb2(slot=None)
-    assert len(h.talents) == 1
+    assert len(h.talents) == 2
     assert h.talents[0].name == "Shockwave"
     assert h.talents[0].behavior_tag == _TALENT_TAG
+    assert h.talents[1].name == "Ward of the Fertile Soil"
+    assert h.talents[1].behavior_tag == _WARD_TAG
 
 
 # ---------------------------------------------------------------------------
