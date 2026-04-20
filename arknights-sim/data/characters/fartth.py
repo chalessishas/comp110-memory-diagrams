@@ -116,7 +116,7 @@ def make_fartth(slot: str = "S3") -> UnitState:
             initial_sp=15,
             duration=_S2_DURATION,
             sp_gain_mode=SPGainMode.AUTO_TIME,
-            trigger=SkillTrigger.MANUAL,
+            trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
         )

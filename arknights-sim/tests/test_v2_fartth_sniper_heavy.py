@@ -278,7 +278,7 @@ def test_s2_atk_buff():
     from data.characters.fartth import _S2_ATK_RATIO, _S2_BUFF_TAG, _S2_DURATION
     base_atk = f.effective_atk
     f.skill.sp = f.skill.sp_cost
-    manual_trigger(w, f)
+    w.tick()
 
     expected_atk = int(base_atk * (1.0 + _S2_ATK_RATIO))
     assert f.skill.active_remaining > 0.0

@@ -7,7 +7,6 @@ from core.world import World
 from core.state.tile_state import TileGrid, TileState
 from core.types import TileType, TICK_RATE
 from core.systems import register_default_systems
-from core.systems.skill_system import manual_trigger
 from data.characters.fartth import (
     make_fartth, _S2_TAG, _S2_ATK_RATIO, _S2_BUFF_TAG, _S2_DURATION,
 )
@@ -42,7 +41,7 @@ def test_s2_atk_buff():
     w.add_unit(f)
 
     f.skill.sp = float(f.skill.sp_cost)
-    manual_trigger(w, f)
+    w.tick()
 
     buff = next((b for b in f.buffs if b.source_tag == _S2_BUFF_TAG), None)
     assert buff is not None, "S2 ATK buff must be applied"
@@ -58,7 +57,7 @@ def test_s2_buff_removed_on_end():
     w.add_unit(f)
 
     f.skill.sp = float(f.skill.sp_cost)
-    manual_trigger(w, f)
+    w.tick()
 
     for _ in range(int(TICK_RATE * (_S2_DURATION + 2))):
         w.tick()
