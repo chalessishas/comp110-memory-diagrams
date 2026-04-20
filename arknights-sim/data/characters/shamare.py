@@ -2,8 +2,9 @@
 
 SUP_HEXER trait: Attacks reduce enemy ATK and DEF.
 
-Talent "Rancor": Each normal attack applies ATK_DOWN (−25%) and DEF_DOWN (−25%)
-  to the target for 10s. Refresh semantics on repeat hits.
+Talent "Rancor": Each normal attack applies a stackable ATK_DOWN/DEF_DOWN debuff
+  (−25% each per stack, up to 2 stacks = −50% max). Each hit refreshes all existing
+  stacks and adds a new one if below the maximum.
 
 S2 "Puppetmaster": Instant AoE — applies FRAGILE (+65% damage taken) to all
   enemies in attack range for 20s.
@@ -31,11 +32,18 @@ SUP_HEXER_RANGE = RangeShape(tiles=tuple(
 
 # --- Talent: Rancor ---
 _TALENT_TAG = "shamare_rancor"
-_RANCOR_ATK_RATIO = 0.25       # −25% ATK reduction
-_RANCOR_DEF_RATIO = 0.25       # −25% DEF reduction
+_RANCOR_ATK_RATIO = 0.25       # −25% ATK per stack
+_RANCOR_DEF_RATIO = 0.25       # −25% DEF per stack
 _RANCOR_DURATION = 10.0
+_RANCOR_MAX_STACKS = 2
+# Stack 1 keeps original tags for test backward compatibility
 _RANCOR_ATK_TAG = "shamare_rancor_atk"
 _RANCOR_DEF_TAG = "shamare_rancor_def"
+# Stack 2 tags
+_RANCOR_ATK_TAG2 = "shamare_rancor_atk_2"
+_RANCOR_DEF_TAG2 = "shamare_rancor_def_2"
+_RANCOR_ALL_ATK_TAGS = (_RANCOR_ATK_TAG, _RANCOR_ATK_TAG2)
+_RANCOR_ALL_TAGS = (_RANCOR_ATK_TAG, _RANCOR_DEF_TAG, _RANCOR_ATK_TAG2, _RANCOR_DEF_TAG2)
 
 # --- S2: Puppetmaster ---
 _S2_TAG = "shamare_s2_puppetmaster"
@@ -48,41 +56,50 @@ def _rancor_on_attack_hit(world, attacker: UnitState, target, damage: int) -> No
     elapsed = world.global_state.elapsed
     expires = elapsed + _RANCOR_DURATION
 
-    # Refresh: remove stale then re-apply both debuffs
-    target.statuses = [s for s in target.statuses
-                       if s.source_tag not in (_RANCOR_ATK_TAG, _RANCOR_DEF_TAG)]
-    target.buffs = [b for b in target.buffs
-                    if b.source_tag not in (_RANCOR_ATK_TAG, _RANCOR_DEF_TAG)]
+    # Count active stacks by presence of ATK-debuff buffs from this talent
+    current_stacks = sum(1 for b in target.buffs if b.source_tag in _RANCOR_ALL_ATK_TAGS)
 
-    target.statuses.append(StatusEffect(
-        kind=StatusKind.ATK_DOWN,
-        source_tag=_RANCOR_ATK_TAG,
-        expires_at=expires,
-        params={"amount": _RANCOR_ATK_RATIO},
-    ))
-    target.buffs.append(Buff(
-        axis=BuffAxis.ATK,
-        stack=BuffStack.RATIO,
-        value=-_RANCOR_ATK_RATIO,
-        source_tag=_RANCOR_ATK_TAG,
-        expires_at=expires,
-    ))
-    target.statuses.append(StatusEffect(
-        kind=StatusKind.DEF_DOWN,
-        source_tag=_RANCOR_DEF_TAG,
-        expires_at=expires,
-        params={"amount": _RANCOR_DEF_RATIO},
-    ))
-    target.buffs.append(Buff(
-        axis=BuffAxis.DEF,
-        stack=BuffStack.RATIO,
-        value=-_RANCOR_DEF_RATIO,
-        source_tag=_RANCOR_DEF_TAG,
-        expires_at=expires,
-    ))
+    # Refresh all existing stacks' durations
+    for b in target.buffs:
+        if b.source_tag in _RANCOR_ALL_TAGS:
+            b.expires_at = expires
+    for s in target.statuses:
+        if s.source_tag in _RANCOR_ALL_TAGS:
+            s.expires_at = expires
+
+    # Add a new stack if below max
+    if current_stacks < _RANCOR_MAX_STACKS:
+        atk_tag = _RANCOR_ATK_TAG if current_stacks == 0 else _RANCOR_ATK_TAG2
+        def_tag = _RANCOR_DEF_TAG if current_stacks == 0 else _RANCOR_DEF_TAG2
+        target.statuses.append(StatusEffect(
+            kind=StatusKind.ATK_DOWN,
+            source_tag=atk_tag,
+            expires_at=expires,
+            params={"amount": _RANCOR_ATK_RATIO},
+        ))
+        target.buffs.append(Buff(
+            axis=BuffAxis.ATK,
+            stack=BuffStack.RATIO,
+            value=-_RANCOR_ATK_RATIO,
+            source_tag=atk_tag,
+            expires_at=expires,
+        ))
+        target.statuses.append(StatusEffect(
+            kind=StatusKind.DEF_DOWN,
+            source_tag=def_tag,
+            expires_at=expires,
+            params={"amount": _RANCOR_DEF_RATIO},
+        ))
+        target.buffs.append(Buff(
+            axis=BuffAxis.DEF,
+            stack=BuffStack.RATIO,
+            value=-_RANCOR_DEF_RATIO,
+            source_tag=def_tag,
+            expires_at=expires,
+        ))
     world.log(
-        f"Shamare Rancor → {target.name}  "
-        f"ATK_DOWN/DEF_DOWN −{_RANCOR_ATK_RATIO:.0%}  ({_RANCOR_DURATION}s)"
+        f"Shamare Rancor stack {min(current_stacks + 1, _RANCOR_MAX_STACKS)}/{_RANCOR_MAX_STACKS} "
+        f"→ {target.name}  ATK/DEF −{_RANCOR_ATK_RATIO:.0%}×{min(current_stacks + 1, _RANCOR_MAX_STACKS)}"
     )
 
 

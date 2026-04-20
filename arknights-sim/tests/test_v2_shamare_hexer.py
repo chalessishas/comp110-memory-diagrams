@@ -1,8 +1,8 @@
-"""Shamare — SUP_HEXER: Rancor talent ATK/DEF debuff on hit + S2 AoE FRAGILE.
+"""Shamare — SUP_HEXER: Rancor talent ATK/DEF stackable debuff + S2 AoE FRAGILE.
 
 SUP_HEXER trait:
-  - Normal attacks apply ATK_DOWN (−25%) and DEF_DOWN (−25%) for 10s
-  - Debuffs refresh on repeated hits (expires_at resets)
+  - Normal attacks apply ATK_DOWN/DEF_DOWN debuffs (−25% per stack, up to 2 stacks)
+  - All existing stacks refresh duration on each hit
   - S2 "Puppetmaster": instant AoE applies FRAGILE (+65% dmg taken) for 20s
 
 Tests cover:
@@ -14,6 +14,8 @@ Tests cover:
   - S2 applies FRAGILE to all enemies in range
   - S2 FRAGILE expires after 20s
   - FRAGILE actually amplifies damage taken
+  - Two hits apply 2 stacks (double ATK/DEF reduction)
+  - Three hits do NOT exceed max 2 stacks
 """
 from __future__ import annotations
 import sys, os
@@ -27,7 +29,8 @@ from core.systems import register_default_systems
 from data.characters.shamare import (
     make_shamare,
     _RANCOR_ATK_TAG, _RANCOR_DEF_TAG,
-    _RANCOR_DURATION,
+    _RANCOR_ATK_TAG2, _RANCOR_ATK_RATIO, _RANCOR_DEF_RATIO,
+    _RANCOR_DURATION, _RANCOR_MAX_STACKS,
     _S2_FRAGILE_TAG, _S2_FRAGILE_AMOUNT, _S2_FRAGILE_DURATION,
 )
 from data.enemies import make_originium_slug
@@ -291,4 +294,72 @@ def test_fragile_amplifies_damage():
     actual_ratio = dmg_fragile / dmg_normal
     assert abs(actual_ratio - expected_ratio) < 0.05, (
         f"Damage ratio must be ~{expected_ratio:.2f}; got {actual_ratio:.3f}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 9: Two hits apply 2 stacks — ATK/DEF reduced by 50% total
+# ---------------------------------------------------------------------------
+
+def test_rancor_two_hits_give_double_stack():
+    """Two Shamare hits must give 2 stacks: target ATK/DEF each reduced by 50%."""
+    w = _world()
+    s = make_shamare()
+    s.deployed = True; s.position = (0.0, 1.0)
+    s.atk_cd = 0.0
+    w.add_unit(s)
+
+    enemy = _slug(pos=(1, 1), hp=99999, defence=0)
+    enemy.atk = 1000
+    base_atk = enemy.effective_atk
+    w.add_unit(enemy)
+
+    # First hit
+    w.tick(); w.tick(); w.tick()
+    s.atk_cd = 0.0
+
+    # Second hit
+    w.tick()
+
+    # 2 stacks = −50% ATK
+    atk_stacks = [b for b in enemy.buffs if b.source_tag in (_RANCOR_ATK_TAG, _RANCOR_ATK_TAG2)]
+    assert len(atk_stacks) == 2, (
+        f"Two hits must produce 2 Rancor ATK stacks; found {len(atk_stacks)}"
+    )
+    expected_atk = int(base_atk * (1.0 - _RANCOR_ATK_RATIO * 2))
+    assert enemy.effective_atk == expected_atk, (
+        f"Two stacks must give −50% ATK; expected {expected_atk}, got {enemy.effective_atk}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 10: Three hits do NOT exceed max 2 stacks
+# ---------------------------------------------------------------------------
+
+def test_rancor_max_stacks_capped_at_two():
+    """A third hit must NOT add a third stack — cap is {_RANCOR_MAX_STACKS}."""
+    w = _world()
+    s = make_shamare()
+    s.deployed = True; s.position = (0.0, 1.0)
+    s.atk_cd = 0.0
+    w.add_unit(s)
+
+    enemy = _slug(pos=(1, 1), hp=99999, defence=0)
+    enemy.atk = 1000
+    base_atk = enemy.effective_atk
+    w.add_unit(enemy)
+
+    # Force three attacks
+    for _ in range(3):
+        s.atk_cd = 0.0
+        w.tick(); w.tick()
+
+    atk_stacks = [b for b in enemy.buffs if b.source_tag in (_RANCOR_ATK_TAG, _RANCOR_ATK_TAG2)]
+    assert len(atk_stacks) <= _RANCOR_MAX_STACKS, (
+        f"Rancor stacks must not exceed {_RANCOR_MAX_STACKS}; found {len(atk_stacks)}"
+    )
+    # ATK reduction must be exactly −50% (max stacks), not −75%
+    expected_atk = int(base_atk * (1.0 - _RANCOR_ATK_RATIO * _RANCOR_MAX_STACKS))
+    assert enemy.effective_atk == expected_atk, (
+        f"Max stacks ATK must be {expected_atk}; got {enemy.effective_atk}"
     )
