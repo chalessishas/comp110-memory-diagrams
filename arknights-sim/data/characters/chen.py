@@ -2,13 +2,18 @@
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 S2 "Sheathed Strike": MANUAL instant — deals 380% ATK arts damage to all enemies in range.
-sp_cost=20, initial_sp=10.
+  sp_cost=20, initial_sp=10.
+
+S3 "Tiger Stance": 40s duration, MANUAL.
+  ATK +200%, ASPD +30.
+  If Heartless Act (summon from talent) is deployed at start: it also gains ATK +100%.
+  sp_cost=70, initial_sp=35, AUTO_ATTACK SP gain.
 """
 from __future__ import annotations
 from math import floor
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    AttackType, Faction, Profession,
+    AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill, manual_trigger
@@ -86,6 +91,47 @@ def _s2_on_start(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3: Tiger Stance — ATK+200%, ASPD+30, 40s, MANUAL ---
+_S3_TAG = "chen_s3_tiger_stance"
+_S3_ATK_RATIO = 2.00
+_S3_ASPD_BONUS = 30.0
+_S3_DURATION = 40.0
+_S3_ATK_BUFF_TAG = "chen_s3_atk"
+_S3_ASPD_BUFF_TAG = "chen_s3_aspd"
+_S3_SWORD_ATK_BUFF_TAG = "chen_s3_sword_atk"
+_S3_SWORD_ATK_RATIO = 1.00   # Heartless Act ATK +100% while S3 is active
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S3_ASPD_BONUS, source_tag=_S3_ASPD_BUFF_TAG,
+    ))
+    for ally in world.allies():
+        if ally.name == _SWORD_NAME and ally.alive and ally.deployed:
+            ally.buffs.append(Buff(
+                axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                value=_S3_SWORD_ATK_RATIO, source_tag=_S3_SWORD_ATK_BUFF_TAG,
+            ))
+    world.log(f"Ch'en Tiger Stance — ATK+{_S3_ATK_RATIO:.0%}, ASPD+{_S3_ASPD_BONUS:.0f}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [
+        b for b in carrier.buffs
+        if b.source_tag not in (_S3_ATK_BUFF_TAG, _S3_ASPD_BUFF_TAG)
+    ]
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_SWORD_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_chen(slot: str = "S2") -> UnitState:
     """Ch'en E2 max, trust 100. S2 Sheathed Strike wired (MANUAL)."""
     op = _base_stats()
@@ -104,5 +150,17 @@ def make_chen(slot: str = "S2") -> UnitState:
             sp_gain_mode=SPGainMode.AUTO_ATTACK,   # charges on hit
             trigger=SkillTrigger.MANUAL,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Tiger Stance",
+            slot="S3",
+            sp_cost=70,
+            initial_sp=35,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
     return op
