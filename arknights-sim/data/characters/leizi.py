@@ -3,6 +3,9 @@
 Chain Caster trait: attacks chain to 2 additional nearest enemies after primary hit.
   Implemented via chain_count=2 on UnitState + _apply_chain in combat_system.
 
+S2 "Thunderclap": ATK +100%, chain count increases to 3 (4 total), 20s.
+  sp_cost=35, initial_sp=10, AUTO_TIME. More damage/hit than S3; fewer chains.
+
 S3 "Thunderstruck Mane": ATK +50%, chain count increases to 5 (6 total), 20s.
   sp_cost=40, initial_sp=20, AUTO_TIME.
 
@@ -65,8 +68,32 @@ def _s3_on_end(world, unit: UnitState) -> None:
 register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
+# --- S2: Thunderclap — ATK+100%, chain_count=3 (4 total), 20s ---
+_S2_TAG = "leizi_s2_thunderclap"
+_S2_ATK_RATIO = 1.00
+_S2_ATK_BUFF_TAG = "leizi_s2_atk"
+_S2_CHAIN_COUNT = 3     # 3 additional targets = 4 total
+
+
+def _s2_on_start(world, unit: UnitState) -> None:
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_ATK_BUFF_TAG,
+    ))
+    unit.chain_count = _S2_CHAIN_COUNT
+    world.log(f"Leizi S2 Thunderclap — ATK+{_S2_ATK_RATIO:.0%}, chain_count={_S2_CHAIN_COUNT}")
+
+
+def _s2_on_end(world, unit: UnitState) -> None:
+    unit.buffs = [b for b in unit.buffs if b.source_tag != _S2_ATK_BUFF_TAG]
+    unit.chain_count = _BASE_CHAIN_COUNT   # talent on_tick will reapply voltage bonus
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 def make_leizi(slot: str = "S3") -> UnitState:
-    """Leizi E2 max. Chain Caster: hits 3 enemies (primary + 2 chains). S3: 6 total + ATK+50%/20s."""
+    """Leizi E2 max. Chain Caster: hits 3 enemies (primary + 2 chains). S2: 4 total + ATK+100%. S3: 6 total + ATK+50%."""
     op = _base_stats()
     op.name = "Leizi"
     op.archetype = RoleArchetype.CASTER_CHAIN
@@ -80,7 +107,20 @@ def make_leizi(slot: str = "S3") -> UnitState:
     op.chain_damage_ratio = 1.0
     op.talents = [TalentComponent(name="Voltage", behavior_tag=_VOLTAGE_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Thunderclap",
+            slot="S2",
+            sp_cost=35,
+            initial_sp=10,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Thunderstruck Mane",
             slot="S3",
