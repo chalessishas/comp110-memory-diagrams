@@ -121,7 +121,10 @@ def _targeting_for_enemy(world, enemy: UnitState) -> Optional[UnitState]:
 
 
 def _is_fortress_blocking(world, op: UnitState) -> bool:
-    """True when this Fortress Defender is currently blocking at least one enemy."""
+    """True when this Fortress Defender is currently blocking at least one enemy.
+    Returns False when _force_ranged_mode is set (e.g. Horn S2 override)."""
+    if getattr(op, "_force_ranged_mode", False):
+        return False
     return any(op.unit_id in e.blocked_by_unit_ids for e in world.enemies())
 
 
