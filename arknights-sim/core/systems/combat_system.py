@@ -109,15 +109,18 @@ def combat_system(world, dt: float) -> None:
 
         # SP on attack
         if u.skill is not None:
-            if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
-                u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
+            sk = u.skill
+            if sk.sp_gain_mode == SPGainMode.AUTO_ATTACK and not sk.active_remaining > 0:
+                if world.global_state.elapsed >= sk.sp_lockout_until:
+                    sk.sp = min(sk.sp + 1.0, float(sk.sp_cost))
 
         # SP on being hit (AUTO_DEFENSIVE): charge target's SP when it takes damage
         if u.attack_type != AttackType.HEAL and target.alive:
             sk_t = getattr(target, "skill", None)
             if sk_t is not None and sk_t.sp_gain_mode == SPGainMode.AUTO_DEFENSIVE:
                 if not sk_t.active_remaining > 0:
-                    sk_t.sp = min(sk_t.sp + 1.0, float(sk_t.sp_cost))
+                    if world.global_state.elapsed >= sk_t.sp_lockout_until:
+                        sk_t.sp = min(sk_t.sp + 1.0, float(sk_t.sp_cost))
 
         # Talent hooks — fire for both damage and heals (callbacks filter by type)
         if u.attack_type != AttackType.HEAL:
@@ -182,8 +185,10 @@ def _apply_multi_heal(world, u, targets) -> None:
             fire_on_attack_hit(world, u, target, dealt)
     u.atk_cd = u.current_atk_interval
     if u.skill is not None:
-        if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
-            u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
+        sk = u.skill
+        if sk.sp_gain_mode == SPGainMode.AUTO_ATTACK and not sk.active_remaining > 0:
+            if world.global_state.elapsed >= sk.sp_lockout_until:
+                sk.sp = min(sk.sp + 1.0, float(sk.sp_cost))
 
 
 def _apply_fortress_ranged(world, u, targets) -> None:
@@ -207,8 +212,10 @@ def _apply_fortress_ranged(world, u, targets) -> None:
             fire_on_kill(world, u, target)
     u.atk_cd = u.current_atk_interval
     if u.skill is not None:
-        if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
-            u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
+        sk = u.skill
+        if sk.sp_gain_mode == SPGainMode.AUTO_ATTACK and not sk.active_remaining > 0:
+            if world.global_state.elapsed >= sk.sp_lockout_until:
+                sk.sp = min(sk.sp + 1.0, float(sk.sp_cost))
 
 
 def _apply_chain(world, attacker, primary_target, primary_raw: int) -> None:

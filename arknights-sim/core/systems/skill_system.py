@@ -1,7 +1,7 @@
 """Skill — SP 回复 + 技能触发/持续/结束. 技能行为由 behavior_tag 查注册表."""
 from __future__ import annotations
 from typing import Callable, Dict, Tuple
-from ..types import Faction
+from ..types import Faction, SP_POST_SKILL_LOCKOUT
 from ..state.unit_state import SPGainMode, SkillTrigger
 
 # skill behavior registry: tag → (on_start, on_tick, on_end)
@@ -30,13 +30,15 @@ def skill_system(world, dt: float) -> None:
             if sk.active_remaining <= 0.0:
                 sk.active_remaining = 0.0
                 sk.sp = 0.0
+                sk.sp_lockout_until = now + SP_POST_SKILL_LOCKOUT
                 if on_end:
                     on_end(world, u)
             continue
 
         # ---- SP accumulation (time-based) ----
         if sk.sp_gain_mode == SPGainMode.AUTO_TIME and u.can_use_skill():
-            sk.sp = min(sk.sp + dt, float(sk.sp_cost))
+            if now >= sk.sp_lockout_until:
+                sk.sp = min(sk.sp + dt, float(sk.sp_cost))
 
         # ---- Auto-trigger with lockout ----
         # Wiki: AUTO skills hold at full SP until target exists (lockout).

@@ -49,10 +49,13 @@ def _bard_sp_aura(world, carrier: UnitState, dt: float, sp_rate: float) -> None:
         return
     s2_active = carrier.skill is not None and carrier.skill.active_remaining > 0
     effective_rate = sp_rate * (_S2_SP_MULTIPLIER if s2_active else 1.0)
+    now = world.global_state.elapsed
     for ally in world.allies():
         if ally is carrier or not ally.alive or not ally.deployed:
             continue
         if ally.skill is None or ally.skill.active_remaining > 0:
+            continue
+        if now < ally.skill.sp_lockout_until:
             continue
         if not _ally_in_range(carrier, ally):
             continue

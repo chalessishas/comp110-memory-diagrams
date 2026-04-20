@@ -32,6 +32,7 @@ def _unisonant_on_tick(world, carrier, dt: float) -> None:
     frac = getattr(carrier, _SP_FRAC_ATTR, 0.0) + _SP_RATE * dt
     sp_bonus = frac
     if sp_bonus >= 0.01:   # avoid accumulating tiny float every tick
+        now = world.global_state.elapsed
         for ally in world.allies():
             if ally is carrier:
                 continue
@@ -39,7 +40,8 @@ def _unisonant_on_tick(world, carrier, dt: float) -> None:
                 continue
             sk = ally.skill
             if sk.active_remaining <= 0.0 and sk.sp < sk.sp_cost:
-                sk.sp = min(sk.sp + sp_bonus, float(sk.sp_cost))
+                if now >= sk.sp_lockout_until:
+                    sk.sp = min(sk.sp + sp_bonus, float(sk.sp_cost))
         setattr(carrier, _SP_FRAC_ATTR, 0.0)
     else:
         setattr(carrier, _SP_FRAC_ATTR, sp_bonus)

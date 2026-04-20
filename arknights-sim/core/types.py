@@ -220,3 +220,7 @@ TICK_PHASE_ORDER: tuple[TickPhase, ...] = (
 
 TICK_RATE = 10              # 10 Hz — 1 tick = 0.1s game-time
 DT = 1.0 / TICK_RATE
+
+# SP lockout window after a skill ends — no SP can be gained during this period.
+# Documented in Terra Wiki: brief recovery pause after skill duration expires.
+SP_POST_SKILL_LOCKOUT: float = 0.5   # seconds

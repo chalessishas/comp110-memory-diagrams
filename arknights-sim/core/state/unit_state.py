@@ -56,6 +56,7 @@ class SkillComponent:
     active_remaining: float = 0.0        # 当前持续剩余
     locked_out: bool = False             # SP 满但无目标时锁 SP (Terra Wiki Lockout)
     fire_count: int = 0                  # 已释放次数
+    sp_lockout_until: float = 0.0       # no SP can be gained before this timestamp (post-skill lockout)
 
     # Behavior hooks (by tag name — resolved via Skill registry)
     behavior_tag: str = ""               # e.g. "silverash_s3" → maps to on_start/on_tick/on_end funcs
