@@ -22,9 +22,12 @@ def combat_system(world, dt: float) -> None:
         target = getattr(u, "__target__", None)
         multi_targets = getattr(u, "__targets__", [])
 
-        # Fortress Defender ranged mode: __targets__ is populated, __target__ is None
+        # Multi-targets: Fortress ranged AoE or multi-target medic heal
         if multi_targets:
-            _apply_fortress_ranged(world, u, multi_targets)
+            if u.attack_type == AttackType.HEAL:
+                _apply_multi_heal(world, u, multi_targets)
+            else:
+                _apply_fortress_ranged(world, u, multi_targets)
             continue
 
         if target is None or not target.alive:
@@ -115,6 +118,24 @@ def combat_system(world, dt: float) -> None:
                 fire_on_kill(world, u, target)
         if u.talents:
             fire_on_attack_hit(world, u, target, dealt)
+
+
+def _apply_multi_heal(world, u, targets) -> None:
+    """Multi-target medic: heal all allies in targets simultaneously."""
+    alive_targets = [t for t in targets if t.alive]
+    if not alive_targets:
+        return
+    raw = u.effective_atk
+    for target in alive_targets:
+        dealt = target.heal(raw)
+        world.global_state.total_healing_done += dealt
+        world.log(f"{u.name} → {target.name}  heal={dealt}  ({target.hp}/{target.max_hp})")
+        if u.talents:
+            fire_on_attack_hit(world, u, target, dealt)
+    u.atk_cd = u.current_atk_interval
+    if u.skill is not None:
+        if u.skill.sp_gain_mode == SPGainMode.AUTO_ATTACK and not u.skill.active_remaining > 0:
+            u.skill.sp = min(u.skill.sp + 1.0, float(u.skill.sp_cost))
 
 
 def _apply_fortress_ranged(world, u, targets) -> None:

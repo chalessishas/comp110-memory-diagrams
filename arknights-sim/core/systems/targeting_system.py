@@ -15,7 +15,7 @@ Aerial targeting rule:
 """
 from __future__ import annotations
 from typing import List, Optional
-from ..types import Faction, Mobility, RoleArchetype, StatusKind
+from ..types import AttackType, Faction, Mobility, RoleArchetype, StatusKind
 from ..state.unit_state import UnitState
 
 
@@ -160,6 +160,14 @@ def targeting_system(world, dt: float) -> None:
                     # No blocked enemies — fall back to normal single-target
                     setattr(u, "__target__", _targeting_for_operator(world, u))
                     setattr(u, "__targets__", [])
+            elif u.attack_type == AttackType.HEAL and u.heal_targets > 1:
+                # Multi-target medic: heal top-N most-injured allies simultaneously
+                injured = sorted(
+                    [a for a in world.allies() if a.alive and a.hp < a.max_hp],
+                    key=lambda a: a.hp / a.max_hp,
+                )
+                setattr(u, "__target__", None)
+                setattr(u, "__targets__", injured[: u.heal_targets])
             elif getattr(u, "_attack_all_in_range", False):
                 # Generic AOE attack override (e.g. Thorns S3) — hit every enemy in range
                 candidates = [
