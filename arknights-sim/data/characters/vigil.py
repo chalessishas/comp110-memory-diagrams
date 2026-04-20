@@ -8,15 +8,39 @@ S3 "Packleader's Dignity": 12 DP over 15s (DP drip). block=0 during skill.
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent, StatusEffect
 from core.types import (
-    Profession, RoleArchetype, SPGainMode, SkillTrigger,
+    Profession, RoleArchetype, SPGainMode, SkillTrigger, StatusKind, TICK_RATE,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.vigil import make_vigil as _base_stats
 
 
 TACTICIAN_RANGE = RangeShape(tiles=((0, 0), (1, 0), (2, 0)))
+
+# --- Talent: Pack Leader's Resolve — self-REGEN while S3 inactive ---
+_TALENT_TAG = "vigil_pack_resolve"
+_REGEN_SOURCE_TAG = "vigil_pack_resolve_regen"
+_REGEN_HPS = 80.0
+_REGEN_TTL = 2.0 / TICK_RATE  # two ticks so it lapses quickly when S3 fires
+
+
+def _pack_resolve_on_tick(world, carrier: UnitState, dt: float) -> None:
+    skill_active = carrier.skill is not None and carrier.skill.active_remaining > 0.0
+    carrier.statuses = [s for s in carrier.statuses if s.source_tag != _REGEN_SOURCE_TAG]
+    if not skill_active:
+        elapsed = world.global_state.elapsed
+        carrier.statuses.append(StatusEffect(
+            kind=StatusKind.REGEN,
+            source_tag=_REGEN_SOURCE_TAG,
+            expires_at=elapsed + _REGEN_TTL,
+            params={"hps": _REGEN_HPS},
+        ))
+
+
+register_talent(_TALENT_TAG, on_tick=_pack_resolve_on_tick)
+
 
 # --- S3: Packleader's Dignity — 12 DP / 15s drip ---
 _S3_TAG = "vigil_s3_packleaders_dignity"
@@ -55,6 +79,7 @@ def make_vigil(slot: str = "S3") -> UnitState:
     op.range_shape = TACTICIAN_RANGE
     op.block = 1
     op.cost = 17
+    op.talents = [TalentComponent(name="Pack Leader's Resolve", behavior_tag=_TALENT_TAG)]
 
     if slot == "S3":
         op.skill = SkillComponent(
