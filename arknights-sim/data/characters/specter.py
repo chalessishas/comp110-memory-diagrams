@@ -5,7 +5,8 @@ Talent "Undying Will" (E2): Once per deployment, when Specter would die,
   DAMAGE_IMMUNE for 10s, then recovers to 40% HP after the window.
 
 S2 "Pather's Light": ATK +160%, 30s, AUTO_TIME. Attacks also restore
-  5% of damage dealt as HP to Specter.
+  5% of damage dealt as HP to Specter. On skill end, Specter is STUNNED
+  for 10s (cannot attack or block).
 
 S3 "Deathless Aegis": ATK +400%, ASPD +50, duration 30s, MANUAL trigger.
   While active, Specter cannot die (undying_charges=999). On end, buffs
@@ -96,6 +97,8 @@ _S2_TAG = "specter_s2_pathers_light"
 _S2_ATK_RATIO = 1.60
 _S2_LIFESTEAL = 0.05   # 5% of damage dealt heals Specter
 _S2_BUFF_TAG = "specter_s2_atk_buff"
+_S2_STUN_DURATION = 10.0   # post-skill Stun duration
+_S2_STUN_TAG = "specter_s2_stun"
 
 
 def _s2_on_start(world, unit) -> None:
@@ -109,6 +112,10 @@ def _s2_on_start(world, unit) -> None:
 def _s2_on_end(world, unit) -> None:
     unit.buffs = [b for b in unit.buffs if b.source_tag != _S2_BUFF_TAG]
     unit._specter_s2_active = False
+    unit.statuses.append(StatusEffect(
+        kind=StatusKind.STUN, source_tag=_S2_STUN_TAG,
+        expires_at=world.global_state.elapsed + _S2_STUN_DURATION,
+    ))
 
 
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
