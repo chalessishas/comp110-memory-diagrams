@@ -11,10 +11,28 @@ S2 "Torrent": ATK +80%, forces ranged mode even while blocking, for 25s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=False.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import AttackType, BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.ashlok import make_ashlok as _base_stats
+
+
+# --- Talent: Steadfast Guard — permanent flat DEF bonus ---
+_TALENT_TAG = "ashlock_steadfast_guard"
+_TALENT_BUFF_TAG = "ashlock_steadfast_guard_def"
+_DEF_BONUS = 150
+
+
+def _steadfast_on_battle_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.DEF, stack=BuffStack.FLAT,
+        value=_DEF_BONUS, source_tag=_TALENT_BUFF_TAG,
+    ))
+    world.log(f"Ashlock Steadfast Guard — DEF +{_DEF_BONUS}")
+
+
+register_talent(_TALENT_TAG, on_battle_start=_steadfast_on_battle_start)
 
 
 _RANGED_RANGE = RangeShape(tiles=(
@@ -58,6 +76,7 @@ def make_ashlock(slot: str = "S2") -> UnitState:
     op.attack_type = AttackType.PHYSICAL
     op.block = 3
     op.cost = 27
+    op.talents = [TalentComponent(name="Steadfast Guard", behavior_tag=_TALENT_TAG)]
 
     op.range_shape = _RANGED_RANGE
     op._melee_range = _MELEE_RANGE

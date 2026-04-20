@@ -8,10 +8,24 @@ S1 "Strafing Fire": ATK +100% for 20s.
 Base stats: E2 max, trust 100 (generated/erato.py).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import BuffAxis, BuffStack, Profession, RoleArchetype, SPGainMode, SkillTrigger
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.erato import make_erato as _base_stats
+
+
+# --- Talent: Precision Strike — 10% crit chance on attacks ---
+_TALENT_TAG = "erato_precision_strike"
+_CRIT_CHANCE = 0.10
+
+
+def _precision_on_battle_start(world, carrier: UnitState) -> None:
+    carrier.crit_chance = _CRIT_CHANCE
+    world.log(f"Erato Precision Strike — crit_chance = {_CRIT_CHANCE:.0%}")
+
+
+register_talent(_TALENT_TAG, on_battle_start=_precision_on_battle_start)
 
 # Standard Besieger Sniper range: 3 forward + flanking tiles
 BESIEGER_RANGE_5STAR = RangeShape(tiles=(
@@ -49,6 +63,7 @@ def make_erato(slot: str = "S1") -> UnitState:
     op.range_shape = BESIEGER_RANGE_5STAR
     op.block = 1
     op.cost = 23
+    op.talents = [TalentComponent(name="Precision Strike", behavior_tag=_TALENT_TAG)]
 
     if slot == "S1":
         op.skill = SkillComponent(

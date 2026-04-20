@@ -13,13 +13,28 @@ Base stats: E2 max, trust 100 (hand-authored from wiki).
   HP=1857, ATK=499, DEF=271, RES=0, atk_interval=1.2s, cost=11, block=1.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     AttackType, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
 from core.systems.combat_system import _apply_push
+from core.systems.talent_registry import register_talent
+
+
+# --- Talent: Gale — push distance 1 → 2 at E2 ---
+_TALENT_TAG = "shaw_gale"
+_BASE_PUSH = 1
+_GALE_PUSH = 2
+
+
+def _gale_on_battle_start(world, carrier: UnitState) -> None:
+    carrier.push_distance = _GALE_PUSH
+    world.log(f"Shaw Gale — push_distance → {_GALE_PUSH}")
+
+
+register_talent(_TALENT_TAG, on_battle_start=_gale_on_battle_start)
 
 
 PUSHER_RANGE = RangeShape(tiles=((0, 0), (1, 0), (2, 0)))   # melee + 2 tiles forward
@@ -74,7 +89,8 @@ def make_shaw(slot: str = "S2") -> UnitState:
     )
     op.archetype = RoleArchetype.SPEC_PUSHER
     op.range_shape = PUSHER_RANGE
-    op.push_distance = 2   # Gale talent: push 2 tiles per normal attack (E2 level)
+    op.push_distance = _BASE_PUSH   # base 1; Gale talent raises to 2 on deploy
+    op.talents = [TalentComponent(name="Gale", behavior_tag=_TALENT_TAG)]
 
     if slot == "S2":
         op.skill = SkillComponent(

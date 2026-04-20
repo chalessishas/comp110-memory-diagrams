@@ -4,15 +4,31 @@ Class trait: Tactician Vanguard — no passive DP accumulation; DP via skills.
 S1 "Tactical Formation I": Instantly gains 8 DP. sp_cost=25, duration=0 (instant).
 S2 "Support Order": 12 DP over 15s (DP drip, block=0 during skill). sp_cost=35.
 
+Talent "Frontline Supply": On deployment, immediately grants 3 DP.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.blackd import make_blackd as _base_stats
+
+
+# --- Talent: Frontline Supply ---
+_TALENT_TAG = "courier_frontline_supply"
+_DP_GRANT = 3
+
+
+def _frontline_supply_on_battle_start(world, carrier: UnitState) -> None:
+    world.global_state.refund_dp(_DP_GRANT)
+    world.log(f"Courier Frontline Supply — +{_DP_GRANT} DP")
+
+
+register_talent(_TALENT_TAG, on_battle_start=_frontline_supply_on_battle_start)
 
 
 TACTICIAN_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -58,7 +74,7 @@ register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_o
 
 
 def make_courier(slot: str = "S1") -> UnitState:
-    """Courier E2 max. S1: +8 DP instant; S2: 12 DP / 15s drip, block=0."""
+    """Courier E2 max. S1: +8 DP instant; S2: 12 DP / 15s drip, block=0. Talent: +3 DP on deploy."""
     op = _base_stats()
     op.name = "Courier"
     op.archetype = RoleArchetype.VAN_TACTICIAN
@@ -66,6 +82,7 @@ def make_courier(slot: str = "S1") -> UnitState:
     op.range_shape = TACTICIAN_RANGE
     op.block = 2
     op.cost = 12
+    op.talents = [TalentComponent(name="Frontline Supply", behavior_tag=_TALENT_TAG)]
 
     if slot == "S1":
         op.skill = SkillComponent(
