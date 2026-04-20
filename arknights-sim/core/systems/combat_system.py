@@ -70,6 +70,10 @@ def combat_system(world, dt: float) -> None:
             f"({target.hp}/{target.max_hp})"
         )
 
+        # GUARD_CENTURION trait: attack hits ALL currently blocked enemies simultaneously
+        if u.archetype == RoleArchetype.GUARD_CENTURION:
+            _apply_centurion_cleave(world, u, target, raw)
+
         # AOE splash — splash_atk_multiplier lets 撼地者 do 50% splash while
         # standard splash casters (Eyjafjalla/Angelina) keep 100%.
         if u.splash_radius > 0.0 and u.attack_type != AttackType.HEAL:
@@ -297,6 +301,29 @@ def _apply_blast_pierce(
             dealt = e.take_true(blast_raw)
         world.global_state.total_damage_dealt += dealt
         world.log(f"{attacker.name} blast → {e.name}  dmg={dealt}  ({e.hp}/{e.max_hp})")
+        if attacker.talents:
+            fire_on_attack_hit(world, attacker, e, dealt)
+        if not e.alive and attacker.talents:
+            fire_on_kill(world, attacker, e)
+
+
+def _apply_centurion_cleave(world, attacker, primary_target, raw: int) -> None:
+    """GUARD_CENTURION trait: deal damage to all OTHER enemies currently blocked by attacker."""
+    for e in world.enemies():
+        if e is primary_target or not e.alive:
+            continue
+        if attacker.unit_id not in e.blocked_by_unit_ids:
+            continue
+        if attacker.attack_type == AttackType.PHYSICAL:
+            dealt = e.take_physical(raw)
+        elif attacker.attack_type == AttackType.ARTS:
+            dealt = e.take_arts(raw)
+        else:
+            dealt = e.take_true(raw)
+        world.global_state.total_damage_dealt += dealt
+        world.log(
+            f"{attacker.name} cleave → {e.name}  dmg={dealt}  ({e.hp}/{e.max_hp})"
+        )
         if attacker.talents:
             fire_on_attack_hit(world, attacker, e, dealt)
         if not e.alive and attacker.talents:
