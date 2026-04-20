@@ -1,0 +1,337 @@
+id: main_06-08
+name: "main_06-08"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: deployment_melee}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: ground}
+    - {x: 6, y: 6, type: ground}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 6, y: 4, type: ground}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: ground}
+    - {x: 9, y: 4, type: ground}
+    - {x: 10, y: 4, type: goal}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 10, y: 2, type: goal}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: ground}
+enemies:
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 4]
+      - [6, 4]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 4]
+      - [6, 4]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [10, 2]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snsbr
+    count: 3
+    interval: 5.0
+    first_delay: 17.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snsbr
+    count: 3
+    interval: 5.0
+    first_delay: 17.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snsbr
+    count: 3
+    interval: 5.0
+    first_delay: 17.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [0, 3]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snwolf
+    count: 2
+    interval: 20.0
+    first_delay: 30.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 3]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 6]
+      - [10, 4]
+  - id: snmage
+    count: 2
+    interval: 15.0
+    first_delay: 41.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snmage
+    count: 2
+    interval: 15.0
+    first_delay: 41.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 47.0
+    path:
+      - [0, 6]
+      - [10, 4]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 49.0
+    path:
+      - [0, 3]
+      - [10, 4]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 59.0
+    path:
+      - [0, 1]
+      - [10, 2]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 4]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [10, 4]

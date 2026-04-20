@@ -1,0 +1,139 @@
+id: main_01-01
+name: "main_01-01"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 9
+  height: 7
+  tiles:
+    - {x: 4, y: 6, type: ground}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: goal}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 5, y: 0, type: goal}
+enemies:
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: gopro
+    count: 1
+    interval: 1.0
+    first_delay: 12.0
+    path:
+      - [4, 6]
+      - [5, 0]
+  - id: 2_slime
+    count: 4
+    interval: 9.0
+    first_delay: 12.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: 2_slime
+    count: 4
+    interval: 9.0
+    first_delay: 13.0
+    path:
+      - [4, 6]
+      - [5, 0]
+  - id: 2_slime
+    count: 4
+    interval: 11.0
+    first_delay: 14.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 19.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: 2_slime
+    count: 4
+    interval: 9.0
+    first_delay: 20.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: 2_slime
+    count: 3
+    interval: 8.0
+    first_delay: 20.0
+    path:
+      - [4, 6]
+      - [5, 0]
+  - id: 2_slime
+    count: 3
+    interval: 8.0
+    first_delay: 21.0
+    path:
+      - [4, 6]
+      - [5, 0]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: gopro
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [4, 6]
+      - [5, 0]
+  - id: wteeth
+    count: 1
+    interval: 19.0
+    first_delay: 32.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [8, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [0, 3]
+      - [8, 3]
+  - id: wteeth
+    count: 2
+    interval: 24.0
+    first_delay: 37.0
+    path:
+      - [4, 6]
+      - [4, 5]
+      - [5, 0]
+  - id: mocock
+    count: 1
+    interval: 1.0
+    first_delay: 44.0
+    path:
+      - [4, 6]
+      - [4, 5]
+      - [5, 0]
+  - id: mocock
+    count: 1
+    interval: 1.0
+    first_delay: 49.0
+    path:
+      - [0, 3]
+      - [8, 3]

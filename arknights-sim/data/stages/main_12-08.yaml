@@ -1,0 +1,189 @@
+id: main_12-08
+name: "main_12-08"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 7
+  tiles:
+    - {x: 3, y: 6, type: goal}
+    - {x: 7, y: 6, type: ground}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: ground}
+    - {x: 8, y: 5, type: ground}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: ground}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: goal}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: ground}
+    - {x: 10, y: 3, type: ground}
+    - {x: 11, y: 3, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: ground}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 0, y: 1, type: goal}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+enemies:
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 5]
+      - [3, 2]
+      - [3, 6]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 1]
+      - [3, 4]
+      - [0, 1]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: wdnjd
+    count: 2
+    interval: 35.0
+    first_delay: 7.0
+    path:
+      - [11, 3]
+      - [0, 3]
+  - id: 2_wdnjd
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [5, 1]
+      - [0, 1]
+  - id: 2_wdnjd
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [7, 6]
+      - [3, 6]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [5, 1]
+      - [6, 1]
+      - [5, 4]
+      - [0, 1]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [7, 6]
+      - [7, 5]
+      - [3, 2]
+      - [3, 6]
+  - id: demon
+    count: 2
+    interval: 20.0
+    first_delay: 25.0
+    path:
+      - [5, 1]
+      - [0, 1]
+  - id: wdpjd
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: wdexg
+    count: 2
+    interval: 25.0
+    first_delay: 35.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: 2_wdnjd
+    count: 2
+    interval: 15.0
+    first_delay: 45.0
+    path:
+      - [7, 6]
+      - [3, 6]
+  - id: wdpjd
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: wdnjd
+    count: 1
+    interval: 13.0
+    first_delay: 75.0
+    path:
+      - [5, 1]
+      - [0, 1]
+  - id: wdpjd
+    count: 1
+    interval: 1.0
+    first_delay: 80.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]
+  - id: wdnjd
+    count: 1
+    interval: 9.0
+    first_delay: 85.0
+    path:
+      - [7, 6]
+      - [3, 6]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 95.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [0, 3]

@@ -1,0 +1,207 @@
+id: main_13-16
+name: "main_13-16"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 3, y: 7, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: goal}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: ground}
+    - {x: 9, y: 5, type: ground}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: ground}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: ground}
+    - {x: 10, y: 4, type: ground}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 2, y: 3, type: ground}
+    - {x: 3, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 11, y: 3, type: goal}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: ground}
+    - {x: 3, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+enemies:
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 6]
+      - [10, 6]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [0, 4]
+      - [3, 4]
+      - [11, 3]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [0, 2]
+      - [3, 2]
+      - [11, 3]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 4]
+      - [2, 4]
+      - [11, 3]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [11, 3]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 2]
+      - [2, 2]
+      - [11, 3]
+  - id: dfello
+    count: 4
+    interval: 15.0
+    first_delay: 5.0
+    path:
+      - [0, 4]
+      - [11, 3]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 5.0
+    path:
+      - [0, 4]
+      - [11, 3]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 9.0
+    path:
+      - [0, 2]
+      - [11, 3]
+  - id: dfello
+    count: 4
+    interval: 15.0
+    first_delay: 10.0
+    path:
+      - [0, 3]
+      - [11, 3]
+  - id: dfello
+    count: 4
+    interval: 15.0
+    first_delay: 15.0
+    path:
+      - [0, 2]
+      - [11, 3]
+  - id: dfello
+    count: 3
+    interval: 6.0
+    first_delay: 15.0
+    path:
+      - [0, 4]
+      - [11, 3]
+  - id: dfello
+    count: 3
+    interval: 6.0
+    first_delay: 19.0
+    path:
+      - [0, 2]
+      - [11, 3]
+  - id: spilot
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [10, 6]
+  - id: dcolle
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [9, 1]
+      - [3, 1]
+      - [3, 3]
+      - [11, 3]
+  - id: dcolle
+    count: 1
+    interval: 1.0
+    first_delay: 80.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [9, 1]
+      - [3, 1]
+      - [3, 3]
+      - [11, 3]
+  - id: spnshd
+    count: 2
+    interval: 45.0
+    first_delay: 85.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [10, 6]
+  - id: dcolle
+    count: 1
+    interval: 1.0
+    first_delay: 95.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [9, 1]
+      - [3, 1]
+      - [3, 2]
+      - [3, 3]
+      - [11, 3]

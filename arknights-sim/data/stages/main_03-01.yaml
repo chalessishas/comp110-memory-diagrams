@@ -1,0 +1,251 @@
+id: main_03-01
+name: "main_03-01"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_ranged}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_ranged}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_ranged}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: goal}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: goal}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_ranged}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_ranged}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: goal}
+enemies:
+  - id: 2_slime
+    count: 3
+    interval: 7.0
+    first_delay: 6.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: 2_slime
+    count: 3
+    interval: 7.0
+    first_delay: 8.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 2_slime
+    count: 3
+    interval: 7.0
+    first_delay: 10.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: 3_slime
+    count: 4
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 2_yokai
+    count: 4
+    interval: 8.0
+    first_delay: 12.0
+    path:
+      - [0, 4]
+      - [10, 4]
+  - id: 3
+    count: 3
+    interval: 16.0
+    first_delay: 14.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 3
+    count: 3
+    interval: 16.0
+    first_delay: 15.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: 3
+    count: 3
+    interval: 16.0
+    first_delay: 16.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: wizard
+    count: 3
+    interval: 16.0
+    first_delay: 17.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 2_yokai
+    count: 4
+    interval: 8.0
+    first_delay: 17.0
+    path:
+      - [0, 2]
+      - [10, 2]
+  - id: wizard
+    count: 3
+    interval: 16.0
+    first_delay: 18.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: 3_slime
+    count: 4
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: wizard
+    count: 3
+    interval: 16.0
+    first_delay: 19.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: 3_slime
+    count: 4
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: 2_gopro
+    count: 3
+    interval: 13.0
+    first_delay: 25.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: 2_gopro
+    count: 3
+    interval: 13.0
+    first_delay: 25.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 2_gopro
+    count: 3
+    interval: 13.0
+    first_delay: 25.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: 2_ncbow
+    count: 3
+    interval: 3.0
+    first_delay: 29.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: ncbow
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: handax
+    count: 2
+    interval: 10.0
+    first_delay: 31.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: 2_ncbow
+    count: 3
+    interval: 3.0
+    first_delay: 33.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: ncbow
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: 2_ncbow
+    count: 2
+    interval: 8.0
+    first_delay: 39.0
+    path:
+      - [0, 4]
+      - [10, 2]
+  - id: 2_ncbow
+    count: 2
+    interval: 8.0
+    first_delay: 43.0
+    path:
+      - [0, 2]
+      - [10, 4]
+  - id: lurker
+    count: 2
+    interval: 5.0
+    first_delay: 58.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: lurker
+    count: 2
+    interval: 5.0
+    first_delay: 59.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [10, 3]
+  - id: lurker
+    count: 3
+    interval: 6.0
+    first_delay: 62.0
+    path:
+      - [0, 3]
+      - [10, 3]
+  - id: lurker
+    count: 3
+    interval: 6.0
+    first_delay: 63.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [10, 3]
+  - id: lurker
+    count: 3
+    interval: 6.0
+    first_delay: 64.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [9, 3]
+      - [10, 3]

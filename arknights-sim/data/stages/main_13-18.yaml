@@ -1,0 +1,248 @@
+id: main_13-18
+name: "main_13-18"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: ground}
+    - {x: 3, y: 5, type: ground}
+    - {x: 4, y: 5, type: ground}
+    - {x: 5, y: 5, type: ground}
+    - {x: 6, y: 5, type: ground}
+    - {x: 7, y: 5, type: ground}
+    - {x: 8, y: 5, type: ground}
+    - {x: 9, y: 5, type: ground}
+    - {x: 10, y: 5, type: ground}
+    - {x: 0, y: 4, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: ground}
+    - {x: 5, y: 4, type: ground}
+    - {x: 6, y: 4, type: ground}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: ground}
+    - {x: 0, y: 3, type: goal}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: ground}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: ground}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 11, y: 3, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: ground}
+    - {x: 3, y: 2, type: ground}
+    - {x: 4, y: 2, type: ground}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: ground}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 10, y: 2, type: ground}
+enemies:
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 4]
+      - [4, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 4]
+      - [6, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 3]
+      - [4, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 3]
+      - [6, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: spnaxe
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 4]
+      - [5, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: spnaxe
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 3]
+      - [5, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [11, 4]
+      - [10, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: 2_darmy
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [11, 4]
+      - [10, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: 2_darmy
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [8, 3]
+      - [8, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 18.0
+    path:
+      - [11, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 18.0
+    path:
+      - [11, 3]
+      - [8, 3]
+      - [8, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [11, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: 2_darmy
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [11, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: 2_darmy
+    count: 2
+    interval: 10.0
+    first_delay: 23.0
+    path:
+      - [11, 3]
+      - [8, 3]
+      - [8, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [11, 4]
+      - [10, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [8, 3]
+      - [8, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [11, 4]
+      - [10, 4]
+      - [8, 4]
+      - [8, 5]
+      - [2, 5]
+      - [2, 4]
+      - [0, 4]
+  - id: dthrow
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [11, 3]
+      - [10, 3]
+      - [8, 3]
+      - [8, 2]
+      - [2, 2]
+      - [2, 3]
+      - [0, 3]

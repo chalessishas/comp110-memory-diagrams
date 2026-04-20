@@ -1,0 +1,127 @@
+id: main_11-17
+name: "main_11-17"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 5, y: 6, type: ground}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: goal}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 2, y: 3, type: ground}
+    - {x: 3, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: ground}
+    - {x: 8, y: 3, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: ground}
+    - {x: 3, y: 2, type: ground}
+    - {x: 4, y: 2, type: ground}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: ground}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: ground}
+enemies:
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [1, 2]
+      - [3, 2]
+      - [3, 3]
+      - [4, 3]
+      - [4, 5]
+      - [5, 5]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]
+  - id: nhpbr
+    count: 2
+    interval: 2.0
+    first_delay: 7.0
+    path:
+      - [1, 2]
+      - [3, 2]
+      - [3, 3]
+      - [5, 3]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]
+  - id: stmkgt2
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [8, 2]
+      - [7, 2]
+      - [7, 3]
+      - [5, 3]
+      - [5, 4]
+      - [4, 4]
+      - [4, 5]
+      - [5, 5]
+      - [7, 5]
+  - id: nhpbr
+    count: 2
+    interval: 2.0
+    first_delay: 16.0
+    path:
+      - [1, 2]
+      - [4, 2]
+      - [4, 3]
+      - [5, 3]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]
+  - id: nhpbr
+    count: 2
+    interval: 2.0
+    first_delay: 21.0
+    path:
+      - [1, 2]
+      - [4, 2]
+      - [4, 5]
+      - [5, 5]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]
+  - id: nhstlk
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [1, 2]
+      - [2, 2]
+      - [2, 3]
+      - [4, 3]
+      - [4, 5]
+      - [5, 5]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]
+  - id: 2_stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 51.0
+    path:
+      - [5, 2]
+      - [5, 6]
+      - [7, 6]
+      - [7, 5]

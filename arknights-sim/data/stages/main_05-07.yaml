@@ -1,0 +1,435 @@
+id: main_05-07
+name: "main_05-07"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 10, y: 7, type: ground}
+    - {x: 0, y: 6, type: goal}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: ground}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: ground}
+    - {x: 11, y: 6, type: ground}
+    - {x: 0, y: 5, type: goal}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: ground}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: ground}
+    - {x: 11, y: 5, type: ground}
+    - {x: 0, y: 4, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: ground}
+    - {x: 11, y: 4, type: ground}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: ground}
+    - {x: 11, y: 2, type: ground}
+    - {x: 0, y: 1, type: goal}
+    - {x: 1, y: 1, type: ground}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: ground}
+    - {x: 11, y: 1, type: ground}
+enemies:
+  - id: frostd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 6]
+      - [0, 6]
+  - id: frostd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 2]
+      - [0, 2]
+  - id: frostd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 4]
+      - [0, 4]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 4.0
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 4.3
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 4.5
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 4.8
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 5.0
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 5.3
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: breakr
+    count: 1
+    interval: 0.5
+    first_delay: 13.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 14.0
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 14.3
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 14.5
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 14.8
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 15.0
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: lazerd
+    count: 3
+    interval: 1.5
+    first_delay: 15.0
+    path:
+      - [10, 7]
+      - [8, 0]
+      - [6, 7]
+      - [3, 0]
+      - [2, 7]
+      - [0, 1]
+  - id: 3_slime
+    count: 3
+    interval: 10.0
+    first_delay: 15.3
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: lunsbr
+    count: 3
+    interval: 10.0
+    first_delay: 17.0
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]
+  - id: 2_litamr
+    count: 2
+    interval: 13.0
+    first_delay: 17.0
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: lazerd
+    count: 3
+    interval: 1.5
+    first_delay: 19.0
+    path:
+      - [10, 7]
+      - [8, 0]
+      - [6, 7]
+      - [3, 0]
+      - [2, 7]
+      - [0, 1]
+  - id: 2_litamr
+    count: 3
+    interval: 8.0
+    first_delay: 19.0
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: lunsbr
+    count: 3
+    interval: 8.0
+    first_delay: 19.0
+    path:
+      - [11, 4]
+      - [9, 4]
+      - [0, 5]
+  - id: breakr
+    count: 1
+    interval: 0.5
+    first_delay: 21.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: lunsbr
+    count: 3
+    interval: 9.0
+    first_delay: 23.0
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: lunsbr
+    count: 3
+    interval: 9.0
+    first_delay: 23.5
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: 2_litamr
+    count: 1
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: lazerd
+    count: 3
+    interval: 1.5
+    first_delay: 27.0
+    path:
+      - [10, 7]
+      - [8, 0]
+      - [6, 7]
+      - [3, 0]
+      - [2, 7]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 0.5
+    first_delay: 28.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 29.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: lazerd
+    count: 3
+    interval: 1.5
+    first_delay: 29.0
+    path:
+      - [10, 7]
+      - [8, 0]
+      - [6, 7]
+      - [3, 0]
+      - [2, 7]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 29.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 32.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: lunsbr
+    count: 2
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: lazerd
+    count: 1
+    interval: 4.0
+    first_delay: 36.0
+    path:
+      - [11, 5]
+      - [4, 5]
+      - [0, 5]
+  - id: lazerd
+    count: 1
+    interval: 4.0
+    first_delay: 36.0
+    path:
+      - [11, 3]
+      - [7, 3]
+      - [0, 3]
+  - id: lazerd
+    count: 1
+    interval: 4.0
+    first_delay: 37.0
+    path:
+      - [11, 6]
+      - [5, 6]
+      - [0, 6]
+  - id: lazerd
+    count: 3
+    interval: 1.5
+    first_delay: 39.0
+    path:
+      - [10, 7]
+      - [8, 0]
+      - [6, 7]
+      - [3, 0]
+      - [2, 7]
+      - [0, 1]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [11, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 42.0
+    path:
+      - [11, 6]
+      - [9, 6]
+      - [0, 5]

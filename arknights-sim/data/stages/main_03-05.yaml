@@ -1,0 +1,444 @@
+id: main_03-05
+name: "main_03-05"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: goal}
+    - {x: 1, y: 6, type: deployment_melee}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_ranged}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_ranged}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_ranged}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: ground}
+enemies:
+  - id: jmage
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: jmage
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: jmage
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 7.0
+    first_delay: 46.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: jmage
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: 2_gopro
+    count: 2
+    interval: 7.0
+    first_delay: 48.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 5.0
+    first_delay: 58.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: jshoot
+    count: 1
+    interval: 1.0
+    first_delay: 62.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 18.0
+    first_delay: 62.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 11.0
+    first_delay: 67.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 68.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: jmage
+    count: 2
+    interval: 12.0
+    first_delay: 69.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: 2_yokai
+    count: 2
+    interval: 13.0
+    first_delay: 69.0
+    path:
+      - [10, 1]
+      - [0, 6]
+  - id: 2_gopro
+    count: 3
+    interval: 3.0
+    first_delay: 79.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: jshoot
+    count: 2
+    interval: 8.0
+    first_delay: 83.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: 2_yokai
+    count: 2
+    interval: 4.0
+    first_delay: 103.0
+    path:
+      - [10, 1]
+      - [0, 6]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 104.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 109.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: jshoot
+    count: 2
+    interval: 5.0
+    first_delay: 110.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 9.0
+    first_delay: 110.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: laxe
+    count: 1
+    interval: 1.0
+    first_delay: 110.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 1
+    interval: 1.0
+    first_delay: 118.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 7.0
+    first_delay: 125.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 12.0
+    first_delay: 126.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: jshoot
+    count: 2
+    interval: 14.0
+    first_delay: 130.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: 2_yokai
+    count: 3
+    interval: 9.0
+    first_delay: 130.0
+    path:
+      - [10, 1]
+      - [0, 6]
+  - id: jmage
+    count: 2
+    interval: 8.0
+    first_delay: 135.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: 2_gopro
+    count: 4
+    interval: 4.0
+    first_delay: 140.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 1
+    interval: 1.0
+    first_delay: 149.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: jshoot
+    count: 1
+    interval: 1.0
+    first_delay: 152.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: handax
+    count: 1
+    interval: 1.0
+    first_delay: 155.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [2, 4]
+      - [2, 6]
+      - [0, 6]
+  - id: aoemag
+    count: 1
+    interval: 1.0
+    first_delay: 155.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [9, 4]
+      - [3, 4]
+      - [3, 6]
+      - [0, 6]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 155.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 156.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: lurker
+    count: 2
+    interval: 4.0
+    first_delay: 157.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]
+  - id: yokai
+    count: 3
+    interval: 1.5
+    first_delay: 157.0
+    path:
+      - [10, 1]
+      - [0, 6]
+  - id: 2_yokai
+    count: 2
+    interval: 3.0
+    first_delay: 162.0
+    path:
+      - [10, 1]
+      - [0, 6]
+  - id: laxe
+    count: 1
+    interval: 1.0
+    first_delay: 165.0
+    path:
+      - [10, 1]
+      - [6, 1]
+      - [6, 2]
+      - [2, 6]
+      - [0, 6]

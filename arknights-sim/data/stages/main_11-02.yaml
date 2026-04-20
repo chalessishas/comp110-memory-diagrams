@@ -1,0 +1,170 @@
+id: main_11-02
+name: "main_11-02"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 9
+  height: 7
+  tiles:
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: ground}
+    - {x: 3, y: 5, type: ground}
+    - {x: 4, y: 5, type: ground}
+    - {x: 5, y: 5, type: ground}
+    - {x: 6, y: 5, type: ground}
+    - {x: 7, y: 5, type: ground}
+    - {x: 8, y: 5, type: ground}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: goal}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: goal}
+enemies:
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [0, 5]
+      - [6, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 5]
+      - [2, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: darmy
+    count: 2
+    interval: 5.0
+    first_delay: 18.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: nhpbr
+    count: 1
+    interval: 5.0
+    first_delay: 20.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: darmy
+    count: 2
+    interval: 8.0
+    first_delay: 25.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: nhpbr
+    count: 3
+    interval: 5.0
+    first_delay: 27.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: nhpbr
+    count: 4
+    interval: 5.0
+    first_delay: 28.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: darmy
+    count: 1
+    interval: 5.0
+    first_delay: 32.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: darmy
+    count: 3
+    interval: 5.0
+    first_delay: 38.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: nhpbr
+    count: 5
+    interval: 6.0
+    first_delay: 40.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: dwlock
+    count: 1
+    interval: 30.0
+    first_delay: 45.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: darmy
+    count: 2
+    interval: 3.0
+    first_delay: 50.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: nhpbr
+    count: 5
+    interval: 3.0
+    first_delay: 65.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [8, 5]
+      - [8, 1]
+  - id: darmy
+    count: 3
+    interval: 3.0
+    first_delay: 75.0
+    path:
+      - [0, 2]
+      - [8, 2]
+  - id: dwlock
+    count: 1
+    interval: 30.0
+    first_delay: 90.0
+    path:
+      - [0, 2]
+      - [1, 2]
+      - [8, 2]

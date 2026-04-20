@@ -1,0 +1,307 @@
+id: main_09-10
+name: "main_09-10"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 9
+  tiles:
+    - {x: 0, y: 7, type: ground}
+    - {x: 1, y: 7, type: ground}
+    - {x: 2, y: 7, type: ground}
+    - {x: 3, y: 7, type: deployment_melee}
+    - {x: 4, y: 7, type: deployment_melee}
+    - {x: 5, y: 7, type: deployment_melee}
+    - {x: 6, y: 7, type: deployment_melee}
+    - {x: 7, y: 7, type: deployment_melee}
+    - {x: 1, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: ground}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 0, y: 5, type: goal}
+    - {x: 1, y: 5, type: ground}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: ground}
+    - {x: 6, y: 5, type: ground}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: ground}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: ground}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: ground}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: ground}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+enemies:
+  - id: dusbr
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dusbr
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dusbr
+    count: 2
+    interval: 1.0
+    first_delay: 19.5
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: durokt
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: dusbr
+    count: 2
+    interval: 2.0
+    first_delay: 27.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: durokt
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: dumage
+    count: 3
+    interval: 15.0
+    first_delay: 30.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: dushld
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dushld
+    count: 2
+    interval: 20.0
+    first_delay: 30.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dugago
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [0, 5]
+  - id: dusbr
+    count: 2
+    interval: 2.0
+    first_delay: 36.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: durokt
+    count: 2
+    interval: 3.0
+    first_delay: 38.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: dumage
+    count: 2
+    interval: 20.0
+    first_delay: 38.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dushld
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dushld
+    count: 2
+    interval: 15.0
+    first_delay: 40.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dusbr
+    count: 2
+    interval: 2.0
+    first_delay: 46.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: durokt
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: durokt
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dushld
+    count: 2
+    interval: 5.0
+    first_delay: 50.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: durokt
+    count: 2
+    interval: 3.0
+    first_delay: 52.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: durokt
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [6, 3]
+      - [0, 5]
+  - id: dumage
+    count: 1
+    interval: 1.0
+    first_delay: 59.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dugago
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 7]
+      - [0, 5]
+  - id: dumage
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dushld
+    count: 2
+    interval: 5.0
+    first_delay: 65.0
+    path:
+      - [0, 7]
+      - [1, 7]
+      - [0, 5]
+  - id: dugago
+    count: 1
+    interval: 1.0
+    first_delay: 70.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [0, 5]
+  - id: dugago
+    count: 1
+    interval: 1.0
+    first_delay: 75.0
+    path:
+      - [0, 7]
+      - [0, 5]

@@ -1,0 +1,312 @@
+id: main_07-11
+name: "main_07-11"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 8, y: 7, type: ground}
+    - {x: 9, y: 7, type: ground}
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: ground}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: ground}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: ground}
+    - {x: 10, y: 2, type: ground}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 5, y: 1, type: goal}
+    - {x: 6, y: 1, type: goal}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: ground}
+    - {x: 10, y: 1, type: goal}
+enemies:
+  - id: sotisd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [8, 5]
+      - [8, 7]
+      - [2, 1]
+      - [2, 2]
+      - [0, 2]
+      - [8, 2]
+      - [8, 1]
+      - [10, 1]
+  - id: sotisd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 2]
+      - [0, 2]
+      - [8, 2]
+      - [8, 1]
+      - [10, 1]
+  - id: sotisc
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 6]
+      - [8, 7]
+      - [1, 1]
+      - [1, 2]
+      - [0, 2]
+      - [9, 2]
+      - [9, 1]
+      - [10, 1]
+  - id: sotisp
+    count: 2
+    interval: 10.0
+    first_delay: 6.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 3
+    interval: 6.0
+    first_delay: 6.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotisc
+    count: 2
+    interval: 6.0
+    first_delay: 7.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotihd
+    count: 3
+    interval: 4.0
+    first_delay: 9.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 3
+    interval: 7.0
+    first_delay: 11.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotihd
+    count: 2
+    interval: 4.0
+    first_delay: 13.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 6]
+      - [8, 7]
+      - [1, 1]
+      - [1, 2]
+      - [0, 2]
+      - [9, 2]
+      - [9, 1]
+      - [10, 1]
+  - id: sotihd
+    count: 2
+    interval: 6.0
+    first_delay: 13.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 6]
+      - [8, 7]
+      - [1, 1]
+      - [1, 2]
+      - [0, 2]
+      - [9, 2]
+      - [9, 1]
+      - [10, 1]
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 6]
+      - [8, 7]
+      - [1, 1]
+      - [1, 2]
+      - [0, 2]
+      - [9, 2]
+      - [9, 1]
+      - [10, 1]
+  - id: sotisp
+    count: 3
+    interval: 10.0
+    first_delay: 15.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 3
+    interval: 6.0
+    first_delay: 16.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotisp
+    count: 3
+    interval: 8.0
+    first_delay: 16.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotihd
+    count: 3
+    interval: 5.0
+    first_delay: 23.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotihd
+    count: 3
+    interval: 5.0
+    first_delay: 25.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]
+  - id: sotisc
+    count: 2
+    interval: 6.0
+    first_delay: 27.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotisc
+    count: 4
+    interval: 6.0
+    first_delay: 32.0
+    path:
+      - [0, 5]
+      - [4, 5]
+      - [4, 4]
+      - [5, 4]
+      - [5, 1]
+  - id: sotihd
+    count: 2
+    interval: 6.0
+    first_delay: 33.0
+    path:
+      - [0, 6]
+      - [5, 6]
+      - [5, 5]
+      - [6, 5]
+      - [6, 1]

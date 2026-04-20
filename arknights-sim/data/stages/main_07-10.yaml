@@ -1,0 +1,286 @@
+id: main_07-10
+name: "main_07-10"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 13
+  height: 9
+  tiles:
+    - {x: 1, y: 8, type: ground}
+    - {x: 9, y: 8, type: ground}
+    - {x: 1, y: 7, type: ground}
+    - {x: 2, y: 7, type: deployment_melee}
+    - {x: 3, y: 7, type: deployment_melee}
+    - {x: 4, y: 7, type: deployment_melee}
+    - {x: 5, y: 7, type: deployment_melee}
+    - {x: 6, y: 7, type: deployment_melee}
+    - {x: 7, y: 7, type: deployment_melee}
+    - {x: 8, y: 7, type: deployment_melee}
+    - {x: 9, y: 7, type: ground}
+    - {x: 10, y: 7, type: deployment_melee}
+    - {x: 11, y: 7, type: deployment_melee}
+    - {x: 1, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 11, y: 6, type: deployment_melee}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: ground}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 11, y: 5, type: ground}
+    - {x: 12, y: 5, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 11, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: goal}
+    - {x: 11, y: 2, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+    - {x: 11, y: 1, type: deployment_melee}
+enemies:
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [9, 7]
+      - [0, 2]
+  - id: sotidp
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [1, 7]
+      - [0, 2]
+  - id: sotisc
+    count: 4
+    interval: 7.0
+    first_delay: 3.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotihd
+    count: 2
+    interval: 5.0
+    first_delay: 6.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: sotidp
+    count: 2
+    interval: 10.0
+    first_delay: 6.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: sotidp
+    count: 3
+    interval: 10.0
+    first_delay: 6.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: sotidp
+    count: 2
+    interval: 10.0
+    first_delay: 7.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: sotisc
+    count: 2
+    interval: 10.0
+    first_delay: 7.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotisc
+    count: 2
+    interval: 5.0
+    first_delay: 8.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: 3_sotidm
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [12, 5]
+  - id: 3_sotidm
+    count: 2
+    interval: 10.0
+    first_delay: 8.0
+    path:
+      - [0, 5]
+      - [12, 5]
+  - id: sotisp
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: 3_sotiwz
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [12, 5]
+  - id: sotisc
+    count: 2
+    interval: 5.0
+    first_delay: 13.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: 3_sotiwz
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [12, 5]
+  - id: 2_sotidm
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 5]
+      - [12, 5]
+  - id: sotisp
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotidp
+    count: 2
+    interval: 5.0
+    first_delay: 15.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: sotisc
+    count: 3
+    interval: 7.0
+    first_delay: 18.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotisc
+    count: 3
+    interval: 7.0
+    first_delay: 20.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotisp
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: 3_sotidm
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [12, 5]
+  - id: sotihd
+    count: 2
+    interval: 5.0
+    first_delay: 23.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: 3_sotiwz
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [0, 5]
+      - [12, 5]
+  - id: sotisc
+    count: 3
+    interval: 7.0
+    first_delay: 23.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: sotisc
+    count: 2
+    interval: 5.0
+    first_delay: 25.0
+    path:
+      - [9, 8]
+      - [9, 2]
+  - id: 3_sotiwz
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 5]
+      - [12, 5]
+  - id: sotihd
+    count: 3
+    interval: 6.0
+    first_delay: 28.0
+    path:
+      - [1, 8]
+      - [0, 2]
+  - id: 2_sotidm
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [0, 5]
+      - [12, 5]
+  - id: sotisc
+    count: 2
+    interval: 5.0
+    first_delay: 37.0
+    path:
+      - [9, 8]
+      - [9, 2]

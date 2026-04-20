@@ -1,0 +1,210 @@
+id: main_11-16
+name: "main_11-16"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: ground}
+    - {x: 10, y: 6, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_ranged}
+    - {x: 1, y: 2, type: goal}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 1, y: 1, type: goal}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: ground}
+    - {x: 10, y: 1, type: ground}
+enemies:
+  - id: stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 1.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [1, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [1, 1]
+  - id: stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [1, 2]
+  - id: stmram
+    count: 2
+    interval: 2.0
+    first_delay: 6.0
+    path:
+      - [10, 6]
+      - [1, 2]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [1, 1]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 9.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: nhtank
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [1, 2]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: darmy
+    count: 1
+    interval: 1.5
+    first_delay: 11.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: darmy
+    count: 1
+    interval: 1.5
+    first_delay: 11.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: darmy
+    count: 1
+    interval: 1.5
+    first_delay: 12.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: stmram
+    count: 1
+    interval: 1.0
+    first_delay: 12.0
+    path:
+      - [10, 6]
+      - [1, 2]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 12.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: nhtank
+    count: 1
+    interval: 2.0
+    first_delay: 12.0
+    path:
+      - [10, 6]
+      - [1, 2]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 12.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: nhtank
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [10, 6]
+      - [1, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [1, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.5
+    first_delay: 16.0
+    path:
+      - [10, 1]
+      - [1, 1]
+  - id: stmram
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [1, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [1, 1]

@@ -1,0 +1,388 @@
+id: main_04-09
+name: "main_04-09"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 5, y: 7, type: ground}
+    - {x: 8, y: 7, type: ground}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: ground}
+    - {x: 5, y: 6, type: ground}
+    - {x: 8, y: 6, type: ground}
+    - {x: 3, y: 5, type: ground}
+    - {x: 8, y: 5, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: ground}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 3, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 0, y: 1, type: goal}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: ground}
+    - {x: 10, y: 1, type: goal}
+enemies:
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 2
+    interval: 2.0
+    first_delay: 13.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 2
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: 3
+    count: 2
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: dcross
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: dcross
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: 2_rogue
+    count: 2
+    interval: 4.0
+    first_delay: 18.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: nsabr
+    count: 2
+    interval: 2.0
+    first_delay: 19.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: nsabr
+    count: 2
+    interval: 4.0
+    first_delay: 22.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: 3
+    count: 2
+    interval: 0.5
+    first_delay: 25.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: bslime
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: bslime
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: bslime
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: nsabr
+    count: 2
+    interval: 0.8
+    first_delay: 28.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: dmage
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: dmage
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: nsabr
+    count: 2
+    interval: 2.0
+    first_delay: 33.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 2_rogue
+    count: 1
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 2
+    interval: 0.5
+    first_delay: 37.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 2
+    interval: 1.0
+    first_delay: 37.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: nsabr
+    count: 2
+    interval: 1.5
+    first_delay: 39.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: 3
+    count: 2
+    interval: 1.5
+    first_delay: 44.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: nsabr
+    count: 2
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: dcross
+    count: 1
+    interval: 1.0
+    first_delay: 52.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: dmage
+    count: 1
+    interval: 1.0
+    first_delay: 58.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: dmage
+    count: 1
+    interval: 1.0
+    first_delay: 58.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 66.0
+    path:
+      - [5, 7]
+      - [5, 6]
+      - [3, 6]
+      - [3, 1]
+      - [0, 1]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 66.0
+    path:
+      - [8, 7]
+      - [8, 4]
+      - [6, 4]
+      - [6, 1]
+      - [10, 1]

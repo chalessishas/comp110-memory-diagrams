@@ -1,0 +1,426 @@
+id: main_08-06
+name: "main_08-06"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 3, y: 7, type: ground}
+    - {x: 3, y: 6, type: ground}
+    - {x: 4, y: 6, type: ground}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: deployment_melee}
+    - {x: 3, y: 5, type: ground}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: goal}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 2, y: 3, type: ground}
+    - {x: 4, y: 2, type: ground}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: ground}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: goal}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+enemies:
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 1]
+      - [4, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [7, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [8, 2]
+      - [11, 2]
+  - id: ftrtal
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [11, 2]
+      - [9, 2]
+      - [6, 2]
+      - [4, 2]
+      - [5, 1]
+      - [5, 1]
+      - [0, 1]
+  - id: uterer
+    count: 4
+    interval: 6.0
+    first_delay: 8.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uterer
+    count: 2
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uterer
+    count: 10
+    interval: 4.0
+    first_delay: 10.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uamord
+    count: 4
+    interval: 10.0
+    first_delay: 10.0
+    path:
+      - [0, 1]
+      - [4, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uterer
+    count: 5
+    interval: 6.0
+    first_delay: 11.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uoffcr
+    count: 3
+    interval: 6.0
+    first_delay: 13.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 2
+    interval: 15.0
+    first_delay: 13.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uamord
+    count: 3
+    interval: 12.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [4, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 4
+    interval: 10.0
+    first_delay: 13.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 2
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uterer
+    count: 2
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 2
+    interval: 12.0
+    first_delay: 22.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uterer
+    count: 2
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 2
+    interval: 15.0
+    first_delay: 30.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uterer
+    count: 2
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [2, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 1]
+      - [4, 1]
+      - [5, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 48.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [4, 5]
+      - [6, 5]
+      - [6, 4]
+      - [8, 4]
+      - [8, 6]
+      - [10, 6]
+      - [10, 4]
+      - [11, 4]

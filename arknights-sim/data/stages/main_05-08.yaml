@@ -1,0 +1,580 @@
+id: main_05-08
+name: "main_05-08"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 8, y: 7, type: ground}
+    - {x: 9, y: 7, type: ground}
+    - {x: 10, y: 7, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: ground}
+    - {x: 10, y: 6, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: goal}
+    - {x: 1, y: 3, type: ground}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+enemies:
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 5]
+      - [6, 5]
+      - [6, 4]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [9, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [4, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 3]
+      - [9, 2]
+      - [7, 2]
+      - [6, 1]
+      - [4, 1]
+      - [4, 2]
+      - [0, 3]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [7, 5]
+      - [6, 5]
+      - [5, 4]
+      - [4, 3]
+      - [2, 3]
+      - [0, 3]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: 2_laxe
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 3]
+      - [10, 2]
+      - [8, 2]
+      - [6, 1]
+      - [4, 1]
+      - [3, 2]
+      - [0, 2]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 4]
+      - [10, 2]
+      - [8, 2]
+      - [6, 1]
+      - [4, 1]
+      - [3, 2]
+      - [0, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [7, 6]
+      - [6, 6]
+      - [5, 6]
+      - [3, 6]
+      - [2, 5]
+      - [2, 4]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [5, 4]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [5, 4]
+      - [5, 3]
+      - [3, 3]
+      - [0, 3]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [8, 7]
+      - [7, 6]
+      - [7, 6]
+      - [5, 6]
+      - [4, 6]
+      - [3, 6]
+      - [2, 5]
+      - [2, 4]
+      - [2, 3]
+      - [0, 3]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 19.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 4]
+      - [10, 2]
+      - [8, 2]
+      - [7, 2]
+      - [6, 1]
+      - [4, 1]
+      - [3, 2]
+      - [2, 2]
+      - [0, 2]
+  - id: breakr
+    count: 2
+    interval: 5.0
+    first_delay: 20.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 4]
+      - [10, 2]
+      - [8, 2]
+      - [6, 1]
+      - [4, 1]
+      - [3, 2]
+      - [0, 2]
+  - id: wteeth
+    count: 3
+    interval: 4.0
+    first_delay: 20.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [6, 6]
+      - [5, 6]
+      - [3, 6]
+      - [2, 5]
+      - [2, 4]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 2
+    interval: 5.0
+    first_delay: 23.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [9, 5]
+      - [8, 5]
+      - [6, 4]
+      - [5, 3]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 25.0
+    path:
+      - [8, 7]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [6, 5]
+      - [5, 3]
+      - [3, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [6, 5]
+      - [6, 3]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [9, 7]
+      - [9, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [7, 6]
+      - [6, 5]
+      - [6, 4]
+      - [5, 3]
+      - [4, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: breakr
+    count: 3
+    interval: 3.0
+    first_delay: 34.0
+    path:
+      - [10, 7]
+      - [10, 5]
+      - [10, 2]
+      - [8, 2]
+      - [7, 1]
+      - [4, 1]
+      - [3, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [10, 7]
+      - [10, 5]
+      - [10, 4]
+      - [10, 2]
+      - [7, 2]
+      - [5, 1]
+      - [3, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [6, 6]
+      - [5, 5]
+      - [5, 3]
+      - [3, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [6, 6]
+      - [4, 6]
+      - [2, 6]
+      - [2, 5]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [6, 5]
+      - [5, 3]
+      - [4, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: zomsbr
+    count: 4
+    interval: 3.0
+    first_delay: 41.0
+    path:
+      - [8, 7]
+      - [7, 6]
+      - [7, 6]
+      - [5, 6]
+      - [4, 6]
+      - [3, 6]
+      - [2, 5]
+      - [2, 4]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 43.0
+    path:
+      - [10, 7]
+      - [9, 6]
+      - [10, 5]
+      - [10, 2]
+      - [7, 2]
+      - [5, 1]
+      - [3, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 44.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [6, 5]
+      - [5, 4]
+      - [5, 3]
+      - [3, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 3
+    interval: 3.0
+    first_delay: 46.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [9, 5]
+      - [7, 5]
+      - [6, 4]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 47.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 2]
+      - [7, 2]
+      - [5, 1]
+      - [3, 2]
+      - [2, 3]
+      - [0, 3]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 47.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 6]
+      - [6, 5]
+      - [5, 4]
+      - [5, 3]
+      - [3, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: lunsbr
+    count: 3
+    interval: 5.0
+    first_delay: 47.0
+    path:
+      - [8, 7]
+      - [7, 6]
+      - [5, 6]
+      - [4, 6]
+      - [2, 6]
+      - [2, 4]
+      - [2, 3]
+      - [0, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 48.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [6, 5]
+      - [5, 4]
+      - [4, 3]
+      - [2, 2]
+      - [0, 2]
+  - id: breakr
+    count: 2
+    interval: 3.0
+    first_delay: 48.0
+    path:
+      - [10, 7]
+      - [10, 6]
+      - [10, 5]
+      - [10, 4]
+      - [10, 2]
+      - [8, 2]
+      - [7, 2]
+      - [6, 1]
+      - [4, 1]
+      - [3, 2]
+      - [2, 2]
+      - [0, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 54.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [7, 5]
+      - [6, 5]
+      - [5, 3]
+      - [3, 2]
+      - [0, 2]
+  - id: breakr
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [9, 7]
+      - [9, 6]
+      - [8, 5]
+      - [6, 5]
+      - [5, 4]
+      - [5, 3]
+      - [3, 3]
+      - [0, 3]

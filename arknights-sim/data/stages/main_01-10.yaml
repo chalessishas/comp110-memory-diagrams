@@ -1,0 +1,327 @@
+id: main_01-10
+name: "main_01-10"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 10
+  height: 8
+  tiles:
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: goal}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: goal}
+    - {x: 1, y: 0, type: ground}
+enemies:
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: slime
+    count: 3
+    interval: 3.0
+    first_delay: 9.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: shdsbr
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: slime
+    count: 2
+    interval: 3.0
+    first_delay: 13.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: slime
+    count: 6
+    interval: 3.0
+    first_delay: 13.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 2
+    interval: 4.0
+    first_delay: 13.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: 2_slime
+    count: 2
+    interval: 3.0
+    first_delay: 15.5
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: 2_slime
+    count: 3
+    interval: 6.0
+    first_delay: 16.5
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: 2_slime
+    count: 2
+    interval: 4.0
+    first_delay: 18.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 2
+    interval: 6.0
+    first_delay: 24.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: nsabr
+    count: 1
+    interval: 4.0
+    first_delay: 26.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 2
+    interval: 6.0
+    first_delay: 28.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: nsabr
+    count: 2
+    interval: 2.0
+    first_delay: 30.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: slime
+    count: 2
+    interval: 2.0
+    first_delay: 31.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: 2_slime
+    count: 2
+    interval: 4.0
+    first_delay: 32.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: gopro
+    count: 2
+    interval: 3.0
+    first_delay: 34.0
+    path:
+      - [0, 4]
+      - [4, 4]
+      - [4, 6]
+      - [9, 6]
+  - id: nsabr
+    count: 1
+    interval: 2.0
+    first_delay: 36.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: nsabr
+    count: 1
+    interval: 6.0
+    first_delay: 37.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 1
+    interval: 3.0
+    first_delay: 38.0
+    path:
+      - [0, 4]
+      - [4, 4]
+      - [4, 6]
+      - [9, 6]
+  - id: gopro
+    count: 1
+    interval: 2.0
+    first_delay: 48.0
+    path:
+      - [0, 4]
+      - [4, 4]
+      - [4, 6]
+      - [9, 6]
+  - id: mocock
+    count: 1
+    interval: 3.0
+    first_delay: 57.0
+    path:
+      - [0, 4]
+      - [4, 4]
+      - [4, 6]
+      - [9, 6]
+  - id: nsabr
+    count: 2
+    interval: 2.0
+    first_delay: 62.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: nsabr
+    count: 1
+    interval: 2.0
+    first_delay: 62.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: nsabr
+    count: 1
+    interval: 2.0
+    first_delay: 62.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: wteeth
+    count: 1
+    interval: 2.0
+    first_delay: 65.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 1
+    interval: 2.0
+    first_delay: 66.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 67.0
+    path:
+      - [0, 4]
+      - [7, 4]
+      - [7, 1]
+      - [9, 1]
+  - id: mocock
+    count: 2
+    interval: 2.0
+    first_delay: 70.0
+    path:
+      - [1, 0]
+      - [1, 1]
+      - [4, 1]
+      - [4, 3]
+      - [7, 3]
+      - [7, 1]
+      - [9, 1]

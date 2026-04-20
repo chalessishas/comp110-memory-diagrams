@@ -1,0 +1,399 @@
+id: main_08-17
+name: "main_08-17"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 15
+  height: 9
+  tiles:
+    - {x: 0, y: 8, type: ground}
+    - {x: 3, y: 8, type: ground}
+    - {x: 9, y: 8, type: goal}
+    - {x: 11, y: 8, type: ground}
+    - {x: 14, y: 8, type: ground}
+    - {x: 0, y: 7, type: ground}
+    - {x: 1, y: 7, type: ground}
+    - {x: 2, y: 7, type: ground}
+    - {x: 3, y: 7, type: deployment_melee}
+    - {x: 5, y: 7, type: deployment_melee}
+    - {x: 6, y: 7, type: deployment_melee}
+    - {x: 7, y: 7, type: deployment_melee}
+    - {x: 8, y: 7, type: deployment_melee}
+    - {x: 9, y: 7, type: deployment_melee}
+    - {x: 11, y: 7, type: deployment_melee}
+    - {x: 12, y: 7, type: deployment_melee}
+    - {x: 13, y: 7, type: ground}
+    - {x: 14, y: 7, type: ground}
+    - {x: 0, y: 6, type: ground}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 14, y: 6, type: ground}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: ground}
+    - {x: 3, y: 5, type: ground}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: ground}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: goal}
+    - {x: 10, y: 5, type: ground}
+    - {x: 11, y: 5, type: deployment_melee}
+    - {x: 12, y: 5, type: deployment_melee}
+    - {x: 13, y: 5, type: ground}
+    - {x: 14, y: 5, type: ground}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: ground}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 14, y: 4, type: ground}
+    - {x: 0, y: 3, type: ground}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 11, y: 3, type: ground}
+    - {x: 12, y: 3, type: deployment_melee}
+    - {x: 13, y: 3, type: ground}
+    - {x: 14, y: 3, type: ground}
+    - {x: 0, y: 2, type: ground}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 14, y: 2, type: ground}
+    - {x: 0, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: ground}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+    - {x: 11, y: 1, type: deployment_melee}
+    - {x: 12, y: 1, type: goal}
+    - {x: 14, y: 1, type: ground}
+    - {x: 0, y: 0, type: ground}
+    - {x: 14, y: 0, type: ground}
+enemies:
+  - id: bsnake
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [1, 7]
+      - [2, 7]
+      - [3, 7]
+      - [3, 8]
+      - [11, 5]
+      - [10, 5]
+      - [6, 1]
+      - [7, 1]
+      - [11, 7]
+      - [11, 7]
+      - [11, 8]
+      - [12, 3]
+      - [11, 3]
+      - [7, 5]
+      - [9, 5]
+  - id: uterer
+    count: 3
+    interval: 4.0
+    first_delay: 3.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 3
+    interval: 5.0
+    first_delay: 4.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 2
+    interval: 18.0
+    first_delay: 5.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 3
+    interval: 12.0
+    first_delay: 6.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [1, 4]
+      - [2, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 3
+    interval: 11.0
+    first_delay: 12.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 2
+    interval: 16.0
+    first_delay: 13.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 2
+    interval: 3.0
+    first_delay: 14.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 2
+    interval: 3.0
+    first_delay: 15.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [1, 4]
+      - [2, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 2
+    interval: 6.0
+    first_delay: 17.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: ucommd
+    count: 2
+    interval: 17.0
+    first_delay: 18.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uterer
+    count: 2
+    interval: 5.0
+    first_delay: 25.0
+    path:
+      - [1, 5]
+      - [2, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [1, 5]
+      - [2, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uamord
+    count: 2
+    interval: 10.0
+    first_delay: 28.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [1, 4]
+      - [2, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: ucommd
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [1, 5]
+      - [4, 5]
+      - [4, 6]
+      - [5, 6]
+      - [5, 7]
+      - [9, 7]
+      - [9, 8]
+  - id: uamord
+    count: 2
+    interval: 10.0
+    first_delay: 38.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [1, 4]
+      - [5, 4]
+      - [5, 3]
+      - [9, 3]
+      - [9, 1]
+      - [12, 1]

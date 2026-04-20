@@ -1,0 +1,167 @@
+id: main_11-14
+name: "main_11-14"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 10
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: goal}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+enemies:
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: nhpbr
+    count: 2
+    interval: 15.0
+    first_delay: 13.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 10.0
+    first_delay: 13.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhkodo
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: nhpbr
+    count: 2
+    interval: 15.0
+    first_delay: 14.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 10.0
+    first_delay: 14.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhkodo
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: 2_nhstlk
+    count: 2
+    interval: 15.0
+    first_delay: 18.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 3
+    interval: 10.0
+    first_delay: 23.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: 2_nhstlk
+    count: 3
+    interval: 10.0
+    first_delay: 24.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 37.0
+    path:
+      - [9, 6]
+      - [8, 6]
+      - [0, 6]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 43.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [0, 6]

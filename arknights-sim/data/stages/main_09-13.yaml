@@ -1,0 +1,183 @@
+id: main_09-13
+name: "main_09-13"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: ground}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: ground}
+    - {x: 5, y: 4, type: ground}
+    - {x: 6, y: 4, type: ground}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: ground}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: ground}
+    - {x: 10, y: 3, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: ground}
+enemies:
+  - id: dusocr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [10, 3]
+  - id: duhond
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duphlx
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [8, 1]
+      - [7, 1]
+      - [10, 3]
+  - id: duphlx
+    count: 4
+    interval: 15.0
+    first_delay: 17.0
+    path:
+      - [0, 3]
+      - [2, 3]
+      - [10, 3]
+  - id: duhond
+    count: 2
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duphlx
+    count: 4
+    interval: 15.0
+    first_delay: 22.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [10, 3]
+  - id: dumage
+    count: 3
+    interval: 21.0
+    first_delay: 26.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duhond
+    count: 2
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duphlx
+    count: 3
+    interval: 15.0
+    first_delay: 38.5
+    path:
+      - [8, 1]
+      - [7, 1]
+      - [10, 3]
+  - id: duphlx
+    count: 3
+    interval: 16.0
+    first_delay: 40.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [10, 3]
+  - id: duhond
+    count: 2
+    interval: 1.0
+    first_delay: 41.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duphlx
+    count: 3
+    interval: 16.0
+    first_delay: 54.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: dusocr
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [8, 1]
+      - [7, 1]
+      - [10, 3]
+  - id: dushld
+    count: 1
+    interval: 1.0
+    first_delay: 67.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: dushld
+    count: 1
+    interval: 1.0
+    first_delay: 72.0
+    path:
+      - [0, 3]
+      - [1, 3]
+      - [10, 3]
+  - id: duphlx
+    count: 2
+    interval: 1.0
+    first_delay: 87.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [10, 3]
+  - id: dumage
+    count: 2
+    interval: 1.0
+    first_delay: 90.0
+    path:
+      - [0, 3]
+      - [10, 3]

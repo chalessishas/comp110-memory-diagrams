@@ -1,0 +1,241 @@
+id: main_02-04
+name: "main_02-04"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 9
+  height: 7
+  tiles:
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 1, y: 0, type: goal}
+enemies:
+  - id: aoemag
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 5]
+      - [2, 5]
+      - [2, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: nsabr
+    count: 2
+    interval: 27.0
+    first_delay: 6.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: nsabr
+    count: 2
+    interval: 54.0
+    first_delay: 9.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: ncbow
+    count: 1
+    interval: 24.0
+    first_delay: 34.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: rogue
+    count: 1
+    interval: 4.0
+    first_delay: 55.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 0]
+  - id: ncbow
+    count: 1
+    interval: 27.0
+    first_delay: 61.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: rogue
+    count: 1
+    interval: 1.0
+    first_delay: 77.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 0]
+  - id: ncbow
+    count: 1
+    interval: 11.0
+    first_delay: 77.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: shdsbr
+    count: 1
+    interval: 6.0
+    first_delay: 82.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: shdsbr
+    count: 1
+    interval: 6.0
+    first_delay: 87.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: shdsbr
+    count: 1
+    interval: 1.0
+    first_delay: 90.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: shdsbr
+    count: 1
+    interval: 2.0
+    first_delay: 92.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: wizard
+    count: 2
+    interval: 15.0
+    first_delay: 100.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 102.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: wizard
+    count: 1
+    interval: 2.0
+    first_delay: 107.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 0]
+  - id: shdsbr
+    count: 1
+    interval: 1.0
+    first_delay: 119.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 0]
+  - id: nsabr
+    count: 2
+    interval: 1.0
+    first_delay: 121.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: wizard
+    count: 1
+    interval: 18.0
+    first_delay: 130.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: nsabr
+    count: 1
+    interval: 18.0
+    first_delay: 137.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: wizard
+    count: 1
+    interval: 18.0
+    first_delay: 142.0
+    path:
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+      - [6, 4]
+      - [1, 4]
+      - [1, 0]
+  - id: nsabr
+    count: 2
+    interval: 1.0
+    first_delay: 148.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+      - [1, 4]
+      - [1, 0]

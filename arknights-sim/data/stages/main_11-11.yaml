@@ -1,0 +1,295 @@
+id: main_11-11
+name: "main_11-11"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: ground}
+    - {x: 10, y: 5, type: ground}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: ground}
+    - {x: 10, y: 3, type: ground}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: ground}
+    - {x: 10, y: 2, type: ground}
+    - {x: 0, y: 1, type: goal}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+enemies:
+  - id: nhfly
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 4]
+      - [0, 2]
+  - id: nhfly
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [7, 4]
+      - [0, 2]
+  - id: nhfly
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [9, 4]
+      - [0, 2]
+  - id: nhfly
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [9, 1]
+      - [0, 1]
+  - id: stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 2.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [2, 5]
+      - [2, 3]
+      - [4, 3]
+      - [4, 5]
+      - [2, 5]
+      - [0, 2]
+  - id: 2_stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 2.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [2, 5]
+      - [2, 3]
+      - [4, 3]
+      - [4, 5]
+      - [2, 5]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: 2_stmgun
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [2, 5]
+      - [2, 3]
+      - [4, 3]
+      - [4, 5]
+      - [2, 5]
+      - [0, 2]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 8.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 8.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: nhpbr
+    count: 3
+    interval: 1.5
+    first_delay: 8.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 3
+    interval: 1.5
+    first_delay: 10.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: nhpbr
+    count: 2
+    interval: 1.5
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: nhpbr
+    count: 3
+    interval: 1.5
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: nhtank
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 15.0
+    path:
+      - [10, 3]
+      - [0, 2]
+  - id: darmy
+    count: 2
+    interval: 1.5
+    first_delay: 15.0
+    path:
+      - [10, 2]
+      - [0, 1]
+  - id: nhpbr
+    count: 3
+    interval: 1.5
+    first_delay: 16.0
+    path:
+      - [10, 5]
+      - [0, 2]
+  - id: nhtank
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [0, 2]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 5]
+      - [0, 2]

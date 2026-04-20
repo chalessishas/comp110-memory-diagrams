@@ -1,0 +1,437 @@
+id: main_08-10
+name: "main_08-10"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 2, y: 5, type: ground}
+    - {x: 4, y: 5, type: ground}
+    - {x: 6, y: 5, type: ground}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 2, y: 4, type: ground}
+    - {x: 4, y: 4, type: ground}
+    - {x: 6, y: 4, type: ground}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 2, y: 3, type: ground}
+    - {x: 4, y: 3, type: ground}
+    - {x: 6, y: 3, type: ground}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 2, y: 2, type: ground}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: ground}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: goal}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+enemies:
+  - id: upeopl
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 4]
+      - [2, 5]
+      - [2, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: upeopl
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 4]
+      - [4, 5]
+      - [4, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: upeopl
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 4]
+      - [6, 5]
+      - [6, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [8, 5]
+      - [11, 2]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [9, 1]
+      - [9, 2]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: uoffcr
+    count: 4
+    interval: 15.0
+    first_delay: 13.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uamord
+    count: 2
+    interval: 25.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [8, 1]
+      - [10, 2]
+      - [11, 2]
+  - id: uterer
+    count: 2
+    interval: 11.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [9, 1]
+      - [9, 2]
+      - [11, 2]
+  - id: uamord
+    count: 2
+    interval: 15.0
+    first_delay: 15.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [8, 1]
+      - [10, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uterer
+    count: 6
+    interval: 10.0
+    first_delay: 18.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [9, 1]
+      - [9, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uterer
+    count: 2
+    interval: 9.0
+    first_delay: 20.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [9, 1]
+      - [9, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 4
+    interval: 15.0
+    first_delay: 23.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [8, 6]
+      - [11, 2]
+  - id: uoffcr
+    count: 2
+    interval: 2.0
+    first_delay: 28.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 32.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 3
+    interval: 15.0
+    first_delay: 33.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uamord
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [8, 1]
+      - [10, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 2
+    interval: 1.0
+    first_delay: 46.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [2, 3]
+      - [2, 3]
+      - [2, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 58.0
+    path:
+      - [4, 3]
+      - [4, 3]
+      - [4, 2]
+      - [11, 2]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 63.0
+    path:
+      - [6, 3]
+      - [6, 3]
+      - [6, 2]
+      - [11, 2]

@@ -1,0 +1,300 @@
+id: main_10-02
+name: "main_10-02"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 3, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 3, y: 5, type: ground}
+    - {x: 7, y: 5, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: ground}
+    - {x: 7, y: 4, type: ground}
+    - {x: 8, y: 4, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: ground}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: goal}
+enemies:
+  - id: 2_dusbr
+    count: 5
+    interval: 9.0
+    first_delay: 5.0
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 1]
+      - [9, 1]
+  - id: darmy
+    count: 5
+    interval: 20.0
+    first_delay: 11.0
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 13.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 4]
+      - [6, 1]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 14.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 4]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [7, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 15.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [8, 1]
+      - [9, 1]
+  - id: 2_dubow
+    count: 3
+    interval: 20.0
+    first_delay: 23.0
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 4]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: 2_dubow
+    count: 5
+    interval: 18.0
+    first_delay: 23.0
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 4]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: darmy
+    count: 2
+    interval: 25.0
+    first_delay: 35.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 4]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: 2_dusbr
+    count: 2
+    interval: 1.2
+    first_delay: 46.0
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 63.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 63.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 64.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 4]
+      - [6, 1]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 64.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 4]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 65.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [7, 4]
+      - [8, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 65.5
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [6, 1]
+      - [9, 1]
+  - id: dzoms
+    count: 1
+    interval: 1.0
+    first_delay: 66.0
+    path:
+      - [1, 3]
+      - [1, 2]
+      - [1, 1]
+      - [0, 1]
+      - [7, 5]
+      - [8, 1]
+      - [9, 1]
+  - id: 2_dusbr
+    count: 3
+    interval: 1.2
+    first_delay: 81.5
+    path:
+      - [3, 6]
+      - [3, 4]
+      - [4, 4]
+      - [4, 3]
+      - [6, 3]
+      - [6, 4]
+      - [8, 4]
+      - [8, 1]
+      - [9, 1]

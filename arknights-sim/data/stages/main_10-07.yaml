@@ -1,0 +1,126 @@
+id: main_10-07
+name: "main_10-07"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 1, y: 7, type: ground}
+    - {x: 4, y: 7, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 4, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: ground}
+    - {x: 10, y: 6, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 4, y: 5, type: ground}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 7, y: 3, type: ground}
+    - {x: 8, y: 3, type: ground}
+    - {x: 9, y: 3, type: ground}
+    - {x: 10, y: 3, type: ground}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: goal}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: ground}
+enemies:
+  - id: darmy
+    count: 3
+    interval: 18.0
+    first_delay: 5.0
+    path:
+      - [4, 7]
+      - [4, 4]
+      - [1, 4]
+      - [1, 7]
+      - [4, 2]
+  - id: darmy
+    count: 5
+    interval: 20.0
+    first_delay: 13.0
+    path:
+      - [4, 7]
+      - [4, 4]
+      - [1, 4]
+      - [1, 7]
+      - [4, 2]
+  - id: dkmage
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 6]
+      - [8, 6]
+      - [7, 6]
+      - [7, 3]
+      - [10, 3]
+      - [5, 1]
+      - [5, 2]
+      - [4, 2]
+  - id: dkmage
+    count: 2
+    interval: 35.0
+    first_delay: 35.0
+    path:
+      - [10, 6]
+      - [7, 6]
+      - [7, 3]
+      - [10, 3]
+      - [5, 1]
+      - [5, 2]
+      - [4, 2]
+  - id: dzoms
+    count: 2
+    interval: 1.5
+    first_delay: 47.0
+    path:
+      - [4, 7]
+      - [4, 4]
+      - [1, 4]
+      - [1, 7]
+      - [4, 2]
+  - id: dzoms
+    count: 2
+    interval: 1.5
+    first_delay: 63.0
+    path:
+      - [4, 7]
+      - [4, 4]
+      - [1, 4]
+      - [1, 7]
+      - [4, 2]
+  - id: dkmage
+    count: 1
+    interval: 1.0
+    first_delay: 65.0
+    path:
+      - [10, 6]
+      - [7, 6]
+      - [7, 3]
+      - [10, 3]
+      - [5, 1]
+      - [5, 2]
+      - [4, 2]
+  - id: dzoms
+    count: 2
+    interval: 1.5
+    first_delay: 83.0
+    path:
+      - [4, 7]
+      - [4, 4]
+      - [1, 4]
+      - [1, 7]
+      - [4, 2]

@@ -1,0 +1,333 @@
+id: main_01-05
+name: "main_01-05"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 0, y: 5, type: goal}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: ground}
+    - {x: 0, y: 4, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: ground}
+    - {x: 0, y: 3, type: goal}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: ground}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: ground}
+enemies:
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 4.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_slime
+    count: 1
+    interval: 0.7
+    first_delay: 7.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: gopro
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: 2_slime
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: 2_slime
+    count: 1
+    interval: 0.7
+    first_delay: 9.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: gopro
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: 2_slime
+    count: 2
+    interval: 0.8
+    first_delay: 9.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_slime
+    count: 2
+    interval: 0.8
+    first_delay: 10.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: 2_slime
+    count: 2
+    interval: 0.7
+    first_delay: 12.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 1
+    interval: 0.8
+    first_delay: 12.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 1
+    interval: 0.8
+    first_delay: 13.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: 2_slime
+    count: 2
+    interval: 4.0
+    first_delay: 14.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: yokai
+    count: 2
+    interval: 22.0
+    first_delay: 18.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: yokai
+    count: 2
+    interval: 22.0
+    first_delay: 18.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: yokai
+    count: 2
+    interval: 15.0
+    first_delay: 18.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: yokai
+    count: 2
+    interval: 15.0
+    first_delay: 18.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mocock
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: mocock
+    count: 1
+    interval: 1.0
+    first_delay: 19.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: mob
+    count: 3
+    interval: 13.0
+    first_delay: 21.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: mob
+    count: 3
+    interval: 13.0
+    first_delay: 21.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: nsabr
+    count: 2
+    interval: 20.0
+    first_delay: 22.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: nsabr
+    count: 2
+    interval: 20.0
+    first_delay: 22.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: gopro
+    count: 2
+    interval: 13.0
+    first_delay: 25.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_slime
+    count: 2
+    interval: 5.0
+    first_delay: 25.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_slime
+    count: 2
+    interval: 5.0
+    first_delay: 26.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: gopro
+    count: 1
+    interval: 13.0
+    first_delay: 38.0
+    path:
+      - [10, 3]
+      - [0, 3]

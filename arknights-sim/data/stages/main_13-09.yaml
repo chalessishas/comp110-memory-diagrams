@@ -1,0 +1,184 @@
+id: main_13-09
+name: "main_13-09"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: ground}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 2, y: 4, type: ground}
+    - {x: 4, y: 4, type: goal}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: ground}
+    - {x: 10, y: 4, type: ground}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: ground}
+enemies:
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 6]
+      - [8, 6]
+      - [8, 4]
+      - [4, 4]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [7, 2]
+      - [4, 2]
+      - [4, 4]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [7, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: dfello
+    count: 2
+    interval: 11.0
+    first_delay: 3.0
+    path:
+      - [10, 4]
+      - [4, 4]
+  - id: dfello
+    count: 5
+    interval: 8.0
+    first_delay: 13.0
+    path:
+      - [10, 4]
+      - [4, 4]
+  - id: dfello
+    count: 4
+    interval: 11.0
+    first_delay: 13.0
+    path:
+      - [9, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: dfello
+    count: 3
+    interval: 6.0
+    first_delay: 21.0
+    path:
+      - [10, 4]
+      - [4, 4]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [9, 1]
+      - [8, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: dfello
+    count: 2
+    interval: 2.0
+    first_delay: 28.0
+    path:
+      - [9, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 30.0
+    path:
+      - [9, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [9, 1]
+      - [8, 1]
+      - [6, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [9, 1]
+      - [8, 1]
+      - [8, 2]
+      - [6, 2]
+      - [4, 2]
+      - [4, 4]
+  - id: dfello
+    count: 2
+    interval: 8.0
+    first_delay: 36.0
+    path:
+      - [9, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: dfello
+    count: 2
+    interval: 2.0
+    first_delay: 44.0
+    path:
+      - [9, 1]
+      - [4, 1]
+      - [4, 4]
+  - id: spnshd
+    count: 2
+    interval: 30.0
+    first_delay: 50.0
+    path:
+      - [10, 4]
+      - [9, 4]
+      - [4, 4]
+  - id: spnwiz
+    count: 1
+    interval: 1.0
+    first_delay: 56.0
+    path:
+      - [0, 6]
+      - [2, 5]
+      - [2, 6]
+      - [8, 6]
+      - [8, 4]
+      - [4, 4]

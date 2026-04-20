@@ -5,6 +5,10 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 import pytest
+# Evict any cached v1 stages module before importing v2 version
+for _k in list(sys.modules.keys()):
+    if _k == "stages" or _k.startswith("stages."):
+        del sys.modules[_k]
 from stages.loader import load_stage, load_and_build
 from core.types import TICK_RATE, TileType
 
@@ -67,21 +71,23 @@ def test_main_00_01_enemies_are_known():
 
 
 # --------------------------------------------------------------------------
-# All generated main_00 stages load without error
+# All generated main_XX stages load without error (auto-discovers YAML files)
 # --------------------------------------------------------------------------
 
-@pytest.mark.parametrize("stage_id", [
-    f"main_00-{n:02d}" for n in range(1, 12)
-])
-def test_all_main_00_stages_load(stage_id: str):
-    """Every generated main_00 stage parses without error."""
-    path = _stage_path(stage_id)
-    if not os.path.exists(path):
-        pytest.skip(f"{stage_id}.yaml not generated yet")
-    s = load_stage(path)
+import glob as _glob
+
+_ALL_STAGE_IDS = sorted(
+    os.path.splitext(os.path.basename(p))[0]
+    for p in _glob.glob(os.path.join(STAGE_DIR, "main_[0-9][0-9]-[0-9][0-9].yaml"))
+)
+
+
+@pytest.mark.parametrize("stage_id", _ALL_STAGE_IDS)
+def test_all_main_stages_load(stage_id: str):
+    """Every generated main_XX-YY stage parses cleanly: valid structure + non-degenerate paths."""
+    s = load_stage(_stage_path(stage_id))
     assert s.id == stage_id
     assert s.width > 0 and s.height > 0
-    assert len(s.waves) > 0
-    # Verify all paths are non-trivial
+    assert len(s.waves) > 0, f"{stage_id} has no SPAWN actions"
     for w in s.waves:
         assert len(w.path) >= 2, f"{stage_id} wave {w.enemy_id} has degenerate path"

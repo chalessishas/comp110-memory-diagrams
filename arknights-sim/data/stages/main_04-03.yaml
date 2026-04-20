@@ -1,0 +1,241 @@
+id: main_04-03
+name: "main_04-03"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 0, y: 4, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: ground}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: goal}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+enemies:
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [10, 4]
+      - [5, 4]
+      - [0, 4]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: dcross
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 4]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 2
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 2
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 25.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 26.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 26.5
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: haxe
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [10, 4]
+      - [0, 2]
+  - id: 3
+    count: 2
+    interval: 0.5
+    first_delay: 30.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 32.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_litamr
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 33.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: nsabr
+    count: 4
+    interval: 9.0
+    first_delay: 33.5
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 37.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_litamr
+    count: 3
+    interval: 9.0
+    first_delay: 38.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: nsabr
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: 2_litamr
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 44.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: dcross
+    count: 2
+    interval: 25.0
+    first_delay: 48.0
+    path:
+      - [10, 4]
+      - [0, 2]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: demon
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: laxe
+    count: 1
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: dcross
+    count: 1
+    interval: 1.0
+    first_delay: 65.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 4]

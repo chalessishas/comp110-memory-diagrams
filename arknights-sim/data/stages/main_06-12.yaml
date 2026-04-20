@@ -1,0 +1,312 @@
+id: main_06-12
+name: "main_06-12"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 0, y: 5, type: goal}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: ground}
+    - {x: 9, y: 5, type: ground}
+    - {x: 10, y: 5, type: ground}
+    - {x: 0, y: 4, type: goal}
+    - {x: 8, y: 4, type: ground}
+    - {x: 9, y: 4, type: ground}
+    - {x: 10, y: 4, type: ground}
+    - {x: 0, y: 3, type: goal}
+    - {x: 8, y: 3, type: ground}
+    - {x: 9, y: 3, type: ground}
+    - {x: 10, y: 3, type: ground}
+    - {x: 0, y: 2, type: goal}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 10, y: 2, type: ground}
+    - {x: 2, y: 1, type: goal}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: ground}
+    - {x: 10, y: 1, type: ground}
+enemies:
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [2, 1]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 2]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 2]
+  - id: snslime
+    count: 2
+    interval: 7.0
+    first_delay: 8.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: snsbr
+    count: 2
+    interval: 5.0
+    first_delay: 9.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [0, 3]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [2, 1]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 2]
+      - [9, 2]
+      - [0, 2]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [0, 3]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [10, 4]
+      - [9, 4]
+      - [0, 4]
+  - id: snsbr
+    count: 1
+    interval: 1.0
+    first_delay: 12.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [2, 1]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 12.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: snsbr
+    count: 3
+    interval: 6.0
+    first_delay: 13.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: snslime
+    count: 2
+    interval: 7.0
+    first_delay: 13.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: snslime
+    count: 2
+    interval: 9.0
+    first_delay: 13.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [10, 4]
+      - [9, 4]
+      - [0, 4]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [0, 3]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: snmage
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: snsbr
+    count: 3
+    interval: 7.0
+    first_delay: 23.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: snslime
+    count: 3
+    interval: 6.0
+    first_delay: 23.0
+    path:
+      - [10, 5]
+      - [0, 5]
+  - id: snslime
+    count: 3
+    interval: 6.0
+    first_delay: 23.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: snwolf
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [10, 5]
+      - [9, 5]
+      - [0, 5]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [10, 2]
+      - [0, 2]
+  - id: iced
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [10, 4]
+      - [9, 4]
+      - [0, 4]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [10, 4]
+      - [0, 4]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 32.0
+    path:
+      - [10, 1]
+      - [9, 1]
+      - [2, 1]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 37.0
+    path:
+      - [10, 3]
+      - [0, 3]
+  - id: snslime
+    count: 1
+    interval: 1.0
+    first_delay: 42.0
+    path:
+      - [10, 1]
+      - [2, 1]
+  - id: yokai
+    count: 1
+    interval: 1.0
+    first_delay: 47.0
+    path:
+      - [10, 4]
+      - [0, 4]

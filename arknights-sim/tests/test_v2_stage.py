@@ -1,7 +1,14 @@
 """P-stage acceptance — stage YAML loading + wave spawning via EventQueue."""
 from __future__ import annotations
 import os
+import sys
 import pytest
+
+# Evict cached v1 stages so the v2 package takes precedence
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+for _k in list(sys.modules.keys()):
+    if _k == "stages" or _k.startswith("stages."):
+        del sys.modules[_k]
 
 from stages.loader import load_stage, build_world, load_and_build
 from data.characters import make_silverash, make_liskarm

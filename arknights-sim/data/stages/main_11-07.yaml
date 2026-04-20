@@ -1,0 +1,238 @@
+id: main_11-07
+name: "main_11-07"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 8, y: 7, type: ground}
+    - {x: 2, y: 6, type: ground}
+    - {x: 3, y: 6, type: ground}
+    - {x: 4, y: 6, type: ground}
+    - {x: 5, y: 6, type: ground}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 8, y: 6, type: ground}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 4, y: 1, type: goal}
+    - {x: 5, y: 1, type: goal}
+    - {x: 6, y: 1, type: goal}
+enemies:
+  - id: nhnrs
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 6]
+      - [3, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: nhnrs
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [4, 6]
+      - [4, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [5, 6]
+      - [5, 5]
+      - [3, 5]
+      - [3, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 6]
+      - [6, 5]
+      - [3, 5]
+      - [3, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [7, 6]
+      - [7, 5]
+      - [7, 3]
+      - [6, 3]
+      - [6, 1]
+  - id: nhpbr
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [8, 6]
+      - [8, 5]
+      - [7, 5]
+      - [7, 3]
+      - [6, 3]
+      - [6, 1]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [7, 5]
+      - [7, 3]
+      - [6, 3]
+      - [6, 1]
+  - id: darmy
+    count: 2
+    interval: 11.0
+    first_delay: 7.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [7, 5]
+      - [7, 3]
+      - [6, 3]
+      - [6, 1]
+  - id: nhpbr
+    count: 6
+    interval: 2.0
+    first_delay: 18.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [3, 5]
+      - [3, 6]
+      - [7, 6]
+      - [7, 3]
+      - [5, 3]
+      - [5, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [7, 5]
+      - [7, 3]
+      - [5, 3]
+      - [5, 1]
+  - id: dwlock
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [7, 5]
+      - [7, 3]
+      - [5, 3]
+      - [5, 1]
+  - id: darmy
+    count: 3
+    interval: 12.0
+    first_delay: 25.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: darmy
+    count: 2
+    interval: 2.0
+    first_delay: 34.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: nhpbr
+    count: 1
+    interval: 2.0
+    first_delay: 35.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 5]
+      - [3, 5]
+      - [3, 6]
+      - [7, 6]
+      - [7, 3]
+      - [5, 3]
+      - [5, 1]
+  - id: nhpbr
+    count: 5
+    interval: 2.0
+    first_delay: 42.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 5]
+      - [3, 5]
+      - [3, 6]
+      - [7, 6]
+      - [7, 3]
+      - [5, 3]
+      - [5, 1]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [7, 5]
+      - [7, 3]
+      - [6, 3]
+      - [6, 1]
+  - id: darmy
+    count: 2
+    interval: 2.0
+    first_delay: 53.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 1]
+  - id: darmy
+    count: 2
+    interval: 2.0
+    first_delay: 70.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 1]

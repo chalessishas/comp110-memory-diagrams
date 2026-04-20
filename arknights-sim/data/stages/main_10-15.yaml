@@ -1,0 +1,361 @@
+id: main_10-15
+name: "main_10-15"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 6, y: 7, type: ground}
+    - {x: 2, y: 6, type: ground}
+    - {x: 3, y: 6, type: ground}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 11, y: 5, type: goal}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: goal}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+enemies:
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: darmy
+    count: 2
+    interval: 3.0
+    first_delay: 8.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: dmech
+    count: 2
+    interval: 25.0
+    first_delay: 11.0
+    path:
+      - [3, 6]
+      - [2, 6]
+      - [2, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dpvt
+    count: 3
+    interval: 14.0
+    first_delay: 14.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dslime
+    count: 2
+    interval: 2.0
+    first_delay: 14.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dpvt
+    count: 2
+    interval: 15.0
+    first_delay: 19.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: manfri
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [5, 1]
+      - [5, 2]
+      - [5, 4]
+      - [8, 4]
+      - [8, 5]
+      - [11, 5]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dklord
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: dslime
+    count: 3
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: dpvt
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]
+  - id: dzoms
+    count: 3
+    interval: 1.0
+    first_delay: 42.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [3, 3]
+      - [8, 3]
+      - [9, 4]
+      - [11, 4]
+  - id: darmy
+    count: 1
+    interval: 1.0
+    first_delay: 44.0
+    path:
+      - [5, 1]
+      - [4, 1]
+      - [1, 1]
+      - [6, 6]
+      - [7, 6]
+      - [7, 5]
+      - [11, 5]
+  - id: dklord
+    count: 1
+    interval: 1.0
+    first_delay: 45.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [3, 4]
+      - [8, 4]
+      - [11, 4]

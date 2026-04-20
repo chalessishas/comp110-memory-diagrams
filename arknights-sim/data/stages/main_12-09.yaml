@@ -1,0 +1,197 @@
+id: main_12-09
+name: "main_12-09"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: ground}
+    - {x: 3, y: 6, type: ground}
+    - {x: 4, y: 6, type: ground}
+    - {x: 5, y: 6, type: ground}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: ground}
+    - {x: 10, y: 6, type: ground}
+    - {x: 0, y: 4, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: ground}
+    - {x: 4, y: 4, type: ground}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: ground}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: ground}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: ground}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: goal}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: ground}
+enemies:
+  - id: wdsmgc
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [1, 6]
+      - [2, 6]
+      - [4, 6]
+      - [6, 6]
+      - [8, 6]
+      - [9, 6]
+      - [6, 2]
+      - [11, 2]
+  - id: wdnjd
+    count: 2
+    interval: 2.0
+    first_delay: 0.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: 2_dftman
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: 2_dftman
+    count: 2
+    interval: 2.0
+    first_delay: 10.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdnjd
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdnjd
+    count: 2
+    interval: 10.0
+    first_delay: 10.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdsmgc
+    count: 1
+    interval: 1.0
+    first_delay: 10.0
+    path:
+      - [0, 6]
+      - [2, 6]
+      - [4, 6]
+      - [6, 6]
+      - [8, 6]
+      - [9, 6]
+      - [6, 2]
+      - [11, 2]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 2]
+      - [1, 1]
+      - [2, 2]
+      - [11, 2]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 2]
+      - [1, 1]
+      - [2, 2]
+      - [11, 2]
+  - id: wdsmgc
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 6]
+      - [2, 6]
+      - [4, 6]
+      - [6, 6]
+      - [8, 6]
+      - [9, 6]
+      - [6, 2]
+      - [11, 2]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [0, 2]
+      - [1, 1]
+      - [2, 2]
+      - [11, 2]
+  - id: wdyjd
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 2]
+      - [1, 1]
+      - [2, 2]
+      - [11, 2]
+  - id: 2_dftman
+    count: 3
+    interval: 5.0
+    first_delay: 40.0
+    path:
+      - [11, 4]
+      - [0, 4]
+  - id: wdsmgc
+    count: 1
+    interval: 1.0
+    first_delay: 60.0
+    path:
+      - [0, 6]
+      - [2, 6]
+      - [4, 6]
+      - [6, 6]
+      - [8, 6]
+      - [9, 6]
+      - [6, 2]
+      - [11, 2]

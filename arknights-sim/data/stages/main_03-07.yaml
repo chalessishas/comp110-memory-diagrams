@@ -1,0 +1,326 @@
+id: main_03-07
+name: "main_03-07"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 3, y: 7, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: ground}
+    - {x: 7, y: 6, type: ground}
+    - {x: 8, y: 6, type: ground}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: ground}
+    - {x: 11, y: 6, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: ground}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: ground}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: ground}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: ground}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: goal}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: ground}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: ground}
+enemies:
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: mortar
+    count: 2
+    interval: 35.0
+    first_delay: 10.0
+    path:
+      - [11, 2]
+      - [10, 2]
+      - [8, 2]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [11, 6]
+      - [10, 6]
+      - [8, 2]
+  - id: jshoot
+    count: 1
+    interval: 2.0
+    first_delay: 15.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 16.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 2_gopro
+    count: 2
+    interval: 0.7
+    first_delay: 18.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 3
+    interval: 2.0
+    first_delay: 18.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: lurker
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: handax
+    count: 4
+    interval: 10.0
+    first_delay: 23.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 2_gopro
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 2_shield
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jmage
+    count: 1
+    interval: 2.0
+    first_delay: 25.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: 3
+    count: 1
+    interval: 0.7
+    first_delay: 26.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: 3
+    count: 2
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: lurker
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: jshoot
+    count: 2
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 3
+    interval: 2.0
+    first_delay: 29.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 3
+    count: 2
+    interval: 0.7
+    first_delay: 31.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 2
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: jshoot
+    count: 1
+    interval: 2.0
+    first_delay: 35.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: mortar
+    count: 2
+    interval: 35.0
+    first_delay: 35.0
+    path:
+      - [11, 2]
+      - [10, 2]
+      - [8, 2]
+  - id: 3
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jmage
+    count: 2
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 3
+    interval: 2.0
+    first_delay: 40.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: 3
+    count: 2
+    interval: 1.0
+    first_delay: 43.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jmage
+    count: 1
+    interval: 2.0
+    first_delay: 45.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: lurker
+    count: 2
+    interval: 2.0
+    first_delay: 50.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jshoot
+    count: 1
+    interval: 2.0
+    first_delay: 55.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: handax
+    count: 2
+    interval: 8.0
+    first_delay: 55.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jshoot
+    count: 2
+    interval: 1.0
+    first_delay: 55.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: jmage
+    count: 2
+    interval: 2.0
+    first_delay: 60.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: 2_handax
+    count: 1
+    interval: 10.0
+    first_delay: 70.0
+    path:
+      - [3, 7]
+      - [8, 2]
+  - id: jmage
+    count: 2
+    interval: 1.0
+    first_delay: 70.0
+    path:
+      - [11, 6]
+      - [8, 2]
+  - id: 2_shield
+    count: 1
+    interval: 1.0
+    first_delay: 76.0
+    path:
+      - [3, 7]
+      - [3, 6]
+      - [8, 2]

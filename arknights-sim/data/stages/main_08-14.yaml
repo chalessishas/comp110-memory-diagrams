@@ -1,0 +1,357 @@
+id: main_08-14
+name: "main_08-14"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 13
+  height: 7
+  tiles:
+    - {x: 1, y: 5, type: ground}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: ground}
+    - {x: 9, y: 5, type: ground}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 11, y: 5, type: ground}
+    - {x: 12, y: 5, type: goal}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: ground}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: ground}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: ground}
+    - {x: 9, y: 3, type: ground}
+    - {x: 0, y: 2, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 2, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: deployment_melee}
+    - {x: 12, y: 2, type: goal}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 2, y: 1, type: deployment_melee}
+    - {x: 3, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: deployment_melee}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+    - {x: 11, y: 1, type: deployment_melee}
+    - {x: 12, y: 1, type: goal}
+enemies:
+  - id: smephi
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 5]
+      - [4, 3]
+      - [6, 3]
+      - [8, 3]
+      - [9, 5]
+      - [11, 5]
+      - [12, 5]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 4]
+      - [3, 3]
+      - [5, 3]
+      - [12, 5]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [2, 5]
+      - [3, 4]
+      - [5, 2]
+      - [12, 5]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [1, 5]
+      - [3, 5]
+      - [4, 3]
+      - [12, 5]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [1, 4]
+      - [2, 4]
+      - [5, 1]
+      - [12, 5]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 4
+    interval: 10.0
+    first_delay: 6.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 4
+    interval: 10.0
+    first_delay: 7.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rageth
+    count: 1
+    interval: 1.0
+    first_delay: 7.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 2
+    interval: 16.0
+    first_delay: 7.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rageth
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: zomsbr
+    count: 3
+    interval: 15.0
+    first_delay: 11.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: rager
+    count: 2
+    interval: 20.0
+    first_delay: 11.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 2
+    interval: 26.0
+    first_delay: 11.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 2
+    interval: 20.0
+    first_delay: 13.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 4
+    interval: 10.0
+    first_delay: 14.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomsbr
+    count: 2
+    interval: 20.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: zomsbr
+    count: 3
+    interval: 15.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 2
+    interval: 20.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 14.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: zomsbr
+    count: 3
+    interval: 9.0
+    first_delay: 18.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: zomstr
+    count: 2
+    interval: 18.0
+    first_delay: 18.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 2
+    interval: 18.0
+    first_delay: 21.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rageth
+    count: 2
+    interval: 18.0
+    first_delay: 21.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 34.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [0, 2]
+      - [12, 2]
+  - id: rageth
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rageth
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rgrdmn
+    count: 1
+    interval: 1.0
+    first_delay: 39.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [0, 1]
+      - [12, 1]
+  - id: rager
+    count: 1
+    interval: 1.0
+    first_delay: 52.0
+    path:
+      - [0, 2]
+      - [12, 2]

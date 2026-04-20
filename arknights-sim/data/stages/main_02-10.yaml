@@ -1,0 +1,290 @@
+id: main_02-10
+name: "main_02-10"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 8
+  tiles:
+    - {x: 1, y: 7, type: ground}
+    - {x: 1, y: 6, type: deployment_melee}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: ground}
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 2, y: 3, type: ground}
+    - {x: 3, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: goal}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 1, y: 1, type: deployment_melee}
+    - {x: 4, y: 1, type: deployment_melee}
+    - {x: 1, y: 0, type: ground}
+enemies:
+  - id: aoemag
+    count: 2
+    interval: 50.0
+    first_delay: 6.0
+    path:
+      - [10, 6]
+      - [7, 6]
+      - [7, 2]
+      - [5, 2]
+  - id: mob
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: mob
+    count: 3
+    interval: 5.0
+    first_delay: 16.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: skulsr
+    count: 1
+    interval: 1.0
+    first_delay: 31.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 6]
+      - [4, 6]
+      - [4, 3]
+      - [1, 3]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: aoemag
+    count: 2
+    interval: 40.0
+    first_delay: 31.0
+    path:
+      - [10, 6]
+      - [7, 6]
+      - [7, 2]
+      - [5, 2]
+  - id: 2_mob
+    count: 1
+    interval: 0.7
+    first_delay: 33.0
+    path:
+      - [10, 3]
+      - [9, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: shield
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: defdrn
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [1, 7]
+      - [2, 5]
+      - [3, 4]
+      - [5, 2]
+  - id: defdrn
+    count: 2
+    interval: 30.0
+    first_delay: 33.0
+    path:
+      - [10, 6]
+      - [9, 6]
+      - [7, 3]
+      - [5, 2]
+  - id: handax
+    count: 1
+    interval: 2.0
+    first_delay: 36.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: 2_mob
+    count: 1
+    interval: 0.7
+    first_delay: 40.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: 2_mob
+    count: 2
+    interval: 3.0
+    first_delay: 49.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: nsabr
+    count: 2
+    interval: 8.0
+    first_delay: 56.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: litamr
+    count: 2
+    interval: 2.0
+    first_delay: 58.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: shield
+    count: 1
+    interval: 1.0
+    first_delay: 58.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: mocock
+    count: 2
+    interval: 3.0
+    first_delay: 62.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: shield
+    count: 1
+    interval: 1.0
+    first_delay: 68.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: wizard
+    count: 1
+    interval: 1.0
+    first_delay: 71.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 2]
+      - [5, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 73.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: 2_mob
+    count: 2
+    interval: 1.0
+    first_delay: 76.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]
+  - id: litamr
+    count: 2
+    interval: 6.0
+    first_delay: 76.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: handax
+    count: 1
+    interval: 1.0
+    first_delay: 78.0
+    path:
+      - [1, 0]
+      - [1, 6]
+      - [4, 6]
+      - [4, 2]
+      - [5, 2]
+  - id: wizard
+    count: 1
+    interval: 1.0
+    first_delay: 83.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [1, 3]
+      - [4, 3]
+      - [4, 2]
+      - [5, 2]
+  - id: wteeth
+    count: 1
+    interval: 1.0
+    first_delay: 88.0
+    path:
+      - [10, 3]
+      - [8, 3]
+      - [7, 2]
+      - [5, 2]

@@ -1,0 +1,257 @@
+id: main_13-15
+name: "main_13-15"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 12
+  height: 8
+  tiles:
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 3, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 5, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: goal}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: ground}
+    - {x: 6, y: 5, type: ground}
+    - {x: 7, y: 5, type: ground}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 0, y: 4, type: ground}
+    - {x: 1, y: 4, type: ground}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: deployment_melee}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 0, y: 3, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 2, y: 3, type: deployment_melee}
+    - {x: 3, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: ground}
+    - {x: 7, y: 2, type: ground}
+    - {x: 8, y: 2, type: ground}
+    - {x: 9, y: 2, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+    - {x: 6, y: 1, type: ground}
+    - {x: 7, y: 1, type: ground}
+    - {x: 8, y: 1, type: ground}
+    - {x: 9, y: 1, type: ground}
+enemies:
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [3, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [6, 3]
+      - [6, 6]
+      - [10, 6]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [9, 4]
+      - [7, 4]
+      - [7, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 3.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 5.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [0, 4]
+      - [1, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: spilot
+    count: 1
+    interval: 1.0
+    first_delay: 23.0
+    path:
+      - [3, 1]
+      - [4, 1]
+      - [6, 1]
+      - [7, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 25.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 30.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [0, 4]
+      - [6, 4]
+      - [6, 6]
+      - [10, 6]
+  - id: dfello
+    count: 1
+    interval: 1.0
+    first_delay: 38.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]
+  - id: spnshd
+    count: 1
+    interval: 1.0
+    first_delay: 50.0
+    path:
+      - [0, 3]
+      - [10, 3]
+      - [10, 6]

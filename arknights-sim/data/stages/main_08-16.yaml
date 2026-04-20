@@ -1,0 +1,345 @@
+id: main_08-16
+name: "main_08-16"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 13
+  height: 8
+  tiles:
+    - {x: 1, y: 7, type: ground}
+    - {x: 2, y: 7, type: ground}
+    - {x: 0, y: 6, type: ground}
+    - {x: 1, y: 6, type: ground}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: deployment_melee}
+    - {x: 9, y: 6, type: deployment_melee}
+    - {x: 10, y: 6, type: deployment_melee}
+    - {x: 11, y: 6, type: ground}
+    - {x: 12, y: 6, type: ground}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: deployment_melee}
+    - {x: 11, y: 5, type: ground}
+    - {x: 12, y: 5, type: ground}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: ground}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 6, y: 4, type: goal}
+    - {x: 7, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 9, y: 4, type: deployment_melee}
+    - {x: 10, y: 4, type: deployment_melee}
+    - {x: 11, y: 4, type: ground}
+    - {x: 12, y: 4, type: ground}
+    - {x: 1, y: 3, type: ground}
+    - {x: 3, y: 3, type: ground}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 6, y: 3, type: goal}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: deployment_melee}
+    - {x: 11, y: 3, type: ground}
+    - {x: 12, y: 3, type: ground}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: deployment_melee}
+    - {x: 11, y: 2, type: ground}
+    - {x: 12, y: 2, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 2, y: 1, type: ground}
+    - {x: 3, y: 1, type: ground}
+    - {x: 4, y: 1, type: ground}
+    - {x: 7, y: 1, type: deployment_melee}
+    - {x: 8, y: 1, type: deployment_melee}
+    - {x: 9, y: 1, type: deployment_melee}
+    - {x: 10, y: 1, type: deployment_melee}
+    - {x: 11, y: 1, type: ground}
+    - {x: 12, y: 1, type: ground}
+enemies:
+  - id: talula
+    count: 1
+    interval: 1.0
+    first_delay: 0.0
+    path:
+      - [0, 6]
+      - [1, 6]
+      - [1, 7]
+      - [3, 1]
+      - [1, 1]
+      - [1, 4]
+      - [3, 4]
+      - [3, 3]
+      - [5, 3]
+      - [5, 4]
+      - [6, 4]
+  - id: emppnt
+    count: 1
+    interval: 1.0
+    first_delay: 6.0
+    path:
+      - [2, 7]
+      - [2, 6]
+      - [1, 6]
+      - [1, 1]
+      - [11, 1]
+      - [11, 6]
+      - [1, 6]
+      - [1, 1]
+      - [6, 1]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 9.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 5]
+      - [11, 5]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 2]
+      - [11, 2]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 5]
+      - [11, 5]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 2]
+      - [11, 2]
+      - [6, 3]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 6]
+      - [11, 6]
+      - [7, 6]
+      - [7, 4]
+      - [6, 4]
+  - id: uoffcr
+    count: 1
+    interval: 1.0
+    first_delay: 18.0
+    path:
+      - [12, 1]
+      - [11, 1]
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 20.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 21.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [12, 5]
+      - [11, 5]
+      - [6, 4]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 26.0
+    path:
+      - [12, 2]
+      - [11, 2]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 27.0
+    path:
+      - [12, 2]
+      - [11, 2]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 28.0
+    path:
+      - [12, 5]
+      - [11, 5]
+      - [6, 4]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 32.0
+    path:
+      - [12, 1]
+      - [11, 1]
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+  - id: uterer
+    count: 1
+    interval: 1.0
+    first_delay: 33.0
+    path:
+      - [12, 6]
+      - [11, 6]
+      - [7, 6]
+      - [7, 4]
+      - [6, 4]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 6]
+      - [11, 6]
+      - [7, 6]
+      - [7, 4]
+      - [6, 4]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 1]
+      - [11, 1]
+      - [7, 1]
+      - [7, 3]
+      - [6, 3]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 2]
+      - [11, 2]
+      - [6, 3]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 5]
+      - [11, 5]
+      - [6, 4]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 35.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [12, 4]
+      - [11, 4]
+      - [6, 4]
+  - id: empace
+    count: 1
+    interval: 1.0
+    first_delay: 40.0
+    path:
+      - [12, 3]
+      - [11, 3]
+      - [6, 3]

@@ -1,0 +1,261 @@
+id: main_06-01
+name: "main_06-01"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 11
+  height: 7
+  tiles:
+    - {x: 0, y: 5, type: ground}
+    - {x: 1, y: 5, type: deployment_melee}
+    - {x: 2, y: 5, type: deployment_melee}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 4, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 9, y: 5, type: deployment_melee}
+    - {x: 10, y: 5, type: goal}
+    - {x: 2, y: 4, type: ground}
+    - {x: 5, y: 4, type: ground}
+    - {x: 2, y: 3, type: ground}
+    - {x: 5, y: 3, type: ground}
+    - {x: 6, y: 3, type: deployment_melee}
+    - {x: 7, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 9, y: 3, type: deployment_melee}
+    - {x: 10, y: 3, type: goal}
+    - {x: 2, y: 2, type: ground}
+    - {x: 3, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: ground}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 9, y: 2, type: deployment_melee}
+    - {x: 10, y: 2, type: goal}
+    - {x: 2, y: 1, type: ground}
+    - {x: 5, y: 1, type: ground}
+    - {x: 2, y: 0, type: ground}
+    - {x: 5, y: 0, type: ground}
+enemies:
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 8.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 11.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 13.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 13.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: zomshd
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 5]
+      - [1, 5]
+      - [10, 5]
+  - id: zomsbr
+    count: 2
+    interval: 3.0
+    first_delay: 13.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: 2_zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 15.0
+    path:
+      - [0, 5]
+      - [2, 5]
+      - [10, 5]
+  - id: lunmag
+    count: 3
+    interval: 10.0
+    first_delay: 15.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: lunsbr
+    count: 1
+    interval: 1.0
+    first_delay: 17.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunmag
+    count: 2
+    interval: 9.0
+    first_delay: 17.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: 2_zomsbr
+    count: 2
+    interval: 9.0
+    first_delay: 17.0
+    path:
+      - [0, 5]
+      - [10, 5]
+  - id: 2_zomsbr
+    count: 3
+    interval: 6.0
+    first_delay: 17.0
+    path:
+      - [0, 5]
+      - [10, 5]
+  - id: lunmag
+    count: 1
+    interval: 1.0
+    first_delay: 19.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: lunmag
+    count: 2
+    interval: 9.0
+    first_delay: 19.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: zomsbr
+    count: 2
+    interval: 3.0
+    first_delay: 19.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: zomstr
+    count: 1
+    interval: 3.0
+    first_delay: 19.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunmag
+    count: 2
+    interval: 8.0
+    first_delay: 19.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 22.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 22.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: 2_zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 24.0
+    path:
+      - [0, 5]
+      - [10, 5]
+  - id: lunsbr
+    count: 2
+    interval: 3.0
+    first_delay: 25.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: zomsbr
+    count: 2
+    interval: 3.0
+    first_delay: 31.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: 2_zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [0, 5]
+      - [10, 5]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 37.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: zomsbr
+    count: 2
+    interval: 3.0
+    first_delay: 48.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]
+  - id: lunmag
+    count: 2
+    interval: 7.0
+    first_delay: 48.0
+    path:
+      - [5, 0]
+      - [5, 3]
+      - [10, 3]
+  - id: 2_zomsbr
+    count: 1
+    interval: 1.0
+    first_delay: 51.0
+    path:
+      - [0, 5]
+      - [10, 5]
+  - id: zomstr
+    count: 1
+    interval: 1.0
+    first_delay: 52.0
+    path:
+      - [2, 0]
+      - [2, 2]
+      - [10, 2]

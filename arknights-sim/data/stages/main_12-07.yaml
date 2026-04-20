@@ -1,0 +1,227 @@
+id: main_12-07
+name: "main_12-07"
+starting_dp: 10
+max_lives: 3
+map:
+  width: 10
+  height: 8
+  tiles:
+    - {x: 8, y: 7, type: ground}
+    - {x: 2, y: 6, type: deployment_melee}
+    - {x: 4, y: 6, type: deployment_melee}
+    - {x: 6, y: 6, type: deployment_melee}
+    - {x: 7, y: 6, type: deployment_melee}
+    - {x: 8, y: 6, type: ground}
+    - {x: 3, y: 5, type: deployment_melee}
+    - {x: 5, y: 5, type: deployment_melee}
+    - {x: 6, y: 5, type: deployment_melee}
+    - {x: 7, y: 5, type: deployment_melee}
+    - {x: 8, y: 5, type: deployment_melee}
+    - {x: 1, y: 4, type: deployment_melee}
+    - {x: 2, y: 4, type: deployment_melee}
+    - {x: 3, y: 4, type: deployment_melee}
+    - {x: 4, y: 4, type: deployment_melee}
+    - {x: 5, y: 4, type: deployment_melee}
+    - {x: 8, y: 4, type: deployment_melee}
+    - {x: 1, y: 3, type: deployment_melee}
+    - {x: 4, y: 3, type: deployment_melee}
+    - {x: 5, y: 3, type: deployment_melee}
+    - {x: 8, y: 3, type: deployment_melee}
+    - {x: 1, y: 2, type: deployment_melee}
+    - {x: 4, y: 2, type: deployment_melee}
+    - {x: 5, y: 2, type: deployment_melee}
+    - {x: 6, y: 2, type: deployment_melee}
+    - {x: 7, y: 2, type: deployment_melee}
+    - {x: 8, y: 2, type: deployment_melee}
+    - {x: 0, y: 1, type: ground}
+    - {x: 1, y: 1, type: ground}
+    - {x: 5, y: 1, type: deployment_melee}
+    - {x: 6, y: 1, type: goal}
+enemies:
+  - id: dftman
+    count: 3
+    interval: 7.0
+    first_delay: 3.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: dftman
+    count: 2
+    interval: 7.0
+    first_delay: 8.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: dftman
+    count: 3
+    interval: 11.0
+    first_delay: 8.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 2]
+      - [6, 2]
+      - [6, 1]
+  - id: dftman
+    count: 4
+    interval: 8.0
+    first_delay: 8.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: dftman
+    count: 4
+    interval: 8.0
+    first_delay: 9.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 11.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 13.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: dftman
+    count: 3
+    interval: 11.0
+    first_delay: 17.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 2
+    interval: 11.0
+    first_delay: 17.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [8, 2]
+      - [6, 2]
+      - [6, 1]
+  - id: dftman
+    count: 3
+    interval: 11.0
+    first_delay: 21.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [8, 2]
+      - [6, 2]
+      - [6, 1]
+  - id: dftman
+    count: 3
+    interval: 11.0
+    first_delay: 22.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [8, 2]
+      - [6, 2]
+      - [6, 1]
+  - id: dftman
+    count: 3
+    interval: 7.0
+    first_delay: 23.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 2
+    interval: 20.0
+    first_delay: 23.0
+    path:
+      - [8, 7]
+      - [8, 5]
+      - [8, 2]
+      - [6, 2]
+      - [6, 1]
+  - id: dftman
+    count: 2
+    interval: 11.0
+    first_delay: 25.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 2
+    interval: 12.0
+    first_delay: 25.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
+  - id: demon
+    count: 2
+    interval: 12.0
+    first_delay: 30.0
+    path:
+      - [8, 7]
+      - [8, 6]
+      - [5, 5]
+      - [5, 1]
+      - [6, 1]
+  - id: wdexg
+    count: 1
+    interval: 1.0
+    first_delay: 36.0
+    path:
+      - [0, 1]
+      - [1, 1]
+      - [1, 4]
+      - [5, 4]
+      - [5, 1]
+      - [6, 1]
