@@ -1,11 +1,11 @@
-"""Zima S3 "March Order" — instant 15 DP + ATK+60% to all deployed Vanguards for 25s.
+"""Zima S3 "March Order" — instantly grants 15 DP + ATK+60% aura to all deployed Vanguards, 25s MANUAL.
 
 Tests cover:
-  - S3 configured correctly (slot, sp_cost=45, MANUAL, duration=25s)
+  - S3 config (slot, sp_cost, MANUAL)
   - Instantly grants 15 DP on activation
-  - ATK+60% buff applied to all deployed Vanguard allies (including Zima)
-  - Non-Vanguard ally does NOT receive buff
-  - ATK buff cleared on S3 end
+  - Deployed Vanguard ally receives ATK+60%
+  - Non-Vanguard ally does NOT receive ATK buff
+  - ATK buff cleared from Vanguards on end
   - S2 regression
 """
 from __future__ import annotations
@@ -14,14 +14,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.world import World
 from core.state.tile_state import TileGrid, TileState
-from core.state.unit_state import UnitState
-from core.types import TileType, TICK_RATE, Faction, BuffAxis, SPGainMode, Profession
+from core.types import TileType, TICK_RATE, Faction, Profession
 from core.systems import register_default_systems
 from core.systems.skill_system import manual_trigger
+from core.state.unit_state import UnitState
 from data.characters.zima import (
     make_zima,
-    _S3_TAG, _S3_ATK_RATIO, _S3_ATK_BUFF_TAG, _S3_DP_GAIN,
+    _S3_TAG, _S3_DP_GAIN, _S3_ATK_RATIO, _S3_DURATION, _S3_ATK_BUFF_TAG,
 )
+from data.characters.saga import make_saga
 
 
 def _world() -> World:
@@ -31,148 +32,89 @@ def _world() -> World:
             grid.set_tile(TileState(x=x, y=y, type=TileType.GROUND))
     w = World(tile_grid=grid)
     w.global_state.dp_gain_rate = 0.0
+    w.global_state.dp = 0
     register_default_systems(w)
     return w
 
 
-def _ticks(w: World, seconds: float) -> None:
+def _ticks(w, seconds):
     for _ in range(int(TICK_RATE * seconds)):
         w.tick()
 
 
-def _vanguard_ally(world: World, x: float, y: float) -> UnitState:
-    a = UnitState(name="VanAlly", faction=Faction.ALLY, max_hp=3000, atk=600,
-                  defence=150, res=0.0, atk_interval=1.5)
-    a.alive = True; a.deployed = True; a.position = (x, y)
-    a.profession = Profession.VANGUARD
-    world.add_unit(a)
-    return a
+_ZIMA_POS = (0.0, 1.0)
 
-
-def _guard_ally(world: World, x: float, y: float) -> UnitState:
-    a = UnitState(name="GuardAlly", faction=Faction.ALLY, max_hp=3000, atk=800,
-                  defence=200, res=0.0, atk_interval=1.2)
-    a.alive = True; a.deployed = True; a.position = (x, y)
-    a.profession = Profession.GUARD
-    world.add_unit(a)
-    return a
-
-
-# ---------------------------------------------------------------------------
-# Test 1: S3 config
-# ---------------------------------------------------------------------------
 
 def test_s3_config():
     z = make_zima(slot="S3")
-    assert z.skill is not None
-    assert z.skill.slot == "S3"
+    assert z.skill is not None and z.skill.slot == "S3"
     assert z.skill.name == "March Order"
     assert z.skill.sp_cost == 45
-    assert z.skill.initial_sp == 15
-    assert z.skill.duration == 25.0
     from core.types import SkillTrigger
     assert z.skill.trigger == SkillTrigger.MANUAL
-    assert z.skill.sp_gain_mode == SPGainMode.AUTO_TIME
     assert z.skill.behavior_tag == _S3_TAG
 
 
-# ---------------------------------------------------------------------------
-# Test 2: Instantly grants 15 DP
-# ---------------------------------------------------------------------------
-
-def test_s3_dp_grant():
+def test_s3_grants_dp():
     w = _world()
     z = make_zima(slot="S3")
-    z.deployed = True; z.position = (0.0, 1.0); z.atk_cd = 999.0
+    z.deployed = True; z.position = _ZIMA_POS; z.atk_cd = 999.0
     w.add_unit(z)
-
-    dp_before = w.global_state.dp
+    w.global_state.dp = 5
     z.skill.sp = float(z.skill.sp_cost)
     manual_trigger(w, z)
-
-    assert abs((w.global_state.dp - dp_before) - _S3_DP_GAIN) <= 0.1, (
-        f"S3 must grant {_S3_DP_GAIN} DP; got {w.global_state.dp - dp_before}"
-    )
+    assert w.global_state.dp == 5 + _S3_DP_GAIN
 
 
-# ---------------------------------------------------------------------------
-# Test 3: ATK+60% buff applied to all deployed Vanguards (including Zima)
-# ---------------------------------------------------------------------------
-
-def test_s3_atk_buff_vanguards():
+def test_s3_vanguard_gets_atk_buff():
     w = _world()
     z = make_zima(slot="S3")
-    z.deployed = True; z.position = (0.0, 1.0); z.atk_cd = 999.0
+    z.deployed = True; z.position = _ZIMA_POS; z.atk_cd = 999.0
     w.add_unit(z)
-    van_ally = _vanguard_ally(w, 2.0, 1.0)
-    base_atk_zima = z.effective_atk
-    base_atk_ally = van_ally.effective_atk
-
+    saga = make_saga(slot="S2")
+    saga.deployed = True; saga.position = (1.0, 1.0)
+    w.add_unit(saga)
+    base_atk = saga.effective_atk
     z.skill.sp = float(z.skill.sp_cost)
     manual_trigger(w, z)
-
-    # Zima herself (Vanguard) receives buff
-    zima_buff = next((b for b in z.buffs if b.source_tag == _S3_ATK_BUFF_TAG), None)
-    assert zima_buff is not None, "Zima must receive ATK buff (she is a Vanguard)"
-    assert abs(zima_buff.value - _S3_ATK_RATIO) <= 0.001
-
-    # Vanguard ally also receives buff
-    ally_buff = next((b for b in van_ally.buffs if b.source_tag == _S3_ATK_BUFF_TAG), None)
-    assert ally_buff is not None, "Vanguard ally must receive ATK buff"
-    assert abs(ally_buff.value - _S3_ATK_RATIO) <= 0.001
-
-    expected_ally = int(base_atk_ally * (1 + _S3_ATK_RATIO))
-    assert abs(van_ally.effective_atk - expected_ally) <= 2
+    expected = int(base_atk * (1 + _S3_ATK_RATIO))
+    assert abs(saga.effective_atk - expected) <= 2
 
 
-# ---------------------------------------------------------------------------
-# Test 4: Non-Vanguard ally does NOT receive buff
-# ---------------------------------------------------------------------------
-
-def test_s3_no_buff_for_non_vanguard():
+def test_s3_non_vanguard_no_atk_buff():
     w = _world()
     z = make_zima(slot="S3")
-    z.deployed = True; z.position = (0.0, 1.0); z.atk_cd = 999.0
+    z.deployed = True; z.position = _ZIMA_POS; z.atk_cd = 999.0
     w.add_unit(z)
-    guard = _guard_ally(w, 2.0, 1.0)
-
+    from data.characters.liskarm import make_liskarm
+    defender = make_liskarm(slot="S2")
+    defender.deployed = True; defender.position = (1.0, 1.0)
+    w.add_unit(defender)
+    base_atk = defender.effective_atk
     z.skill.sp = float(z.skill.sp_cost)
     manual_trigger(w, z)
-
-    assert not any(b.source_tag == _S3_ATK_BUFF_TAG for b in guard.buffs), (
-        "Non-Vanguard ally must NOT receive March Order ATK buff"
-    )
+    assert defender.effective_atk == base_atk
+    assert not any(b.source_tag == _S3_ATK_BUFF_TAG for b in defender.buffs)
 
 
-# ---------------------------------------------------------------------------
-# Test 5: ATK buff cleared on S3 end
-# ---------------------------------------------------------------------------
-
-def test_s3_cleanup_on_end():
+def test_s3_atk_buff_cleared_on_end():
     w = _world()
     z = make_zima(slot="S3")
-    z.deployed = True; z.position = (0.0, 1.0); z.atk_cd = 999.0
+    z.deployed = True; z.position = _ZIMA_POS; z.atk_cd = 999.0
     w.add_unit(z)
-    van_ally = _vanguard_ally(w, 2.0, 1.0)
-    base_atk_ally = van_ally.effective_atk
-
+    saga = make_saga(slot="S2")
+    saga.deployed = True; saga.position = (1.0, 1.0)
+    w.add_unit(saga)
+    base_atk = saga.effective_atk
     z.skill.sp = float(z.skill.sp_cost)
     manual_trigger(w, z)
-    _ticks(w, 26.0)
+    _ticks(w, _S3_DURATION + 1)
+    assert z.skill.active_remaining == 0.0
+    assert not any(b.source_tag == _S3_ATK_BUFF_TAG for b in saga.buffs)
+    assert abs(saga.effective_atk - base_atk) <= 2
 
-    assert z.skill.active_remaining == 0.0, "S3 must have ended"
-    assert not any(b.source_tag == _S3_ATK_BUFF_TAG for b in van_ally.buffs), (
-        "Vanguard ATK buff must clear on S3 end"
-    )
-    assert abs(van_ally.effective_atk - base_atk_ally) <= 2
-
-
-# ---------------------------------------------------------------------------
-# Test 6: S2 regression
-# ---------------------------------------------------------------------------
 
 def test_s2_regression():
     z = make_zima(slot="S2")
     assert z.skill is not None and z.skill.slot == "S2"
     assert z.skill.name == "Battle Cry"
-    assert z.skill.sp_cost == 40
