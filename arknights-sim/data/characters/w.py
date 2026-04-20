@@ -8,12 +8,16 @@ Talent "Last Will" (simplified): Each attack levitates the target for 1.5s.
 S2 "Extra Supplies": 15s duration, ATK +60%.
   sp_cost=30, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
 
-S3 "Chaos Edict": Instant activation (duration=0). Throws a mine at the
-  current target's position. The mine detonates after _BOMB_DELAY seconds,
-  dealing _BOMB_ATK_RATIO × ATK physical AoE damage in _BOMB_RADIUS tiles.
-  Uses EventQueue: handler registered at on_battle_start; event scheduled
-  in on_start with target position captured in payload.
+S3 "Chaos Edict": Instant activation (duration=0). Places up to _BOMB_MAX=4
+  bombs on the highest-HP enemies in range. Each bomb detonates independently
+  after _BOMB_DELAY=3.0s at the position captured at throw time, dealing
+  _BOMB_ATK_RATIO=3.10 (310%) ATK physical AoE within _BOMB_RADIUS=1.2 tiles.
+  Uses EventQueue: 1 handler registered per world at on_battle_start; up to 4
+  events scheduled per activation with per-bomb position in payload.
   sp_cost=50, initial_sp=20, AUTO_TIME, AUTO trigger, requires_target=True.
+
+Constants verified against arknights.wiki.gg/wiki/W (M3 values):
+  _BOMB_DELAY: 3.0s, _BOMB_ATK_RATIO: 3.10, _BOMB_RADIUS: 1.2 tiles.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
@@ -46,11 +50,12 @@ _S2_ATK_RATIO = 0.60
 _S2_BUFF_TAG = "w_s2_atk_buff"
 _S2_DURATION = 15.0
 
-# --- S3: Chaos Edict (delayed bomb) ---
+# --- S3: Chaos Edict (4 delayed bombs) ---
 _S3_TAG = "w_s3_chaos_edict"
-_BOMB_DELAY = 2.5          # seconds after throw before detonation
-_BOMB_ATK_RATIO = 8.0      # 800% ATK on detonation
-_BOMB_RADIUS = 2.5         # tile radius of AoE
+_BOMB_DELAY = 3.0          # seconds after throw before detonation (wiki M3)
+_BOMB_ATK_RATIO = 3.10     # 310% ATK per bomb (wiki M3)
+_BOMB_RADIUS = 1.2         # tile radius of each bomb's AoE (wiki)
+_BOMB_MAX = 4              # up to 4 bombs per activation, targeting highest-HP enemies
 _BOMB_KIND_PREFIX = "w_bomb_detonate"
 
 
@@ -112,22 +117,33 @@ register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
-    target = getattr(carrier, "__target__", None)
-    if target is not None and target.position is not None:
-        bx, by = target.position
-    elif carrier.position is not None:
-        bx, by = carrier.position
-    else:
-        bx, by = 0.0, 0.0
+    # Pick up to _BOMB_MAX enemies in range, prioritised by highest current HP
+    if carrier.position is None:
+        return
+    cx, cy = carrier.position
+    in_range = [
+        e for e in world.enemies()
+        if e.alive and e.position is not None
+        and (round(e.position[0]) - round(cx), round(e.position[1]) - round(cy))
+           in set(carrier.range_shape.tiles)
+    ]
+    # Sort by HP descending (highest HP = primary targets)
+    targets = sorted(in_range, key=lambda e: -e.hp)[:_BOMB_MAX]
+
+    # Fallback: if nothing in range, use the primary __target__ if available
+    if not targets:
+        t = getattr(carrier, "__target__", None)
+        if t is not None and t.alive and t.position is not None:
+            targets = [t]
+
     kind = f"{_BOMB_KIND_PREFIX}_{carrier.unit_id}"
-    world.event_queue.schedule(
-        fire_at=world.global_state.elapsed + _BOMB_DELAY,
-        kind=kind,
-        bx=bx, by=by,
-    )
+    fire_at = world.global_state.elapsed + _BOMB_DELAY
+    for t in targets:
+        bx, by = t.position
+        world.event_queue.schedule(fire_at=fire_at, kind=kind, bx=bx, by=by)
     world.log(
-        f"W S3: bomb thrown to ({bx:.0f},{by:.0f}), "
-        f"detonates in {_BOMB_DELAY}s"
+        f"W S3: {len(targets)} bomb(s) placed, "
+        f"detonate at t={fire_at:.1f}s"
     )
 
 

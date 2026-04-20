@@ -67,7 +67,8 @@ class BuffAxis(str, Enum):
     ATK = "atk"
     DEF = "def"
     MAX_HP = "max_hp"
-    ASPD = "aspd"          # 攻速（会影响 atk_interval 的倒数）
+    ASPD = "aspd"              # 攻速（会影响 atk_interval 的倒数）
+    ATK_INTERVAL = "atk_interval"  # flat seconds added/subtracted from interval
     MOVE_SPEED = "move_speed"
     RES = "res"
 
