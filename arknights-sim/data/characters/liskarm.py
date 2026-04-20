@@ -80,6 +80,52 @@ def _on_hit_received(world, defender: UnitState, attacker, damage: int) -> None:
 register_talent(_LIGHTNING_TAG, on_hit_received=_on_hit_received)
 
 
+# --- S2: Voltaic Shield ---
+_S2_TAG = "liskarm_s2_voltaic_shield"
+_S2_DEF_RATIO = 0.80         # DEF +80% while active
+_S2_PULSE_DPS = 1.50         # 150% ATK Arts damage per second in pulse radius
+_S2_PULSE_RADIUS = 1.5       # tile radius of electric pulse
+_S2_PULSE_INTERVAL = 1.0     # pulse fires every 1 second
+_S2_SOURCE_TAG = "liskarm_s2_voltaic"
+_S2_ACCUM_ATTR = "_liskarm_s2_pulse_accum"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+        value=_S2_DEF_RATIO, source_tag=_S2_SOURCE_TAG,
+    ))
+    setattr(carrier, _S2_ACCUM_ATTR, 0.0)
+    world.log(f"Liskarm S2 Voltaic Shield — DEF+{_S2_DEF_RATIO:.0%}, pulse r={_S2_PULSE_RADIUS}")
+
+
+def _s2_on_tick(world, carrier: UnitState, dt: float) -> None:
+    if carrier.position is None:
+        return
+    accum = getattr(carrier, _S2_ACCUM_ATTR, 0.0) + dt
+    pulses = int(accum / _S2_PULSE_INTERVAL)
+    if pulses > 0:
+        cx, cy = carrier.position
+        raw = int(carrier.effective_atk * _S2_PULSE_DPS * _S2_PULSE_INTERVAL)
+        for e in world.enemies():
+            if not e.alive or e.position is None:
+                continue
+            dist = sqrt((e.position[0] - cx) ** 2 + (e.position[1] - cy) ** 2)
+            if dist <= _S2_PULSE_RADIUS:
+                for _ in range(pulses):
+                    dealt = e.take_arts(raw)
+                    world.global_state.total_damage_dealt += dealt
+                world.log(f"⚡ Liskarm S2 pulse ×{pulses} → {e.name}  dmg={raw * pulses}")
+    setattr(carrier, _S2_ACCUM_ATTR, accum - pulses * _S2_PULSE_INTERVAL)
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_SOURCE_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
+
+
 # --- S1: Overcharge ---
 _S1_TAG = "liskarm_s1_overcharge"
 _S1_DEF_RATIO = 0.50     # DEF +50%
@@ -110,7 +156,20 @@ def make_liskarm(slot: str = "S1") -> UnitState:
     op.cost = 21
     op.talents = [TalentComponent(name="Lightning Discharge", behavior_tag=_LIGHTNING_TAG)]
 
-    if slot == "S1":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Voltaic Shield",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=15,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S1":
         op.skill = SkillComponent(
             name="Overcharge",
             slot="S1",
