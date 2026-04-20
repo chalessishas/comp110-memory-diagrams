@@ -36,6 +36,12 @@ MYSTIC_RANGE = RangeShape(tiles=(
 _TALENT_TAG = "mostima_serenity"
 _TALENT_SP_ON_KILL = 10.0
 
+# S2 constants (exported for tests)
+_S2_TAG = "mostima_s2_chaos"
+_S2_ATK_RATIO = 2.10       # 210% ATK Arts
+_S2_STUN_DURATION = 1.5    # 1.5s STUN per hit
+_S2_STUN_TAG = "mostima_s2_stun"
+
 _S3_TAG = "mostima_s3_ley_lines"
 _S3_ATK_RATIO = 1.7
 _S3_STUN_DURATION = 3.5
@@ -52,6 +58,32 @@ def _talent_on_kill(world, killer: UnitState, killed: UnitState) -> None:
 
 
 register_talent(_TALENT_TAG, on_kill=_talent_on_kill)
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    if carrier.position is None:
+        return
+    cx, cy = carrier.position
+    elapsed = world.global_state.elapsed
+    raw = int(carrier.effective_atk * _S2_ATK_RATIO)
+    tiles = set(carrier.range_shape.tiles)
+    for e in world.enemies():
+        if not e.alive or e.position is None:
+            continue
+        if (round(e.position[0]) - round(cx), round(e.position[1]) - round(cy)) not in tiles:
+            continue
+        dealt = e.take_arts(raw)
+        world.global_state.total_damage_dealt += dealt
+        world.log(f"Mostima S2 Chaos → {e.name}  arts={dealt}")
+        e.statuses = [s for s in e.statuses if s.source_tag != _S2_STUN_TAG]
+        e.statuses.append(StatusEffect(
+            kind=StatusKind.STUN,
+            source_tag=_S2_STUN_TAG,
+            expires_at=elapsed + _S2_STUN_DURATION,
+        ))
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
@@ -89,7 +121,20 @@ def make_mostima(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Serenity", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Chaos",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=5,
+            duration=0.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Ley Lines",
             slot="S3",
