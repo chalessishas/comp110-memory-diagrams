@@ -1,7 +1,7 @@
 """Cleanup — 移除死亡单位，统计击杀，派发 on_death 钩子."""
 from __future__ import annotations
 from ..types import Faction
-from .talent_registry import fire_on_death
+from .talent_registry import fire_on_death, fire_on_enemy_killed
 
 
 def cleanup_system(world, dt: float) -> None:
@@ -16,3 +16,5 @@ def cleanup_system(world, dt: float) -> None:
         if getattr(u, "_just_died", False):
             u._just_died = False
             fire_on_death(world, u)
+            if u.faction == Faction.ENEMY:
+                fire_on_enemy_killed(world, u)

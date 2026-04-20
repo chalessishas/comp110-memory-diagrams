@@ -29,10 +29,18 @@ Talent callbacks:
     Called synchronously inside world.retreat() before the function returns.
     Use to cascade-despawn summons when the summoner is manually retreated.
 
+Enemy-killed watcher (separate registry, not part of the 8-tuple):
+  register_enemy_killed_watcher(tag, fn) / fire_on_enemy_killed(world, killed)
+  fn(world, watcher_unit, killed_enemy) → None
+    Called for every deployed ally that registered this tag when any enemy dies.
+    Use for "enemy dies in my range → SP/buff gain" patterns (e.g. Warfarin).
+    Fired from cleanup_system AFTER fire_on_death for the dying enemy.
+
 Usage:
     register_talent("texas_tactical_delivery", on_battle_start=_dp_cb)
     register_talent("gravel_tactical_concealment", on_deploy=_shield_cb)
     register_talent("mayer_summon", on_death=_despawn_tokens, on_retreat=_despawn_tokens)
+    register_enemy_killed_watcher("warfarin_blood_sample_recycle", _cb)
 """
 from __future__ import annotations
 from typing import Callable, Dict, Optional, Tuple
@@ -41,6 +49,24 @@ _Fn = Callable  # type alias shorthand
 
 _REGISTRY: Dict[str, Tuple] = {}
 # value: (on_hit_received, on_attack_hit, on_kill, on_battle_start, on_tick, on_deploy, on_death, on_retreat)
+
+_ENEMY_KILLED_WATCHERS: Dict[str, _Fn] = {}
+
+
+def register_enemy_killed_watcher(tag: str, fn: _Fn) -> None:
+    """Register a callback for 'any enemy in my range dies' events."""
+    _ENEMY_KILLED_WATCHERS[tag] = fn
+
+
+def fire_on_enemy_killed(world, killed_unit) -> None:
+    """Notify all deployed allies that have an enemy-killed watcher."""
+    for u in world.units:
+        if not u.alive or not u.deployed:
+            continue
+        for tc in getattr(u, "talents", []):
+            fn = _ENEMY_KILLED_WATCHERS.get(tc.behavior_tag)
+            if fn is not None:
+                fn(world, u, killed_unit)
 
 
 def register_talent(
