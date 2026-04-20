@@ -10,6 +10,9 @@ S2 "Puppetmaster": Instant AoE — applies FRAGILE (+65% damage taken) to all
   enemies in attack range for 20s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=False.
 
+S3 "Resentment Convergence": ATK+20% base, each kill adds +8% ATK (up to 5 stacks,
+  max +60%). 30s MANUAL. sp_cost=35, initial_sp=15, AUTO_TIME.
+
 Base stats (E2 max, trust 100, char_1014_nearl2 approximate — no generated file).
   HP=1640, ATK=396, DEF=117, RES=0, atk_interval=2.05s, cost=12, block=1.
 """
@@ -44,6 +47,17 @@ _RANCOR_ATK_TAG2 = "shamare_rancor_atk_2"
 _RANCOR_DEF_TAG2 = "shamare_rancor_def_2"
 _RANCOR_ALL_ATK_TAGS = (_RANCOR_ATK_TAG, _RANCOR_ATK_TAG2)
 _RANCOR_ALL_TAGS = (_RANCOR_ATK_TAG, _RANCOR_DEF_TAG, _RANCOR_ATK_TAG2, _RANCOR_DEF_TAG2)
+
+# --- S3: Resentment Convergence ---
+_S3_TAG = "shamare_s3_resentment_convergence"
+_S3_KILL_TAG = "shamare_s3_resentment_kill"
+_S3_BASE_ATK_RATIO = 0.20     # ATK +20% base
+_S3_STACK_ATK_RATIO = 0.08    # +8% ATK per kill stack
+_S3_MAX_STACKS = 5
+_S3_ATK_BUFF_TAG = "shamare_s3_atk"
+_S3_DURATION = 30.0
+_S3_ACTIVE_ATTR = "_shamare_s3_active"
+_S3_STACK_ATTR = "_shamare_s3_stacks"
 
 # --- S2: Puppetmaster ---
 _S2_TAG = "shamare_s2_puppetmaster"
@@ -138,6 +152,46 @@ def _s2_on_start(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3 kill stack logic ---
+def _s3_kill_handler(world, killer: UnitState, killed) -> None:
+    if not getattr(killer, _S3_ACTIVE_ATTR, False):
+        return
+    stacks = getattr(killer, _S3_STACK_ATTR, 0)
+    if stacks >= _S3_MAX_STACKS:
+        return
+    stacks += 1
+    setattr(killer, _S3_STACK_ATTR, stacks)
+    killer.buffs = [b for b in killer.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    total_ratio = _S3_BASE_ATK_RATIO + stacks * _S3_STACK_ATK_RATIO
+    killer.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=total_ratio, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Shamare S3 kill stack {stacks}/{_S3_MAX_STACKS} — ATK+{total_ratio:.0%}")
+
+
+register_talent(_S3_KILL_TAG, on_kill=_s3_kill_handler)
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
+    setattr(carrier, _S3_STACK_ATTR, 0)
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_BASE_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Shamare S3 Resentment Convergence — ATK+{_S3_BASE_ATK_RATIO:.0%}, on-kill stacks up to ×{_S3_MAX_STACKS}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
+    setattr(carrier, _S3_STACK_ATTR, 0)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_shamare(slot: str = "S2") -> UnitState:
     """Shamare E2 max. SUP_HEXER: Rancor ATK/DEF -25% on hit; S2: AoE FRAGILE +65%."""
     op = UnitState(
@@ -161,8 +215,23 @@ def make_shamare(slot: str = "S2") -> UnitState:
     )
     op.archetype = RoleArchetype.SUP_HEXER
     op.talents = [TalentComponent(name="Rancor", behavior_tag=_TALENT_TAG)]
+    if slot == "S3":
+        op.talents.append(TalentComponent(name="Resentment Convergence", behavior_tag=_S3_KILL_TAG))
 
-    if slot == "S2":
+    if slot == "S3":
+        op.skill = SkillComponent(
+            name="Resentment Convergence",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
         op.skill = SkillComponent(
             name="Puppetmaster",
             slot="S2",

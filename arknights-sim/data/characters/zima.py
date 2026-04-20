@@ -6,6 +6,10 @@ Talent "Lead Whistle": When deployed, all ground enemies within 3 Manhattan
 S2 "Battle Cry": 25s duration, ATK +80%.
   sp_cost=40, initial_sp=20, AUTO_TIME, AUTO trigger, requires_target=True.
 
+S3 "March Order": Instantly grants 15 DP, then for 25s applies ATK+60% aura
+  (TTL-stamp) to all deployed Vanguard allies. MANUAL.
+  sp_cost=45, initial_sp=15, AUTO_TIME.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
@@ -74,6 +78,36 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: March Order — 15 DP instant + ATK+60% to all deployed Vanguards for 25s ---
+_S3_TAG = "zima_s3_march_order"
+_S3_DP_GAIN = 15
+_S3_ATK_RATIO = 0.60
+_S3_DURATION = 25.0
+_S3_ATK_BUFF_TAG = "zima_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    world.global_state.refund_dp(_S3_DP_GAIN)
+    for ally in world.allies():
+        if not ally.alive or not ally.deployed:
+            continue
+        if ally.profession != Profession.VANGUARD:
+            continue
+        ally.buffs.append(Buff(
+            axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+            value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+        ))
+    world.log(f"Zima S3 March Order — {_S3_DP_GAIN} DP + ATK+{_S3_ATK_RATIO:.0%} to Vanguards")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_zima(slot: str = "S2") -> UnitState:
     """Zima E2 max. Talent: STUN on deploy. S2: ATK burst."""
     op = _base_stats()
@@ -98,4 +132,17 @@ def make_zima(slot: str = "S2") -> UnitState:
             requires_target=True,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="March Order",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
