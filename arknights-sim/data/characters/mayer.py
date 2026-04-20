@@ -83,7 +83,16 @@ def _talent_on_battle_start(world, carrier: UnitState) -> None:
     _spawn_token(world, carrier)
 
 
-register_talent(_TALENT_TAG, on_battle_start=_talent_on_battle_start)
+def _talent_on_death(world, carrier: UnitState) -> None:
+    """When Mayer dies, despawn all her mech-otter tokens."""
+    token_ids = getattr(carrier, _MAYER_TOKENS_ATTR, [])
+    for unit in world.units:
+        if unit.unit_id in token_ids and unit.alive:
+            unit.alive = False
+            unit.deployed = False
+
+
+register_talent(_TALENT_TAG, on_battle_start=_talent_on_battle_start, on_death=_talent_on_death)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:

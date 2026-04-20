@@ -183,3 +183,82 @@ def test_s2_buff_removed_on_end():
     assert m.skill.active_remaining == 0.0, "S2 must have ended"
     s2_buffs = [buf for buf in m.buffs if buf.source_tag == _S2_ATK_BUFF_TAG]
     assert len(s2_buffs) == 0, "S2 ATK buff must be cleared after skill ends"
+
+
+# ---------------------------------------------------------------------------
+# Test 8: on_death cascade — Mayer dies → tokens despawn
+# ---------------------------------------------------------------------------
+
+def test_tokens_despawn_when_mayer_dies():
+    """When Mayer is killed, all her mech-otter tokens must also be despawned."""
+    w = _world()
+    m = make_mayer(slot=None)   # no skill, just talent
+    m.deployed = True; m.position = (0.0, 1.0)
+    w.add_unit(m)
+
+    # Mayer now has 1 token (from on_battle_start)
+    tokens = [u for u in w.units if u.name == _TOKEN_NAME]
+    assert len(tokens) == 1, "Mayer must have spawned 1 token on deploy"
+    token = tokens[0]
+
+    # Kill Mayer via direct HP manipulation → forces take_damage path
+    damage_needed = m.max_hp + 1000
+    m.take_damage(damage_needed)
+
+    assert not m.alive, "Mayer must be dead"
+
+    # Run one tick so cleanup_system dispatches on_death
+    w.tick()
+
+    assert not token.alive or not token.deployed, (
+        f"Token must despawn when Mayer dies; alive={token.alive}, deployed={token.deployed}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Test 9: on_death cascade does not affect enemies or unrelated allies
+# ---------------------------------------------------------------------------
+
+def test_death_cascade_only_affects_mayer_tokens():
+    """When Mayer dies, unrelated allied units must NOT be affected."""
+    from data.characters.liskarm import make_liskarm
+
+    w = _world()
+    m = make_mayer(slot=None)
+    m.deployed = True; m.position = (0.0, 1.0)
+    w.add_unit(m)
+
+    lisk = make_liskarm()
+    lisk.deployed = True; lisk.position = (2.0, 1.0)
+    w.add_unit(lisk)
+
+    lisk_hp_before = lisk.hp
+
+    m.take_damage(m.max_hp + 1000)
+    w.tick()
+
+    assert not m.alive, "Mayer must be dead"
+    assert lisk.alive, "Liskarm must NOT be affected by Mayer's death cascade"
+    assert lisk.hp == lisk_hp_before, "Liskarm HP must be unchanged"
+
+
+# ---------------------------------------------------------------------------
+# Test 10: on_death fires exactly once (no double-cascade on repeated ticks)
+# ---------------------------------------------------------------------------
+
+def test_death_cascade_fires_once():
+    """Tokens despawned on tick 1 must stay despawned after many subsequent ticks."""
+    w = _world()
+    m = make_mayer(slot=None)
+    m.deployed = True; m.position = (0.0, 1.0)
+    w.add_unit(m)
+
+    token = next(u for u in w.units if u.name == _TOKEN_NAME)
+
+    m.take_damage(m.max_hp + 1000)
+    for _ in range(TICK_RATE * 3):   # 3 seconds of ticks
+        w.tick()
+
+    assert not token.alive or not token.deployed, "Token must remain despawned"
+    # _just_died must not linger
+    assert not getattr(m, "_just_died", False), "_just_died flag must be cleared after one tick"

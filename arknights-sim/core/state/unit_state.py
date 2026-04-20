@@ -300,6 +300,7 @@ class UnitState:
         self.hp = max(0, new_hp)
         if self.hp == 0:
             self.alive = False
+            self._just_died = True
         return actual
 
     def _fragile_mult(self) -> float:
