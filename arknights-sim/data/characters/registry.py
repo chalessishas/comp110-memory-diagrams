@@ -16,7 +16,33 @@ import importlib
 import pkgutil
 from typing import Callable, Dict, List
 
-from core.state.unit_state import UnitState
+from core.state.unit_state import UnitState, TalentComponent
+from core.types import RoleArchetype
+from core.systems.talent_registry import register_talent
+
+
+# --- Class-level traits (auto-injected for any operator with matching archetype) ---
+
+_CHARGER_DP_TAG = "vanguard_charger_dp_on_kill"
+
+
+def _charger_on_kill(world, killer, killed) -> None:
+    if killed.faction.value == "enemy":
+        world.global_state.refund_dp(1)
+
+
+register_talent(_CHARGER_DP_TAG, on_kill=_charger_on_kill)
+
+
+def _apply_class_traits(unit: UnitState) -> UnitState:
+    """Inject archetype-level traits that curated files may omit."""
+    existing_tags = {t.behavior_tag for t in unit.talents}
+    if unit.archetype == RoleArchetype.VAN_CHARGER and _CHARGER_DP_TAG not in existing_tags:
+        unit.talents.append(TalentComponent(
+            name="Charger (DP on kill)",
+            behavior_tag=_CHARGER_DP_TAG,
+        ))
+    return unit
 
 
 def _discover(subpackage: str) -> Dict[str, Callable[..., UnitState]]:
@@ -73,7 +99,7 @@ def get_operator(handle: str) -> UnitState:
             f"Unknown operator {handle!r}. "
             f"Known: {len(_REGISTRY)} total. Use list_operators() to browse."
         )
-    return _REGISTRY[handle]()
+    return _apply_class_traits(_REGISTRY[handle]())
 
 
 def list_operators() -> List[str]:
