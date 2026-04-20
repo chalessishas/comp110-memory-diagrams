@@ -234,12 +234,12 @@ class UnitState:
     def current_atk_interval(self) -> float:
         """考虑攻速 buff + flat 间隔修改后的实际攻击间隔. ASPD clamped to [20, 600]."""
         aspd = max(20.0, min(600.0, self.effective_aspd))
-        base = self.atk_interval * 100.0 / aspd
         flat_offset = sum(
             b.value for b in self.buffs
             if b.axis == BuffAxis.ATK_INTERVAL and b.stack == BuffStack.FLAT
         )
-        return max(0.067, base + flat_offset)   # floor at 1 frame (1/15s)
+        # wiki formula: a = (b + y) * (100 / (100 + x)) — flat offset applied BEFORE ASPD scaling
+        return max(0.067, (self.atk_interval + flat_offset) * 100.0 / aspd)
 
     # ---- status helpers ---------------------------------------------------
 

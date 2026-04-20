@@ -102,7 +102,7 @@ def load_stage(yaml_path: str) -> StageSpec:
     for e in raw["enemies"]:
         path = [(p[0], p[1]) for p in e["path"]]
         waves.append(EnemyWave(
-            enemy_id=e["id"],
+            enemy_id=str(e["id"]),
             count=int(e["count"]),
             interval=float(e["interval"]),
             path=path,
