@@ -1,6 +1,7 @@
 """Myrtle — 5* Vanguard (Standard Bearer archetype).
 
 Base stats from ArknightsGameData (E2 max, trust 100).
+Talent "Glistening" (E2): All Vanguards recover 25 HP/s while Myrtle is deployed.
 S1 "Tactical Delivery I": 14 DP over 8s while not blocking (block=0 during skill).
   sp_cost=12, initial_sp=6, duration=8s, requires_target=False.
 S2 "Healing Wings": 16 DP over 16s + heals most-injured adjacent ally at 50% ATK/s.
@@ -10,15 +11,35 @@ S2 "Healing Wings": 16 DP over 16s + heals most-injured adjacent ally at 50% ATK
 Arknights wiki: Standard Bearer stops blocking during skill activation.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.myrtle import make_myrtle as _base_stats
 
 
 STANDARD_BEARER_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
+
+# --- Talent: Glistening ---
+_GLISTENING_TAG = "myrtle_glistening"
+_GLISTENING_HEAL_RATE = 25.0   # HP/s to all Vanguards
+_GLISTENING_FRAC_ATTR = "_myrtle_glistening_frac"
+
+
+def _glistening_on_tick(world, carrier, dt: float) -> None:
+    frac = getattr(carrier, _GLISTENING_FRAC_ATTR, 0.0) + _GLISTENING_HEAL_RATE * dt
+    heal_amount = int(frac)
+    if heal_amount > 0:
+        for ally in world.allies():
+            if ally.profession == Profession.VANGUARD and ally.hp < ally.max_hp:
+                actual = ally.heal(heal_amount)
+                world.global_state.total_healing_done += actual
+    setattr(carrier, _GLISTENING_FRAC_ATTR, frac - heal_amount)
+
+
+register_talent(_GLISTENING_TAG, on_tick=_glistening_on_tick)
 
 _S1_TAG = "myrtle_s1_tactical_delivery"
 _S1_DP_RATE = 14.0 / 8.0      # 1.75 DP/s over 8s duration
@@ -114,13 +135,14 @@ register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_o
 
 
 def make_myrtle(slot: str = "S1") -> UnitState:
-    """Myrtle E2 max. S1 Tactical Delivery: 14 DP / 8s, block=0 during skill."""
+    """Myrtle E2 max. Talent Glistening: +25 HP/s to Vanguards. S1/S2 DP drip."""
     op = _base_stats()
     op.name = "Myrtle"
     op.archetype = RoleArchetype.VAN_STANDARD_BEARER
     op.range_shape = STANDARD_BEARER_RANGE
     op.block = 1
     op.cost = 10
+    op.talents = [TalentComponent(name="Glistening", behavior_tag=_GLISTENING_TAG)]
 
     if slot == "S1":
         op.skill = SkillComponent(
