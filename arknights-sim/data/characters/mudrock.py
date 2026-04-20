@@ -8,24 +8,26 @@ Talent "Rocksteady" (磐石之固):
   While HP > 50%, gain +_TALENT_DEF_BONUS flat DEF.
   Applied as a persistent buff; removed when HP drops to/below threshold.
 
-S3 "Surge of Rocks" (骤石): 15s duration, sp_cost=30, AUTO_TIME, AUTO trigger
-  Grants +100% ATK ratio buff on activation.
-  Schedules _STRIKE_COUNT=5 physical AoE strikes via EventQueue, each _STRIKE_INTERVAL apart.
-  Each strike:
-    - Deals physical damage (effective_atk, boosted by S3 buff) to all enemies within radius
-    - Generates _STRIKE_DP_PER_HIT DP on hit
-  Buff removed on S3 end; pending strikes still fire if S3 expires early.
+S3 "Surge of Rocks" (骤石): two-phase, total ~40s, sp_cost=30, AUTO_TIME, AUTO trigger
+  Phase 1 (_PHASE1_DURATION=10s): Mudrock becomes DAMAGE_IMMUNE (invulnerable).
+    Implemented via StatusKind.DAMAGE_IMMUNE applied at S3 start, removed after 10s
+    by an EventQueue expiry event.
+  Phase 2 (_S3_DURATION=30s): after Phase 1 ends, schedules _STRIKE_COUNT=5 physical
+    AoE strikes via EventQueue. Each strike:
+      - Deals physical damage (effective_atk, boosted by S3 buff) to all enemies in radius
+      - Generates _STRIKE_DP_PER_HIT DP on hit
+    ATK buff present for full duration; removed on S3 end.
 
 Base stats from ArknightsGameData (E2 max, trust 100, char_311_mudrok):
   HP=4428, ATK=882, DEF=662, RES=10, atk_interval=1.6, block=3.
 """
 from __future__ import annotations
 from core.state.unit_state import (
-    UnitState, SkillComponent, Buff, RangeShape, TalentComponent,
+    UnitState, SkillComponent, Buff, RangeShape, TalentComponent, StatusEffect,
 )
 from core.types import (
     AttackType, BuffAxis, BuffStack, Faction, Profession,
-    RoleArchetype, SkillTrigger, SPGainMode,
+    RoleArchetype, SkillTrigger, SPGainMode, StatusKind,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -42,7 +44,10 @@ _HP_THRESHOLD = 0.50             # must be strictly above 50%
 _S3_TAG = "mudrock_s3_surge_of_rocks"
 _S3_ATK_RATIO = 1.0              # +100% ATK (doubles effective_atk)
 _S3_ATK_BUFF_TAG = "mudrock_s3_atk"
-_S3_DURATION = 15.0
+_S3_DURATION = 30.0              # Phase 2 duration (rock strikes)
+_PHASE1_DURATION = 10.0          # Phase 1: DAMAGE_IMMUNE invulnerable window
+_PHASE1_STATUS_TAG = "mudrock_s3_invuln"
+_PHASE1_END_KIND = "mudrock_s3_phase1_end"
 _STRIKE_COUNT = 5
 _STRIKE_INTERVAL = 0.4           # seconds between each of the 5 hits
 _STRIKE_AOE_RADIUS = 1.5         # tiles — covers adjacent + diagonal
@@ -114,16 +119,44 @@ def _s3_on_start(world, carrier: UnitState) -> None:
         axis=BuffAxis.ATK, stack=BuffStack.RATIO,
         value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
     ))
-    kind = f"mudrock_rock_strike_{carrier.unit_id}"
-    world.event_queue.schedule_repeating(
-        first_at=world.global_state.elapsed + _STRIKE_INTERVAL,
-        interval=_STRIKE_INTERVAL,
-        count=_STRIKE_COUNT,
-        kind=kind,
+
+    # Phase 1: apply DAMAGE_IMMUNE for _PHASE1_DURATION seconds
+    now = world.global_state.elapsed
+    carrier.statuses.append(StatusEffect(
+        kind=StatusKind.DAMAGE_IMMUNE,
+        source_tag=_PHASE1_STATUS_TAG,
+        expires_at=now + _PHASE1_DURATION,
+    ))
+
+    # Register Phase 1-end handler (idempotent: only once per world)
+    if _PHASE1_END_KIND not in world.event_queue._handlers:
+        def _phase1_end(w, ev) -> None:
+            c = w.unit_by_id(ev.payload["carrier_id"])
+            if c is None or not c.alive:
+                return
+            # Remove Phase 1 immunity
+            c.statuses = [s for s in c.statuses if s.source_tag != _PHASE1_STATUS_TAG]
+            # Phase 2: schedule rock strikes
+            strike_kind = f"mudrock_rock_strike_{c.unit_id}"
+            w.event_queue.schedule_repeating(
+                first_at=w.global_state.elapsed + _STRIKE_INTERVAL,
+                interval=_STRIKE_INTERVAL,
+                count=_STRIKE_COUNT,
+                kind=strike_kind,
+            )
+            w.log(
+                f"Mudrock S3 Phase 2: {_STRIKE_COUNT} strikes scheduled"
+            )
+        world.event_queue.register(_PHASE1_END_KIND, _phase1_end)
+
+    world.event_queue.schedule(
+        now + _PHASE1_DURATION,
+        _PHASE1_END_KIND,
+        carrier_id=carrier.unit_id,
     )
     world.log(
-        f"Mudrock S3: Surge of Rocks — "
-        f"{_STRIKE_COUNT} strikes over {_STRIKE_COUNT * _STRIKE_INTERVAL:.1f}s scheduled"
+        f"Mudrock S3: Phase 1 invulnerable for {_PHASE1_DURATION}s, "
+        f"then {_STRIKE_COUNT} strikes"
     )
 
 
@@ -158,7 +191,7 @@ def make_mudrock(slot: str = "S3") -> UnitState:
             slot="S3",
             sp_cost=30,
             initial_sp=15,
-            duration=_S3_DURATION,
+            duration=_PHASE1_DURATION + _S3_DURATION,  # 10s Phase 1 + 30s Phase 2
             sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.AUTO,
             requires_target=False,
