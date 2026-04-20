@@ -153,6 +153,7 @@ class RoleArchetype(str, Enum):
     MEDIC_MULTI = "medic_multi"                  # 群奶
     MEDIC_WANDERING = "medic_wandering"          # 行医
     MEDIC_THERAPIST = "medic_therapist"
+    MEDIC_INCANTATION = "medic_incantation"      # 咒纹医师（Quercus）: attacks enemies + heals allies
     # Supporter 辅助分支
     SUP_DECEL = "sup_decel"                      # 减速辅助
     SUP_BARD = "sup_bard"                        # 诗人
