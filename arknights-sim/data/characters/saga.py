@@ -33,9 +33,17 @@ _TALENT_BUFF_TAG = "saga_tengus_edge_atk"
 
 # --- S2: Tsurugi ---
 _S2_TAG = "saga_s2_tsurugi"
-_S2_ATK_RATIO = 1.20        # ATK +120%
+_S2_ATK_RATIO = 1.20
 _S2_BUFF_TAG = "saga_s2_atk_buff"
 _S2_DURATION = 30.0
+
+# --- S3: Zangetsu ---
+_S3_TAG = "saga_s3_zangetsu"
+_S3_ATK_RATIO = 1.80
+_S3_ATK_BUFF_TAG = "saga_s3_atk"
+_S3_DURATION = 20.0
+_S3_ACTIVE_ATTR = "_saga_s3_active"
+_S3_SP_RESTORE_RATIO = 0.15
 
 
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
@@ -51,16 +59,7 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
         carrier.buffs = [b for b in carrier.buffs if b.source_tag != _TALENT_BUFF_TAG]
 
 
-# --- S3: Zangetsu — ATK+180%, on-kill SP restore ---
-_S3_TAG = "saga_s3_zangetsu"
-_S3_ATK_RATIO = 1.80        # ATK +180%
-_S3_ATK_BUFF_TAG = "saga_s3_atk"
-_S3_DURATION = 20.0
-_S3_ACTIVE_ATTR = "_saga_s3_active"
-_S3_SP_RESTORE_RATIO = 0.15  # restore 15% of sp_cost on kill
-
-
-def _tengus_edge_on_kill(world, killer: UnitState, killed) -> None:
+def _talent_on_kill(world, killer: UnitState, killed) -> None:
     if not getattr(killer, _S3_ACTIVE_ATTR, False):
         return
     sk = killer.skill
@@ -71,7 +70,7 @@ def _tengus_edge_on_kill(world, killer: UnitState, killed) -> None:
     world.log(f"Saga S3 Zangetsu kill — SP +{sp_gain:.1f} ({sk.sp:.1f}/{sk.sp_cost})")
 
 
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_kill=_tengus_edge_on_kill)
+register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_kill=_talent_on_kill)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
@@ -106,7 +105,7 @@ register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_saga(slot: str = "S2") -> UnitState:
-    """Saga E2 max. Talent: ATK buff at full SP. S2: ATK burst 30s."""
+    """Saga E2 max. Talent: ATK buff at full SP + S3 on-kill SP restore. S2/S3 ATK bursts."""
     op = _base_stats()
     op.name = "Saga"
     op.archetype = RoleArchetype.GUARD_FIGHTER
@@ -129,4 +128,17 @@ def make_saga(slot: str = "S2") -> UnitState:
             requires_target=True,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Zangetsu",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

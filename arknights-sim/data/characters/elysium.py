@@ -12,6 +12,10 @@ S2 "Tactical Gear": ATK+60% + 24 DP over 12s, block=0 during skill.
   DP rate: 24/12 = 2.0 DP/s. More total DP than S1 at a lower burst rate.
 
 Arknights wiki: Standard Bearer stops blocking during skill activation.
+
+S3 "Standard Rally": Instant MANUAL — immediately gives 20 DP and gifts 30%
+  of sp_cost SP to all deployed Vanguard allies.
+  sp_cost=35, initial_sp=15, AUTO_TIME.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
@@ -123,6 +127,33 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# --- S3: Standard Rally — instant DP burst + SP gift to all Vanguards ---
+_S3_TAG = "elysium_s3_standard_rally"
+_S3_DP_BURST = 20          # immediate DP gain
+_S3_SP_GIFT_RATIO = 0.30   # gift 30% of sp_cost to each deployed Vanguard
+
+
+def _s3_on_start(world, unit: UnitState) -> None:
+    world.global_state.refund_dp(_S3_DP_BURST)
+    for ally in world.allies():
+        if not ally.alive or not ally.deployed:
+            continue
+        if ally.profession != Profession.VANGUARD:
+            continue
+        sk = ally.skill
+        if sk is None or sk.active_remaining > 0:
+            continue
+        sp_gift = sk.sp_cost * _S3_SP_GIFT_RATIO
+        sk.sp = min(sk.sp + sp_gift, float(sk.sp_cost))
+    world.log(
+        f"Elysium S3 Standard Rally — +{_S3_DP_BURST} DP, "
+        f"{_S3_SP_GIFT_RATIO:.0%} SP gift to all Vanguards"
+    )
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
 def make_elysium(slot: str = "S1") -> UnitState:
     """Elysium E2 max. Talent: +0.3 SP/s to all Vanguards. S1 Support γ: 18 DP/8s. S2 Tactical Gear: ATK+60% + 24 DP/12s."""
     op = _base_stats()
@@ -156,6 +187,19 @@ def make_elysium(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Standard Rally",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=15,
+            duration=0.0,   # instant
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
 

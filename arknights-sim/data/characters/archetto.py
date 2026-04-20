@@ -7,6 +7,9 @@ Talent "Heartseeker": every 3rd attack applies DEF_DOWN (flat -100 DEF)
 S2 "Tactical Positioning": ATK +80%, 15s duration.
   sp_cost=20, initial_sp=10, AUTO_TIME, AUTO trigger.
 
+S3 "Tempest": ATK +150%, all attacks gain 1-tile AoE splash for 25s. MANUAL.
+  sp_cost=40, initial_sp=20, AUTO_TIME. Uses splash_radius mutation pattern.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
@@ -91,8 +94,34 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Tempest — ATK+150% + all attacks splash 1 tile ---
+_S3_TAG = "archetto_s3_tempest"
+_S3_ATK_RATIO = 1.50         # ATK +150%
+_S3_ATK_BUFF_TAG = "archetto_s3_atk"
+_S3_SPLASH_RADIUS = 1.0      # 1-tile radius around primary target
+_S3_DURATION = 25.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._saved_splash_radius = carrier.splash_radius
+    carrier.splash_radius = _S3_SPLASH_RADIUS
+    world.log(f"Archetto S3 Tempest — ATK+{_S3_ATK_RATIO:.0%}, splash_radius={_S3_SPLASH_RADIUS}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier.splash_radius = getattr(carrier, "_saved_splash_radius", 0.0)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_archetto(slot: str = "S2") -> UnitState:
-    """Archetto E2 max. Talent: DEF_DOWN -100 on every 3rd hit. S2: ATK +80%."""
+    """Archetto E2 max. Talent: DEF_DOWN -100 on every 3rd hit. S2: ATK +80%. S3: ATK+150% + splash."""
     op = _base_stats()
     op.name = "Archetto"
     op.archetype = RoleArchetype.SNIPER_DEADEYE
@@ -115,4 +144,17 @@ def make_archetto(slot: str = "S2") -> UnitState:
             requires_target=True,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Tempest",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
