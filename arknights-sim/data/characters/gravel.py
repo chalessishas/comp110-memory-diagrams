@@ -8,10 +8,14 @@ Talent "Tactical Concealment" (E2):
   Activated via on_deploy hook (fires on every world.deploy() call, including re-deploys).
   An EventQueue event at deploy_time + 10s marks the shield inactive.
   on_battle_start is kept to handle the pattern where a unit is added pre-deployed.
+
+S1 "Hidden Blade": ATK +100% for 15s.
+  sp_cost=30, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, TalentComponent, RangeShape
-from core.types import RoleArchetype
+from core.state.unit_state import UnitState, SkillComponent, Buff, TalentComponent, RangeShape
+from core.types import BuffAxis, BuffStack, RoleArchetype, SPGainMode, SkillTrigger
+from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
 from data.characters.generated.gravel import make_gravel as _base_stats
 
@@ -82,8 +86,29 @@ register_talent(
 )
 
 
-def make_gravel() -> UnitState:
-    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy."""
+# --- S1: Hidden Blade ---
+_S1_TAG = "gravel_s1_hidden_blade"
+_S1_ATK_RATIO = 1.00     # ATK +100%
+_S1_SOURCE_TAG = "gravel_s1_hidden_blade"
+
+
+def _s1_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S1_ATK_RATIO, source_tag=_S1_SOURCE_TAG,
+    ))
+    world.log(f"Gravel S1 Hidden Blade — ATK +{_S1_ATK_RATIO:.0%}")
+
+
+def _s1_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S1_SOURCE_TAG]
+
+
+register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
+
+
+def make_gravel(slot: str = "S1") -> UnitState:
+    """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy. S1: ATK+100% 15s."""
     op = _base_stats()
     op.name = "Gravel"
     op.archetype = RoleArchetype.SPEC_AMBUSHER
@@ -98,4 +123,18 @@ def make_gravel() -> UnitState:
             params={},
         )
     ]
+
+    if slot == "S1":
+        op.skill = SkillComponent(
+            name="Hidden Blade",
+            slot="S1",
+            sp_cost=30,
+            initial_sp=10,
+            duration=15.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S1_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
