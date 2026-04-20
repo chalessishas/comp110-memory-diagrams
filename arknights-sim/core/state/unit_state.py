@@ -266,6 +266,9 @@ class UnitState:
                 self.statuses = [x for x in self.statuses if x is not s]
             if actual == 0:
                 return 0
+        # SLEEP: unit wakes on any hit that deals damage
+        if actual > 0:
+            self.statuses = [s for s in self.statuses if s.kind != StatusKind.SLEEP]
         new_hp = self.hp - actual
         if new_hp <= 0 and self.undying_charges > 0:
             self.undying_charges -= 1
