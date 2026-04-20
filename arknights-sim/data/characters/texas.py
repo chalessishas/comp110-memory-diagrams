@@ -10,12 +10,18 @@ S2 "Sword Rain": Instant AoE (actually single-target burst).
   ATK +200%, immediately deals 2 physical hits to current target.
   Restores 3 DP on activation.
   sp_cost=18, initial_sp=9, AUTO_ATTACK (charges per attack), AUTO trigger.
+
+S3 "Texas Rhapsody": Instant MANUAL.
+  Deals 350% ATK Arts to all enemies in range. Stuns them for 2s. +3 DP.
+  sp_cost=30, initial_sp=15, AUTO_ATTACK.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
+from math import floor
+from core.state.unit_state import StatusEffect
 from core.types import (
     AttackType, Faction, Profession, RoleArchetype,
-    BuffAxis, BuffStack, SPGainMode, SkillTrigger,
+    BuffAxis, BuffStack, SPGainMode, SkillTrigger, StatusKind,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -67,6 +73,42 @@ def _s2_on_start(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3: Texas Rhapsody — instant Arts AoE + 2s STUN + 3 DP ---
+_S3_TAG = "texas_s3_rhapsody"
+_S3_ATK_MULTIPLIER = 3.50      # 350% ATK arts burst
+_S3_STUN_DURATION = 2.0
+_S3_DP_GAIN = 3
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    if carrier.position is None:
+        return
+    ox, oy = carrier.position
+    tiles = set(carrier.range_shape.tiles)
+    raw = int(floor(carrier.effective_atk * _S3_ATK_MULTIPLIER))
+    now = world.global_state.elapsed
+    stun_tag = f"{_S3_TAG}_stun"
+    for enemy in world.enemies():
+        if not enemy.alive or not enemy.deployed or enemy.position is None:
+            continue
+        dx = round(enemy.position[0]) - round(ox)
+        dy = round(enemy.position[1]) - round(oy)
+        if (dx, dy) not in tiles:
+            continue
+        dealt = enemy.take_arts(raw)
+        world.global_state.total_damage_dealt += dealt
+        enemy.statuses.append(StatusEffect(
+            kind=StatusKind.STUN,
+            source_tag=stun_tag,
+            expires_at=now + _S3_STUN_DURATION,
+        ))
+    world.global_state.refund_dp(_S3_DP_GAIN)
+    world.log(f"Texas S3 Rhapsody — {_S3_ATK_MULTIPLIER:.0%} ATK arts AoE, {_S3_STUN_DURATION}s stun, +{_S3_DP_GAIN} DP")
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
 def make_texas(slot: str = "S2") -> UnitState:
     """Texas E2 max. Tactical Delivery: +2 DP at start. S2: +200% ATK burst + 2 hits + 3 DP."""
     op = _base_stats()
@@ -93,6 +135,19 @@ def make_texas(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Texas Rhapsody",
+            slot="S3",
+            sp_cost=30,
+            initial_sp=15,
+            duration=0.0,           # instant
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
