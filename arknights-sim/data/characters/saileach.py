@@ -7,12 +7,16 @@ S2 "Flagship Order": 20 DP over 20s + global HoT at 35% ATK/s to all allies.
   sp_cost=35, initial_sp=20, duration=20s, block=0 during skill.
   No range restriction on HoT — heals all deployed alive allies.
 
+S3 "Battle Hymn": 30 DP over 20s + ATK+40% to all deployed allies.
+  sp_cost=40, initial_sp=20, duration=20s, MANUAL, block=0 during skill.
+  Team ATK buff applied on_start, cleared on_end.
+
 Base stats: E2 max, trust 100 (from generated/sidero.py).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
+    BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -117,6 +121,47 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# ---------------------------------------------------------------------------
+# S3 "Battle Hymn" — 30 DP/20s + ATK+40% to all deployed allies
+# ---------------------------------------------------------------------------
+_S3_TAG = "saileach_s3_battle_hymn"
+_S3_DP_RATE    = 30.0 / 20.0   # 1.5 DP/s over 20s
+_S3_ATK_RATIO  = 0.40           # ATK +40% to all deployed allies
+_S3_BUFF_TAG   = "saileach_s3_atk"
+_S3_DP_FRAC    = "_saileach_s3_dp_frac"
+
+
+def _s3_on_start(world, unit) -> None:
+    unit._saved_block = unit.block
+    unit.block = 0
+    setattr(unit, _S3_DP_FRAC, 0.0)
+    for ally in world.allies():
+        if not ally.alive or not ally.deployed:
+            continue
+        ally.buffs.append(Buff(
+            axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+            value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+        ))
+
+
+def _s3_on_tick(world, unit, dt: float) -> None:
+    dp_frac = getattr(unit, _S3_DP_FRAC, 0.0) + _S3_DP_RATE * dt
+    dp_gained = int(dp_frac)
+    if dp_gained > 0:
+        world.global_state.refund_dp(dp_gained)
+    setattr(unit, _S3_DP_FRAC, dp_frac - dp_gained)
+
+
+def _s3_on_end(world, unit) -> None:
+    unit.block = getattr(unit, "_saved_block", 1)
+    setattr(unit, _S3_DP_FRAC, 0.0)
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_tick=_s3_on_tick, on_end=_s3_on_end)
+
+
 def make_saileach(slot: str = "S2") -> UnitState:
     """Saileach E2 max, trust 100.
     S1: 14 DP/8s Standard Bearer drip.
@@ -154,5 +199,17 @@ def make_saileach(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Battle Hymn",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op
