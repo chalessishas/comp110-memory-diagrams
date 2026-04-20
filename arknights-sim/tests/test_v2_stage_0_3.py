@@ -5,7 +5,8 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from stages.loader import load_stage, build_world, load_and_build
-from data.characters import make_silverash, make_liskarm
+from data.characters import make_liskarm
+from data.characters.exusiai import make_exusiai
 from core.types import TileType, TICK_RATE, Mobility
 
 
@@ -71,16 +72,20 @@ def test_ground_enemies_are_still_blocked():
 
 
 def test_stage_clears_with_two_operators():
-    """SilverAsh + Liskarm should clear all 6 enemies (3 slugs + 3 drones)."""
+    """Exusiai (ranged) + Liskarm clear all 6 enemies (3 slugs + 3 drones).
+
+    Exusiai handles both aerial drones and ground slugs (ranged, attack_range_melee=False).
+    Liskarm blocks and handles slugs (melee, cannot target aerial).
+    """
     _, world = load_and_build(STAGE_PATH)
 
-    # SilverAsh handles both slugs and drones via ranged attacks
-    sa = make_silverash()
-    sa.deployed = True
-    sa.position = (2.0, 1.0)
-    world.add_unit(sa)
+    # Exusiai: ranged sniper, can target both ground and aerial enemies
+    ex = make_exusiai()
+    ex.deployed = True
+    ex.position = (2.0, 1.0)
+    world.add_unit(ex)
 
-    # Liskarm provides block for slugs + backup damage
+    # Liskarm: blocks ground slugs, cannot target aerial drones
     lk = make_liskarm()
     lk.deployed = True
     lk.position = (4.0, 1.0)

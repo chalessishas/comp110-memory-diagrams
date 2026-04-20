@@ -8,10 +8,14 @@ Terra Wiki 优先级栈（从高到低）:
   5. Highest negative aggression —— 隐身等特殊负优先
 
 本实现覆盖 1 + 3 + 4（最常用的三条），Special 预留 hook.
+
+Aerial targeting rule:
+  attack_range_melee=True operators CANNOT target Mobility.AIRBORNE enemies.
+  SNIPER_ANTI_AIR operators prioritize AIRBORNE enemies over ground enemies.
 """
 from __future__ import annotations
 from typing import List, Optional
-from ..types import Faction, RoleArchetype, StatusKind
+from ..types import Faction, Mobility, RoleArchetype, StatusKind
 from ..state.unit_state import UnitState
 
 
@@ -50,10 +54,19 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
         return min(candidates, key=lambda u: u.hp / u.max_hp)
 
     # Collect in-range live enemies
-    candidates: List[UnitState] = [
+    all_in_range: List[UnitState] = [
         e for e in world.enemies()
         if _enemy_in_range(op, e) and not e.has_status(StatusKind.CAMOUFLAGE)
     ]
+    if not all_in_range:
+        return None
+
+    # Aerial targeting restriction: melee operators cannot target airborne enemies
+    if op.attack_range_melee:
+        candidates = [e for e in all_in_range if e.mobility != Mobility.AIRBORNE]
+    else:
+        candidates = all_in_range
+
     if not candidates:
         return None
 
@@ -73,6 +86,11 @@ def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
     if op.archetype == RoleArchetype.SNIPER_SIEGE:
         # Besieger Sniper trait: target enemy with highest weight
         return max(candidates, key=lambda e: (e.weight, -_dist_remaining(e)))
+    if op.archetype == RoleArchetype.SNIPER_ANTI_AIR:
+        # Anti-Air Sniper trait: prefer airborne enemies, then closest to exit
+        airborne = [e for e in candidates if e.mobility == Mobility.AIRBORNE]
+        pool = airborne if airborne else candidates
+        return min(pool, key=_dist_remaining)
 
     # Rule 3/4: closest to destination — min path_distance_remaining
     return min(candidates, key=_dist_remaining)
@@ -163,7 +181,6 @@ def targeting_system(world, dt: float) -> None:
 
 def _update_block_assignments(world) -> None:
     """Each melee ally blocks up to `block` enemies currently on/near its tile."""
-    from ..types import Mobility
     # 清空所有 enemy.blocked_by_unit_ids
     for e in world.enemies():
         e.blocked_by_unit_ids = []
