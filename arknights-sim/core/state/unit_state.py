@@ -251,6 +251,18 @@ class UnitState:
     def take_damage(self, amount: int) -> int:
         dr = self.talent_damage_reduction()
         actual = max(1, int(amount * (1.0 - dr)))
+        # SHIELD absorbs damage before HP (largest shield pool used first)
+        for s in sorted(self.statuses, key=lambda x: -x.params.get("amount", 0)):
+            if s.kind != StatusKind.SHIELD:
+                continue
+            pool = s.params.get("amount", 0)
+            absorbed = min(pool, actual)
+            s.params["amount"] = pool - absorbed
+            actual -= absorbed
+            if s.params["amount"] <= 0:
+                self.statuses = [x for x in self.statuses if x is not s]
+            if actual == 0:
+                return 0
         self.hp = max(0, self.hp - actual)
         if self.hp == 0:
             self.alive = False

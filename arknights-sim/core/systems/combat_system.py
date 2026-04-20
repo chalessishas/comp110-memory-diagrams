@@ -94,14 +94,14 @@ def combat_system(world, dt: float) -> None:
                 if not sk_t.active_remaining > 0:
                     sk_t.sp = min(sk_t.sp + 1.0, float(sk_t.sp_cost))
 
-        # Talent hooks
+        # Talent hooks — fire for both damage and heals (callbacks filter by type)
         if u.attack_type != AttackType.HEAL:
             if target.talents:
                 fire_on_hit_received(world, target, u, dealt)
-            if u.talents:
-                fire_on_attack_hit(world, u, target, dealt)
             if not target.alive and u.talents:
                 fire_on_kill(world, u, target)
+        if u.talents:
+            fire_on_attack_hit(world, u, target, dealt)
 
 
 def _apply_fortress_ranged(world, u, targets) -> None:
