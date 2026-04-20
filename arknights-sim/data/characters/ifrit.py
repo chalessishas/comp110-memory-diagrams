@@ -6,13 +6,38 @@ sp_cost=22, initial_sp=10.
 """
 from __future__ import annotations
 from math import floor
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent, Buff
 from core.types import (
-    AttackType, BuffAxis, Faction, Profession,
+    AttackType, BuffAxis, BuffStack, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.ifrit import make_ifrit as _base_stats
+
+
+# --- Talent: Injection ---
+_INJECTION_TAG = "ifrit_injection"
+_INJECTION_BUFF_TAG = "ifrit_injection_def"
+_DEF_REDUCTION = 0.15    # -15% DEF (E2 max)
+_INJECTION_DURATION = 10.0
+
+
+def _injection_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
+    now = world.global_state.elapsed
+    new_expires = now + _INJECTION_DURATION
+    existing = next((b for b in target.buffs if b.source_tag == _INJECTION_BUFF_TAG), None)
+    if existing is not None:
+        existing.expires_at = new_expires
+    else:
+        target.buffs.append(Buff(
+            axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+            value=-_DEF_REDUCTION, source_tag=_INJECTION_BUFF_TAG,
+            expires_at=new_expires,
+        ))
+
+
+register_talent(_INJECTION_TAG, on_attack_hit=_injection_on_attack_hit)
 
 
 # Ifrit fires straight ahead in a 1×5 line (standard Core Caster range)
@@ -57,6 +82,7 @@ def make_ifrit(slot: str = "S2") -> UnitState:
     op.archetype = RoleArchetype.CASTER_CORE
     op.range_shape = CORE_CASTER_RANGE
     op.cost = 34
+    op.talents = [TalentComponent(name="Injection", behavior_tag=_INJECTION_TAG)]
     if slot == "S2":
         op.skill = SkillComponent(
             name="Combustion",
