@@ -31,6 +31,47 @@ _TALENT_TAG = "manticore_camouflage"
 _CAMO_TAG = "manticore_camo_aura"
 _CAMO_REFRESH_DT = 2.0 / TICK_RATE   # two ticks — lapses quickly when undeployed
 
+# --- S2: Predator's Claws ---
+_S2_TAG = "manticore_s2_predator"
+_S2_ATK_RATIO = 1.00         # ATK +100%
+_S2_BIND_DURATION = 2.0      # 2s BIND on each hit enemy at skill start
+_S2_BIND_TAG = "manticore_s2_bind"
+_S2_BUFF_TAG = "manticore_s2_atk"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    from core.state.unit_state import Buff
+    from core.types import BuffAxis, BuffStack
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    if carrier.position is None:
+        return
+    cx, cy = carrier.position
+    elapsed = world.global_state.elapsed
+    tiles = set(carrier.range_shape.tiles)
+    for e in world.enemies():
+        if not e.alive or e.position is None:
+            continue
+        if (round(e.position[0]) - round(cx), round(e.position[1]) - round(cy)) not in tiles:
+            continue
+        e.statuses = [s for s in e.statuses if s.source_tag != _S2_BIND_TAG]
+        e.statuses.append(StatusEffect(
+            kind=StatusKind.BIND,
+            source_tag=_S2_BIND_TAG,
+            expires_at=elapsed + _S2_BIND_DURATION,
+        ))
+    world.log(f"Manticore S2 Predator's Claws — ATK+{_S2_ATK_RATIO:.0%}, BIND({_S2_BIND_DURATION}s)")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 # --- S1: Scorpion's Art (self-REGEN) ---
 _S1_TAG = "manticore_s1_scorpion"
 _S1_REGEN_HPS = 150.0        # 150 HP per second (true regen, bypasses DEF)
@@ -86,7 +127,20 @@ def make_manticore(slot: str = "S1") -> UnitState:
 
     op.talents = [TalentComponent(name="Venomous Fangs", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S1":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Predator's Claws",
+            slot="S2",
+            sp_cost=20,
+            initial_sp=5,
+            duration=15.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S1":
         op.skill = SkillComponent(
             name="Scorpion's Art",
             slot="S1",
