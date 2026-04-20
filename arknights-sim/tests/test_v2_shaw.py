@@ -41,8 +41,13 @@ def _slug(path=None, hp=99999, atk=0, progress=5.0):
 
 def test_shaw_archetype_and_push():
     from core.types import RoleArchetype
+    from core.systems.talent_registry import fire_on_battle_start
     s = make_shaw()
     assert s.archetype == RoleArchetype.SPEC_PUSHER
+    # Gale talent fires on_battle_start; construction default is 1
+    w = _world()
+    w.add_unit(s)
+    fire_on_battle_start(w, s)
     assert s.push_distance == 2
 
 

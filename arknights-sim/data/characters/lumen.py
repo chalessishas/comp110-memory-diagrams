@@ -3,6 +3,9 @@
 MEDIC_MULTI trait: heals 3 most-injured allies simultaneously per attack.
   Each hit heals the 3 allies with the lowest hp/max_hp ratio.
 
+Talent "Intensive Care" (E2): Each ally Lumen heals restores +1 SP to Lumen.
+  With 3 heal targets, this is effectively +3 SP per attack cycle.
+
 S2 "Group Recovery": ATK +30%, heal targets 3 → 5 for 15s.
   sp_cost=20, initial_sp=10, AUTO_TIME, AUTO trigger.
 
@@ -10,12 +13,13 @@ Base stats from ArknightsGameData (E2 max, trust 100, char_4042_lumen).
   HP=1825, ATK=585, DEF=141, RES=10, atk_interval=2.85s, cost=23, block=1.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
     AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.lumen import make_lumen as _base_stats
 
 
@@ -30,6 +34,21 @@ _S2_HEAL_TARGETS = 5
 _S2_DURATION = 15.0
 
 _BASE_HEAL_TARGETS = 3
+
+_INTENSIVE_CARE_TAG = "lumen_intensive_care"
+_SP_PER_HEAL = 1.0
+
+
+def _intensive_care_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
+    sk = getattr(attacker, "skill", None)
+    if sk is None or sk.active_remaining > 0:
+        return
+    if world.global_state.elapsed < sk.sp_lockout_until:
+        return
+    sk.sp = min(sk.sp + _SP_PER_HEAL, float(sk.sp_cost))
+
+
+register_talent(_INTENSIVE_CARE_TAG, on_attack_hit=_intensive_care_on_attack_hit)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
@@ -60,6 +79,10 @@ def make_lumen(slot: str = "S2") -> UnitState:
     op.block = 1
     op.cost = 23
     op.heal_targets = _BASE_HEAL_TARGETS
+    op.talents = [TalentComponent(
+        name="Intensive Care",
+        behavior_tag=_INTENSIVE_CARE_TAG,
+    )]
 
     if slot == "S2":
         op.skill = SkillComponent(
