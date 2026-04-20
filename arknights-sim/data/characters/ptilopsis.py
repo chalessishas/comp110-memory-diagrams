@@ -4,11 +4,14 @@ Talent "Unisonant" (E2): While deployed, all operators gain +0.3 SP/s.
   Applies to all SP gain modes (AUTO_TIME, AUTO_ATTACK, AUTO_DEFENSIVE).
   Respects can_use_skill() — silenced/stunned units do not benefit.
 S1 "Dawn's Resonance": +50% ATK for 25s (boosts heal output). sp_cost=25, initial=10.
+S2 "Night Cure": +80% ATK for 20s + heals ALL allies in range for 70% ATK per second.
+  sp_cost=30, initial_sp=12, AUTO_TIME, AUTO trigger, requires_target=False.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from math import sqrt
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
     Profession, RoleArchetype, SPGainMode, SkillTrigger, AttackType,
     BuffAxis, BuffStack,
@@ -70,8 +73,52 @@ def _s1_on_end(world, unit) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
+# --- S2: Night Cure — ATK+80% + AoE heal all allies in range per second ---
+_S2_TAG = "ptilopsis_s2_night_cure"
+_S2_ATK_RATIO = 0.80
+_S2_BUFF_TAG = "ptilopsis_s2_atk_buff"
+_S2_HEAL_PER_SEC = 0.70      # heal = 70% of effective ATK per second to each ally
+_S2_RANGE = 3.0              # tile radius matching MEDIC_RANGE extent
+_S2_HEAL_ACCUM = "_ptilopsis_s2_heal_accum"
+
+
+def _s2_on_start(world, unit) -> None:
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    setattr(unit, _S2_HEAL_ACCUM, 0.0)
+    world.log(f"Ptilopsis S2 Night Cure — ATK+{_S2_ATK_RATIO:.0%}, AoE heal {_S2_HEAL_PER_SEC:.0%} ATK/s")
+
+
+def _s2_on_tick(world, unit, dt: float) -> None:
+    accum = getattr(unit, _S2_HEAL_ACCUM, 0.0) + dt
+    heal_events = int(accum)   # fire whole-second heal pulses
+    if heal_events > 0 and unit.position is not None:
+        px, py = unit.position
+        heal_amount = int(unit.effective_atk * _S2_HEAL_PER_SEC * heal_events)
+        for ally in world.allies():
+            if ally is unit or not ally.alive or not ally.deployed:
+                continue
+            if ally.position is None:
+                continue
+            ax, ay = ally.position
+            if sqrt((ax - px) ** 2 + (ay - py) ** 2) <= _S2_RANGE:
+                ally.heal(heal_amount)
+    setattr(unit, _S2_HEAL_ACCUM, accum - heal_events)
+
+
+def _s2_on_end(world, unit) -> None:
+    unit.buffs = [b for b in unit.buffs if b.source_tag != _S2_BUFF_TAG]
+    setattr(unit, _S2_HEAL_ACCUM, 0.0)
+    world.log("Ptilopsis S2 ended")
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
+
+
 def make_ptilopsis(slot: str = "S1") -> UnitState:
-    """Ptilopsis E2 max. Talent: +0.3 SP/s to all operators. S1: +50% ATK heal buff."""
+    """Ptilopsis E2 max. Talent: +0.3 SP/s to all operators. S1: +50% ATK. S2: +80% ATK + AoE heal 70% ATK/s."""
     op = _base_stats()
     op.name = "Ptilopsis"
     op.archetype = RoleArchetype.MEDIC_ST
@@ -94,4 +141,17 @@ def make_ptilopsis(slot: str = "S1") -> UnitState:
             requires_target=False,
             behavior_tag=_S1_TAG,
         )
+    elif slot == "S2":
+        op.skill = SkillComponent(
+            name="Night Cure",
+            slot="S2",
+            sp_cost=30,
+            initial_sp=12,
+            duration=20.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
