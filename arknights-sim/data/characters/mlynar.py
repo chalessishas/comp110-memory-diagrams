@@ -122,7 +122,7 @@ def make_mlynar(slot: str = "S3") -> UnitState:
             duration=_S3_DURATION,
             sp_gain_mode=SPGainMode.AUTO_ATTACK,
             trigger=SkillTrigger.AUTO,
-            requires_target=True,
+            requires_target=False,
             behavior_tag=_S3_TAG,
         )
     return op

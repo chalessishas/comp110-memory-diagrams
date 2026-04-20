@@ -40,11 +40,15 @@ def _enemy_in_range(op: UnitState, enemy: UnitState) -> bool:
 
 
 def _targeting_for_operator(world, op: UnitState) -> Optional[UnitState]:
-    from ..types import AttackType
+    from ..types import AttackType, RoleArchetype
     if not op.can_act():
         return None
     if not op.deployed or op.position is None:
         return None
+    # GUARD_LIBERATOR cannot attack while skill is inactive
+    if op.archetype == RoleArchetype.GUARD_LIBERATOR:
+        if op.skill is None or op.skill.active_remaining <= 0:
+            return None
 
     # Healer: target most-injured ally (lowest hp/max_hp ratio)
     # Musha Guards with heal_block_threshold > 0 are excluded when above their threshold
