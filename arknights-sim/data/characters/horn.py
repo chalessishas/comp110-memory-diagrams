@@ -15,6 +15,9 @@ S2 "Support Ray": ATK +120%, forces ranged attack mode even while blocking.
   Duration=35s, sp_cost=30, initial_sp=15, AUTO_TIME, AUTO trigger, requires_target=False.
   While active: _force_ranged_mode=True overrides the blocking check in targeting_system.
 
+S3 "Pursuit": ATK +250%, forces ranged attack mode. Duration=40s, MANUAL.
+  sp_cost=50, initial_sp=25, AUTO_TIME SP gain, requires_target=False.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
   HP=4400, ATK=592, DEF=580, RES=0, atk_interval=2.8s, cost=28, block=3.
 """
@@ -102,6 +105,30 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Pursuit — ATK+250%, forced ranged mode, 40s, MANUAL ---
+_S3_TAG = "horn_s3_pursuit"
+_S3_ATK_RATIO = 2.50          # ATK +250%
+_S3_DURATION = 40.0
+_S3_ATK_BUFF_TAG = "horn_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._force_ranged_mode = True
+    world.log(f"Horn S3 Pursuit — ATK +{_S3_ATK_RATIO:.0%}, forced ranged mode")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._force_ranged_mode = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_horn(slot: str = "S2", talent: bool = True) -> UnitState:
     """Horn E2 max. Fortress: ranged AoE / melee toggle. S2: ATK+120% + forced ranged mode."""
     op = _base_stats()
@@ -129,6 +156,19 @@ def make_horn(slot: str = "S2", talent: bool = True) -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Pursuit",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=25,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
