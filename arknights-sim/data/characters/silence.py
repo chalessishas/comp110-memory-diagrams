@@ -6,13 +6,28 @@ S2 "Medical Protocol": Deploys a healing drone — continuously heals the
   sp_cost=25, initial_sp=0, AUTO_TIME.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
 from core.types import (
     AttackType, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
 from core.systems.skill_system import register_skill
+from core.systems.talent_registry import register_talent
 from data.characters.generated.silent import make_silent as _base_stats
+
+
+# --- Talent: Reinforcement ---
+_TALENT_TAG = "silence_reinforcement"
+_TALENT_CRIT_ATTR = "_silence_heal_crit"
+_CRIT_CHANCE = 0.15       # E2 max: 15% heal crit chance
+_CRIT_MULTIPLIER = 2.0    # crit heals deal 2× the normal amount
+
+
+def _reinforcement_on_battle_start(world, carrier: UnitState) -> None:
+    setattr(carrier, _TALENT_CRIT_ATTR, _CRIT_CHANCE)
+
+
+register_talent(_TALENT_TAG, on_battle_start=_reinforcement_on_battle_start)
 
 
 MEDIC_RANGE = RangeShape(tiles=tuple(
@@ -47,13 +62,17 @@ def _s2_on_start(world, carrier: UnitState) -> None:
 
 
 def _s2_on_tick(world, carrier: UnitState, dt: float) -> None:
-    """Accumulate fractional heal; apply integer portion each tick."""
+    """Accumulate fractional heal; apply integer portion each tick. Crit if talent active."""
     accum = getattr(carrier, _S2_HEAL_ACCUM, 0.0) + carrier.effective_atk * _S2_HEAL_PER_SECOND * dt
     whole = int(accum)
     if whole > 0:
+        heal_amount = whole
+        crit_chance = getattr(carrier, _TALENT_CRIT_ATTR, 0.0)
+        if crit_chance > 0.0 and world.rng.random() < crit_chance:
+            heal_amount = int(whole * _CRIT_MULTIPLIER)
         target = _find_most_injured(world, carrier)
         if target is not None:
-            healed = target.heal(whole)
+            healed = target.heal(heal_amount)
             world.global_state.total_healing_done += healed
             world.log(
                 f"Silence S2 drone → {target.name}  heal={healed}  ({target.hp}/{target.max_hp})"
@@ -75,6 +94,7 @@ def make_silence(slot: str = "S2") -> UnitState:
     op.archetype = RoleArchetype.MEDIC_ST
     op.range_shape = MEDIC_RANGE
     op.cost = 19
+    op.talents = [TalentComponent(name="Reinforcement", behavior_tag=_TALENT_TAG)]
     if slot == "S2":
         op.skill = SkillComponent(
             name="Medical Protocol",
