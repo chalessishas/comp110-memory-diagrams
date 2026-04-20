@@ -38,6 +38,14 @@ _RAMP_BUFF_TAG = "mlynar_ramp_atk"
 
 _INACTIVE_ATK_CD = 9999.0    # prevents attacking when skill inactive
 
+# --- S2: Blood of Iron ---
+_S2_TAG = "mlynar_s2_blood_of_iron"
+_S2_ATK_RATIO = 0.30
+_S2_ASPD_FLAT = 40.0
+_S2_BUFF_TAG = "mlynar_s2_buff"
+_S2_DURATION = 20.0
+_S2_BLOCK = 3
+
 # S3 constants
 _TALENT_TAG = "mlynar_iron_will"
 _S3_TAG = "mlynar_s3_fathers_teachings"
@@ -79,6 +87,30 @@ def _iron_will_on_tick(world, carrier: UnitState, dt: float) -> None:
 register_talent(_TALENT_TAG, on_tick=_iron_will_on_tick)
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.block = _S2_BLOCK
+    carrier.atk_cd = 0.0
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S2_ASPD_FLAT, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Mlynar S2 Blood of Iron — ATK+{_S2_ATK_RATIO:.0%}, ASPD+{_S2_ASPD_FLAT}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+    _clear_ramp_buff(carrier)
+    setattr(carrier, _RAMP_ATTR, 0.0)
+    carrier.block = 0
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 def _s3_on_start(world, carrier: UnitState) -> None:
     carrier.block = _S3_BLOCK
     carrier.atk_cd = 0.0  # immediate first attack after activation
@@ -113,7 +145,19 @@ def make_mlynar(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Iron Will", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Blood of Iron",
+            slot="S2",
+            sp_cost=35,
+            initial_sp=15,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Father's Teachings",
             slot="S3",

@@ -50,19 +50,21 @@ def test_ashlock_s2_skill_config():
 # ---------------------------------------------------------------------------
 
 def test_ashlock_s2_atk_buff():
+    from core.types import BuffAxis, BuffStack
     w = _world()
     a = make_ashlock(slot="S2")
     a.deployed = True; a.position = (0.0, 1.0)
     w.add_unit(a)
 
-    base_atk = a.effective_atk
     a.skill.sp = float(a.skill.sp_cost)
     w.tick()
 
-    expected = int(a.atk * (1.0 + _S2_ATK_RATIO))
-    assert a.effective_atk == expected, (
-        f"S2 ATK +{_S2_ATK_RATIO:.0%} must give {expected}; got {a.effective_atk}"
-    )
+    # Check the S2 buff is present with correct value (talent also fires on same tick)
+    s2_buff = next((b for b in a.buffs if b.source_tag == _S2_SOURCE_TAG), None)
+    assert s2_buff is not None, "S2 ATK buff must be applied"
+    assert s2_buff.axis == BuffAxis.ATK
+    assert s2_buff.stack == BuffStack.RATIO
+    assert s2_buff.value == _S2_ATK_RATIO
 
 
 # ---------------------------------------------------------------------------

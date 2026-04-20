@@ -33,6 +33,12 @@ _TALENT_TAG = "weedy_free_flowing"
 _TALENT_DEF_RATIO = 0.70
 _TALENT_DEF_BUFF_TAG = "weedy_free_flowing_def"
 
+# --- S2: Water Jet ---
+_S2_TAG = "weedy_s2_water_jet"
+_S2_ATK_RATIO = 0.80
+_S2_BUFF_TAG = "weedy_s2_atk"
+_S2_DURATION = 20.0
+
 # --- S3: Torrential Stream ---
 _S3_TAG = "weedy_s3_torrential"
 _S3_DURATION = 30.0
@@ -74,6 +80,21 @@ register_talent(
 )
 
 
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"Weedy S2 Water Jet — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
 def _s3_on_start(world, carrier: UnitState) -> None:
     carrier.buffs.append(Buff(
         axis=BuffAxis.ATK, stack=BuffStack.RATIO,
@@ -109,7 +130,20 @@ def make_weedy(slot: str = "S3") -> UnitState:
 
     op.talents = [TalentComponent(name="Free-Flowing", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Water Jet",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S2_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Torrential Stream",
             slot="S3",

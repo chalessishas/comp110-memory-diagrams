@@ -37,11 +37,32 @@ def _kings_sight_on_attack_hit(world, attacker: UnitState, target, damage: int) 
 register_talent(_TALENT_TAG, on_attack_hit=_kings_sight_on_attack_hit)
 
 
+# --- S2: Charged Arrow ---
+_S2_TAG = "typhon_s2_charged_arrow"
+_S2_ATK_RATIO = 1.00     # ATK +100%
+_S2_AMMO = 3
+_S2_SOURCE_TAG = "typhon_s2_charged_arrow"
+
 # --- S3: Eternal Hunt ---
 _S3_TAG = "typhon_s3_eternal_hunt"
 _S3_ATK_RATIO = 2.00     # ATK +200% → each arrow deals 3× base ATK
 _S3_AMMO = 5             # 5 arrows per activation
 _S3_SOURCE_TAG = "typhon_s3_eternal_hunt"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_SOURCE_TAG,
+    ))
+    world.log(f"Typhon S2 Charged Arrow — {_S2_AMMO} shots, ATK+{_S2_ATK_RATIO:.0%}")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_SOURCE_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
@@ -70,7 +91,21 @@ def make_typhon(slot: str = "S3") -> UnitState:
     op.cost = 24
     op.talents = [TalentComponent(name="King's Sight", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Charged Arrow",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=0.0,
+            ammo_count=_S2_AMMO,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="Eternal Hunt",
             slot="S3",
