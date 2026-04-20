@@ -7,7 +7,7 @@ from core.world import World
 from core.state.tile_state import TileGrid, TileState
 from core.types import TileType, StatusKind, TICK_RATE
 from core.systems import register_default_systems
-from data.characters.rope import make_rope, _BASE_PULL, _S2_PULL_DIST, _S2_BIND_DURATION, _S2_ATK_MULT
+from data.characters.rope import make_rope, _BASE_PULL, _TALENT_PULL, _S2_PULL_DIST, _S2_BIND_DURATION, _S2_ATK_MULT
 from data.enemies import make_originium_slug
 
 
@@ -49,11 +49,11 @@ def test_rope_archetype_and_pull():
 # ---------------------------------------------------------------------------
 
 def test_basic_attack_pulls_one_tile():
-    """Rope's basic attack decreases target path_progress by 1."""
+    """Rope E2 attack pulls 2 tiles (Shadow Step talent raises base 1 → 2)."""
     w = _world()
     r = make_rope()
     r.deployed = True; r.position = (0.0, 1.0); r.atk_cd = 0.0
-    w.add_unit(r)
+    w.add_unit(r)   # on_battle_start sets push_distance = _TALENT_PULL (2)
 
     slug = _slug(progress=3.0)
     w.add_unit(slug)
@@ -61,8 +61,8 @@ def test_basic_attack_pulls_one_tile():
     progress_before = slug.path_progress
     w.tick()
 
-    assert slug.path_progress == progress_before - _BASE_PULL, (
-        f"Expected path_progress={progress_before - _BASE_PULL}, got {slug.path_progress}"
+    assert slug.path_progress == progress_before - _TALENT_PULL, (
+        f"Expected path_progress={progress_before - _TALENT_PULL}, got {slug.path_progress}"
     )
 
 

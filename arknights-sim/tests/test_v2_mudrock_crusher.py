@@ -58,7 +58,7 @@ def test_headb2_splash_hits_co_located_enemy():
     for _ in range(30):
         w.tick()
 
-    assert headb2.splash_radius == 1.0
+    assert headb2.splash_radius == 1.5   # Shockwave talent raises 1.0 → 1.5 at E2
     assert headb2.splash_atk_multiplier == 0.5
     assert primary.hp < primary.max_hp, "primary must take damage"
     assert splash.hp < splash.max_hp, "co-located enemy must receive splash"

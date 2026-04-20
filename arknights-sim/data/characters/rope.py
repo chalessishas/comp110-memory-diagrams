@@ -12,14 +12,28 @@ Base stats: E2 max, trust 100 (ArknightsGameData char_236_rope).
   HP=1720, ATK=728, DEF=385, RES=0, atk_interval=1.8s, cost=12, block=2.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, StatusEffect
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, StatusEffect, TalentComponent
 from core.types import (
     AttackType, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode, StatusKind,
 )
 from core.systems.skill_system import register_skill
 from core.systems.combat_system import _apply_push
+from core.systems.talent_registry import register_talent
 from data.characters.generated.rope import make_rope as _base_stats
+
+
+# --- Talent: Shadow Step — pull distance increases to 2 at E2 ---
+_TALENT_TAG = "rope_shadow_step"
+_TALENT_PULL = 2
+
+
+def _shadow_step_on_battle_start(world, carrier: UnitState) -> None:
+    carrier.push_distance = _TALENT_PULL
+    world.log(f"Rope Shadow Step — push_distance → {_TALENT_PULL}")
+
+
+register_talent(_TALENT_TAG, on_battle_start=_shadow_step_on_battle_start)
 
 
 HOOKMASTER_RANGE = RangeShape(tiles=tuple(
@@ -85,7 +99,8 @@ def make_rope(slot: str = "S2") -> UnitState:
     op.attack_range_melee = False
     op.block = 2
     op.cost = 12
-    op.push_distance = _BASE_PULL   # pull 1 tile per normal attack
+    op.push_distance = _BASE_PULL   # pull 1 tile per normal attack; talent raises to 2
+    op.talents = [TalentComponent(name="Shadow Step", behavior_tag=_TALENT_TAG)]
 
     if slot == "S2":
         op.skill = SkillComponent(
