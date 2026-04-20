@@ -16,6 +16,7 @@ def make_silverash() -> UnitState:
         defence=447,
         res=10.0,
         atk_interval=1.3,
+        move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.GUARD,
         attack_type=AttackType.PHYSICAL,

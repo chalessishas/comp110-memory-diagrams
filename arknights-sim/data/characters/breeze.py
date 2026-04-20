@@ -36,6 +36,7 @@ _BASE_HEAL_TARGETS = 99       # effectively unlimited: heal all injured allies
 _TALENT_TAG = "breeze_healing_breeze"
 _TALENT_BONUS_RATIO = 0.10    # +10% max_hp bonus per healed target
 _TALENT_ACCUM_ATTR = "_breeze_heal_count"
+_TALENT_TICK_ATTR = "_breeze_heal_tick"   # tick_count when count was last reset
 
 # S2: Revitalizing Gale
 _S2_TAG = "breeze_s2_revitalizing_gale"
@@ -46,7 +47,10 @@ _S2_DURATION = 20.0
 
 def _healing_breeze_on_attack_hit(world, attacker: UnitState, target, heal_amount: int) -> None:
     """Called once per healed target. Track count and apply bonus on 2+ heals."""
-    # Count how many allies have been healed this attack cycle
+    current_tick = world.global_state.tick_count
+    if getattr(attacker, _TALENT_TICK_ATTR, -1) != current_tick:
+        setattr(attacker, _TALENT_ACCUM_ATTR, 0)
+        setattr(attacker, _TALENT_TICK_ATTR, current_tick)
     count = getattr(attacker, _TALENT_ACCUM_ATTR, 0) + 1
     setattr(attacker, _TALENT_ACCUM_ATTR, count)
     # Apply bonus 10% max_hp heal for each heal in a multi-heal event

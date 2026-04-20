@@ -16,10 +16,11 @@ def make_angelina() -> UnitState:
         defence=120,
         res=25.0,
         atk_interval=1.9,
+        move_speed=1.0,
         attack_range_melee=False,
         profession=Profession.SUPPORTER,
-        attack_type=AttackType.PHYSICAL,
+        attack_type=AttackType.ARTS,
         block=1,
-        cost=14,
+        cost=16,
         redeploy_cd=70.0,
     )

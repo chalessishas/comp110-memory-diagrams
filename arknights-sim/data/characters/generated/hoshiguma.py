@@ -16,6 +16,7 @@ def make_hoshiguma() -> UnitState:
         defence=783,
         res=0.0,
         atk_interval=1.2,
+        move_speed=1.0,
         attack_range_melee=True,
         profession=Profession.DEFENDER,
         attack_type=AttackType.PHYSICAL,
