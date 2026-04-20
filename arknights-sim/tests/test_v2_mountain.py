@@ -10,6 +10,7 @@ from core.systems import register_default_systems
 from data.characters.mountain import (
     make_mountain, _NATURAL_GOD_ATK_RATIO, _S2_ATK_RATIO,
     _S3_ATK_RATIO, _S3_ASPD_FLAT,
+    _S2_KILL_EXTENSION, _S2_MAX_EXTENSION,
 )
 from data.enemies import make_originium_slug
 
@@ -191,4 +192,85 @@ def test_mountain_s2_reverts():
     # Slug is at same tile: Mountain still blocking → Natural God suppressed → base ATK
     assert m.effective_atk == m.atk, (
         f"After S2, ATK must revert to base ({m.atk}); got {m.effective_atk}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Tests 8–10: S2 kill-extension mechanic
+# ---------------------------------------------------------------------------
+
+def test_s2_kill_extends_duration():
+    """Killing an enemy while S2 is active extends active_remaining by 1s."""
+    w = _world()
+    m = make_mountain("S2")
+    m.deployed = True
+    m.position = (0.0, 1.0)
+    m.atk_cd = 999.0          # don't attack in tick 1
+    m.skill.sp = float(m.skill.sp_cost)
+    w.add_unit(m)
+
+    # Decoy slug to satisfy requires_target → S2 fires
+    decoy = _slug(pos=(1, 1), hp=9999, atk=0)
+    w.add_unit(decoy)
+    w.tick()  # S2 fires → active_remaining = 20.0
+    assert m.skill.active_remaining > 0.0, "S2 must be active"
+
+    # Soft-kill decoy so it's removed from target pool (world.enemies() filters alive=True)
+    decoy.alive = False
+    m.atk_cd = 0.0
+    target = _slug(pos=(1, 1), hp=1, atk=0)
+    w.add_unit(target)
+    active_before = m.skill.active_remaining
+
+    w.tick()  # Mountain attacks only target → kills it → on_kill extends active_remaining
+
+    assert not target.alive, "Target must die for extension to trigger"
+    assert m.skill.active_remaining > active_before, (
+        f"Kill must extend S2 duration; before={active_before:.2f}, "
+        f"after={m.skill.active_remaining:.2f}"
+    )
+
+
+def test_s2_kill_extension_capped():
+    """Kill-extension cannot push active_remaining beyond base_duration + 3s."""
+    w = _world()
+    m = make_mountain("S2")
+    m.deployed = True
+    m.position = (0.0, 1.0)
+    m.atk_cd = 0.0
+    m.skill.sp = float(m.skill.sp_cost)
+    w.add_unit(m)
+
+    decoy = _slug(pos=(1, 1), hp=9999, atk=0)
+    w.add_unit(decoy)
+    w.tick()  # S2 fires
+
+    # Add 4 hp=1 slugs — 4 kills would exceed the 3s cap
+    for _ in range(4):
+        t = _slug(pos=(1, 1), hp=1, atk=0)
+        w.add_unit(t)
+        w.tick()
+
+    cap = float(m.skill.duration) + _S2_MAX_EXTENSION
+    assert m.skill.active_remaining <= cap, (
+        f"active_remaining must not exceed cap={cap:.1f}; got {m.skill.active_remaining:.2f}"
+    )
+
+
+def test_s2_kill_no_extension_when_inactive():
+    """Killing before S2 fires must NOT extend duration (skill not active)."""
+    w = _world()
+    m = make_mountain("S2")
+    m.deployed = True
+    m.position = (0.0, 1.0)
+    m.atk_cd = 0.0
+    m.skill.sp = 0.0           # sp empty — S2 cannot fire
+    w.add_unit(m)
+
+    slug = _slug(pos=(1, 1), hp=1, atk=0)
+    w.add_unit(slug)
+    w.tick()  # Mountain attacks and kills; S2 NOT active
+
+    assert m.skill.active_remaining == 0.0, (
+        "Kill before S2 fires must not set active_remaining"
     )

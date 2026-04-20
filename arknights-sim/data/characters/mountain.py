@@ -5,7 +5,7 @@ Talent "Natural God" (E2): When this unit is not blocking any enemies,
 
 S2 "Mountain Spirit": ATK +160%, 20s duration.
   sp_cost=2, sp_gain_mode=AUTO_ATTACK, trigger=AUTO.
-  Simplified: ignores kill-extension mechanic (each kill +1s up to +3s).
+  Kill-extension: each kill during S2 adds +1s (up to +3s extra).
 
 S3 "Blood and Iron": ATK +200%, ASPD +40, 10s duration.
   sp_cost=30, sp_gain_mode=AUTO_ATTACK.
@@ -33,6 +33,8 @@ _NATURAL_GOD_REFRESH_DT = 0.2   # short-lived; refreshed every 0.1s tick
 _S2_TAG = "mountain_s2_spirit"
 _S2_ATK_RATIO = 1.60
 _S2_BUFF_TAG = "mountain_s2_atk"
+_S2_KILL_EXTENSION = 1.0    # +1s per kill during S2
+_S2_MAX_EXTENSION = 3.0     # hard cap on total bonus seconds
 
 _S3_TAG = "mountain_s3_blood_iron"
 _S3_ATK_RATIO = 2.00
@@ -61,7 +63,17 @@ def _natural_god_on_tick(world, carrier, dt: float) -> None:
             ))
 
 
-register_talent(_NATURAL_GOD_TAG, on_tick=_natural_god_on_tick)
+def _natural_god_on_kill(world, carrier: UnitState, killed) -> None:
+    """Killing during S2 extends active_remaining by 1s (cap: base + 3s)."""
+    sk = carrier.skill
+    if sk is None or sk.active_remaining <= 0.0 or sk.slot != "S2":
+        return
+    cap = float(sk.duration) + _S2_MAX_EXTENSION
+    sk.active_remaining = min(sk.active_remaining + _S2_KILL_EXTENSION, cap)
+    world.log(f"Mountain S2 kill-extension +{_S2_KILL_EXTENSION}s → {sk.active_remaining:.2f}s left")
+
+
+register_talent(_NATURAL_GOD_TAG, on_tick=_natural_god_on_tick, on_kill=_natural_god_on_kill)
 
 
 # --- S2: Mountain Spirit ---
