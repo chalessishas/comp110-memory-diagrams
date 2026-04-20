@@ -9,6 +9,8 @@ Tests cover:
   - Mon3tr death burst hits multiple enemies simultaneously (AoE)
   - Kal'tsit dies → Mon3tr despawned
   - Kal'tsit retreats → Mon3tr despawned
+  - Mon3tr death burst hits diagonally adjacent enemies (Chebyshev dist=1)
+  - No burst when Mon3tr silently despawned via Kal'tsit retreat
 """
 from __future__ import annotations
 import sys, os
@@ -268,3 +270,64 @@ def test_kal_tsit_retreat_despawns_mon3tr():
     w.retreat(kal)  # fires on_retreat → despawns Mon3tr
 
     assert not mon3tr.alive, "Mon3tr must be despawned after Kal'tsit retreats"
+
+
+# ---------------------------------------------------------------------------
+# Test 9: Diagonal adjacent enemy IS hit by death burst
+# ---------------------------------------------------------------------------
+
+def test_mon3tr_death_burst_hits_diagonal_adjacent():
+    """Mon3tr death burst hits diagonally adjacent enemies (Chebyshev dist=1)."""
+    w = _world()
+    kal = make_kal_tsit()
+    kal.deployed = True; kal.position = (2.0, 2.0)
+    w.add_unit(kal)
+
+    w.tick()  # Mon3tr deployed
+
+    mon3tr_id = getattr(kal, "_kal_tsit_mon3tr_id", None)
+    mon3tr = w.unit_by_id(mon3tr_id)
+    mon3tr.position = (3.0, 2.0)
+
+    # Diagonal: (4, 3) → Chebyshev dist = max(|4-3|, |3-2|) = 1
+    e_diag = _slug(pos=(4, 3), hp=99999)
+    e_diag.deployed = True; e_diag.position = (4.0, 3.0)
+    w.add_unit(e_diag)
+
+    hp_before = e_diag.hp
+    mon3tr.hp = 0; mon3tr.alive = False; mon3tr._just_died = True
+    w.tick()
+
+    assert e_diag.hp < hp_before, "Diagonally adjacent enemy must take burst damage"
+    stun_statuses = [s for s in e_diag.statuses if s.kind == StatusKind.STUN]
+    assert len(stun_statuses) >= 1, "Diagonally adjacent enemy must be stunned"
+
+
+# ---------------------------------------------------------------------------
+# Test 10: No burst when Mon3tr is silently despawned via Kal'tsit retreat
+# ---------------------------------------------------------------------------
+
+def test_no_burst_when_mon3tr_despawned_by_retreat():
+    """Mon3tr despawned via Kal'tsit retreat must NOT fire its death burst."""
+    w = _world()
+    kal = make_kal_tsit()
+    kal.deployed = True; kal.position = (0.0, 2.0)
+    w.add_unit(kal)
+
+    w.tick()  # Mon3tr deployed
+
+    mon3tr_id = getattr(kal, "_kal_tsit_mon3tr_id", None)
+    mon3tr = w.unit_by_id(mon3tr_id)
+    mon3tr.position = (1.0, 2.0)
+
+    e = _slug(pos=(2, 2), hp=99999)
+    e.deployed = True; e.position = (2.0, 2.0)
+    w.add_unit(e)
+
+    hp_before = e.hp
+    w.retreat(kal)   # _despawn_mon3tr sets alive=False without setting _just_died
+    w.tick()         # cleanup fires, but _just_died was NOT set → no burst
+
+    assert e.hp == hp_before, (
+        "No True damage burst must fire when Mon3tr is silently despawned via retreat"
+    )
