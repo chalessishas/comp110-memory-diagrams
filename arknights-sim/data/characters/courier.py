@@ -4,31 +4,42 @@ Class trait: Tactician Vanguard — no passive DP accumulation; DP via skills.
 S1 "Tactical Formation I": Instantly gains 8 DP. sp_cost=25, duration=0 (instant).
 S2 "Support Order": 12 DP over 15s (DP drip, block=0 during skill). sp_cost=35.
 
-Talent "Frontline Supply": On deployment, immediately grants 3 DP.
+Talent "Karlan Patrol" (E2): DEF +60 when blocking ≥2 enemies.
+  Implemented via on_tick: scan blocked count; apply/remove DEF buff accordingly.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
 from core.types import (
-    Profession, RoleArchetype, SPGainMode, SkillTrigger,
+    BuffAxis, BuffStack, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
 from data.characters.generated.blackd import make_blackd as _base_stats
 
 
-# --- Talent: Frontline Supply ---
-_TALENT_TAG = "courier_frontline_supply"
-_DP_GRANT = 3
+# --- Talent: Karlan Patrol — DEF+60 when blocking ≥2 enemies ---
+_TALENT_TAG = "courier_karlan_patrol"
+_TALENT_BUFF_TAG = "courier_karlan_patrol_def"
+_DEF_BONUS = 60
+_BLOCK_THRESHOLD = 2
 
 
-def _frontline_supply_on_battle_start(world, carrier: UnitState) -> None:
-    world.global_state.refund_dp(_DP_GRANT)
-    world.log(f"Courier Frontline Supply — +{_DP_GRANT} DP")
+def _karlan_patrol_on_tick(world, carrier: UnitState, dt: float) -> None:
+    blocking_count = sum(1 for e in world.enemies() if carrier.unit_id in e.blocked_by_unit_ids)
+    existing = next((b for b in carrier.buffs if b.source_tag == _TALENT_BUFF_TAG), None)
+    if blocking_count >= _BLOCK_THRESHOLD:
+        if existing is None:
+            carrier.buffs.append(Buff(
+                axis=BuffAxis.DEF, stack=BuffStack.FLAT,
+                value=_DEF_BONUS, source_tag=_TALENT_BUFF_TAG,
+            ))
+    else:
+        carrier.buffs = [b for b in carrier.buffs if b.source_tag != _TALENT_BUFF_TAG]
 
 
-register_talent(_TALENT_TAG, on_battle_start=_frontline_supply_on_battle_start)
+register_talent(_TALENT_TAG, on_tick=_karlan_patrol_on_tick)
 
 
 TACTICIAN_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -82,7 +93,7 @@ def make_courier(slot: str = "S1") -> UnitState:
     op.range_shape = TACTICIAN_RANGE
     op.block = 2
     op.cost = 12
-    op.talents = [TalentComponent(name="Frontline Supply", behavior_tag=_TALENT_TAG)]
+    op.talents = [TalentComponent(name="Karlan Patrol", behavior_tag=_TALENT_TAG)]
 
     if slot == "S1":
         op.skill = SkillComponent(

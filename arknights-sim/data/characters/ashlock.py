@@ -7,6 +7,9 @@ Range shapes follow the same pattern as Horn (ArknightsGameData Fortress Defende
   - Ranged: 3-tile forward line + side tiles
   - Melee:  operator tile + 1 tile forward
 
+Talent "Bombardment Studies" (E2): ATK +8% unconditional.
+  (Game version: +8% base, +16% if all adjacent ground tiles occupied — simple variant here.)
+
 S2 "Torrent": ATK +80%, forces ranged mode even while blocking, for 25s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=False.
 """
@@ -18,21 +21,21 @@ from core.systems.talent_registry import register_talent
 from data.characters.generated.ashlok import make_ashlok as _base_stats
 
 
-# --- Talent: Steadfast Guard — permanent flat DEF bonus ---
-_TALENT_TAG = "ashlock_steadfast_guard"
-_TALENT_BUFF_TAG = "ashlock_steadfast_guard_def"
-_DEF_BONUS = 150
+# --- Talent: Bombardment Studies — permanent ATK+8% ratio ---
+_TALENT_TAG = "ashlock_bombardment_studies"
+_TALENT_BUFF_TAG = "ashlock_bombardment_studies_atk"
+_ATK_RATIO = 0.08
 
 
-def _steadfast_on_battle_start(world, carrier: UnitState) -> None:
+def _bombardment_on_battle_start(world, carrier: UnitState) -> None:
     carrier.buffs.append(Buff(
-        axis=BuffAxis.DEF, stack=BuffStack.FLAT,
-        value=_DEF_BONUS, source_tag=_TALENT_BUFF_TAG,
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_ATK_RATIO, source_tag=_TALENT_BUFF_TAG,
     ))
-    world.log(f"Ashlock Steadfast Guard — DEF +{_DEF_BONUS}")
+    world.log(f"Ashlock Bombardment Studies — ATK +{_ATK_RATIO:.0%}")
 
 
-register_talent(_TALENT_TAG, on_battle_start=_steadfast_on_battle_start)
+register_talent(_TALENT_TAG, on_battle_start=_bombardment_on_battle_start)
 
 
 _RANGED_RANGE = RangeShape(tiles=(
@@ -76,7 +79,7 @@ def make_ashlock(slot: str = "S2") -> UnitState:
     op.attack_type = AttackType.PHYSICAL
     op.block = 3
     op.cost = 27
-    op.talents = [TalentComponent(name="Steadfast Guard", behavior_tag=_TALENT_TAG)]
+    op.talents = [TalentComponent(name="Bombardment Studies", behavior_tag=_TALENT_TAG)]
 
     op.range_shape = _RANGED_RANGE
     op._melee_range = _MELEE_RANGE

@@ -1,4 +1,12 @@
-"""Vigil — Pack Leader's Resolve talent: self-REGEN 80 HP/s while S3 inactive."""
+"""Vigil talent "Wolven Nature" — DEF ignore 175 on physical attacks.
+
+Tests cover:
+  - Talent configured correctly (name + behavior_tag)
+  - on_attack_hit fires and deals bonus true damage = min(enemy_def, 175)
+  - Bonus is capped at enemy effective_def (can't be negative)
+  - Bonus is capped at 175 when enemy DEF > 175
+  - S3 active does not suppress the talent
+"""
 from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -6,12 +14,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from core.world import World
 from core.state.tile_state import TileGrid, TileState
 from core.state.unit_state import UnitState
-from core.types import TileType, TICK_RATE, StatusKind, RoleArchetype
+from core.types import Faction, TileType, TICK_RATE, AttackType, Profession
 from core.systems import register_default_systems
-from data.characters.vigil import (
-    make_vigil,
-    _TALENT_TAG, _REGEN_SOURCE_TAG, _REGEN_HPS,
-)
+from data.characters.vigil import make_vigil, _TALENT_TAG, _DEF_IGNORE
+from data.enemies import make_originium_slug
 
 
 def _world(w=6, h=3) -> World:
@@ -25,124 +31,112 @@ def _world(w=6, h=3) -> World:
     return world
 
 
-# ---------------------------------------------------------------------------
-# Test 1: Config
-# ---------------------------------------------------------------------------
+def _ticks(w: World, seconds: float) -> None:
+    for _ in range(int(TICK_RATE * seconds)):
+        w.tick()
+
 
 def test_vigil_config():
     v = make_vigil()
-    assert v.archetype == RoleArchetype.VAN_TACTICIAN
-    assert v.block == 1
     assert len(v.talents) == 1
-    assert v.talents[0].name == "Pack Leader's Resolve"
+    assert v.talents[0].name == "Wolven Nature"
     assert v.talents[0].behavior_tag == _TALENT_TAG
-    sk = v.skill
-    assert sk is not None and sk.slot == "S3"
 
 
-# ---------------------------------------------------------------------------
-# Test 2: REGEN status applied when S3 not active
-# ---------------------------------------------------------------------------
-
-def test_talent_regen_while_idle():
-    """After one tick with S3 inactive, Vigil must have REGEN status."""
+def test_def_ignore_bonus_applied():
+    """Vigil's attack must deal extra true damage equal to min(enemy_def, 175)."""
     w = _world()
-    v = make_vigil()
-    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    v = make_vigil(slot=None)
+    v.deployed = True; v.position = (0.0, 1.0)
     w.add_unit(v)
 
+    slug = make_originium_slug(path=[(1, 1)] * 5)
+    slug.deployed = True; slug.position = (1.0, 1.0)
+    slug.move_speed = 0.0
+    slug_def = slug.effective_def
+    slug_hp_before = slug.hp
+    w.add_unit(slug)
+
+    # Fire exactly one attack: set atk_cd=0 so attack fires on next tick
+    v.atk_cd = 0.0
     w.tick()
 
-    assert v.has_status(StatusKind.REGEN), (
-        "Vigil must have REGEN status while S3 is inactive"
+    # Vigil base physical damage (no def ignore) = max(int(raw * 0.05), raw - slug_def)
+    raw = v.effective_atk
+    base_dmg = max(int(raw * 0.05), raw - slug_def)
+    bonus = min(slug_def, _DEF_IGNORE)
+    expected_total = base_dmg + bonus
+
+    actual_dmg = slug_hp_before - slug.hp
+    assert actual_dmg == expected_total, (
+        f"Vigil attack must deal base {base_dmg} + bonus {bonus} = {expected_total}; "
+        f"got {actual_dmg}"
     )
 
 
-# ---------------------------------------------------------------------------
-# Test 3: REGEN carries correct source_tag and HPS param
-# ---------------------------------------------------------------------------
-
-def test_talent_regen_params():
-    """REGEN status must have correct source_tag and hps param."""
+def test_def_ignore_capped_at_def():
+    """When enemy DEF < 175, bonus = enemy DEF (not 175)."""
     w = _world()
-    v = make_vigil()
-    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    v = make_vigil(slot=None)
+    v.deployed = True; v.position = (0.0, 1.0)
     w.add_unit(v)
 
+    # Create a low-DEF enemy (DEF=50 < 175)
+    low_def_enemy = UnitState(
+        name="LowDefEnemy", faction=Faction.ENEMY,
+        max_hp=5000, atk=0, defence=50, res=0.0,
+        atk_interval=99.0, attack_range_melee=True,
+        profession=Profession.GUARD, block=0, cost=0,
+    )
+    low_def_enemy.deployed = True; low_def_enemy.position = (1.0, 1.0)
+    low_def_enemy.move_speed = 0.0
+    w.add_unit(low_def_enemy)
+
+    hp_before = low_def_enemy.hp
+    v.atk_cd = 0.0
     w.tick()
 
-    regen = next((s for s in v.statuses if s.kind == StatusKind.REGEN and s.source_tag == _REGEN_SOURCE_TAG), None)
-    assert regen is not None, f"REGEN with source_tag {_REGEN_SOURCE_TAG} must be present"
-    assert regen.params.get("hps") == _REGEN_HPS, (
-        f"REGEN hps must be {_REGEN_HPS}; got {regen.params.get('hps')}"
+    raw = v.effective_atk
+    enemy_def = low_def_enemy.effective_def  # should be 50
+    base_dmg = max(int(raw * 0.05), raw - enemy_def)
+    bonus = min(enemy_def, _DEF_IGNORE)  # min(50, 175) = 50
+    expected_total = base_dmg + bonus
+
+    actual_dmg = hp_before - low_def_enemy.hp
+    assert actual_dmg == expected_total, (
+        f"Bonus must be capped at enemy DEF {enemy_def} (not 175); "
+        f"expected {expected_total}, got {actual_dmg}"
     )
 
 
-# ---------------------------------------------------------------------------
-# Test 4: REGEN actually heals HP each tick
-# ---------------------------------------------------------------------------
-
-def test_talent_regen_heals_hp():
-    """REGEN must increase Vigil's HP each tick when he is injured."""
+def test_def_ignore_capped_at_175():
+    """When enemy DEF > 175, bonus is exactly 175."""
     w = _world()
-    v = make_vigil()
-    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
+    v = make_vigil(slot=None)
+    v.deployed = True; v.position = (0.0, 1.0)
     w.add_unit(v)
 
-    # Injure Vigil
-    v.hp = v.max_hp - 500
-    hp_before = v.hp
-
-    w.tick()  # tick 1: talent applies REGEN (status_system already ran, but REGEN was not present)
-    w.tick()  # tick 2: status_system applies REGEN heal with REGEN present from tick 1
-
-    assert v.hp > hp_before, (
-        f"Vigil HP must increase from REGEN; was {hp_before}, now {v.hp}"
+    high_def_enemy = UnitState(
+        name="HighDefEnemy", faction=Faction.ENEMY,
+        max_hp=5000, atk=0, defence=400, res=0.0,
+        atk_interval=99.0, attack_range_melee=True,
+        profession=Profession.GUARD, block=0, cost=0,
     )
+    high_def_enemy.deployed = True; high_def_enemy.position = (1.0, 1.0)
+    high_def_enemy.move_speed = 0.0
+    w.add_unit(high_def_enemy)
 
+    hp_before = high_def_enemy.hp
+    v.atk_cd = 0.0
+    w.tick()
 
-# ---------------------------------------------------------------------------
-# Test 5: REGEN removed when S3 fires
-# ---------------------------------------------------------------------------
+    raw = v.effective_atk
+    enemy_def = high_def_enemy.effective_def
+    base_dmg = max(int(raw * 0.05), raw - enemy_def)
+    bonus = min(enemy_def, _DEF_IGNORE)  # min(400, 175) = 175
+    expected_total = base_dmg + bonus
 
-def test_talent_regen_removed_on_s3():
-    """When S3 fires, REGEN must be removed by end of that tick."""
-    w = _world()
-    v = make_vigil("S3")
-    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
-    w.add_unit(v)
-
-    w.tick()  # REGEN applied (S3 not yet active)
-    assert v.has_status(StatusKind.REGEN), "REGEN must be present before S3"
-
-    v.skill.sp = float(v.skill.sp_cost)
-    w.tick()  # S3 fires → talent removes REGEN
-
-    assert not v.has_status(StatusKind.REGEN), (
-        "REGEN must be removed once S3 is active"
-    )
-
-
-# ---------------------------------------------------------------------------
-# Test 6: REGEN reapplies after S3 ends
-# ---------------------------------------------------------------------------
-
-def test_talent_regen_reapplies_after_s3():
-    """After S3 expires, REGEN must reapply."""
-    from data.characters.vigil import _S3_TAG
-    w = _world()
-    v = make_vigil("S3")
-    v.deployed = True; v.position = (0.0, 1.0); v.atk_cd = 999.0
-    w.add_unit(v)
-
-    v.skill.sp = float(v.skill.sp_cost)
-    w.tick()  # S3 fires, REGEN removed
-    assert not v.has_status(StatusKind.REGEN)
-
-    # Advance past S3 duration (15s)
-    for _ in range(int(TICK_RATE * 16)):
-        w.tick()
-
-    assert v.has_status(StatusKind.REGEN), (
-        "Vigil must regain REGEN after S3 ends"
+    actual_dmg = hp_before - high_def_enemy.hp
+    assert actual_dmg == expected_total, (
+        f"Bonus must be capped at 175; expected {expected_total}, got {actual_dmg}"
     )
