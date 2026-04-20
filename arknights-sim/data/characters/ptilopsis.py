@@ -6,6 +6,8 @@ Talent "Unisonant" (E2): While deployed, all operators gain +0.3 SP/s.
 S1 "Dawn's Resonance": +50% ATK for 25s (boosts heal output). sp_cost=25, initial=10.
 S2 "Night Cure": +80% ATK for 20s + heals ALL allies in range for 70% ATK per second.
   sp_cost=30, initial_sp=12, AUTO_TIME, AUTO trigger, requires_target=False.
+S3 "Dream Catcher": ATK+100% + Unisonant talent upgrades to +0.6 SP/s during skill.
+  sp_cost=35, initial_sp=12, AUTO_TIME, MANUAL, 30s.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
@@ -27,12 +29,15 @@ MEDIC_RANGE = RangeShape(tiles=((1, 0), (2, 0), (3, 0), (1, -1), (1, 1)))
 
 # --- Talent: Unisonant ---
 _UNISONANT_TAG = "ptilopsis_unisonant"
-_SP_RATE = 0.3   # SP/s to all operators
+_SP_RATE = 0.3           # SP/s to all operators (base)
+_SP_RATE_S3 = 0.6        # SP/s during S3 (doubled)
 _SP_FRAC_ATTR = "_ptilopsis_sp_frac"
+_S3_ACTIVE_ATTR = "_ptilopsis_s3_active"
 
 
 def _unisonant_on_tick(world, carrier, dt: float) -> None:
-    frac = getattr(carrier, _SP_FRAC_ATTR, 0.0) + _SP_RATE * dt
+    rate = _SP_RATE_S3 if getattr(carrier, _S3_ACTIVE_ATTR, False) else _SP_RATE
+    frac = getattr(carrier, _SP_FRAC_ATTR, 0.0) + rate * dt
     sp_bonus = frac
     if sp_bonus >= 0.01:   # avoid accumulating tiny float every tick
         now = world.global_state.elapsed
@@ -117,6 +122,30 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# --- S3: Dream Catcher — ATK+100% + Unisonant upgrades to 0.6 SP/s ---
+_S3_TAG = "ptilopsis_s3_dream_catcher"
+_S3_ATK_RATIO = 1.00
+_S3_ATK_BUFF_TAG = "ptilopsis_s3_atk"
+_S3_DURATION = 30.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
+    world.log(f"Ptilopsis S3 Dream Catcher — ATK+{_S3_ATK_RATIO:.0%}, Unisonant → {_SP_RATE_S3} SP/s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_ptilopsis(slot: str = "S1") -> UnitState:
     """Ptilopsis E2 max. Talent: +0.3 SP/s to all operators. S1: +50% ATK. S2: +80% ATK + AoE heal 70% ATK/s."""
     op = _base_stats()
@@ -141,6 +170,19 @@ def make_ptilopsis(slot: str = "S1") -> UnitState:
             requires_target=False,
             behavior_tag=_S1_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Dream Catcher",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=12,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     elif slot == "S2":
         op.skill = SkillComponent(
             name="Night Cure",

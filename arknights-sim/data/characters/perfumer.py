@@ -6,6 +6,10 @@ Talent "熏衣香" (E2): While deployed, all allies recover HP equal to
 
 S2 "Soothing Fume": ATK +100% for 20s — doubles both targeted heal and passive HoT.
   sp_cost=30, initial_sp=15, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "Shining Stars": ATK +120% + heals ALL deployed allies simultaneously per attack.
+  Achieved by setting heal_targets=999 during skill. 30s MANUAL.
+  sp_cost=40, initial_sp=15, AUTO_TIME.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
@@ -61,6 +65,32 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Shining Stars ---
+_S3_TAG = "perfumer_s3_shining_stars"
+_S3_ATK_RATIO = 1.20
+_S3_ATK_BUFF_TAG = "perfumer_s3_atk"
+_S3_DURATION = 30.0
+_S3_HEAL_TARGETS = 999   # heal all allies simultaneously
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._saved_heal_targets = carrier.heal_targets
+    carrier.heal_targets = _S3_HEAL_TARGETS
+    world.log(f"Perfumer S3 Shining Stars — ATK+{_S3_ATK_RATIO:.0%}, heals all allies/attack")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier.heal_targets = getattr(carrier, "_saved_heal_targets", 1)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_perfumer(slot: str = "S2") -> UnitState:
     """Perfumer E2 max, trust 100. Passive HoT: all allies +5% ATK HP/s. S2: ATK+100% 20s."""
     op = _base_stats()
@@ -74,7 +104,20 @@ def make_perfumer(slot: str = "S2") -> UnitState:
         behavior_tag=_PASSIVE_TAG,
     )]
 
-    if slot == "S2":
+    if slot == "S3":
+        op.skill = SkillComponent(
+            name="Shining Stars",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
         op.skill = SkillComponent(
             name="Soothing Fume",
             slot="S2",
