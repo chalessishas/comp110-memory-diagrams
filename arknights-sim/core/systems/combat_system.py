@@ -115,6 +115,10 @@ def combat_system(world, dt: float) -> None:
 
         u.atk_cd = u.current_atk_interval
 
+        # Ammo-based skill: consume one charge per attack hit
+        if u.skill is not None and u.skill.ammo_remaining > 0:
+            u.skill.ammo_remaining -= 1
+
         # SP on attack
         if u.skill is not None:
             sk = u.skill
@@ -193,6 +197,8 @@ def _apply_multi_heal(world, u, targets) -> None:
         if u.talents:
             fire_on_attack_hit(world, u, target, dealt)
     u.atk_cd = u.current_atk_interval
+    if u.skill is not None and u.skill.ammo_remaining > 0:
+        u.skill.ammo_remaining -= 1
     if u.skill is not None:
         sk = u.skill
         if sk.sp_gain_mode == SPGainMode.AUTO_ATTACK and not sk.active_remaining > 0:
@@ -220,6 +226,8 @@ def _apply_fortress_ranged(world, u, targets) -> None:
         if not target.alive and u.talents:
             fire_on_kill(world, u, target)
     u.atk_cd = u.current_atk_interval
+    if u.skill is not None and u.skill.ammo_remaining > 0:
+        u.skill.ammo_remaining -= 1
     if u.skill is not None:
         sk = u.skill
         if sk.sp_gain_mode == SPGainMode.AUTO_ATTACK and not sk.active_remaining > 0:

@@ -26,6 +26,14 @@ def skill_system(world, dt: float) -> None:
             on_start, on_tick, on_end = _SKILL_REGISTRY.get(sk.behavior_tag, (None, None, None))
             if on_tick:
                 on_tick(world, u, dt)
+            # Ammo depletion terminates skill before the safety timeout expires.
+            if sk.ammo_count > 0 and sk.ammo_remaining <= 0:
+                sk.active_remaining = 0.0
+                sk.sp = 0.0
+                sk.sp_lockout_until = now + SP_POST_SKILL_LOCKOUT
+                if on_end:
+                    on_end(world, u)
+                continue
             sk.active_remaining -= dt
             if sk.active_remaining <= 0.0:
                 sk.active_remaining = 0.0
@@ -65,6 +73,11 @@ def _fire_skill(world, u) -> None:
         on_start(world, u)
     if sk.duration > 0.0:
         sk.active_remaining = sk.duration
+    elif sk.ammo_count > 0:
+        # Ammo-based: load ammo, use 3600s safety timeout so skill stays "active"
+        # until ammo depletes via combat_system decrement.
+        sk.ammo_remaining = sk.ammo_count
+        sk.active_remaining = 3600.0
     else:
         sk.sp = 0.0
 

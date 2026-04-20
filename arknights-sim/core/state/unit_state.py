@@ -58,6 +58,11 @@ class SkillComponent:
     fire_count: int = 0                  # 已释放次数
     sp_lockout_until: float = 0.0       # no SP can be gained before this timestamp (post-skill lockout)
 
+    # Ammo-based skills (e.g. Typhon S3 Eternal Hunt): ammo_count > 0 activates ammo mode.
+    # Skill stays active until ammo_remaining hits 0 (or safety timeout of 3600s).
+    ammo_count: int = 0        # total ammo loaded on skill fire; 0 = duration-based
+    ammo_remaining: int = 0    # decremented by combat_system on each attack hit
+
     # Behavior hooks (by tag name — resolved via Skill registry)
     behavior_tag: str = ""               # e.g. "silverash_s3" → maps to on_start/on_tick/on_end funcs
     requires_target: bool = True         # False = fires on SP full regardless of target (buff-only skills)
