@@ -4,10 +4,15 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from core.world import World
 from core.state.tile_state import TileGrid, TileState
-from core.state.unit_state import StatusEffect
-from core.types import TileType, TICK_RATE, DT, StatusKind
+from core.state.unit_state import StatusEffect, UnitState, SkillComponent, RangeShape
+from core.types import TileType, TICK_RATE, DT, StatusKind, Faction, AttackType, SPGainMode
 from core.systems import register_default_systems
+from core.systems.skill_system import register_skill
 from data.enemies import make_originium_slug
+
+
+# Register a no-op skill tag for test units that need a skill component
+register_skill("_test_noop")
 
 
 PATH = [(x, 0) for x in range(6)]
@@ -112,3 +117,64 @@ def test_slow_expires_and_speed_restores():
     assert slug.path_progress >= 1.5, \
         f"Enemy should recover full speed after slow expires, got {slug.path_progress:.2f}"
     assert not slug.has_status(StatusKind.SLOW), "SLOW status must have been removed after expiry"
+
+
+def test_stun_blocks_auto_defensive_sp_gain():
+    """A STUNNED operator must NOT gain SP when hit (AUTO_DEFENSIVE mode)."""
+    grid = TileGrid(width=4, height=1)
+    for i in range(4):
+        grid.set_tile(TileState(x=i, y=0, type=TileType.GROUND))
+    w = World(tile_grid=grid)
+    w.global_state.dp_gain_rate = 0.0
+    register_default_systems(w)
+
+    # Operator with AUTO_DEFENSIVE skill
+    defender = UnitState(
+        name="Defender",
+        faction=Faction.ALLY,
+        max_hp=5000, hp=5000, atk=0,
+        defence=0, res=0.0,
+        atk_interval=999.0, block=1,
+        attack_type=AttackType.PHYSICAL,
+        attack_range_melee=True,
+        range_shape=RangeShape(tiles=((0, 0),)),
+        deployed=True, position=(1.0, 0.0),
+    )
+    defender.skill = SkillComponent(
+        name="Test",
+        slot="S1",
+        sp_cost=10,
+        duration=5.0,
+        sp_gain_mode=SPGainMode.AUTO_DEFENSIVE,
+        behavior_tag="_test_noop",
+    )
+    w.add_unit(defender)
+
+    # Enemy attacks the defender
+    attacker = make_originium_slug(path=[(1, 0)] * 10)
+    attacker.atk = 100; attacker.defence = 0; attacker.res = 0.0
+    attacker.move_speed = 0.0; attacker.deployed = True; attacker.position = (1.0, 0.0)
+    attacker.atk_cd = 0.0
+    w.add_unit(attacker)
+
+    # Without stun: SP should accumulate
+    for _ in range(5):
+        w.tick()
+    sp_no_stun = defender.skill.sp
+    assert sp_no_stun > 0, "AUTO_DEFENSIVE must grant SP when not stunned"
+
+    # Apply STUN and reset SP to 0
+    defender.statuses.append(StatusEffect(
+        kind=StatusKind.STUN,
+        source_tag="test_stun",
+        expires_at=float("inf"),
+    ))
+    defender.skill.sp = 0.0
+
+    for _ in range(5):
+        w.tick()
+    sp_with_stun = defender.skill.sp
+    assert sp_with_stun == 0.0, (
+        f"STUNNED operator must NOT gain AUTO_DEFENSIVE SP; "
+        f"gained={sp_with_stun}"
+    )

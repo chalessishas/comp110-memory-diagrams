@@ -123,7 +123,8 @@ def combat_system(world, dt: float) -> None:
                     sk.sp = min(sk.sp + 1.0, float(sk.sp_cost))
 
         # SP on being hit (AUTO_DEFENSIVE): charge target's SP when it takes damage
-        if u.attack_type != AttackType.HEAL and target.alive:
+        # can_use_skill() blocks SP gain while STUN/BIND/FREEZE/SLEEP/SILENCE
+        if u.attack_type != AttackType.HEAL and target.alive and target.can_use_skill():
             sk_t = getattr(target, "skill", None)
             if sk_t is not None and sk_t.sp_gain_mode == SPGainMode.AUTO_DEFENSIVE:
                 if not sk_t.active_remaining > 0:

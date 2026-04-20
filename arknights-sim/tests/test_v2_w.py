@@ -1,4 +1,4 @@
-"""W — Last Will LEVITATE-on-hit talent + S2 ATK burst."""
+"""W — Last Will LEVITATE-on-hit talent + S2 ATK burst + S3 delayed bomb (EventQueue)."""
 from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -10,6 +10,7 @@ from core.types import TileType, TICK_RATE, Faction, StatusKind
 from core.systems import register_default_systems
 from data.characters.w import (
     make_w, _TALENT_TAG, _LEVITATE_DURATION, _S2_ATK_RATIO, _S2_DURATION,
+    _S3_TAG, _BOMB_DELAY, _BOMB_ATK_RATIO, _BOMB_RADIUS,
 )
 from data.enemies import make_originium_slug
 
@@ -221,3 +222,85 @@ def test_w_s2_buff_removed_on_end():
 
     assert w.skill.active_remaining == 0.0, "S2 must have expired"
     assert w.effective_atk == atk_base, "ATK must revert to base after S2"
+
+
+# ---------------------------------------------------------------------------
+# Tests 9–11: S3 "Chaos Edict" — delayed bomb via EventQueue
+# ---------------------------------------------------------------------------
+
+def test_w_s3_schedules_bomb_event():
+    """S3 activation must schedule exactly 1 bomb event in the EventQueue."""
+    world = _world()
+    w = make_w(slot="S3")
+    w.deployed = True; w.position = (0.0, 1.0); w.atk_cd = 999.0
+    world.add_unit(w)
+
+    slug = _slug(pos=(2, 1), hp=99999)
+    world.add_unit(slug)
+
+    events_before = len(world.event_queue)
+    w.skill.sp = float(w.skill.sp_cost)
+    world.tick()  # S3 activates (instant duration=0)
+
+    events_added = len(world.event_queue) - events_before
+    assert events_added == 1, (
+        f"S3 must schedule exactly 1 bomb event; scheduled {events_added}"
+    )
+
+
+def test_w_s3_bomb_detonates_after_delay():
+    """Bomb must NOT deal damage immediately; must deal damage after _BOMB_DELAY seconds."""
+    world = _world()
+    w = make_w(slot="S3")
+    w.deployed = True; w.position = (0.0, 1.0); w.atk_cd = 999.0
+    world.add_unit(w)
+
+    slug = _slug(pos=(1, 1), hp=99999)
+    world.add_unit(slug)
+
+    w.skill.sp = float(w.skill.sp_cost)
+    world.tick()  # S3 activates — bomb placed
+    hp_at_throw = slug.hp
+
+    # Just before detonation: no damage yet
+    for _ in range(int(TICK_RATE * (_BOMB_DELAY * 0.5))):
+        world.tick()
+    hp_mid = slug.hp
+    assert hp_mid == hp_at_throw, (
+        f"Bomb must not detonate early; hp at throw={hp_at_throw}, mid={hp_mid}"
+    )
+
+    # After detonation: damage must have been dealt
+    for _ in range(int(TICK_RATE * _BOMB_DELAY)):
+        world.tick()
+    hp_after = slug.hp
+    assert hp_after < hp_at_throw, (
+        f"Bomb must deal damage after delay; hp at throw={hp_at_throw}, after={hp_after}"
+    )
+
+
+def test_w_s3_bomb_hits_multiple_enemies():
+    """Bomb detonation is AoE — all enemies within radius take damage."""
+    world = _world()
+    w = make_w(slot="S3")
+    w.deployed = True; w.position = (0.0, 1.0); w.atk_cd = 999.0
+    world.add_unit(w)
+
+    # Two enemies both within _BOMB_RADIUS
+    e1 = _slug(pos=(2, 1), hp=99999)
+    e2 = _slug(pos=(2, 2), hp=99999)  # 1 tile away from e1 — both within radius
+    world.add_unit(e1)
+    world.add_unit(e2)
+
+    w.skill.sp = float(w.skill.sp_cost)
+    world.tick()  # S3 fires — target is e1
+
+    hp1_at_throw = e1.hp
+    hp2_at_throw = e2.hp
+
+    # Wait for detonation
+    for _ in range(int(TICK_RATE * (_BOMB_DELAY + 0.5))):
+        world.tick()
+
+    assert e1.hp < hp1_at_throw, "Bomb AoE must hit primary target"
+    assert e2.hp < hp2_at_throw, "Bomb AoE must hit nearby enemy within radius"
