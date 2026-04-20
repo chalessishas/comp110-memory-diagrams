@@ -5,6 +5,10 @@ Talent "Blood Sample Recycle": When any enemy within Warfarin's range dies,
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 S2 Sanguinelant: +35% ATK to all deployed allies for 10s (sp_cost=3, fires unconditionally).
+
+S3 "Exsanguination": ATK +80%, deals Arts damage to all enemies in range once per second.
+  Damage = 1× effective_atk per second (Arts, respects RES). Duration 15s.
+  sp_cost=10, initial_sp=5, AUTO_TIME, requires_target=False.
 """
 from __future__ import annotations
 import random as _random
@@ -79,6 +83,52 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Exsanguination — ATK+80% + Arts damage aura (1× ATK/s to enemies in range) ---
+_S3_TAG = "warfarin_s3_exsanguination"
+_S3_ATK_RATIO = 0.80         # ATK +80%
+_S3_BUFF_TAG = "warfarin_s3_atk"
+_S3_DAMAGE_RATIO = 1.00      # 1× effective_atk per second as Arts to in-range enemies
+_S3_DURATION = 15.0
+_S3_DMG_ACCUM_ATTR = "_warfarin_s3_dmg_accum"
+
+
+def _in_range(carrier: UnitState, target) -> bool:
+    if carrier.position is None or target.position is None:
+        return False
+    ox, oy = carrier.position
+    tx, ty = target.position
+    return (round(tx) - round(ox), round(ty) - round(oy)) in set(carrier.range_shape.tiles)
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_DMG_ACCUM_ATTR, 0.0)
+
+
+def _s3_on_tick(world, carrier: UnitState, dt: float) -> None:
+    accum = getattr(carrier, _S3_DMG_ACCUM_ATTR, 0.0) + dt
+    pulses = int(accum + 1e-9)  # epsilon guards against 10×0.1 = 0.9999… float drift
+    setattr(carrier, _S3_DMG_ACCUM_ATTR, accum - pulses)
+    if pulses <= 0:
+        return
+    raw = int(carrier.effective_atk * _S3_DAMAGE_RATIO * pulses)
+    for enemy in world.enemies():
+        if enemy.alive and enemy.deployed and _in_range(carrier, enemy):
+            dealt = enemy.take_arts(raw)
+            world.global_state.total_damage_dealt += dealt
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    setattr(carrier, _S3_DMG_ACCUM_ATTR, 0.0)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_tick=_s3_on_tick, on_end=_s3_on_end)
+
+
 def make_warfarin(slot: str = "S2") -> UnitState:
     """Warfarin E2 max. Talent: Blood Sample Recycle (+1 SP on enemy kill in range). S2: team ATK buff."""
     op = _base_stats()
@@ -102,4 +152,17 @@ def make_warfarin(slot: str = "S2") -> UnitState:
             behavior_tag=_S2_TAG,
             requires_target=False,   # fires unconditionally — no heal target needed
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Exsanguination",
+            slot="S3",
+            sp_cost=10,
+            initial_sp=5,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            behavior_tag=_S3_TAG,
+            requires_target=False,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
