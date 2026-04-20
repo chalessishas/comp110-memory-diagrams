@@ -17,7 +17,7 @@ from core.state.unit_state import (
 )
 from core.types import (
     AttackType, Faction, Profession, RoleArchetype,
-    SkillTrigger, SPGainMode,
+    SkillTrigger, SPGainMode, StatusKind, TICK_RATE,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -29,6 +29,11 @@ CLONE_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 
 _CLONE_TALENT_TAG = "phantom_shadow_death_burst"
 _S3_TAG = "phantom_s3_the_spring"
+
+# Talent: Infiltration — CAMOUFLAGE while S3 inactive, removed when S3 fires
+_INFILTRATION_TAG = "phantom_infiltration"
+_INFILTRATION_CAMO_TAG = "phantom_infiltration_camo"
+_INFILTRATION_CAMO_TTL = 2.0 / TICK_RATE  # two ticks so it lapses fast when S3 fires
 
 _CLONE_HP = 3000
 _CLONE_ATK = 648     # mirrors Phantom's ATK
@@ -59,6 +64,25 @@ def _clone_burst_on_death(world, unit: UnitState) -> None:
 
 
 register_talent(_CLONE_TALENT_TAG, on_death=_clone_burst_on_death)
+
+
+# ---------------------------------------------------------------------------
+# Phantom's own talent: Infiltration (CAMOUFLAGE while S3 inactive)
+# ---------------------------------------------------------------------------
+
+def _infiltration_on_tick(world, carrier: UnitState, dt: float) -> None:
+    skill_active = carrier.skill is not None and carrier.skill.active_remaining > 0.0
+    carrier.statuses = [s for s in carrier.statuses if s.source_tag != _INFILTRATION_CAMO_TAG]
+    if not skill_active:
+        elapsed = world.global_state.elapsed
+        carrier.statuses.append(StatusEffect(
+            kind=StatusKind.CAMOUFLAGE,
+            source_tag=_INFILTRATION_CAMO_TAG,
+            expires_at=elapsed + _INFILTRATION_CAMO_TTL,
+        ))
+
+
+register_talent(_INFILTRATION_TAG, on_tick=_infiltration_on_tick)
 
 
 def _make_shadow_clone(position: tuple[float, float]) -> UnitState:
@@ -126,6 +150,7 @@ def make_phantom(slot: str = "S3") -> UnitState:
     op.range_shape = EXECUTOR_RANGE
     op.block = 1
     op.cost = 10
+    op.talents = [TalentComponent(name="Infiltration", behavior_tag=_INFILTRATION_TAG)]
 
     if slot == "S3":
         op.skill = SkillComponent(
