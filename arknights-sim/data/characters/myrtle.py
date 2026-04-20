@@ -7,13 +7,16 @@ S1 "Tactical Delivery I": 14 DP over 8s while not blocking (block=0 during skill
 S2 "Healing Wings": 16 DP over 16s + heals most-injured adjacent ally at 50% ATK/s.
   sp_cost=18, initial_sp=9, duration=16s, requires_target=False.
   Heal range: cross (5-tile) centered on Myrtle.
+S3 "Blazing Sun": Team-wide SP aura (1 SP/s to all allies) + ATK+20% INSPIRATION
+  for all deployed operators for 25s. block=0 during skill.
+  sp_cost=30, initial_sp=15, duration=25s, AUTO trigger, requires_target=False.
 
 Arknights wiki: Standard Bearer stops blocking during skill activation.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent
+from core.state.unit_state import UnitState, SkillComponent, RangeShape, TalentComponent, Buff
 from core.types import (
-    Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
+    BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger,
 )
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
@@ -135,6 +138,71 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# ---------------------------------------------------------------------------
+# S3 "Blazing Sun" — team SP aura (1 SP/s) + ATK+20% INSPIRATION
+# ---------------------------------------------------------------------------
+
+_S3_TAG = "myrtle_s3_blazing_sun"
+_S3_DURATION = 25.0
+_S3_SP_RATE = 1.0              # 1 SP/s to all deployed allies
+_S3_ATK_RATIO = 0.20           # ATK+20% (INSPIRATION — max of same source wins)
+_S3_ATK_BUFF_TAG = "myrtle_s3_atk"
+_S3_ATK_BUFF_TTL = 0.3         # re-stamped each tick to keep live
+_S3_SP_FRAC_ATTR = "_myrtle_s3_sp_frac"
+
+
+def _s3_on_start(world, unit) -> None:
+    unit._saved_block = unit.block
+    unit.block = 0
+    setattr(unit, _S3_SP_FRAC_ATTR, 0.0)
+    # Immediately stamp ATK aura on all current allies
+    _s3_stamp_atk_buffs(world, unit)
+
+
+def _s3_stamp_atk_buffs(world, carrier) -> None:
+    now = world.global_state.elapsed
+    new_expires = now + _S3_ATK_BUFF_TTL + 0.15
+    for ally in world.allies():
+        if not ally.alive or not ally.deployed:
+            continue
+        existing = next((b for b in ally.buffs if b.source_tag == _S3_ATK_BUFF_TAG), None)
+        if existing is not None:
+            existing.expires_at = new_expires
+        else:
+            ally.buffs.append(Buff(
+                axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+                expires_at=new_expires,
+            ))
+
+
+def _s3_on_tick(world, unit, dt: float) -> None:
+    # Roll ATK buff TTL for all allies
+    _s3_stamp_atk_buffs(world, unit)
+    # SP pulse
+    frac = getattr(unit, _S3_SP_FRAC_ATTR, 0.0) + _S3_SP_RATE * dt
+    sp_grant = int(frac)
+    if sp_grant > 0:
+        for ally in world.allies():
+            if not ally.alive or not ally.deployed:
+                continue
+            sk = getattr(ally, "skill", None)
+            if sk is not None and sk.active_remaining <= 0.0:
+                sk.sp = min(sk.sp + float(sp_grant), float(sk.sp_cost))
+    setattr(unit, _S3_SP_FRAC_ATTR, frac - sp_grant)
+
+
+def _s3_on_end(world, unit) -> None:
+    unit.block = getattr(unit, "_saved_block", 1)
+    setattr(unit, _S3_SP_FRAC_ATTR, 0.0)
+    # Remove ATK buffs from all allies immediately (TTL expiry also handles this)
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_tick=_s3_on_tick, on_end=_s3_on_end)
+
+
 def make_myrtle(slot: str = "S1") -> UnitState:
     """Myrtle E2 max. Talent Glistening: +25 HP/s to Vanguards. S1/S2 DP drip."""
     op = _base_stats()
@@ -168,6 +236,18 @@ def make_myrtle(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Blazing Sun",
+            slot="S3",
+            sp_cost=30,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
 
     return op
