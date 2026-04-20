@@ -8,6 +8,7 @@
     world.run(max_seconds=300.0)
 """
 from __future__ import annotations
+import random as _random
 from dataclasses import dataclass, field
 from typing import Callable, Dict, List, Optional
 
@@ -34,6 +35,9 @@ class World:
 
     # 日志
     log_entries: List[str] = field(default_factory=list)
+
+    # Per-world RNG — replace with random.Random(seed) in tests that need determinism.
+    rng: _random.Random = field(default_factory=_random.Random)
 
     # --------------------------------------------------------------------
     # System registration

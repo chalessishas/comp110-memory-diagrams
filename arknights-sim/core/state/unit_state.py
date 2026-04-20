@@ -150,6 +150,8 @@ class UnitState:
     buffs: List[Buff] = field(default_factory=list)
     statuses: List[StatusEffect] = field(default_factory=list)
     undying_charges: int = 0    # 防死次数 (Specter/Chen 等)；>0 时致命伤改为留 1 HP
+    crit_chance: float = 0.0    # 暴击概率 0.0-1.0；暴击时伤害×crit_multiplier
+    crit_multiplier: float = 1.5  # 暴击倍率 (Arknights default × 1.5)
 
     def __post_init__(self) -> None:
         if self.hp == 0:

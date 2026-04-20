@@ -35,6 +35,10 @@ def combat_system(world, dt: float) -> None:
         # Besieger Sniper trait: 1.5× ATK when target is blocked by an ally
         if u.archetype == RoleArchetype.SNIPER_SIEGE and target.blocked_by_unit_ids:
             raw = int(raw * _BESIEGER_BLOCKED_MULT)
+        # Crit check — only for damage (not heals), only when crit_chance > 0
+        if u.crit_chance > 0.0 and u.attack_type != AttackType.HEAL:
+            if world.rng.random() < u.crit_chance:
+                raw = int(raw * u.crit_multiplier)
         if u.attack_type == AttackType.PHYSICAL:
             dealt = target.take_physical(raw)
         elif u.attack_type == AttackType.ARTS:
