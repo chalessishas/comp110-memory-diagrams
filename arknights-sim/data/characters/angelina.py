@@ -40,6 +40,39 @@ def _on_attack_hit(world, attacker: UnitState, target: UnitState, damage: int) -
 register_talent(_SLOW_TAG, on_attack_hit=_on_attack_hit)
 
 
+# --- S2: Frigid Breath ---
+_S2_TAG = "angelina_s2_frigid_breath"
+_S2_ATK_RATIO = 1.50        # 150% ATK Arts damage
+_S2_COLD_DURATION = 3.0     # 3s COLD on each hit
+_S2_COLD_TAG = "angelina_s2_cold"
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    if carrier.position is None:
+        return
+    cx, cy = carrier.position
+    now = world.global_state.elapsed
+    tiles = set(carrier.range_shape.tiles)
+    for enemy in world.enemies():
+        if not enemy.alive or enemy.position is None:
+            continue
+        if (round(enemy.position[0]) - round(cx), round(enemy.position[1]) - round(cy)) not in tiles:
+            continue
+        raw = int(carrier.effective_atk * _S2_ATK_RATIO)
+        dealt = enemy.take_arts(raw)
+        world.global_state.total_damage_dealt += dealt
+        enemy.statuses = [s for s in enemy.statuses if s.source_tag != _S2_COLD_TAG]
+        enemy.statuses.append(StatusEffect(
+            kind=StatusKind.COLD,
+            source_tag=_S2_COLD_TAG,
+            expires_at=now + _S2_COLD_DURATION,
+        ))
+    world.log(f"Angelina S2 Frigid Breath — AoE Arts+COLD in range")
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start)
+
+
 # --- S3: All for One ---
 _S3_TAG = "angelina_s3_all_for_one"
 _S3_ATK_RATIO = 0.50      # +50% ATK at rank 7
@@ -77,7 +110,20 @@ def make_angelina(slot: str = "S3") -> UnitState:
     op.range_shape = DECEL_RANGE
     op.cost = 27
     op.talents = [TalentComponent(name="Thoughtful", behavior_tag=_SLOW_TAG)]
-    if slot == "S3":
+    if slot == "S2":
+        op.skill = SkillComponent(
+            name="Frigid Breath",
+            slot="S2",
+            sp_cost=25,
+            initial_sp=10,
+            duration=0.0,
+            sp_gain_mode=SPGainMode.AUTO_ATTACK,
+            trigger=SkillTrigger.AUTO,
+            requires_target=True,
+            behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
         op.skill = SkillComponent(
             name="All for One",
             slot="S3",
