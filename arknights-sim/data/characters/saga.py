@@ -7,6 +7,10 @@ Talent "Tengu's Edge": When SP is at maximum (sp ≥ sp_cost), ATK +12%.
 S2 "Tsurugi": 30s duration, ATK +120%.
   sp_cost=35, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
 
+S3 "Zangetsu": 20s MANUAL. ATK +180%. Each kill during S3 restores 15% of
+  sp_cost as SP (on_kill hook gated on _saga_s3_active attribute).
+  sp_cost=45, initial_sp=15, AUTO_ATTACK.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
@@ -47,7 +51,27 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
         carrier.buffs = [b for b in carrier.buffs if b.source_tag != _TALENT_BUFF_TAG]
 
 
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
+# --- S3: Zangetsu — ATK+180%, on-kill SP restore ---
+_S3_TAG = "saga_s3_zangetsu"
+_S3_ATK_RATIO = 1.80        # ATK +180%
+_S3_ATK_BUFF_TAG = "saga_s3_atk"
+_S3_DURATION = 20.0
+_S3_ACTIVE_ATTR = "_saga_s3_active"
+_S3_SP_RESTORE_RATIO = 0.15  # restore 15% of sp_cost on kill
+
+
+def _tengus_edge_on_kill(world, killer: UnitState, killed) -> None:
+    if not getattr(killer, _S3_ACTIVE_ATTR, False):
+        return
+    sk = killer.skill
+    if sk is None:
+        return
+    sp_gain = sk.sp_cost * _S3_SP_RESTORE_RATIO
+    sk.sp = min(sk.sp + sp_gain, float(sk.sp_cost))
+    world.log(f"Saga S3 Zangetsu kill — SP +{sp_gain:.1f} ({sk.sp:.1f}/{sk.sp_cost})")
+
+
+register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_kill=_tengus_edge_on_kill)
 
 
 def _s2_on_start(world, carrier: UnitState) -> None:
@@ -62,6 +86,23 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 
 
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
+    world.log(f"Saga S3 Zangetsu — ATK+{_S3_ATK_RATIO:.0%}, on-kill SP restore")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_saga(slot: str = "S2") -> UnitState:

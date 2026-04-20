@@ -52,7 +52,7 @@ _S3_ATK_RATIO = 3.00        # ATK +300%
 _S3_BUFF_TAG = "blemsh_s3_atk"
 _S3_HEAL_RATIO = 1.00       # heal 100% ATK to allies within 1 tile after each attack
 _S3_DURATION = 15.0
-_S3_ACTIVE: set[str] = set()   # unit_ids with Holy Flash active
+_S3_ACTIVE_ATTR = "_blemsh_s3_active"   # instance attr — avoids module-level set cross-test leak
 
 
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
@@ -85,7 +85,7 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
 
 
 def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
-    if attacker.unit_id not in _S3_ACTIVE or attacker.position is None:
+    if not getattr(attacker, _S3_ACTIVE_ATTR, False) or attacker.position is None:
         return
     heal_amount = int(attacker.effective_atk * _S3_HEAL_RATIO)
     ax, ay = attacker.position
@@ -130,13 +130,13 @@ def _s3_on_start(world, carrier: UnitState) -> None:
     ))
     carrier._blemsh_original_attack_type = carrier.attack_type
     carrier.attack_type = AttackType.TRUE
-    _S3_ACTIVE.add(carrier.unit_id)
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
 
 
 def _s3_on_end(world, carrier: UnitState) -> None:
     carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
     carrier.attack_type = getattr(carrier, "_blemsh_original_attack_type", AttackType.PHYSICAL)
-    _S3_ACTIVE.discard(carrier.unit_id)
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
 
 
 register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)

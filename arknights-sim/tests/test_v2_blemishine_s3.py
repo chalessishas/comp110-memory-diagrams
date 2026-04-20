@@ -203,9 +203,8 @@ def test_s3_cleanup_on_end():
     assert len(atk_buffs) == 0, "S3 ATK buff must be cleared on end"
     assert b.attack_type == AttackType.PHYSICAL, "attack_type must revert to PHYSICAL"
     assert abs(b.effective_atk - base_atk) <= 2, "ATK must revert to base"
-    assert b.unit_id not in __import__(
-        "data.characters.blemishine", fromlist=["_S3_ACTIVE"]
-    )._S3_ACTIVE, "_S3_ACTIVE must not contain unit after S3 ends"
+    from data.characters.blemishine import _S3_ACTIVE_ATTR
+    assert not getattr(b, _S3_ACTIVE_ATTR, False), "_S3_ACTIVE_ATTR must be False after S3 ends"
 
 
 # ---------------------------------------------------------------------------
