@@ -2,19 +2,77 @@
 
 Curated layer wrapping generated/headb2.py base stats + her 撼地者 特性:
 attacks deal 50% ATK splash damage within 1.0 tile radius of primary target.
+
+S3 "Storm Strike": 5 consecutive hits each dealing 200% ATK physical damage,
+  scheduled via EventQueue at 0.3s intervals from activation.
+  sp_cost=45, initial_sp=20, duration=5.0s, MANUAL trigger, AUTO_TIME SP gain.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState
-from core.types import RoleArchetype
+from core.state.unit_state import UnitState, SkillComponent
+from core.types import RoleArchetype, SPGainMode, SkillTrigger
+from core.systems.skill_system import register_skill
 from data.characters.generated.headb2 import make_headb2 as _base_stats
 
 
-def make_headb2() -> UnitState:
+_S3_TAG = "headb2_s3_storm_strike"
+_S3_EVENT_KIND = "headb2_smash_hit"
+_S3_HIT_COUNT = 5
+_S3_ATK_RATIO = 2.0
+_S3_HIT_INTERVAL = 0.3
+_S3_DURATION = 5.0
+
+
+def _smash_hit_handler(world, event) -> None:
+    attacker = world.unit_by_id(event.payload["attacker_id"])
+    target = world.unit_by_id(event.payload["target_id"])
+    if attacker is None or not attacker.alive:
+        return
+    if target is None or not target.alive:
+        return
+    dmg = int(attacker.effective_atk * event.payload["atk_ratio"])
+    actual = target.take_physical(dmg)
+    world.global_state.total_damage_dealt += actual
+
+
+def _s3_on_start(world, carrier) -> None:
+    if _S3_EVENT_KIND not in world.event_queue._handlers:
+        world.event_queue.register(_S3_EVENT_KIND, _smash_hit_handler)
+    target = getattr(carrier, "__target__", None)
+    if target is None:
+        return
+    now = world.global_state.elapsed
+    world.event_queue.schedule_repeating(
+        first_at=now,
+        interval=_S3_HIT_INTERVAL,
+        count=_S3_HIT_COUNT,
+        kind=_S3_EVENT_KIND,
+        attacker_id=carrier.unit_id,
+        target_id=target.unit_id,
+        atk_ratio=_S3_ATK_RATIO,
+    )
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
+def make_headb2(slot: str | None = None) -> UnitState:
+    """怒潮凛冬 E2 max. 撼地者 特性: 50% ATK splash. slot='S3' adds EventQueue multi-hit skill."""
     op = _base_stats()
-    op.archetype = RoleArchetype.GUARD_CRUSHER   # 撼地者
-    # 撼地者 特性: 攻击使目标周围的其他敌人受到相当于攻击力50%的群体物理伤害
-    # 溅射半径 1.0 格, 不对主目标生效 — combat_system 的 `other is target`
-    # 跳过已保证不对主目标生效, 倍率 0.5 为 PRTS 特性描述
+    op.archetype = RoleArchetype.GUARD_CRUSHER
     op.splash_radius = 1.0
     op.splash_atk_multiplier = 0.5
+
+    if slot == "S3":
+        op.skill = SkillComponent(
+            name="Storm Strike",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
+        )
+
     return op
