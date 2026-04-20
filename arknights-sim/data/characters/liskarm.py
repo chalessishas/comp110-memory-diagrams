@@ -9,9 +9,14 @@ Talent "Lightning Discharge" (E2):
     2. Gives +1 SP to Liskarm herself (if her skill has room).
     3. Gives +1 SP to one random deployed nearby ally (within _SP_RADIUS tiles)
        whose skill has SP room.
+  During S3: gives +1 SP to ALL nearby allies in radius (not random one).
 
 S1 "Overcharge": DEF +50%, duration=35s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "Energies Converging": ATK+100%, DEF+60%, 30s MANUAL.
+  Lightning Discharge upgrades to give SP to ALL nearby allies.
+  sp_cost=50, initial_sp=15, AUTO_TIME.
 """
 from __future__ import annotations
 import random
@@ -32,6 +37,15 @@ _LIGHTNING_TAG = "liskarm_lightning_discharge"
 _LIGHTNING_RATIO = 1.20   # 120% ATK at E2
 _SP_PER_HIT = 1.0         # SP gained by self and one ally on each hit received
 _SP_RADIUS = 1.5          # tile radius for ally SP battery (covers all 8 adjacent)
+
+# --- S3: Energies Converging ---
+_S3_TAG = "liskarm_s3_energies_converging"
+_S3_ATK_RATIO = 1.00      # ATK +100%
+_S3_DEF_RATIO = 0.60      # DEF +60%
+_S3_ATK_BUFF_TAG = "liskarm_s3_atk"
+_S3_DEF_BUFF_TAG = "liskarm_s3_def"
+_S3_DURATION = 30.0
+_S3_ACTIVE_ATTR = "_liskarm_s3_active"
 
 
 def _grant_sp(unit: UnitState, amount: float) -> bool:
@@ -71,13 +85,41 @@ def _on_hit_received(world, defender: UnitState, attacker, damage: int) -> None:
         and u.skill.sp < u.skill.sp_cost
         and u.skill.active_remaining == 0.0
     ]
-    if candidates:
+    if getattr(defender, _S3_ACTIVE_ATTR, False):
+        # S3 active: give SP to ALL nearby allies
+        for ally in candidates:
+            _grant_sp(ally, _SP_PER_HIT)
+            world.log(f"⚡ Liskarm S3 SP battery ALL → {ally.name}  sp={ally.skill.sp:.1f}/{ally.skill.sp_cost}")
+    elif candidates:
         chosen = world.rng.choice(candidates)
         _grant_sp(chosen, _SP_PER_HIT)
         world.log(f"⚡ Liskarm SP battery → {chosen.name}  sp={chosen.skill.sp:.1f}/{chosen.skill.sp_cost}")
 
 
 register_talent(_LIGHTNING_TAG, on_hit_received=_on_hit_received)
+
+
+# --- S3: Energies Converging ---
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+        value=_S3_DEF_RATIO, source_tag=_S3_DEF_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
+    world.log(f"Liskarm S3 Energies Converging — ATK+{_S3_ATK_RATIO:.0%}, DEF+{_S3_DEF_RATIO:.0%}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs
+                     if b.source_tag not in (_S3_ATK_BUFF_TAG, _S3_DEF_BUFF_TAG)]
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 # --- S2: Voltaic Shield ---
@@ -148,7 +190,7 @@ register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
 def make_liskarm(slot: str = "S1") -> UnitState:
-    """Liskarm E2 max. Lightning Discharge talent + S1 Overcharge: DEF+50% 35s."""
+    """Liskarm E2 max. Lightning Discharge talent + S1/S2/S3."""
     op = _base_stats()
     op.name = "Liskarm"
     op.archetype = RoleArchetype.DEF_SENTINEL
@@ -156,7 +198,20 @@ def make_liskarm(slot: str = "S1") -> UnitState:
     op.cost = 21
     op.talents = [TalentComponent(name="Lightning Discharge", behavior_tag=_LIGHTNING_TAG)]
 
-    if slot == "S2":
+    if slot == "S3":
+        op.skill = SkillComponent(
+            name="Energies Converging",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
         op.skill = SkillComponent(
             name="Voltaic Shield",
             slot="S2",

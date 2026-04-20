@@ -10,6 +10,9 @@ S2 "Drumroll": MANUAL.
   ATK +_S2_ATK_RATIO for _S2_DURATION seconds.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger.
 
+S3 "Percussion Resonance II": ATK+120%, Percussion fires every 3 hits (down from 7).
+  sp_cost=45, initial_sp=20, AUTO_TIME, MANUAL, 20s.
+
 Base stats from ArknightsGameData (E2 max, trust 100, char_379_sesa):
   HP=1655, ATK=918, DEF=123, RES=0, atk_interval=2.8s, cost=28, block=1.
 """
@@ -44,6 +47,13 @@ _S2_ATK_RATIO = 0.80
 _S2_ATK_BUFF_TAG = "sesa_s2_atk"
 _S2_DURATION = 20.0
 
+_S3_TAG = "sesa_s3_percussion_resonance_ii"
+_S3_ATK_RATIO = 1.20
+_S3_ATK_BUFF_TAG = "sesa_s3_atk"
+_S3_RESONANCE_INTERVAL = 3   # fires every 3 hits during S3 (vs 7 normally)
+_S3_DURATION = 20.0
+_S3_ACTIVE_ATTR = "_sesa_s3_active"
+
 
 def _trait_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
     target.statuses.append(StatusEffect(
@@ -61,7 +71,8 @@ def _percussion_on_attack_hit(world, attacker: UnitState, target, damage: int) -
     if not hasattr(attacker, "_sesa_hit_count"):
         attacker._sesa_hit_count = 0
     attacker._sesa_hit_count += 1
-    if attacker._sesa_hit_count % _TALENT_HIT_COUNT != 0:
+    interval = _S3_RESONANCE_INTERVAL if getattr(attacker, _S3_ACTIVE_ATTR, False) else _TALENT_HIT_COUNT
+    if attacker._sesa_hit_count % interval != 0:
         return
     if target.position is None:
         return
@@ -95,6 +106,24 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Percussion Resonance II ---
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_ACTIVE_ATTR, True)
+    world.log(f"Sesa S3 Percussion Resonance II — ATK+{_S3_ATK_RATIO:.0%}, resonance every {_S3_RESONANCE_INTERVAL} hits")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    setattr(carrier, _S3_ACTIVE_ATTR, False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_sesa(slot: str = "S2") -> UnitState:
     """Sesa E2 max. SNIPER_HEAVY: SLOW on hit. Talent: Arts explosion every 7 hits. S2: ATK+80%."""
     op = _base_stats()
@@ -112,7 +141,20 @@ def make_sesa(slot: str = "S2") -> UnitState:
         TalentComponent(name="Percussion Resonance", behavior_tag=_TALENT_TAG),
     ]
 
-    if slot == "S2":
+    if slot == "S3":
+        op.skill = SkillComponent(
+            name="Percussion Resonance II",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S2":
         op.skill = SkillComponent(
             name="Drumroll",
             slot="S2",
