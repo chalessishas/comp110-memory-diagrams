@@ -100,6 +100,10 @@ def combat_system(world, dt: float) -> None:
         if u.chain_count > 0 and u.attack_type != AttackType.HEAL and target.position is not None:
             _apply_chain(world, u, target, raw)
 
+        # Blast pierce — CASTER_BLAST: hits all enemies along attack ray through primary target
+        if u.blast_pierce and u.attack_type != AttackType.HEAL and u.position is not None:
+            _apply_blast_pierce(world, u, target, raw)
+
         # Push-back — SPEC_PUSHER trait: retreat target along its path
         if u.push_distance > 0 and target.alive:
             _apply_push(target, u.push_distance)
@@ -254,6 +258,49 @@ def _apply_chain(world, attacker, primary_target, primary_raw: int) -> None:
             fire_on_kill(world, attacker, next_target)
         # Update chain origin to new target's position
         tx, ty = next_target.position
+
+
+def _apply_blast_pierce(
+    world, attacker, primary_target, raw: int, atk_multiplier: float = 1.0
+) -> None:
+    """Blast Caster: deal damage to all enemies along the ray from attacker through primary target.
+
+    Uses unnormalized dot-product projection to avoid sqrt; perp_sq threshold = 0.25 (0.5 tiles²).
+    """
+    if primary_target.position is None:
+        return
+    ox, oy = attacker.position
+    tx, ty = primary_target.position
+    dx, dy = tx - ox, ty - oy
+    len_sq = dx * dx + dy * dy
+    if len_sq < 1e-6:
+        return
+
+    blast_raw = int(raw * atk_multiplier)
+    for e in world.enemies():
+        if e is primary_target or not e.alive or e.position is None:
+            continue
+        ex, ey = e.position
+        vx, vy = ex - ox, ey - oy
+        proj = vx * dx + vy * dy          # unnormalized scalar projection
+        if proj <= 0:
+            continue                       # enemy is behind or at attacker side
+        # perp_sq = |v|² - proj²/len_sq (perpendicular distance squared)
+        perp_sq = (vx * vx + vy * vy) - proj * proj / len_sq
+        if perp_sq > 0.25:               # > 0.5 tiles off the ray
+            continue
+        if attacker.attack_type == AttackType.ARTS:
+            dealt = e.take_arts(blast_raw)
+        elif attacker.attack_type == AttackType.PHYSICAL:
+            dealt = e.take_physical(blast_raw)
+        else:
+            dealt = e.take_true(blast_raw)
+        world.global_state.total_damage_dealt += dealt
+        world.log(f"{attacker.name} blast → {e.name}  dmg={dealt}  ({e.hp}/{e.max_hp})")
+        if attacker.talents:
+            fire_on_attack_hit(world, attacker, e, dealt)
+        if not e.alive and attacker.talents:
+            fire_on_kill(world, attacker, e)
 
 
 def _apply_push(target, distance: int) -> None:

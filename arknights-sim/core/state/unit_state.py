@@ -157,6 +157,7 @@ class UnitState:
     chain_count: int = 0        # 连锁攻击额外目标数 (Chain Caster 职业特性=2)
     chain_damage_ratio: float = 1.0  # 连锁伤害比率 (相对于主目标伤害)
     push_distance: int = 0      # 击退距离 (tiles)；>0 时每次攻击推退目标 N 格 (SPEC_PUSHER)
+    blast_pierce: bool = False  # CASTER_BLAST: 攻击沿射线贯穿所有敌人（法术直线穿透）
     heal_targets: int = 1       # MEDIC_MULTI: 每次攻击同时治疗的目标数（默认 1）
     heal_block_threshold: float = 0.0  # GUARD_MUSHA: 外部治疗被屏蔽的 HP 比例（0.0 = 无屏蔽）
     element_type: Optional[ElementType] = None  # 干员元素类型（ELEMENTAL 攻击时填充敌人元素条）
