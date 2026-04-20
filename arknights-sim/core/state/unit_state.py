@@ -229,8 +229,8 @@ class UnitState:
         return any(s.kind == kind for s in self.statuses)
 
     def can_act(self) -> bool:
-        """Stun/Bind/Freeze/Sleep 都阻止行动. Silence 只阻止技能."""
-        blocking = {StatusKind.STUN, StatusKind.BIND, StatusKind.FREEZE, StatusKind.SLEEP}
+        """Stun/Bind/Freeze/Sleep/Levitate 都阻止行动. Silence 只阻止技能."""
+        blocking = {StatusKind.STUN, StatusKind.BIND, StatusKind.FREEZE, StatusKind.SLEEP, StatusKind.LEVITATE}
         return not any(s.kind in blocking for s in self.statuses)
 
     def can_use_skill(self) -> bool:
