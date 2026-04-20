@@ -45,6 +45,7 @@ _TOKEN_DEF = 145
 _TOKEN_NAME = "Mech-Otter"
 
 _MAYER_TOKENS_ATTR = "_mayer_token_ids"
+_MAYER_SUMMON_BUDGET = 4   # E2 max: talent(1) + up to 3 S2 fires
 
 
 def _make_token(position: tuple) -> UnitState:
@@ -70,6 +71,11 @@ def _make_token(position: tuple) -> UnitState:
 def _spawn_token(world, carrier: UnitState) -> None:
     if carrier.position is None:
         return
+    remaining = getattr(carrier, "_summons_remaining", _MAYER_SUMMON_BUDGET)
+    if remaining <= 0:
+        world.log(f"Mayer summon budget exhausted ({_MAYER_SUMMON_BUDGET} total)")
+        return
+    setattr(carrier, "_summons_remaining", remaining - 1)
     token = _make_token(carrier.position)
     world.add_unit(token)
     ids = getattr(carrier, _MAYER_TOKENS_ATTR, [])

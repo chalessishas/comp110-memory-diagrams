@@ -45,6 +45,7 @@ _TALENT_BUFF_TTL = 0.3          # seconds; re-stamped each tick
 # S3: Draconic Inspiration
 _S3_TAG = "ling_s3_draconic_inspiration"
 _S3_DURATION = 30.0
+_LING_SUMMON_BUDGET = 3   # max Long Xian summons per deployment
 _LONG_XIAN_ATK = 900
 _LONG_XIAN_HP = 4000
 _LONG_XIAN_DEF = 200
@@ -133,6 +134,11 @@ def _make_long_xian(position: tuple[float, float]) -> UnitState:
 
 
 def _s3_on_start(world, carrier: UnitState) -> None:
+    remaining = getattr(carrier, "_summons_remaining", _LING_SUMMON_BUDGET)
+    if remaining <= 0:
+        world.log(f"Ling summon budget exhausted ({_LING_SUMMON_BUDGET} total)")
+        return
+    setattr(carrier, "_summons_remaining", remaining - 1)
     pos = carrier.position if carrier.position is not None else (0.0, 0.0)
     dragon = _make_long_xian(pos)
     world.add_unit(dragon)
