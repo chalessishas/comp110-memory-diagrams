@@ -7,6 +7,10 @@ Talent "Undying Will" (E2): Once per deployment, when Specter would die,
 S2 "Pather's Light": ATK +160%, 30s, AUTO_TIME. Attacks also restore
   5% of damage dealt as HP to Specter.
 
+S3 "Deathless Aegis": ATK +400%, ASPD +50, duration 30s, MANUAL trigger.
+  While active, Specter cannot die (undying_charges=999). On end, buffs
+  cleared and undying_charges restored to pre-S3 value.
+
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
 from __future__ import annotations
@@ -110,6 +114,39 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Deathless Aegis ---
+_S3_TAG = "specter_s3_deathless_aegis"
+_S3_ATK_RATIO = 4.00        # ATK +400%
+_S3_ASPD_BONUS = 50.0       # ASPD +50
+_S3_DURATION = 30.0
+_S3_ATK_BUFF_TAG = "specter_s3_atk"
+_S3_ASPD_BUFF_TAG = "specter_s3_aspd"
+_S3_UNDYING_SENTINEL = 999  # effectively infinite undying during S3
+
+
+def _s3_on_start(world, unit) -> None:
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S3_ASPD_BONUS, source_tag=_S3_ASPD_BUFF_TAG,
+    ))
+    unit._s3_saved_undying = unit.undying_charges
+    unit.undying_charges = _S3_UNDYING_SENTINEL
+    world.log(f"{unit.name} Deathless Aegis — ATK+400%, ASPD+50, immortal for {_S3_DURATION}s")
+
+
+def _s3_on_end(world, unit) -> None:
+    unit.buffs = [b for b in unit.buffs if b.source_tag not in (_S3_ATK_BUFF_TAG, _S3_ASPD_BUFF_TAG)]
+    unit.undying_charges = getattr(unit, "_s3_saved_undying", 0)
+    world.log(f"{unit.name} Deathless Aegis ended")
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_specter(slot: str = "S2") -> UnitState:
     """Specter E2 max. Talent: undying save once (DEF+200%/immune 10s). S2: +160% ATK + lifesteal."""
     op = _base_stats()
@@ -132,5 +169,17 @@ def make_specter(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Deathless Aegis",
+            slot="S3",
+            sp_cost=65,
+            initial_sp=30,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
     return op
