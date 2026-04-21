@@ -3,6 +3,8 @@
 Class trait: Tactician Vanguard — no passive DP accumulation; DP via skills.
 S1 "Tactical Formation I": Instantly gains 8 DP. sp_cost=25, duration=0 (instant).
 S2 "Support Order": 12 DP over 15s (DP drip, block=0 during skill). sp_cost=35.
+S3 "Combat Deployment": Instantly gains 20 DP + ATK+100% for 30s.
+  sp_cost=50, initial_sp=20, MANUAL trigger.
 
 Talent "Karlan Patrol" (E2): DEF +60 when blocking ≥2 enemies.
   Implemented via on_tick: scan blocked count; apply/remove DEF buff accordingly.
@@ -84,6 +86,30 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# --- S3: Combat Deployment — instant 20 DP + ATK+100% for 30s ---
+_S3_TAG = "courier_s3_combat_deployment"
+_S3_DP = 20
+_S3_ATK_RATIO = 1.00    # ATK +100%
+_S3_DURATION = 30.0
+_S3_BUFF_TAG = "courier_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    world.global_state.refund_dp(_S3_DP)
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    world.log(f"Courier S3 Combat Deployment — +{_S3_DP} DP, ATK+{_S3_ATK_RATIO:.0%}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_courier(slot: str = "S1") -> UnitState:
     """Courier E2 max. S1: +8 DP instant; S2: 12 DP / 15s drip, block=0. Talent: +3 DP on deploy."""
     op = _base_stats()
@@ -118,5 +144,17 @@ def make_courier(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Combat Deployment",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op

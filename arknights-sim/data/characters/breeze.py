@@ -11,6 +11,8 @@ Talent "Healing Breeze" (疗愈之风): When 2+ allies are simultaneously healed
 
 S2 "Revitalizing Gale" (活化疾风): 20s duration. ATK (heal power)+30%.
   sp_cost=30, initial_sp=15, AUTO_TIME, AUTO trigger.
+S3 "Healing Storm" (治愈风暴): 30s duration. ATK (heal power)+80%.
+  sp_cost=40, initial_sp=20, AUTO_TIME, MANUAL trigger.
 
 Base stats from ArknightsGameData (E2 max, trust 100, char_275_breeze).
   HP=1795, ATK=373, DEF=153, RES=0, atk_interval=2.85s, cost=17, block=1.
@@ -82,6 +84,28 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Healing Storm — ATK+80% for 30s ---
+_S3_TAG = "breeze_s3_healing_storm"
+_S3_ATK_RATIO = 0.80
+_S3_ATK_BUFF_TAG = "breeze_s3_atk"
+_S3_DURATION = 30.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Breeze S3 Healing Storm — ATK+{_S3_ATK_RATIO:.0%} ({_S3_DURATION}s)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_breeze(slot: str = "S2") -> UnitState:
     """Breeze E2 max. MEDIC_THERAPIST: heals all injured allies per attack. S2: heal power+30%."""
     op = _base_stats()
@@ -108,6 +132,19 @@ def make_breeze(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Healing Storm",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
