@@ -1,7 +1,9 @@
 """v2 — Terrain effect tests: icy TileEffect slows enemy movement."""
+from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from typing import List, Optional
 from core.world import World
 from core.state.tile_state import TileGrid, TileState, TileEffect
 from core.types import TileType, TICK_RATE, DT
@@ -12,7 +14,7 @@ from data.enemies import make_originium_slug
 PATH = [(x, 0) for x in range(6)]
 
 
-def _world(icy_tiles: list[int] | None = None) -> World:
+def _world(icy_tiles: Optional[List[int]] = None) -> World:
     """Build a 6-tile straight path. icy_tiles: list of x-coords with icy TileEffect."""
     grid = TileGrid(width=6, height=1)
     for i in range(6):
