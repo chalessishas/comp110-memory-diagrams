@@ -9,6 +9,9 @@ S2 "Powerful Current" (M3): Instant ranged burst — deals 280% ATK Arts damage 
   all enemies in a line, each pushed back 3 tiles.
   sp_cost=15, initial_sp=5, AUTO_ATTACK.
 
+S3 "Raging Flood": ATK +150%, push_distance→5 for 20s. MANUAL.
+  sp_cost=30, initial_sp=10, AUTO_TIME, MANUAL trigger.
+
 Base stats: E2 max, trust 100 (hand-authored from wiki).
   HP=1857, ATK=499, DEF=271, RES=0, atk_interval=1.2s, cost=11, block=1.
 """
@@ -18,6 +21,8 @@ from core.types import (
     AttackType, Faction, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.state.unit_state import Buff
+from core.types import BuffAxis, BuffStack
 from core.systems.skill_system import register_skill
 from core.systems.combat_system import _apply_push
 from core.systems.talent_registry import register_talent
@@ -70,6 +75,32 @@ def _s2_on_start(world, unit: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3: Raging Flood — ATK +150% + push_distance→5, 20s MANUAL ---
+_S3_TAG = "shaw_s3_raging_flood"
+_S3_ATK_RATIO = 1.50
+_S3_PUSH_BOOST = 5
+_S3_DURATION = 20.0
+_S3_BUFF_TAG = "shaw_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    carrier._shaw_s3_prev_push = carrier.push_distance
+    carrier.push_distance = _S3_PUSH_BOOST
+    world.log(f"Shaw S3 Raging Flood — ATK +{_S3_ATK_RATIO:.0%}, push→{_S3_PUSH_BOOST}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    carrier.push_distance = getattr(carrier, "_shaw_s3_prev_push", _GALE_PUSH)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_shaw(slot: str = "S2") -> UnitState:
     """Shaw E2 max. Pusher trait: push 2 tiles per attack. S2: AoE Arts burst + 3-tile push."""
     op = UnitState(
@@ -104,4 +135,17 @@ def make_shaw(slot: str = "S2") -> UnitState:
             requires_target=True,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Raging Flood",
+            slot="S3",
+            sp_cost=30,
+            initial_sp=10,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

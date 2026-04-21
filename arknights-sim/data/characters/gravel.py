@@ -11,6 +11,12 @@ Talent "Tactical Concealment" (E2):
 
 S1 "Hidden Blade": ATK +100% for 15s.
   sp_cost=30, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S2 "Concealment": ATK +150% for 20s, auto-retreat at end.
+  sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "Shadow Burst": ATK +200% for 20s, refreshes deploy shield. MANUAL.
+  sp_cost=40, initial_sp=15, AUTO_TIME, MANUAL trigger, requires_target=False.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, TalentComponent, RangeShape
@@ -129,6 +135,29 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Shadow Burst — ATK +200%, refreshes deploy shield, 20s MANUAL ---
+_S3_TAG = "gravel_s3_shadow_burst"
+_S3_ATK_RATIO = 2.00
+_S3_DURATION = 20.0
+_S3_BUFF_TAG = "gravel_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    _activate_shield(world, carrier)
+    world.log(f"Gravel S3 Shadow Burst — ATK +{_S3_ATK_RATIO:.0%}, shield refreshed")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_gravel(slot: str = "S1") -> UnitState:
     """砾 E2 max. SPEC_AMBUSHER: 18s redeploy, 80% dmg reduction for 10s on each deploy. S1: ATK+100% 15s. S2: ATK+150% 20s, auto-retreat."""
     op = _base_stats()
@@ -170,6 +199,19 @@ def make_gravel(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Shadow Burst",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

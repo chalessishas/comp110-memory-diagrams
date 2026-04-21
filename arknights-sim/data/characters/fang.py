@@ -8,6 +8,9 @@ S1 "Assault": ATK +50% for 40s.
 
 S2 "Assault Formation": 20 DP over 15s (DP drip), block=0 during skill.
   sp_cost=30, initial_sp=0, AUTO_TIME, AUTO trigger, requires_target=False.
+
+S3 "Full Assault": ATK +200% for 30s. MANUAL.
+  sp_cost=50, initial_sp=20, AUTO_TIME, MANUAL trigger, requires_target=True.
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
@@ -83,6 +86,28 @@ def _s2_on_end(world, unit: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# --- S3: Full Assault — ATK +200%, 30s MANUAL ---
+_S3_TAG = "fang_s3_full_assault"
+_S3_ATK_RATIO = 2.00
+_S3_DURATION = 30.0
+_S3_BUFF_TAG = "fang_s3_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    world.log(f"Fang S3 Full Assault — ATK +{_S3_ATK_RATIO:.0%}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_fang(slot: str = "S1") -> UnitState:
     """Fang E1 max. Charger: +1 DP on kill. S1: ATK+50% 40s. S2: 20 DP / 15s drip."""
     op = _base_stats()
@@ -120,6 +145,19 @@ def make_fang(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Full Assault",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

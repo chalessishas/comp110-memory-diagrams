@@ -8,6 +8,10 @@ S2 "Binding Arts" (M3): Instant ranged Arts 200% ATK to 1 target + BIND (1.5s)
   + pull 3 tiles.
   sp_cost=25, initial_sp=10, AUTO_ATTACK.
 
+S3 "Binding Tempest": Instant MANUAL AoE Arts 250% ATK to all enemies in range
+  + BIND 2.5s + pull 4 tiles each.
+  sp_cost=40, initial_sp=15, AUTO_TIME.
+
 Base stats: E2 max, trust 100 (ArknightsGameData char_236_rope).
   HP=1720, ATK=728, DEF=385, RES=0, atk_interval=1.8s, cost=12, block=2.
 """
@@ -89,6 +93,45 @@ def _s2_on_start(world, unit: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3: Binding Tempest — AoE Arts 250% to all in range + BIND 2.5s + pull 4 tiles ---
+_S3_TAG = "rope_s3_binding_tempest"
+_S3_ATK_MULT = 2.50
+_S3_PULL_DIST = 4
+_S3_BIND_DURATION = 2.5
+_S3_BIND_TAG = "rope_s3_bind"
+
+
+def _s3_on_start(world, unit: UnitState) -> None:
+    if unit.position is None:
+        return
+    ox, oy = unit.position
+    tiles = set(HOOKMASTER_RANGE.tiles)
+    burst_atk = int(unit.effective_atk * _S3_ATK_MULT)
+    now = world.global_state.elapsed
+
+    for enemy in list(world.enemies()):
+        if not enemy.alive or enemy.position is None:
+            continue
+        dx = round(enemy.position[0]) - round(ox)
+        dy = round(enemy.position[1]) - round(oy)
+        if (dx, dy) not in tiles:
+            continue
+        dealt = enemy.take_arts(burst_atk)
+        world.global_state.total_damage_dealt += dealt
+        world.log(f"Rope S3 → {enemy.name}  dmg={dealt}")
+        if enemy.alive:
+            enemy.statuses = [s for s in enemy.statuses if s.source_tag != _S3_BIND_TAG]
+            enemy.statuses.append(StatusEffect(
+                kind=StatusKind.BIND,
+                source_tag=_S3_BIND_TAG,
+                expires_at=now + _S3_BIND_DURATION,
+            ))
+            _apply_push(enemy, _S3_PULL_DIST)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start)
+
+
 def make_rope(slot: str = "S2") -> UnitState:
     """Rope E2 max. Hookmaster: pull 1 tile per attack. S2: instant Arts 200%+BIND+3-tile pull."""
     op = _base_stats()
@@ -113,5 +156,17 @@ def make_rope(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Binding Tempest",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=0.0,        # instant
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op

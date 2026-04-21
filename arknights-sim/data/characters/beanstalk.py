@@ -6,6 +6,8 @@ Talent "Professional Breeder" (E1/E2): Metal Crab respawn timer 17s/15s.
 S1 "Sentinel Command": Instant, gain +8 DP. sp_cost=34, initial_sp=11, AUTO.
 S2 "Everyone Together!": 12 DP drip over 15s, block=0 during skill.
   sp_cost=44, initial_sp=15, AUTO_TIME.
+S3 "Grand Rally": Instant, 20 DP + block→3 + ATK+80% for 25s. MANUAL.
+  sp_cost=50, initial_sp=20, AUTO_TIME, MANUAL trigger.
 
 Base stats from ArknightsGameData (E2 max, trust 100).
 """
@@ -69,6 +71,32 @@ def _s2_on_end(world, unit) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# --- S3: Grand Rally — 20 DP instant + block→3 + ATK+80%, 25s MANUAL ---
+_S3_TAG = "beanstalk_s3_grand_rally"
+_S3_DP = 20
+_S3_ATK_RATIO = 0.80
+_S3_DURATION = 25.0
+_S3_BUFF_TAG = "beanstalk_s3_atk"
+
+
+def _s3_on_start(world, unit) -> None:
+    world.global_state.refund_dp(_S3_DP)
+    unit._beanstalk_s3_saved_block = unit.block
+    unit.block = 3
+    unit.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+
+
+def _s3_on_end(world, unit) -> None:
+    unit.block = getattr(unit, "_beanstalk_s3_saved_block", 1)
+    unit.buffs = [b for b in unit.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_beanstalk(slot: str = "S2") -> UnitState:
     """Beanstalk E2 max. S1: +8 DP instant. S2: 12 DP/15s drip + block=0."""
     op = _base_stats()
@@ -103,5 +131,17 @@ def make_beanstalk(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Grand Rally",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op
