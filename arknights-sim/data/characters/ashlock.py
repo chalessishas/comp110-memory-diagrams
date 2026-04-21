@@ -12,10 +12,14 @@ Talent "Bombardment Studies" (E2): ATK +8% unconditional.
 
 S2 "Torrent": ATK +80%, forces ranged mode even while blocking, for 25s.
   sp_cost=25, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=False.
+
+S3 "Fortress Barrage": ATK +150%, forces ranged mode (same as S2 but stronger), 30s MANUAL.
+  Additionally applies FRAGILE (×1.2 damage taken) to all enemies in range on activation.
+  sp_cost=40, initial_sp=15, AUTO_TIME, MANUAL trigger, requires_target=False.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent
-from core.types import AttackType, BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape, TalentComponent, StatusEffect
+from core.types import AttackType, BuffAxis, BuffStack, Faction, Profession, RoleArchetype, SPGainMode, SkillTrigger, StatusKind
 from core.systems.skill_system import register_skill
 from core.systems.talent_registry import register_talent
 from data.characters.generated.ashlok import make_ashlok as _base_stats
@@ -52,6 +56,15 @@ _S2_TAG = "ashlock_s2_torrent"
 _S2_ATK_RATIO = 0.80     # ATK +80%
 _S2_SOURCE_TAG = "ashlock_s2_torrent"
 
+# --- S3: Fortress Barrage ---
+_S3_TAG = "ashlock_s3_fortress_barrage"
+_S3_ATK_RATIO = 1.50     # ATK +150%
+_S3_SOURCE_TAG = "ashlock_s3_fortress_barrage"
+_S3_FRAGILE_TAG = "ashlock_s3_fragile"
+_S3_FRAGILE_MULTIPLIER = 1.20   # enemies take 20% more damage
+_S3_FRAGILE_DURATION = 8.0      # initial FRAGILE window on activation
+_S3_DURATION = 30.0
+
 
 def _s2_on_start(world, carrier: UnitState) -> None:
     carrier.buffs.append(Buff(
@@ -70,8 +83,47 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _in_range(op: UnitState, enemy) -> bool:
+    if op.position is None or enemy.position is None:
+        return False
+    ox, oy = op.position
+    ex, ey = enemy.position
+    dx = round(ex) - round(ox)
+    dy = round(ey) - round(oy)
+    return (dx, dy) in set(op.range_shape.tiles)
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_SOURCE_TAG,
+    ))
+    carrier._force_ranged_mode = True
+    elapsed = world.global_state.elapsed
+    for enemy in world.enemies():
+        if not enemy.alive or not _in_range(carrier, enemy):
+            continue
+        enemy.statuses = [s for s in enemy.statuses if s.source_tag != _S3_FRAGILE_TAG]
+        enemy.statuses.append(StatusEffect(
+            kind=StatusKind.FRAGILE,
+            source_tag=_S3_FRAGILE_TAG,
+            expires_at=elapsed + _S3_FRAGILE_DURATION,
+            params={"multiplier": _S3_FRAGILE_MULTIPLIER},
+        ))
+        world.log(f"Ashlock S3 FRAGILE → {enemy.name}  ×{_S3_FRAGILE_MULTIPLIER} ({_S3_FRAGILE_DURATION}s)")
+    world.log(f"Ashlock S3 Fortress Barrage — ATK +{_S3_ATK_RATIO:.0%}, forced ranged mode")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_SOURCE_TAG]
+    carrier._force_ranged_mode = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_ashlock(slot: str = "S2") -> UnitState:
-    """Ashlock E2 max. Fortress: ranged AoE ↔ melee toggle. S2: ATK+80% + forced ranged 25s."""
+    """Ashlock E2 max. Fortress: ranged AoE ↔ melee toggle. S2: ATK+80% + forced ranged 25s. S3: ATK+150% MANUAL + FRAGILE."""
     op = _base_stats()
     op.name = "Ashlock"
     op.archetype = RoleArchetype.DEF_FORTRESS
@@ -95,6 +147,19 @@ def make_ashlock(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Fortress Barrage",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op
