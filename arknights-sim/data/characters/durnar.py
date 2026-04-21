@@ -1,17 +1,16 @@
 """Dur-nar (坚雷) — 5★ Defender (Arts Protector archetype).
 
 DEF_ARTS_PROTECTOR trait: Attacks deal Arts damage to blocked enemies instead
-  of physical damage. Retains full Defender block-3 capability. Since ATK is
-  compared against enemy RES (not DEF), this archetype excels against armored
-  enemies that have low Arts resistance.
+  of physical damage. Retains full Defender block-3 capability.
 
-Talent "Thunder Strike": When 2 or more enemies are currently being blocked by
-  Dur-nar, gain ATK+20%. Applied each tick while the condition holds; removed
-  when blocking count drops below threshold.
+Talent "Thunder Strike": When 2+ enemies are blocked, ATK+20%.
 
 S2 "Iron Defense": 25s duration. DEF+50% and block count increases from 3 to 4.
-  Allows Dur-nar to hold an additional enemy lane while gaining tankiness.
   sp_cost=40, initial_sp=20, AUTO_TIME, AUTO trigger, requires_target=True.
+
+S3 "Iron Fortress" (铁堡): MANUAL, 30s duration.
+  DEF+80%, ATK+30%, block count increases to 5.
+  sp_cost=60, initial_sp=30, AUTO_TIME.
 
 Base stats from ArknightsGameData (E2 max, trust 100, char_260_durnar).
   HP=3007, ATK=648, DEF=548, RES=15, atk_interval=1.6s, cost=24, block=3.
@@ -42,6 +41,15 @@ _S2_DEF_BUFF_TAG = "durnar_s2_def"
 _S2_BASE_BLOCK = 3
 _S2_BLOCK_BONUS = 1            # +1 block → total 4
 _S2_DURATION = 25.0
+
+# S3: Iron Fortress
+_S3_TAG = "durnar_s3_iron_fortress"
+_S3_DEF_RATIO = 0.80           # +80% DEF
+_S3_DEF_BUFF_TAG = "durnar_s3_def"
+_S3_ATK_RATIO = 0.30           # +30% ATK
+_S3_ATK_BUFF_TAG = "durnar_s3_atk"
+_S3_BLOCK = 5                  # block→5
+_S3_DURATION = 30.0
 
 
 def _blocking_count(carrier: UnitState, world) -> int:
@@ -84,6 +92,27 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.block = _S3_BLOCK
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+        value=_S3_DEF_RATIO, source_tag=_S3_DEF_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Dur-nar S3 Iron Fortress — DEF+{_S3_DEF_RATIO:.0%}, ATK+{_S3_ATK_RATIO:.0%}, block→{_S3_BLOCK}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.block = _S2_BASE_BLOCK
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag not in (_S3_DEF_BUFF_TAG, _S3_ATK_BUFF_TAG)]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_durnar(slot: str = "S2") -> UnitState:
     """Dur-nar E2 max. DEF_ARTS_PROTECTOR: Arts damage, block-3. S2: +50% DEF + block-4."""
     op = _base_stats()
@@ -109,6 +138,19 @@ def make_durnar(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Iron Fortress",
+            slot="S3",
+            sp_cost=60,
+            initial_sp=30,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

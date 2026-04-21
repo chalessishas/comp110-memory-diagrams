@@ -11,6 +11,10 @@ S2 "协律轰鸣" (Harmonic Blast): Instant. Fires a concentrated blast along
   Applies SLOW (2.0s) to each hit enemy.
   sp_cost=25, initial_sp=10, AUTO_ATTACK, requires_target=True.
 
+S3 "Grand Harmonic" (大协律): MANUAL, 20s duration.
+  ATK +200%. Attacks hit ALL enemies in range (AoE pierce mode).
+  sp_cost=50, initial_sp=20, AUTO_TIME.
+
 Base stats: E2 max, trust 100 (char_4051_akkord).
   HP=1528, ATK=740, DEF=110, RES=20%, atk_interval=2.9s, block=1, cost=32.
 """
@@ -41,6 +45,11 @@ _S2_TAG = "akkord_s2_harmonic_blast"
 _S2_ATK_MULT = 1.50
 _S2_SLOW_DURATION = 2.0
 _S2_SLOW_TAG = "akkord_s2_slow"
+
+_S3_TAG = "akkord_s3_grand_harmonic"
+_S3_ATK_RATIO = 2.00   # ATK +200%
+_S3_BUFF_TAG = "akkord_s3_atk"
+_S3_DURATION = 20.0
 
 
 def _unit_in_range(op: UnitState, other: UnitState) -> bool:
@@ -126,6 +135,23 @@ def _apply_pierce_slow(world, attacker: UnitState, primary_target: UnitState) ->
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    setattr(carrier, "_attack_all_in_range", True)
+    world.log(f"Akkord S3 Grand Harmonic — ATK+{_S3_ATK_RATIO:.0%}, AoE pierce ({_S3_DURATION}s)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    setattr(carrier, "_attack_all_in_range", False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_akkord(slot: str = "S2") -> UnitState:
     """Akkord E2 max. CASTER_BLAST: pierce all enemies in attack ray. Talent: ATK+17% with ally in range."""
     op = _base_stats()
@@ -152,5 +178,17 @@ def make_akkord(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Grand Harmonic",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op
