@@ -30,6 +30,17 @@ def _song_pre_attack(world, attacker: UnitState, target) -> None:
 
 
 def _song_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
+    # S3 Lullaby: apply SLEEP on every hit while S3 is active
+    if getattr(attacker, "_erato_s3_active", False) and damage > 0:
+        target.statuses = [s for s in target.statuses if s.source_tag != "_erato_s3_sleep"]
+        from core.state.unit_state import StatusEffect
+        target.statuses.append(StatusEffect(
+            kind=StatusKind.SLEEP,
+            source_tag="_erato_s3_sleep",
+            expires_at=world.global_state.elapsed + _S3_SLEEP_DURATION,
+        ))
+        world.log(f"Erato S3 → {target.name} SLEEP {_S3_SLEEP_DURATION}s")
+
     saved = getattr(attacker, "_erato_sleep_snapshot", [])
     if not saved:
         return
@@ -98,8 +109,34 @@ def _s1_on_end(world, carrier: UnitState) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
+# --- S3: Lullaby — ATK+120%, SLEEP on every hit ---
+_S3_TAG = "erato_s3_lullaby"
+_S3_ATK_RATIO = 1.20
+_S3_ATK_BUFF_TAG = "erato_s3_atk"
+_S3_SLEEP_DURATION = 3.0
+_S3_SLEEP_TAG = "erato_s3_sleep"
+_S3_DURATION = 20.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._erato_s3_active = True
+    world.log(f"Erato S3 Lullaby — ATK+{_S3_ATK_RATIO:.0%}, SLEEP on hit {_S3_SLEEP_DURATION}s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._erato_s3_active = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_erato(slot: str = "S1") -> UnitState:
-    """Erato E2 max. Besieger: targets heaviest enemy; 1.5× ATK to blocked enemies. S1: ATK+100% 20s."""
+    """Erato E2 max. Besieger: targets heaviest enemy; 1.5× ATK to blocked enemies. S3: ATK+120% + SLEEP on hit."""
     op = _base_stats()
     op.name = "Erato"
     op.archetype = RoleArchetype.SNIPER_SIEGE
@@ -134,6 +171,19 @@ def make_erato(slot: str = "S1") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S1_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Lullaby",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

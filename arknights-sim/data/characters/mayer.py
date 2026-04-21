@@ -121,8 +121,32 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# S3: Full Assembly — ATK+60%, spawn 2 mech-otter tokens at activation
+_S3_TAG = "mayer_s3_full_assembly"
+_S3_ATK_RATIO = 0.60
+_S3_ATK_BUFF_TAG = "mayer_s3_atk"
+_S3_DURATION = 30.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    _spawn_token(world, carrier)
+    _spawn_token(world, carrier)
+    world.log(f"Mayer S3 Full Assembly — ATK+{_S3_ATK_RATIO:.0%}, 2× tokens spawned")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_mayer(slot: str = "S2") -> UnitState:
-    """Mayer E2 max. Talent: spawn 1 mech-otter token on deploy. S2: spawn extra token + ATK+40%."""
+    """Mayer E2 max. Talent: spawn 1 mech-otter token on deploy. S2: +token+ATK+40%. S3: +2 tokens+ATK+60%."""
     op = _base_stats()
     op.name = "Mayer"
     op.archetype = RoleArchetype.SUP_SUMMONER
@@ -147,4 +171,17 @@ def make_mayer(slot: str = "S2") -> UnitState:
             requires_target=False,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Full Assembly",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

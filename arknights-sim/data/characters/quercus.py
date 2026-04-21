@@ -55,8 +55,13 @@ def _ally_in_range(op: UnitState, ally: UnitState) -> bool:
 def _incantation_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
     if damage <= 0:
         return
-    is_s2 = attacker.skill is not None and attacker.skill.active_remaining > 0
-    ratio = _S2_HEAL_RATIO if is_s2 else _TRAIT_HEAL_RATIO
+    skill_active = attacker.skill is not None and attacker.skill.active_remaining > 0
+    if skill_active and attacker.skill.slot == "S3":
+        ratio = _S3_HEAL_RATIO
+    elif skill_active:
+        ratio = _S2_HEAL_RATIO
+    else:
+        ratio = _TRAIT_HEAL_RATIO
     heal_amount = int(damage * ratio)
     if heal_amount <= 0:
         return
@@ -90,8 +95,31 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# --- S3: Sacred Grove — ATK+50%, heal ratio 120% ---
+_S3_TAG = "quercus_s3_sacred_grove"
+_S3_ATK_RATIO = 0.50
+_S3_ATK_BUFF_TAG = "quercus_s3_atk"
+_S3_HEAL_RATIO = 1.20
+_S3_DURATION = 25.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    world.log(f"Quercus S3 Sacred Grove — ATK+{_S3_ATK_RATIO:.0%}, heal ratio {_S3_HEAL_RATIO:.0%}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_quercus(slot: str = "S2") -> UnitState:
-    """Quercus E2 max. MEDIC_INCANTATION: damages enemies + heals allies on hit. S2: +20% ATK + 80% heal ratio."""
+    """Quercus E2 max. MEDIC_INCANTATION: damages enemies + heals allies on hit. S3: ATK+50% + 120% heal ratio."""
     op = _base_stats()
     op.name = "Quercus"
     op.archetype = RoleArchetype.MEDIC_INCANTATION
@@ -115,6 +143,19 @@ def make_quercus(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Sacred Grove",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

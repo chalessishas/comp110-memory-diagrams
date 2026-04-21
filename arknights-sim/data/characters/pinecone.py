@@ -86,8 +86,33 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# S3: Grand Barrage — ATK+100%, splash radius 2.5, _attack_all_in_range=True
+_S3_TAG = "pinecone_s3_grand_barrage"
+_S3_ATK_RATIO = 1.00
+_S3_ATK_BUFF_TAG = "pinecone_s3_atk"
+_S3_SPLASH_RADIUS = 2.5
+_S3_DURATION = 20.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._attack_all_in_range = True
+    world.log(f"Pinecone S3 Grand Barrage — ATK+{_S3_ATK_RATIO:.0%}, splash {_S3_SPLASH_RADIUS}t, AoE primary")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._attack_all_in_range = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_pinecone(slot: str = "S2") -> UnitState:
-    """Pinecone E2 max. SNIPER_ARTILLERY: physical hit + Arts AoE splash. S2: +ATK+wider splash."""
+    """Pinecone E2 max. SNIPER_ARTILLERY: physical hit + Arts AoE splash. S3: ATK+100%, splash 2.5t, AoE."""
     op = _base_stats()
     op.name = "Pinecone"
     op.archetype = RoleArchetype.SNIPER_ARTILLERY
@@ -111,6 +136,19 @@ def make_pinecone(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Grand Barrage",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

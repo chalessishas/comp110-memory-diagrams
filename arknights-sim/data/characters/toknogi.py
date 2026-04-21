@@ -95,8 +95,42 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# S3: Ancient Forest — ATK+80%, DEF+60% to ALL deployed allies
+_S3_TAG = "toknogi_s3_ancient_forest"
+_S3_ATK_RATIO = 0.80
+_S3_ATK_BUFF_TAG = "toknogi_s3_atk"
+_S3_DEF_RATIO = 0.60
+_S3_DEF_BUFF_TAG = "toknogi_s3_def"
+_S3_DURATION = 25.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    for ally in world.allies():
+        if ally is carrier or not ally.alive or not ally.deployed:
+            continue
+        ally.buffs.append(Buff(
+            axis=BuffAxis.DEF, stack=BuffStack.RATIO,
+            value=_S3_DEF_RATIO, source_tag=_S3_DEF_BUFF_TAG,
+        ))
+    world.log(f"Toknogi S3 Ancient Forest — ATK+{_S3_ATK_RATIO:.0%}, DEF+{_S3_DEF_RATIO:.0%} all allies")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_DEF_BUFF_TAG]
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_DEF_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_toknogi(slot: str = "S2") -> UnitState:
-    """Toknogi E2 max. Talent: DEF+20% to nearby allies. S2: ATK+30% self + DEF+35% to allies."""
+    """Toknogi E2 max. Talent: DEF+20% nearby allies. S2: ATK+30%+DEF+35%. S3: ATK+80%+DEF+60% all allies."""
     op = _base_stats()
     op.name = "Toknogi"
     op.archetype = RoleArchetype.SUP_ABJURER
@@ -121,4 +155,17 @@ def make_toknogi(slot: str = "S2") -> UnitState:
             requires_target=False,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Ancient Forest",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

@@ -145,11 +145,44 @@ register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 # ---------------------------------------------------------------------------
+# S3: Abyssal Tide — deploy 2 Jellyfish G1
+# ---------------------------------------------------------------------------
+
+_S3_TAG = "deepcolor_s3_abyssal_tide"
+_DC_S3_JELLY_ATTR = "_dc_s3_jelly_ids"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    pos = carrier.position if carrier.position is not None else (0.0, 0.0)
+    ids = []
+    for _ in range(2):
+        g1 = _make_jellyfish(pos, generation=1)
+        g1._dc_carrier_id = carrier.unit_id
+        world.add_unit(g1)
+        ids.append(g1.unit_id)
+    setattr(carrier, _DC_S3_JELLY_ATTR, ids)
+    world.log(f"Deepcolor S3: 2× Jellyfish-G1 deployed  pos={pos}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    for jid in getattr(carrier, _DC_S3_JELLY_ATTR, []):
+        u = world.unit_by_id(jid)
+        if u is not None and u.alive:
+            u.alive = False
+            u.hp = 0
+            u.deployed = False
+    setattr(carrier, _DC_S3_JELLY_ATTR, [])
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
+# ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
 
 def make_deepcolor(slot: str = "S2") -> UnitState:
-    """Deepcolor E2 max, trust 100. S2 deploys Jellyfish G1 with G2 re-spawn on death."""
+    """Deepcolor E2 max, trust 100. S2 deploys 1 Jellyfish G1. S3 deploys 2 Jellyfish G1."""
     op = _base_stats()
     op.name = "Deepcolor"
     op.archetype = RoleArchetype.SUP_SUMMONER
@@ -173,6 +206,19 @@ def make_deepcolor(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Abyssal Tide",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=10,
+            duration=35.0,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

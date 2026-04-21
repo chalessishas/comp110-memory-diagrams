@@ -77,8 +77,42 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+# S3: Grand Merchant — ATK+80%, DP gen 5/s
+_S3_TAG = "robrta_s3_grand_merchant"
+_S3_ATK_RATIO = 0.80
+_S3_ATK_BUFF_TAG = "robrta_s3_atk"
+_S3_DP_RATE = 5.0
+_S3_DP_FRAC_ATTR = "_robrta_s3_dp_frac"
+_S3_DURATION = 20.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    setattr(carrier, _S3_DP_FRAC_ATTR, 0.0)
+    world.log(f"Robrta S3 Grand Merchant — ATK+{_S3_ATK_RATIO:.0%}, DP gen {_S3_DP_RATE}/s")
+
+
+def _s3_on_tick(world, carrier: UnitState, dt: float) -> None:
+    frac = getattr(carrier, _S3_DP_FRAC_ATTR, 0.0) + _S3_DP_RATE * dt
+    gained = int(frac)
+    if gained > 0:
+        world.global_state.refund_dp(gained)
+    setattr(carrier, _S3_DP_FRAC_ATTR, frac - gained)
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    setattr(carrier, _S3_DP_FRAC_ATTR, 0.0)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_tick=_s3_on_tick, on_end=_s3_on_end)
+
+
 def make_robrta(slot: str = "S2") -> UnitState:
-    """Robrta E2 max. SPEC_MERCHANT: passive DP gen (talent) + boosted DP gen + ATK during S2."""
+    """Robrta E2 max. SPEC_MERCHANT: passive DP gen + boosted DP + ATK during skills. S3: ATK+80%, DP 5/s."""
     op = _base_stats()
     op.name = "Robrta"
     op.archetype = RoleArchetype.SPEC_MERCHANT
@@ -102,6 +136,19 @@ def make_robrta(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Grand Merchant",
+            slot="S3",
+            sp_cost=30,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

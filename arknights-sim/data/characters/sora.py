@@ -54,8 +54,10 @@ def _bard_sp_aura(world, carrier: UnitState, dt: float, sp_rate: float) -> None:
     """Distribute sp_rate SP/s to all in-range allies with uncharged skills."""
     if not carrier.deployed or carrier.position is None:
         return
-    s2_active = carrier.skill is not None and carrier.skill.active_remaining > 0
-    effective_rate = sp_rate * (_S2_SP_MULTIPLIER if s2_active else 1.0)
+    skill_active = carrier.skill is not None and carrier.skill.active_remaining > 0
+    s3_active = skill_active and getattr(carrier, "_sora_s3_active", False)
+    multiplier = _S3_SP_MULTIPLIER if s3_active else (_S2_SP_MULTIPLIER if skill_active else 1.0)
+    effective_rate = sp_rate * multiplier
     now = world.global_state.elapsed
     for ally in world.allies():
         if ally is carrier or not ally.alive or not ally.deployed:
@@ -87,15 +89,18 @@ def _push_inspiration(world, carrier: UnitState) -> None:
     """Push flat ATK Inspiration buff to each in-range ally (replace each tick)."""
     if not carrier.deployed or carrier.position is None:
         return
+    s3_active = getattr(carrier, "_sora_s3_active", False)
+    atk_value = float(_S3_INSPIRATION_ATK if s3_active else _INSPIRATION_ATK)
+    insp_tag = _S3_INSPIRATION_TAG if s3_active else _INSPIRATION_SOURCE_TAG
     for ally in world.allies():
         if ally is carrier or not ally.alive or not ally.deployed:
             continue
         if not _ally_in_range(carrier, ally):
             continue
-        ally.buffs = [b for b in ally.buffs if b.source_tag != _INSPIRATION_SOURCE_TAG]
+        ally.buffs = [b for b in ally.buffs if b.source_tag not in (_INSPIRATION_SOURCE_TAG, _S3_INSPIRATION_TAG)]
         ally.buffs.append(Buff(
             axis=BuffAxis.ATK, stack=BuffStack.INSPIRATION,
-            value=float(_INSPIRATION_ATK), source_tag=_INSPIRATION_SOURCE_TAG,
+            value=atk_value, source_tag=insp_tag,
         ))
 
 
@@ -130,8 +135,30 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# S3: Grand Performance — SP aura ×3 (4/s total), Inspiration ATK doubled
+_S3_TAG = "sora_s3_grand_performance"
+_S3_DURATION = 30.0
+_S3_SP_MULTIPLIER = 3.0   # 3× multiplier applied to total aura → 4.5 SP/s
+_S3_INSPIRATION_ATK = 80  # doubled inspiration during S3
+_S3_INSPIRATION_TAG = "sora_s3_inspiration_atk"
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier._sora_s3_active = True
+    world.log(f"Sora S3 Grand Performance — SP aura ×{_S3_SP_MULTIPLIER}, Inspiration ATK {_S3_INSPIRATION_ATK}")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier._sora_s3_active = False
+    for ally in world.allies():
+        ally.buffs = [b for b in ally.buffs if b.source_tag != _S3_INSPIRATION_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_sora(slot: str = "S2", talent: bool = True) -> UnitState:
-    """Sora E2 max. Bard: +1 SP/s aura to allies. talent=True adds Mellow Flow +0.5 SP/s."""
+    """Sora E2 max. Bard: +1 SP/s aura to allies. S3: ×3 SP aura + doubled Inspiration ATK."""
     op = _base_stats()
     op.name = "Sora"
     op.archetype = RoleArchetype.SUP_BARD
@@ -159,4 +186,17 @@ def make_sora(slot: str = "S2", talent: bool = True) -> UnitState:
             requires_target=False,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Grand Performance",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

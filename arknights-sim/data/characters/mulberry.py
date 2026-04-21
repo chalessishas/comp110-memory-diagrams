@@ -44,11 +44,13 @@ _HEAL_TARGETS = 99
 
 
 def _talent_on_attack_hit(world, healer: UnitState, target: UnitState, dealt: int) -> None:
-    """Reduce elemental bars by 50% on each ally healed."""
+    """Reduce elemental bars by 50% (100% during S3) on each ally healed."""
     if dealt <= 0 or not target.elemental_bars:
         return
+    s3_active = getattr(healer, "_mulberry_s3_active", False)
+    ratio = 1.0 if s3_active else _ELEMENTAL_CLEAR_RATIO
     for key in list(target.elemental_bars.keys()):
-        target.elemental_bars[key] *= (1.0 - _ELEMENTAL_CLEAR_RATIO)
+        target.elemental_bars[key] *= (1.0 - ratio)
         if target.elemental_bars[key] < 1.0:
             del target.elemental_bars[key]
 
@@ -72,8 +74,35 @@ def _s2_on_start(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start)
 
 
+# --- S3: Bloom Storm — 20s duration, ATK+50%, elemental clear 100% on heal ---
+_S3_TAG = "mulberry_s3_bloom_storm"
+_S3_ATK_RATIO = 0.50
+_S3_DURATION = 20.0
+_S3_ATK_BUFF_TAG = "mulberry_s3_atk"
+
+from core.state.unit_state import Buff
+from core.types import BuffAxis, BuffStack
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._mulberry_s3_active = True
+    world.log(f"Mulberry S3 Bloom Storm — ATK+{_S3_ATK_RATIO:.0%}, full elemental cleanse on heal")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._mulberry_s3_active = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_mulberry(slot: str = "S2") -> UnitState:
-    """Mulberry E2 max. MEDIC_WANDERING: heals all allies; talent clears elemental bars."""
+    """Mulberry E2 max. MEDIC_WANDERING: heals all allies; talent clears elemental bars. S3: ATK+50%, full cleanse."""
     op = _base_stats()
     op.name = "Mulberry"
     op.archetype = RoleArchetype.MEDIC_WANDERING
@@ -101,4 +130,17 @@ def make_mulberry(slot: str = "S2") -> UnitState:
             requires_target=False,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Bloom Storm",
+            slot="S3",
+            sp_cost=25,
+            initial_sp=10,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

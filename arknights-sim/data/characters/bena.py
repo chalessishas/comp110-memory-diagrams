@@ -80,8 +80,35 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_tick=_s2_on_tick, on_end=_s2_on_end)
 
 
+_S3_TAG = "bena_s3_blood_frenzy"
+_S3_ATK_RATIO = 1.50
+_S3_ATK_BUFF_TAG = "bena_s3_atk"
+_S3_HP_DRAIN_RATIO = 0.05    # 5% max HP per second
+_S3_DURATION = 20.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+
+
+def _s3_on_tick(world, carrier: UnitState, dt: float) -> None:
+    drain = int(carrier.max_hp * _S3_HP_DRAIN_RATIO * dt)
+    if drain > 0:
+        carrier.hp = max(1, carrier.hp - drain)
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_tick=_s3_on_tick, on_end=_s3_on_end)
+
+
 def make_bena(slot: str = "S2") -> UnitState:
-    """Bena E2 max. Talent: ATK+35% when HP < 50%. S2: ATK+80% + HP drain 3%/s."""
+    """Bena E2 max. Talent: ATK+35% when HP < 50%. S2: ATK+80% + HP drain 3%/s. S3: ATK+150% + drain 5%/s."""
     op = _base_stats()
     op.name = "Bena"
     op.archetype = RoleArchetype.SPEC_GEEK
@@ -106,4 +133,17 @@ def make_bena(slot: str = "S2") -> UnitState:
             requires_target=False,
             behavior_tag=_S2_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Blood Frenzy",
+            slot="S3",
+            sp_cost=50,
+            initial_sp=25,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op

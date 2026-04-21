@@ -135,6 +135,49 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+# S3: Arctic Tempest — ATK+100%, FREEZE all enemies in range at activation
+_S3_TAG = "glacus_s3_arctic_tempest"
+_S3_ATK_RATIO = 1.00
+_S3_ATK_BUFF_TAG = "glacus_s3_atk"
+_S3_FREEZE_DURATION = 4.0
+_S3_FREEZE_TAG = "glacus_s3_freeze"
+_S3_DURATION = 25.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier._glacus_s2_active = True  # reuse flag: direct FREEZE on all hits
+    elapsed = world.global_state.elapsed
+    if carrier.position is None:
+        return
+    cx, cy = carrier.position
+    tiles = set(carrier.range_shape.tiles)
+    for e in world.enemies():
+        if not e.alive or e.position is None:
+            continue
+        ex, ey = e.position
+        if (round(ex) - round(cx), round(ey) - round(cy)) not in tiles:
+            continue
+        e.statuses = [s for s in e.statuses if s.source_tag not in (_COLD_TAG, _FREEZE_TAG, _S3_FREEZE_TAG)]
+        e.statuses.append(StatusEffect(
+            kind=StatusKind.FREEZE,
+            source_tag=_S3_FREEZE_TAG,
+            expires_at=elapsed + _S3_FREEZE_DURATION,
+        ))
+    world.log(f"Glacus S3 Arctic Tempest — ATK+{_S3_ATK_RATIO:.0%}, AoE FREEZE {_S3_FREEZE_DURATION}s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._glacus_s2_active = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_glacus(slot: str = "S2") -> UnitState:
     """Glacius E2 max. SUP_ABJURER: ally RES aura + COLD/FREEZE on hit. S2: ATK+40%, direct FREEZE."""
     op = _base_stats()
@@ -163,6 +206,19 @@ def make_glacus(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Arctic Tempest",
+            slot="S3",
+            sp_cost=35,
+            initial_sp=15,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
         op.skill.sp = float(op.skill.initial_sp)
     return op

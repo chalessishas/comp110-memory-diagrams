@@ -98,7 +98,19 @@ def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
     )
 
 
-register_talent(_TALENT_TAG, on_tick=_talent_on_tick)
+def _talent_on_attack_hit(world, carrier: UnitState, target, damage: int) -> None:
+    if not getattr(carrier, "_spuria_s3_active", False) or damage <= 0:
+        return
+    target.statuses = [s for s in target.statuses if s.source_tag != _S3_STUN_TAG]
+    target.statuses.append(StatusEffect(
+        kind=StatusKind.STUN,
+        source_tag=_S3_STUN_TAG,
+        expires_at=world.global_state.elapsed + _S3_STUN_DURATION,
+    ))
+    world.log(f"Spuria S3 → {target.name} STUN {_S3_STUN_DURATION}s")
+
+
+register_talent(_TALENT_TAG, on_tick=_talent_on_tick, on_attack_hit=_talent_on_attack_hit)
 
 
 def _s1_on_start(world, carrier: UnitState) -> None:
@@ -115,6 +127,35 @@ def _s1_on_end(world, carrier: UnitState) -> None:
 register_skill(_S1_TAG, on_start=_s1_on_start, on_end=_s1_on_end)
 
 
+# --- S3: Phantom Waltz — ATK+200%, restore undying charge, STUN on hit ---
+_S3_TAG = "spuria_s3_phantom_waltz"
+_S3_ATK_RATIO = 2.00
+_S3_ATK_BUFF_TAG = "spuria_s3_atk"
+_S3_STUN_DURATION = 1.0
+_S3_STUN_TAG = "spuria_s3_stun"
+_S3_DURATION = 15.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    if carrier.undying_charges == 0:
+        carrier.undying_charges = 1
+        world.log(f"Spuria S3 — substitute charge restored")
+    carrier._spuria_s3_active = True
+    world.log(f"Spuria S3 Phantom Waltz — ATK+{_S3_ATK_RATIO:.0%}, STUN {_S3_STUN_DURATION}s on hit")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier._spuria_s3_active = False
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_spuria(slot: str = "S1") -> UnitState:
     """Spuria E2 max. Talent: substitute body on fatal (30% HP restore + self-DOT). S1: ATK+80%/8s."""
     op = _base_stats()
@@ -127,10 +168,7 @@ def make_spuria(slot: str = "S1") -> UnitState:
     op.cost = 12
     op.undying_charges = 1   # one substitute body activation per deployment
 
-    op.talents = [TalentComponent(
-        name="Contract of the Substitute",
-        behavior_tag=_TALENT_TAG,
-    )]
+    op.talents = [TalentComponent(name="Contract of the Substitute", behavior_tag=_TALENT_TAG)]
 
     if slot == "S2":
         op.skill = SkillComponent(
@@ -157,4 +195,17 @@ def make_spuria(slot: str = "S1") -> UnitState:
             requires_target=False,
             behavior_tag=_S1_TAG,
         )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Phantom Waltz",
+            slot="S3",
+            sp_cost=40,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
+        )
+        op.skill.sp = float(op.skill.initial_sp)
     return op
