@@ -34,6 +34,12 @@ _S2_ATK_RATIO = 0.70
 _S2_BUFF_TAG = "flint_s2_atk"
 _S2_DURATION = 11.0
 
+# --- S3: White-Hot Forge ---
+_S3_TAG = "flint_s3_whitehot_forge"
+_S3_ATK_RATIO = 2.00   # ATK +200%
+_S3_BUFF_TAG = "flint_s3_atk"
+_S3_DURATION = 12.0
+
 
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
     if not carrier.deployed or carrier.position is None:
@@ -69,6 +75,23 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    setattr(carrier, "_attack_all_in_range", True)
+    world.log(f"Flint S3 White-Hot Forge — ATK+{_S3_ATK_RATIO:.0%}, AoE ({_S3_DURATION}s)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    setattr(carrier, "_attack_all_in_range", False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_flint(slot: str = "S2") -> UnitState:
     """Flint E2 max. Trait: ATK×2 when not blocking. S2: ATK+70%/11s."""
     op = _base_stats()
@@ -94,5 +117,17 @@ def make_flint(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=False,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="White-Hot Forge",
+            slot="S3",
+            sp_cost=45,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op

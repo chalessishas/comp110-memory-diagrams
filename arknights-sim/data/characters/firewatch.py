@@ -44,6 +44,12 @@ _S2_DURATION = 15.0
 _S2_STUN_DURATION = 1.0
 _S2_STUN_TAG = "firewatch_s2_stun"
 
+# --- S3: Starburst Arrow ---
+_S3_TAG = "firewatch_s3_starburst"
+_S3_ATK_RATIO = 1.30   # ATK +130%
+_S3_BUFF_TAG = "firewatch_s3_atk"
+_S3_DURATION = 20.0
+
 
 def _talent_on_tick(world, carrier: UnitState, dt: float) -> None:
     target = getattr(carrier, "__target__", None)
@@ -95,6 +101,23 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    setattr(carrier, "_attack_all_in_range", True)
+    world.log(f"Firewatch S3 Starburst Arrow — ATK+{_S3_ATK_RATIO:.0%}, AoE ({_S3_DURATION}s)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+    setattr(carrier, "_attack_all_in_range", False)
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_firewatch(slot: str = "S2") -> UnitState:
     """Firewatch E2 max. Anti-Air: prioritizes aerial targets. Talent: ATK+30% vs aerial."""
     op = _base_stats()
@@ -120,5 +143,17 @@ def make_firewatch(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Starburst Arrow",
+            slot="S3",
+            sp_cost=55,
+            initial_sp=20,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=False,
+            behavior_tag=_S3_TAG,
         )
     return op

@@ -47,6 +47,13 @@ _S2_ATK_BUFF_TAG = "meteo_s2_atk"
 _S2_SPLASH_RADIUS = 1.8
 _S2_DURATION = 15.0
 
+# --- S3: Meteorite Barrage ---
+_S3_TAG = "meteo_s3_barrage"
+_S3_ATK_RATIO = 1.00   # ATK +100%
+_S3_ATK_BUFF_TAG = "meteo_s3_atk"
+_S3_SPLASH_RADIUS = 2.5
+_S3_DURATION = 20.0
+
 
 def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
     elapsed = world.global_state.elapsed
@@ -89,6 +96,23 @@ def _s2_on_end(world, carrier: UnitState) -> None:
 register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier.splash_radius = _S3_SPLASH_RADIUS
+    world.log(f"Meteorite S3 Barrage — ATK+{_S3_ATK_RATIO:.0%}, splash={_S3_SPLASH_RADIUS} ({_S3_DURATION}s)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_ATK_BUFF_TAG]
+    carrier.splash_radius = _BASE_SPLASH_RADIUS
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
+
 def make_meteo(slot: str = "S2") -> UnitState:
     """Meteorite E2 max. Trait: physical splash. Talent: DEF_DOWN on hit. S2: ATK+50% + wider splash."""
     op = _base_stats()
@@ -116,5 +140,17 @@ def make_meteo(slot: str = "S2") -> UnitState:
             trigger=SkillTrigger.AUTO,
             requires_target=True,
             behavior_tag=_S2_TAG,
+        )
+    elif slot == "S3":
+        op.skill = SkillComponent(
+            name="Meteorite Barrage",
+            slot="S3",
+            sp_cost=55,
+            initial_sp=25,
+            duration=_S3_DURATION,
+            sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL,
+            requires_target=True,
+            behavior_tag=_S3_TAG,
         )
     return op
