@@ -143,6 +143,7 @@ class RoleArchetype(str, Enum):
     SNIPER_SIEGE = "sniper_siege"                # 重狙
     SNIPER_ANTI_AIR = "sniper_anti_air"          # 反器械
     SNIPER_DEADEYE = "sniper_deadeye"            # 神射手
+    SNIPER_AMBUSHER = "sniper_ambusher"          # 近距狙击手（April）
     # Caster 术师分支
     CASTER_CORE = "caster_core"                  # 中距离（SilverAsh... wait he's guard）
     CASTER_SPLASH = "caster_splash"              # 溅射（Eyjafjalla）
