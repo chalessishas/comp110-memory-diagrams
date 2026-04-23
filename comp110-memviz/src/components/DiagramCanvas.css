@@ -1,0 +1,171 @@
+.diagram {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 0.9fr;
+  gap: 12px;
+  padding: 16px;
+  background: #f7fafc;
+  border-radius: 8px;
+  min-height: 440px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+}
+
+.diagram.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #4a5568;
+  font-family: 'Cabin', sans-serif;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.col-title {
+  background: #1e7084;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-family: 'Cabin', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+/* Stack ------------------------------------------------------------ */
+
+.frames {
+  display: flex;
+  flex-direction: column-reverse; /* Globals stays at visual bottom */
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.frame {
+  border: 1.5px solid #2d3748;
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 6px 8px;
+  box-shadow: 1px 1px 0 #2d3748;
+}
+
+.frame.globals {
+  background: #edf2f7;
+  border-color: #1a202c;
+}
+
+.frame.active {
+  background: #fffbea;
+  border-color: #d69e2e;
+  box-shadow: 2px 2px 0 #d69e2e;
+}
+
+.frame-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: baseline;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #a0aec0;
+  margin-bottom: 4px;
+}
+
+.frame-name {
+  font-weight: 700;
+  color: #1a202c;
+}
+
+.ra, .rv {
+  color: #4a5568;
+  font-size: 11px;
+}
+
+.rv {
+  color: #2c7a7b;
+  font-weight: 600;
+}
+
+.bindings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.binding {
+  display: grid;
+  grid-template-columns: minmax(40px, auto) 14px 1fr;
+  gap: 4px;
+  align-items: baseline;
+}
+
+.binding .name { color: #2b6cb0; }
+.binding .eq { color: #a0aec0; }
+.binding .value { color: #1a202c; }
+
+.empty-binding {
+  display: block;
+  color: #a0aec0;
+  font-style: italic;
+}
+
+/* Heap ------------------------------------------------------------- */
+
+.heap-objects {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.heap-obj {
+  border: 1.5px solid #2d3748;
+  border-radius: 4px;
+  background: #f0fff4;
+  padding: 6px 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  box-shadow: 1px 1px 0 #2d3748;
+}
+
+.heap-id {
+  font-weight: 700;
+  color: #22543d;
+}
+
+.heap-label { color: #2d3748; }
+.heap-name { color: #4a5568; font-style: italic; }
+
+.empty {
+  color: #a0aec0;
+  font-style: italic;
+  padding: 10px;
+  font-family: 'Cabin', sans-serif;
+}
+
+/* Output ----------------------------------------------------------- */
+
+.output-lines {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.output-line {
+  padding: 4px 8px;
+  background: #000000;
+  color: #ffe799;
+  border-radius: 3px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}

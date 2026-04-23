@@ -1,0 +1,45 @@
+.step-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 14px;
+}
+
+.step-control button {
+  padding: 6px 12px;
+  border: 1px solid #1e7084;
+  background: #ffffff;
+  color: #1e7084;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 120ms;
+}
+
+.step-control button:hover:not(:disabled) {
+  background: #1e7084;
+  color: #ffffff;
+}
+
+.step-control button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.step-control button.playing {
+  background: #1e7084;
+  color: #ffffff;
+}
+
+.step-counter {
+  flex: 1;
+  text-align: center;
+  color: #2d3748;
+  font-weight: 600;
+}
