@@ -13,6 +13,7 @@
 // - Name resolution: current frame → globals → NameError.
 
 import type {
+  Binding,
   CallExpr,
   Expr,
   FunctionDef,
@@ -54,14 +55,36 @@ function cloneValue(v: Value): Value {
 }
 
 function cloneFrame(f: Frame): Frame {
-  const bindings: Record<string, Value> = {}
-  for (const [k, v] of Object.entries(f.bindings)) bindings[k] = cloneValue(v)
   return {
     name: f.name,
     returnAddress: f.returnAddress,
     returnValue: f.returnValue ? cloneValue(f.returnValue) : null,
-    bindings,
+    bindings: f.bindings.map((b) => ({
+      name: b.name,
+      value: cloneValue(b.value),
+      retired: b.retired,
+    })),
+    retired: f.retired,
   }
+}
+
+// Retire the prior active binding of `name` (if any) and push a new active one.
+// Mirrors the PDF rule: rebinding strikes through the old value and writes a
+// new line beneath it.
+function setBinding(frame: Frame, name: string, value: Value) {
+  for (const b of frame.bindings) {
+    if (!b.retired && b.name === name) b.retired = true
+  }
+  frame.bindings.push({ name, value, retired: false })
+}
+
+// Return the most-recent non-retired binding for `name`, or undefined.
+function lookupBinding(frame: Frame, name: string): Value | undefined {
+  for (let i = frame.bindings.length - 1; i >= 0; i--) {
+    const b = frame.bindings[i]
+    if (!b.retired && b.name === name) return b.value
+  }
+  return undefined
 }
 
 function snap(state: State, currentLine: number, narration: string, error: string | null = null): Snapshot {
@@ -82,8 +105,13 @@ function push(state: State, snapshot: Snapshot) {
 
 const BUILTINS = new Set(['print', 'len', 'int', 'str', 'float'])
 
+// The active frame is the topmost non-retired frame. Retired frames stay in
+// the stack for visualization but aren't the "current" execution context.
 function currentFrame(state: State): Frame {
-  return state.stack[state.stack.length - 1]
+  for (let i = state.stack.length - 1; i >= 0; i--) {
+    if (!state.stack[i].retired) return state.stack[i]
+  }
+  throw new Error('invariant: no active frame')
 }
 
 function globalsFrame(state: State): Frame {
@@ -97,9 +125,12 @@ function resolveName(state: State, name: string, line: number): Value {
   if (name === 'False') return { kind: 'int', v: 0 }
 
   const cur = currentFrame(state)
-  if (name in cur.bindings) return cur.bindings[name]
-  const globals = globalsFrame(state)
-  if (name in globals.bindings) return globals.bindings[name]
+  const local = lookupBinding(cur, name)
+  if (local !== undefined) return local
+  if (cur !== globalsFrame(state)) {
+    const g = lookupBinding(globalsFrame(state), name)
+    if (g !== undefined) return g
+  }
   if (BUILTINS.has(name)) {
     // Represent built-ins as a special marker so the call logic can detect them.
     return { kind: 'str', v: `__builtin_${name}` } as Value
@@ -243,7 +274,7 @@ function evalCall(state: State, expr: CallExpr): Value {
       expr.line,
     )
   }
-  const bindings: Record<string, Value> = {}
+  const paramValues: Record<string, Value> = {}
   const used = new Set<string>()
   for (let i = 0; i < argValues.length; i++) {
     const { name, value } = argValues[i]
@@ -262,7 +293,7 @@ function evalCall(state: State, expr: CallExpr): Value {
         )
       }
       used.add(name)
-      bindings[name] = value
+      paramValues[name] = value
     } else {
       const p = fn.params[i]
       if (!p || used.has(p.name)) {
@@ -272,11 +303,11 @@ function evalCall(state: State, expr: CallExpr): Value {
         )
       }
       used.add(p.name)
-      bindings[p.name] = value
+      paramValues[p.name] = value
     }
   }
   for (const p of fn.params) {
-    if (!(p.name in bindings)) {
+    if (!(p.name in paramValues)) {
       throw new RuntimeErrorSignal(
         `Function Call Error on Line ${expr.line}: missing argument '${p.name}' for ${expr.callee}`,
         expr.line,
@@ -284,15 +315,24 @@ function evalCall(state: State, expr: CallExpr): Value {
     }
   }
 
+  // Build bindings in declaration order so the diagram shows params top-to-bottom
+  // matching the def.
+  const bindings: Binding[] = fn.params.map((p) => ({
+    name: p.name,
+    value: paramValues[p.name],
+    retired: false,
+  }))
+
   // Push the new frame and snapshot the entry.
   const newFrame: Frame = {
     name: expr.callee,
     returnAddress: expr.line,
     returnValue: null,
     bindings,
+    retired: false,
   }
   state.stack.push(newFrame)
-  const argsList = fn.params.map((p) => `${p.name}=${valueToDisplay(bindings[p.name], state)}`).join(', ')
+  const argsList = fn.params.map((p) => `${p.name}=${valueToDisplay(paramValues[p.name], state)}`).join(', ')
   push(state, snap(state, fn.lineStart, `Call ${expr.callee}(${argsList}). New frame pushed; jumping to line ${fn.lineStart}.`))
 
   // Execute the body.
@@ -304,17 +344,19 @@ function evalCall(state: State, expr: CallExpr): Value {
     else throw e
   }
 
-  // Record the RV on the frame and snapshot before popping.
+  // Record the RV on the frame, mark the frame retired (strike-through), then
+  // snapshot. The frame stays in the stack for visualization — the next
+  // activeFrame lookup will skip it.
   newFrame.returnValue = rv
+  newFrame.retired = true
   push(
     state,
     snap(
       state,
       newFrame.returnAddress ?? fn.lineEnd,
-      `Return from ${expr.callee} with RV = ${valueToDisplay(rv, state)}. Jumping back to line ${newFrame.returnAddress}.`,
+      `Return from ${expr.callee} with RV = ${valueToDisplay(rv, state)}. Frame retired (struck through). Jumping back to line ${newFrame.returnAddress}.`,
     ),
   )
-  state.stack.pop()
   return rv
 }
 
@@ -405,7 +447,7 @@ function addFuncDef(state: State, fn: FunctionDef) {
     lineEnd: fn.lineEnd,
   })
   const frame = currentFrame(state)
-  frame.bindings[fn.name] = { kind: 'ref', id }
+  setBinding(frame, fn.name, { kind: 'ref', id })
   push(
     state,
     snap(
@@ -423,7 +465,8 @@ export function evaluate(program: Program): Snapshot[] {
         name: 'Globals',
         returnAddress: null,
         returnValue: null,
-        bindings: {},
+        bindings: [],
+        retired: false,
       },
     ],
     heap: [],

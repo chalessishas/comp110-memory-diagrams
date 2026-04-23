@@ -14,14 +14,31 @@ export function DiagramCanvas({ snapshot }: Props) {
     )
   }
 
+  // The active frame is the last non-retired, non-Globals frame. It's the one
+  // currently executing — highlight it yellow.
+  let activeIdx = -1
+  for (let i = snapshot.stack.length - 1; i >= 0; i--) {
+    const f = snapshot.stack[i]
+    if (!f.retired && f.name !== 'Globals') {
+      activeIdx = i
+      break
+    }
+  }
+
   return (
     <div className="diagram">
       <section className="col stack">
         <header className="col-title">Function Call Stack</header>
         <div className="frames">
-          {/* Active frame at the top. Globals is always at the bottom. */}
-          {[...snapshot.stack].reverse().map((frame, idx) => (
-            <FrameView key={idx} frame={frame} heap={snapshot.heap} isActive={idx === 0 && snapshot.stack.length > 1} />
+          {/* Stack grows upward visually — newest non-globals on top, Globals
+              pinned at the bottom via CSS column-reverse. */}
+          {snapshot.stack.map((frame, idx) => (
+            <FrameView
+              key={idx}
+              frame={frame}
+              heap={snapshot.heap}
+              isActive={idx === activeIdx}
+            />
           ))}
         </div>
       </section>
@@ -50,8 +67,16 @@ export function DiagramCanvas({ snapshot }: Props) {
 }
 
 function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]; isActive: boolean }) {
+  const cls = [
+    'frame',
+    isActive ? 'active' : '',
+    frame.name === 'Globals' ? 'globals' : '',
+    frame.retired ? 'retired' : '',
+  ]
+    .filter(Boolean)
+    .join(' ')
   return (
-    <div className={`frame${isActive ? ' active' : ''}${frame.name === 'Globals' ? ' globals' : ''}`}>
+    <div className={cls}>
       <div className="frame-header">
         <span className="frame-name">{frame.name}</span>
         {frame.returnAddress !== null && <span className="ra">RA: {frame.returnAddress}</span>}
@@ -60,14 +85,14 @@ function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]
         )}
       </div>
       <div className="bindings">
-        {Object.entries(frame.bindings).length === 0 && (
+        {frame.bindings.length === 0 && (
           <div className="binding empty-binding">(empty)</div>
         )}
-        {Object.entries(frame.bindings).map(([name, value]) => (
-          <div key={name} className="binding">
-            <span className="name">{name}</span>
+        {frame.bindings.map((b, i) => (
+          <div key={i} className={`binding${b.retired ? ' retired' : ''}`}>
+            <span className="name">{b.name}</span>
             <span className="eq">=</span>
-            <span className="value">{formatValue(value, heap)}</span>
+            <span className="value">{formatValue(b.value, heap)}</span>
           </div>
         ))}
       </div>

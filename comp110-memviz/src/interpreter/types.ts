@@ -16,11 +16,21 @@ export type HeapObject = {
   lineEnd: number
 }
 
+// Per the v0 ruleset, variable assignments and function returns don't erase
+// the old value — the prior value/frame is struck-through and stays visible.
+// We model that with `retired: boolean` on both bindings and frames.
+export type Binding = {
+  name: string
+  value: Value
+  retired: boolean
+}
+
 export type Frame = {
   name: string // "Globals" or function name
   returnAddress: number | null // line number where the call was made (null for Globals)
   returnValue: Value | null
-  bindings: Record<string, Value>
+  bindings: Binding[]
+  retired: boolean // true once the function has returned; frame stays visible
 }
 
 // A single step the student can observe. The evaluator produces a list of

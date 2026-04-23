@@ -67,6 +67,32 @@
   box-shadow: 2px 2px 0 #d69e2e;
 }
 
+/* Retired frame = function already returned. Per v0 rules the frame
+   stays visible with a strike-through so students can trace history. */
+.frame.retired {
+  background: #f7fafc;
+  border-color: #cbd5e0;
+  border-style: dashed;
+  box-shadow: 1px 1px 0 #cbd5e0;
+  opacity: 0.75;
+}
+
+.frame.retired .frame-name,
+.frame.retired .rv {
+  text-decoration: line-through;
+  text-decoration-color: #718096;
+  color: #718096;
+}
+
+/* A retired frame also strikes through its parameter bindings — per v0 rules
+   the whole frame is crossed out on the diagram once the function returns. */
+.frame.retired .binding .name,
+.frame.retired .binding .value {
+  text-decoration: line-through;
+  text-decoration-color: #a0aec0;
+  color: #718096;
+}
+
 .frame-header {
   display: flex;
   flex-wrap: wrap;
@@ -108,6 +134,18 @@
 .binding .name { color: #2b6cb0; }
 .binding .eq { color: #a0aec0; }
 .binding .value { color: #1a202c; }
+
+/* Retired binding = value was reassigned. Old line stays visible,
+   struck-through, so the student can see the history of the variable. */
+.binding.retired .name,
+.binding.retired .value {
+  text-decoration: line-through;
+  text-decoration-color: #a0aec0;
+  color: #a0aec0;
+}
+.binding.retired .eq {
+  color: #cbd5e0;
+}
 
 .empty-binding {
   display: block;

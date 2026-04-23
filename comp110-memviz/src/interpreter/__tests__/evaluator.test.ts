@@ -34,16 +34,22 @@ describe('evaluator — calzones QZ00 example', () => {
     expect(last.heap.map((h) => h.id)).toEqual([0, 1, 2])
   })
 
-  it('ends with only the Globals frame on the stack', () => {
-    expect(last.stack).toHaveLength(1)
+  it('ends with Globals + 3 retired frames (v0 keeps frames on strike-through)', () => {
+    // v0 rule: returned frames stay visible, crossed out. Only Globals is active.
+    expect(last.stack).toHaveLength(4)
     expect(last.stack[0].name).toBe('Globals')
+    expect(last.stack[0].retired).toBe(false)
+    const retiredNames = last.stack.slice(1).map((f) => f.name).sort()
+    expect(retiredNames).toEqual(['calzones_price', 'strombolis_price', 'total_price'])
+    expect(last.stack.slice(1).every((f) => f.retired)).toBe(true)
   })
 
   it('globals frame binds each function name to its heap ref', () => {
     const g = last.stack[0].bindings
-    expect(g.total_price).toEqual({ kind: 'ref', id: 0 })
-    expect(g.calzones_price).toEqual({ kind: 'ref', id: 1 })
-    expect(g.strombolis_price).toEqual({ kind: 'ref', id: 2 })
+    const find = (n: string) => g.find((b) => b.name === n && !b.retired)?.value
+    expect(find('total_price')).toEqual({ kind: 'ref', id: 0 })
+    expect(find('calzones_price')).toEqual({ kind: 'ref', id: 1 })
+    expect(find('strombolis_price')).toEqual({ kind: 'ref', id: 2 })
   })
 
   it('produces enough intermediate snapshots to step through', () => {
