@@ -17,7 +17,7 @@ def test_swire_s2_config():
     op = make_swire(slot="S2")
     sk = op.skill
     assert sk is not None and sk.slot == "S2"
-    assert sk.sp_cost == 35 and sk.initial_sp == 18
+    assert sk.sp_cost == 50 and sk.initial_sp == 20
     assert sk.duration == _S2_DURATION and sk.behavior_tag == _S2_TAG
-    assert sk.sp == 18.0
+    assert sk.sp == 20.0
 
