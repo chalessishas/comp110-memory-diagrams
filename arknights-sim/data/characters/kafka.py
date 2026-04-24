@@ -1,18 +1,15 @@
-"""Kafka (卡夫卡) — 5* Specialist (Executor archetype).
+"""Kafka (卡夫卡) — 5★ Specialist (Executor).
 
-Talent "Anticipation": each normal attack applies a DOT (electric discharge,
-  100 DPS for 2s) to the target. Refresh semantics on each hit. This is the
-  first StatusKind.DOT usage — the status_decay_system processes DOT effects
-  each tick via take_damage(int(dps * dt)), bypassing DEF/RES.
+Real game skills:
+  S1 "Cube of Absurdism": ON_DEPLOY stub (no behavior modeled).
+  S2 real slot is "Shears of Surrealism" (ON_DEPLOY, also a stub).
 
-S2 "Electrocute": ATK +50%, 15s duration.
-  sp_cost=20, initial_sp=10, AUTO_TIME, AUTO trigger, requires_target=True.
+S2_SIM ("Electrocute") and S3_SIM ("Iron Judgment") are FICTIONAL SIMULATION
+SCENARIOS that exercise real engine subsystems (ATK buff, AoE arts damage,
+stun, DOT). They are not based on actual Kafka skill data but retained for
+engine-level test coverage.
 
-S3 "Iron Judgment": Instant MANUAL burst. Deals 500% ATK arts damage to all
-  enemies in range, then stuns each hit enemy for 2.5s.
-  sp_cost=30, initial_sp=10, AUTO_TIME.
-
-Base stats from ArknightsGameData (E2 max, trust 100).
+Talent "Anticipation": DOT-on-hit approximation (unverified vs game data).
 """
 from __future__ import annotations
 from math import floor
@@ -21,7 +18,7 @@ from core.state.unit_state import (
     TalentComponent, StatusEffect,
 )
 from core.types import (
-    AttackType, BuffAxis, BuffStack, Faction, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode, StatusKind,
 )
 from core.systems.skill_system import register_skill
@@ -31,29 +28,31 @@ from data.characters.generated.kafka import make_kafka as _base_stats
 
 EXECUTOR_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
 
-# --- Talent: Anticipation (DOT on hit) ---
+# --- Talent: Anticipation (DOT on hit, approximation) ---
 _TALENT_TAG = "kafka_anticipation"
-_DOT_DPS = 100.0       # true damage per second while DOT is active
+_DOT_DPS = 100.0
 _DOT_DURATION = 2.0
 _DOT_TAG = "kafka_dot"
 
-# --- S2: Electrocute ---
+# --- Real S1 stub ---
+_S1_TAG = "kafka_s1_cube"
+_S1_DURATION = 0.0
+
+# --- Fictional S2 simulation (exercises ATK buff system) ---
 _S2_TAG = "kafka_s2_electrocute"
 _S2_ATK_RATIO = 0.50
 _S2_BUFF_TAG = "kafka_s2_atk"
 _S2_DURATION = 15.0
 
-# --- S3: Iron Judgment ---
+# --- Fictional S3 simulation (exercises AoE damage + stun systems) ---
 _S3_TAG = "kafka_s3_iron_judgment"
-_S3_ATK_MULTIPLIER = 5.00    # 500% ATK arts burst
-_S3_STUN_DURATION = 2.5      # seconds
+_S3_ATK_MULTIPLIER = 5.00
+_S3_STUN_DURATION = 2.5
 
 
 def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> None:
     elapsed = world.global_state.elapsed
     expires = elapsed + _DOT_DURATION
-
-    # Refresh semantics: remove existing DOT from this source, append fresh
     target.statuses = [s for s in target.statuses if s.source_tag != _DOT_TAG]
     target.statuses.append(StatusEffect(
         kind=StatusKind.DOT,
@@ -61,10 +60,7 @@ def _talent_on_attack_hit(world, attacker: UnitState, target, damage: int) -> No
         expires_at=expires,
         params={"dps": _DOT_DPS},
     ))
-    world.log(
-        f"Kafka Anticipation → {target.name}  "
-        f"DOT {_DOT_DPS:.0f} DPS ({_DOT_DURATION}s)"
-    )
+    world.log(f"Kafka Anticipation → {target.name}  DOT {_DOT_DPS:.0f} DPS ({_DOT_DURATION}s)")
 
 
 register_talent(_TALENT_TAG, on_attack_hit=_talent_on_attack_hit)
@@ -106,14 +102,13 @@ def _s3_on_start(world, carrier: UnitState) -> None:
             source_tag=stun_tag,
             expires_at=now + _S3_STUN_DURATION,
         ))
-        world.log(f"Kafka S3 Iron Judgment → {enemy.name}  dmg={dealt}  stun {_S3_STUN_DURATION}s")
+        world.log(f"Kafka S3 SIM → {enemy.name}  dmg={dealt}  stun {_S3_STUN_DURATION}s")
 
 
 register_skill(_S3_TAG, on_start=_s3_on_start)
 
 
-def make_kafka(slot: str = "S2") -> UnitState:
-    """Kafka E2 max. Talent: DOT 100 DPS / 2s on every hit. S2: ATK +50%. S3: 500% AoE Arts + Stun."""
+def make_kafka(slot: str | None = "S2") -> UnitState:
     op = _base_stats()
     op.name = "Kafka"
     op.archetype = RoleArchetype.SPEC_EXECUTOR
@@ -124,29 +119,22 @@ def make_kafka(slot: str = "S2") -> UnitState:
 
     op.talents = [TalentComponent(name="Anticipation", behavior_tag=_TALENT_TAG)]
 
-    if slot == "S2":
+    if slot == "S1":
+        op.skill = SkillComponent(name="Cube of Absurdism", slot="S1", sp_cost=0, initial_sp=0,
+            duration=_S1_DURATION, sp_gain_mode=SPGainMode.ON_DEPLOY,
+            trigger=SkillTrigger.AUTO, requires_target=False, behavior_tag=_S1_TAG)
+    elif slot == "S2":
         op.skill = SkillComponent(
-            name="Electrocute",
-            slot="S2",
-            sp_cost=20,
-            initial_sp=10,
-            duration=_S2_DURATION,
-            sp_gain_mode=SPGainMode.AUTO_TIME,
-            trigger=SkillTrigger.AUTO,
-            requires_target=True,
-            behavior_tag=_S2_TAG,
+            name="Electrocute", slot="S2", sp_cost=20, initial_sp=10,
+            duration=_S2_DURATION, sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.AUTO, requires_target=True, behavior_tag=_S2_TAG,
         )
     elif slot == "S3":
         op.skill = SkillComponent(
-            name="Iron Judgment",
-            slot="S3",
-            sp_cost=30,
-            initial_sp=10,
-            duration=0.0,   # instant — fires once
-            sp_gain_mode=SPGainMode.AUTO_TIME,
-            trigger=SkillTrigger.MANUAL,
-            requires_target=True,
-            behavior_tag=_S3_TAG,
+            name="Iron Judgment", slot="S3", sp_cost=30, initial_sp=10,
+            duration=0.0, sp_gain_mode=SPGainMode.AUTO_TIME,
+            trigger=SkillTrigger.MANUAL, requires_target=True, behavior_tag=_S3_TAG,
         )
+    if op.skill:
         op.skill.sp = float(op.skill.initial_sp)
     return op
