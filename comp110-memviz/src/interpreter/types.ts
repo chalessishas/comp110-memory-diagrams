@@ -82,6 +82,33 @@ export type Frame = {
   retired: boolean // true once the function has returned; frame stays visible
 }
 
+// Classification for a snapshot. Used by the Timeline strip to color each
+// step dot, and available to any UI that wants to filter/group steps by
+// what kind of thing just happened. Values are inferred from the narration
+// string inside the evaluator's snap() helper so individual call-sites
+// don't have to pass it — see inferEvent() in evaluator.ts.
+//
+//   declare  — a name comes into existence (def, class, list/dict literal,
+//              instantiation)
+//   assign   — a binding is written or rewritten (variable, attr, index,
+//              slice, list.append, list.pop)
+//   call     — a user-defined function frame is pushed
+//   return   — a user-defined function frame returns
+//   print    — a line was appended to Output
+//   control  — flow-only step (if/elif/else entry, while/for iteration,
+//              loop termination). No memory change, but students still
+//              benefit from seeing the beat.
+//   meta     — program start/end, errors. Rare; not part of the normal
+//              student-facing vocabulary.
+export type SnapshotEvent =
+  | 'declare'
+  | 'assign'
+  | 'call'
+  | 'return'
+  | 'print'
+  | 'control'
+  | 'meta'
+
 // A single step the student can observe. The evaluator produces a list of
 // Snapshots that the UI renders as the user clicks next/prev.
 export type Snapshot = {
@@ -90,6 +117,9 @@ export type Snapshot = {
   currentLine: number
   // Short English description of what just happened. Shown under the diagram.
   narration: string
+  // Classification of what just happened — see SnapshotEvent. Used by the
+  // Timeline strip; older consumers can ignore it.
+  event: SnapshotEvent
   // Frame at index 0 is Globals; last element is the active frame.
   stack: Frame[]
   heap: HeapObject[]

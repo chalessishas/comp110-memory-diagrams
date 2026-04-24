@@ -25,6 +25,7 @@ import type {
   HeapObject,
   Program,
   Snapshot,
+  SnapshotEvent,
   Stmt,
   Value,
 } from './types'
@@ -276,11 +277,50 @@ function dictKeys(d: HeapDict): Value[] {
   return ordered.map(([k]) => parse(k))
 }
 
+// Classify a narration string into a SnapshotEvent. The rules match the
+// vocabulary actually used by the evaluator in this file — keep in sync if
+// you edit narration strings. Errors always win, so a failed snap is always
+// 'meta' regardless of what the in-progress narration said.
+function inferEvent(narration: string, error: string | null): SnapshotEvent {
+  if (error) return 'meta'
+  const n = narration
+  if (n.startsWith('Program start') || n.startsWith('Program complete') ||
+      n.startsWith('Execution halted') || n.startsWith('Return at module scope')) {
+    return 'meta'
+  }
+  if (n.startsWith('Printed')) return 'print'
+  if (n.startsWith('Call ')) return 'call'
+  if (n.startsWith('Return from')) return 'return'
+  if (
+    n.startsWith('Defined function') ||
+    n.startsWith('Defined class') ||
+    n.startsWith('Created list') ||
+    n.startsWith('Created dict') ||
+    n.startsWith('Instantiated')
+  ) {
+    return 'declare'
+  }
+  if (
+    n.startsWith('Condition ') ||
+    n.startsWith('All conditions') ||
+    n.startsWith('while condition') ||
+    n.startsWith('for loop') // covers "for loop iteration N" + "for loop finished"
+  ) {
+    return 'control'
+  }
+  // Everything left is a binding write: variable assignment, attr set,
+  // list/dict index-assign, slice-assign, list.append, list.pop.
+  // These narrations start with "Declared", "Reassigned", "Set", "Appended",
+  // "Slice-assigned", or "list ID:…pop(…)". Treat any leftover as 'assign'.
+  return 'assign'
+}
+
 function snap(state: State, currentLine: number, narration: string, error: string | null = null): Snapshot {
   return {
     step: state.snapshots.length,
     currentLine,
     narration,
+    event: inferEvent(narration, error),
     stack: state.stack.map(cloneFrame),
     heap: state.heap.map(cloneHeapObject),
     output: [...state.output],

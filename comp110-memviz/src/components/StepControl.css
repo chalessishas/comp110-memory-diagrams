@@ -8,6 +8,10 @@
   border-radius: 6px;
   font-family: 'Cabin', sans-serif;
   font-size: 14px;
+  /* Keep the whole row on a single line — in V1 the Auto button used to
+     wrap onto a second row at narrow widths, breaking the paper-shadow
+     visual language. Buttons remain compact via with-kbd flex. */
+  flex-wrap: nowrap;
 }
 
 .step-control button {
@@ -20,11 +24,42 @@
   font-size: 13px;
   cursor: pointer;
   transition: background 120ms;
+  flex-shrink: 0;
+}
+
+/* Buttons that pair a label with a keyboard-hint chip. The chip uses a
+   subtle inset-shadow to read as a physical key without adding a second
+   "paper shadow" that would fight the button's own border. */
+.step-control button.with-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-control button kbd {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: #edf2f7;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+  box-shadow: inset 0 -1px 0 #cbd5e0;
+  min-width: 14px;
+  text-align: center;
 }
 
 .step-control button:hover:not(:disabled) {
   background: #1e7084;
   color: #ffffff;
+}
+
+.step-control button:hover:not(:disabled) kbd {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .step-control button:disabled {
@@ -37,9 +72,42 @@
   color: #ffffff;
 }
 
-.step-counter {
+.step-control button.playing kbd {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Counter + progress bar ------------------------------------------ */
+
+.step-counter-wrap {
   flex: 1;
-  text-align: center;
+  min-width: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px 4px;
+}
+
+.step-counter {
   color: #2d3748;
   font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Thin bar under the counter that fills 0→100% over one auto-play tick.
+   Uses transform: scaleX for a cheap GPU-accelerated fill. transform-origin
+   is left so the bar grows from the left edge. */
+.step-progress {
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 2px;
+  height: 2px;
+  background: #1e7084;
+  border-radius: 1px;
+  transform-origin: left center;
+  transform: scaleX(0);
+  pointer-events: none;
 }

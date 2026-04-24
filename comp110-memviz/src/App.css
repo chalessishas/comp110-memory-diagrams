@@ -49,31 +49,11 @@ body {
   border-bottom: 3px solid var(--comp110-teal);
 }
 
-.brand {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
+.brand { display: flex; flex-direction: column; gap: 2px; }
+.brand-name { font-weight: 700; font-size: 20px; color: var(--comp110-gray-900); letter-spacing: 0.3px; }
+.brand-tag { font-size: 12px; color: var(--comp110-teal-dark); font-style: italic; }
 
-.brand-name {
-  font-weight: 700;
-  font-size: 20px;
-  color: var(--comp110-gray-900);
-  letter-spacing: 0.3px;
-}
-
-.brand-tag {
-  font-size: 12px;
-  color: var(--comp110-teal-dark);
-  font-style: italic;
-}
-
-.site-nav {
-  display: flex;
-  gap: 18px;
-  font-size: 14px;
-}
-
+.site-nav { display: flex; gap: 18px; font-size: 14px; }
 .site-nav a {
   color: var(--comp110-teal-dark);
   text-decoration: none;
@@ -82,10 +62,7 @@ body {
   border-radius: 4px;
   transition: background 120ms;
 }
-
-.site-nav a:hover {
-  background: rgba(255, 255, 255, 0.4);
-}
+.site-nav a:hover { background: rgba(255, 255, 255, 0.4); }
 
 /* Workspace -------------------------------------------------------- */
 
@@ -97,16 +74,14 @@ body {
   flex: 1;
 }
 
-.app.embed .workspace {
-  padding: 8px;
-  gap: 10px;
-}
+.app.embed .workspace { padding: 8px; gap: 10px; }
 
-.left,
-.right {
+.left, .right {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  /* V2 bump: more breathing room between diagram, narration, timeline and
+     step-row. 10px felt cramped once Timeline slotted in between. */
+  gap: 12px;
   min-width: 0;
 }
 
@@ -121,90 +96,50 @@ body {
   border-radius: 6px;
   font-size: 14px;
 }
-
-.problem-bar label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: 1;
-  font-weight: 600;
-  color: var(--comp110-gray-700);
-}
-
+.problem-bar label { display: flex; align-items: center; gap: 8px; flex: 1; font-weight: 600; color: var(--comp110-gray-700); }
 .problem-bar select {
-  flex: 1;
-  padding: 5px 8px;
-  border: 1px solid var(--comp110-gray-300);
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 13px;
-  background: #ffffff;
+  flex: 1; padding: 5px 8px; border: 1px solid var(--comp110-gray-300);
+  border-radius: 4px; font-family: inherit; font-size: 13px; background: #ffffff;
 }
 
 .run-btn {
-  padding: 7px 18px;
-  border: none;
-  border-radius: 4px;
-  background: var(--comp110-teal);
-  color: #ffffff;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 120ms;
+  padding: 7px 18px; border: none; border-radius: 4px;
+  background: var(--comp110-teal); color: #ffffff;
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: background 120ms;
 }
-
-.run-btn:hover {
-  background: var(--comp110-teal-dark);
-}
+.run-btn:hover { background: var(--comp110-teal-dark); }
 
 .prompt {
-  margin: 0;
-  padding: 10px 12px;
-  background: #e6f7fb;
-  border-left: 3px solid var(--comp110-teal);
+  margin: 0; padding: 10px 12px;
+  background: #e6f7fb; border-left: 3px solid var(--comp110-teal);
   border-radius: 0 4px 4px 0;
-  font-size: 13px;
-  color: var(--comp110-gray-700);
-  line-height: 1.5;
+  font-size: 13px; color: var(--comp110-gray-700); line-height: 1.5;
 }
 
 .editor-wrap {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 340px;
-  border: 1px solid var(--comp110-gray-300);
-  border-radius: 6px;
-  overflow: hidden;
+  flex: 1; display: flex; flex-direction: column; min-height: 340px;
+  border: 1px solid var(--comp110-gray-300); border-radius: 6px; overflow: hidden;
 }
-
-.editor-wrap > div {
-  flex: 1;
-  min-height: 0;
-}
+.editor-wrap > div { flex: 1; min-height: 0; }
 
 /* Narration + errors ---------------------------------------------- */
 
 .narration {
-  padding: 10px 12px;
+  /* V2: a touch more padding + leading so long narrations don't feel
+     cramped against the amber border. */
+  padding: 12px 14px;
   background: var(--comp110-warn-bg);
   border: 1px solid var(--comp110-warn);
   border-radius: 6px;
   font-size: 13px;
-  line-height: 1.55;
+  line-height: 1.6;
   color: var(--comp110-gray-900);
 }
-
-.step-label {
-  font-weight: 700;
-  color: var(--comp110-teal-dark);
-}
-
+.step-label { font-weight: 700; color: var(--comp110-teal-dark); }
 .line-ref {
   font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
-  color: var(--comp110-gray-700);
-  font-size: 12px;
+  color: var(--comp110-gray-700); font-size: 12px;
 }
 
 .error-banner {
@@ -212,8 +147,44 @@ body {
   background: var(--comp110-error-bg);
   border: 1px solid var(--comp110-error);
   border-radius: 6px;
-  font-size: 13px;
-  color: #742a2a;
+  font-size: 13px; color: #742a2a;
+}
+
+/* Step row (controls + speed slider) ------------------------------- */
+
+/* StepControl + speed slider share a row so they visually belong to the
+   same control group, with the slider on the right as a secondary setting. */
+.step-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.step-row .step-control { flex: 1; min-width: 360px; }
+
+.speed-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid var(--comp110-gray-300);
+  border-radius: 6px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 12px;
+  color: var(--comp110-gray-700);
+}
+.speed-control input[type="range"] {
+  width: 120px;
+  accent-color: var(--comp110-teal);
+}
+.speed-label { font-weight: 600; }
+.speed-value {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--comp110-gray-500);
+  min-width: 48px;
+  text-align: right;
 }
 
 /* Footer ----------------------------------------------------------- */
@@ -222,37 +193,17 @@ body {
   padding: 16px 24px;
   border-top: 1px solid var(--comp110-gray-200);
   background: var(--comp110-gray-50);
-  font-size: 12px;
-  color: var(--comp110-gray-500);
-  text-align: center;
+  font-size: 12px; color: var(--comp110-gray-500); text-align: center;
 }
-
-.site-footer a {
-  color: var(--comp110-teal);
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.site-footer a:hover {
-  text-decoration: underline;
-}
+.site-footer a { color: var(--comp110-teal); text-decoration: none; font-weight: 600; }
+.site-footer a:hover { text-decoration: underline; }
 
 /* Responsive ------------------------------------------------------- */
 
 @media (max-width: 900px) {
-  .workspace {
-    grid-template-columns: 1fr;
-    padding: 12px;
-  }
-
-  .site-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .problem-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
+  .workspace { grid-template-columns: 1fr; padding: 12px; }
+  .site-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .problem-bar { flex-direction: column; align-items: stretch; }
+  .step-row { flex-direction: column; }
+  .step-row .step-control { min-width: 0; }
 }

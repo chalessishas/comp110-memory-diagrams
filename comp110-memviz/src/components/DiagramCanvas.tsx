@@ -15,12 +15,14 @@ export function DiagramCanvas({ snapshot }: Props) {
     )
   }
 
-  // The active frame is the last non-retired, non-Globals frame. It's the one
-  // currently executing — highlight it yellow.
+  // The active frame is the deepest non-retired frame — Globals included.
+  // Previous rule excluded Globals by name, which meant simple programs
+  // (declarations + prints at module scope) never had a visible active
+  // frame and students lost the "you are here" signal. Now Globals gets
+  // the active amber treatment whenever no call frame is open.
   let activeIdx = -1
   for (let i = snapshot.stack.length - 1; i >= 0; i--) {
-    const f = snapshot.stack[i]
-    if (!f.retired && f.name !== 'Globals') {
+    if (!snapshot.stack[i].retired) {
       activeIdx = i
       break
     }
@@ -120,8 +122,6 @@ function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]
 }
 
 // Group an append-only Binding[] by name, preserving first-seen order.
-// Every group holds the full history; renderHistory then emits chunks for
-// each retired entry plus the final active entry — all on the same row.
 function groupByName<T extends { name: string; retired: boolean }>(arr: T[]): { name: string; items: T[] }[] {
   const firstIdx = new Map<string, number>()
   arr.forEach((b, i) => {
@@ -136,15 +136,9 @@ function groupByName<T extends { name: string; retired: boolean }>(arr: T[]): { 
   return [...firstIdx.entries()]
     .sort((a, b) => a[1] - b[1])
     .map(([name]) => ({ name, items: groups.get(name)! }))
-    // Drop groups with no active entry (e.g. a list slot after pop removed
-    // the last one). They no longer "exist" in Python semantics.
     .filter((g) => g.items.some((b) => !b.retired))
 }
 
-// Given a chronological list of versions for one slot, render them inline:
-// each retired version gets a struck-through chunk, then the one active
-// version appears as normal text at the end. Whitespace between chunks is
-// a single space so visually they read as "old new".
 function renderHistory(versions: { retired: boolean; text: string }[]): ReactNode {
   return versions.map((v, i) => (
     <span
@@ -159,7 +153,6 @@ function renderHistory(versions: { retired: boolean; text: string }[]): ReactNod
 
 function HeapObjectView({ obj }: { obj: HeapObject }) {
   if (obj.kind === 'function') {
-    // COMP110 typeset solution convention: `fn X-Y` without the word "lines".
     return (
       <div className="heap-obj function">
         <span className="heap-id">ID:{obj.id}</span>
@@ -178,7 +171,6 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     )
   }
   if (obj.kind === 'list') {
-    // Group slots by index; only active index groups remain.
     const slotGroups = groupByIndex(obj.slots)
     const elemType = inferListType(obj.slots)
     return (
@@ -203,7 +195,6 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     )
   }
   if (obj.kind === 'dict') {
-    // Group by stringified key (the binding's `name` field).
     const entryGroups = groupByName(obj.entries)
     const types = inferDictTypes(obj.entries)
     return (
@@ -227,7 +218,6 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
       </div>
     )
   }
-  // instance
   const attrGroups = groupByName(obj.attrs)
   return (
     <div className="heap-obj instance">
@@ -251,7 +241,6 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
   )
 }
 
-// Same as groupByName but keyed by numeric `index` (used for list slots).
 function groupByIndex<T extends { index: number; retired: boolean }>(arr: T[]): { index: number; items: T[] }[] {
   const firstIdx = new Map<number, number>()
   arr.forEach((s, i) => {
@@ -284,8 +273,6 @@ function formatValue(v: Value, heap: HeapObject[]): string {
   }
 }
 
-// Infer a `list[T]` element type from active slot values. Returns '' if
-// empty or heterogeneous; callers then omit the brackets and show just `list`.
 function inferListType(slots: { value: Value; retired: boolean }[]): string {
   const active = slots.filter((s) => !s.retired)
   if (active.length === 0) return ''
@@ -296,7 +283,6 @@ function inferListType(slots: { value: Value; retired: boolean }[]): string {
   return first
 }
 
-// Infer `dict[K, V]` from active entries. Same rules.
 function inferDictTypes(entries: { name: string; value: Value; retired: boolean }[]): string {
   const active = entries.filter((e) => !e.retired)
   if (active.length === 0) return ''
@@ -333,7 +319,6 @@ function dictKeyTag(tagged: string): string {
   }
 }
 
-// Dict keys are stored as stringified values prefixed with a type tag.
 function formatDictKey(tagged: string): string {
   const tag = tagged[0]
   const rest = tagged.slice(2)

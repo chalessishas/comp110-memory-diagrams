@@ -1,0 +1,77 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e0;
+  border-radius: 6px;
+}
+
+.timeline-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+/* One dot per step. Fixed size so density stays readable; programs with
+   100+ steps wrap to multiple rows instead of shrinking individual dots
+   below usable click targets. */
+.timeline-dot {
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid #2d3748;
+  border-radius: 50%;
+  padding: 0;
+  cursor: pointer;
+  opacity: 0.7;
+  box-shadow: 1px 1px 0 #2d3748;
+  transition: transform 80ms ease, opacity 80ms ease;
+  flex-shrink: 0;
+}
+
+.timeline-dot:hover {
+  opacity: 1;
+  transform: scale(1.15);
+}
+
+.timeline-dot.active {
+  width: 16px;
+  height: 16px;
+  opacity: 1;
+  outline: 2px solid #2d3748;
+  outline-offset: 2px;
+  /* active dot skips the paper shadow so the outline ring reads as the
+     primary "you are here" signal. */
+  box-shadow: none;
+}
+
+/* Legend under the strip — kept permanently visible. The event vocabulary
+   (declare / assign / call / return / print / flow) is part of what
+   students need to learn; a persistent legend is a teaching anchor, not
+   a debugging aid to auto-hide. */
+.timeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 11px;
+  color: #4a5568;
+  padding-top: 4px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.timeline-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timeline-legend-swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid #2d3748;
+  display: inline-block;
+}

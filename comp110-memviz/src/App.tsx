@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 import { CodeEditor } from './components/CodeEditor'
 import { DiagramCanvas } from './components/DiagramCanvas'
 import { StepControl } from './components/StepControl'
+import { Timeline } from './components/Timeline'
 import { QZ00_PROBLEMS } from './data/qz00Problems'
 import { run } from './interpreter/evaluator'
 import type { Snapshot } from './interpreter/types'
@@ -19,12 +20,18 @@ function isEmbed(): boolean {
   return params.get('embed') === '1'
 }
 
+// Default auto-play cadence, tuned during mockup review. Students found
+// 700ms felt "patient" — fast enough to keep flow, slow enough to read the
+// narration. Slider lets them override.
+const DEFAULT_AUTO_SPEED_MS = 700
+
 function App() {
   const embed = useMemo(() => isEmbed(), [])
   const [problemId, setProblemId] = useState(QZ00_PROBLEMS[0].id)
   const [source, setSource] = useState(QZ00_PROBLEMS[0].source)
   const [result, setResult] = useState<RunResult>({ kind: 'idle' })
   const [step, setStep] = useState(0)
+  const [autoSpeedMs, setAutoSpeedMs] = useState(DEFAULT_AUTO_SPEED_MS)
 
   const onRun = () => {
     setStep(0)
@@ -47,6 +54,7 @@ function App() {
 
   const snapshot = result.kind === 'ok' ? result.snapshots[step] ?? null : null
   const total = result.kind === 'ok' ? result.snapshots.length : 0
+  const snapshots = result.kind === 'ok' ? result.snapshots : []
   const currentProblem = QZ00_PROBLEMS.find((p) => p.id === problemId)
 
   return (
@@ -77,7 +85,6 @@ function App() {
               Problem:{' '}
               <select value={problemId} onChange={(e) => onSelectProblem(e.target.value)}>
                 {(() => {
-                  // Render problems grouped by `group`, preserving array order.
                   const out: ReactElement[] = []
                   let currentGroup: string | undefined = undefined
                   let groupItems: ReactElement[] = []
@@ -139,12 +146,38 @@ function App() {
               <strong>Parse error:</strong> {result.message}
             </div>
           )}
-          <StepControl
-            total={total}
-            current={step}
-            onChange={setStep}
-            disabled={result.kind !== 'ok'}
-          />
+          {/* Timeline strip: one colored dot per step, clickable to jump.
+              Dots are colored by the snapshot.event field inferred in
+              evaluator.ts. Only renders once a run has produced snapshots. */}
+          {result.kind === 'ok' && snapshots.length > 0 && (
+            <Timeline snapshots={snapshots} current={step} onSelect={setStep} />
+          )}
+          <div className="step-row">
+            <StepControl
+              total={total}
+              current={step}
+              onChange={setStep}
+              disabled={result.kind !== 'ok'}
+              autoSpeedMs={autoSpeedMs}
+              showProgress
+            />
+            {/* Speed slider sits beside the step controls. Range tuned to
+                "slow enough to read long narrations" → "fast enough to
+                skim through a well-understood problem". */}
+            <label className="speed-control" title="Auto-play speed">
+              <span className="speed-label">Speed</span>
+              <input
+                type="range"
+                min={200}
+                max={2000}
+                step={100}
+                value={autoSpeedMs}
+                onChange={(e) => setAutoSpeedMs(Number(e.target.value))}
+                aria-label="Auto-play speed in milliseconds per step"
+              />
+              <span className="speed-value">{autoSpeedMs}ms</span>
+            </label>
+          </div>
         </section>
       </main>
 
