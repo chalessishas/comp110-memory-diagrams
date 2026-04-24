@@ -110,5 +110,41 @@
   {
     "id": "while/while-02",
     "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nx: int = 10\nresult: str = \"\"\n\nwhile x >= 0:\n    if x % 3 > 0:\n        result = result + str(x)\n    else:\n        result = str(x) + result\n    x = x - 1\n\nprint(result)"
+  },
+  {
+    "id": "qz01_count",
+    "source": "def count(x: str) -> str:\n    \"\"\"Practice conditionals.\"\"\"\n    y: int = len(x)\n    if y % 4 == 1:\n        y = y * 2\n    y = y - 6\n    print(y)\n    return(x[y])\n    print(x[y])\n\ncount(x=\"Hello\")"
+  },
+  {
+    "id": "qz01_xyz",
+    "source": "def xyz(x: int, y: str) -> str:\n    \"\"\"Practice conditionals.\"\"\"\n    z: str = str(x)\n    if len(y) > 1:\n        y = y * x\n    else:\n        y = \"no\"\n    if x > 0:\n        print(z)\n    return y\n\nxyz(x=2, y=\"yo\")"
+  },
+  {
+    "id": "qz01_g",
+    "source": "def g(a: int, b: int) -> None:\n    \"\"\"Practice conditionals.\"\"\"\n    if a > b:\n        print(a-b)\n    elif b < 10:\n        print(b/a)\n    else:\n        print(a+b)\n    print(b)\n\ng(a=2,b=6)"
+  },
+  {
+    "id": "qz01_factorial",
+    "source": "\"\"\"Recursion practice!\"\"\"\n\ndef factorial(num: int) -> int:\n    \"\"\"Calculate the factorial of num.\"\"\"\n    if num <= 0:\n        return 1\n    elif num == 1:\n        return 1\n    else:\n        return num * factorial(num=num - 1)\n\ndef main() -> None:\n    \"\"\"The main function.\"\"\"\n    print(factorial(num=3))\n\nmain()"
+  },
+  {
+    "id": "qz01_palindrome",
+    "source": "\"\"\"Recursion practice with palindromes.\"\"\"\n\ndef is_palindrome(word: str, index: int) -> bool:\n    \"\"\"Returns True if word is a palindrome and False otherwise.\"\"\"\n    if index >= int(len(word) / 2):\n        return True\n    elif word[index] == word[len(word) - (index + 1)]:\n        return is_palindrome(word=word, index=index + 1)\n    else:\n        return False\n\ndef main() -> None:\n    \"\"\"The main function.\"\"\"\n    print(is_palindrome(word=\"noon\", index=0))\n    print(is_palindrome(word=\"110\", index=0))\n\nmain()"
+  },
+  {
+    "id": "qz02_count",
+    "source": "def count(xs: list[int]) -> dict[int, int]:\n    counts: dict[int, int] = {}\n    for x in xs:\n        if x in counts:\n            counts[x] += 1\n        else:\n            counts[x] = 1\n    return counts\n\nnumbers: list[int] = [1, 1, 0]\nprint(count(numbers))"
+  },
+  {
+    "id": "qz03_dogcat",
+    "source": "class Dog:\n   name: str\n   age: int\n   \n   def __init__(self, n: str, a:int):\n       self.name = n\n       self.age = a\n       \n   def speak(self) -> None: \n       print(self.name + \" says woof!\")\n       \n   def birthday(self) -> int:\n       self.age += 1 \n       return self.age\n       \nclass Cat:\n   name: str\n   age: int\n   \n   def __init__(self, n: str, a:int):\n       self.name = n\n       self.age = a\n       \n   def speak(self) -> None: \n       print(self.name + \" says meow!\")\n       \n   def birthday(self) -> int:\n       self.age += 1 \n       return self.age\n   \nrory: Dog = Dog(n = \"Rory\", a = 4)\nprint(rory.birthday())\nmiso: Cat = Cat(\"Miso\", 2)\nmiso.speak()"
+  },
+  {
+    "id": "qz03_concert",
+    "source": "class Concert:\n    artist: str\n    seats: dict[str, bool]\n\n    def __init__(self, a: str, s: dict[str, bool]):\n        self.artist = a\n        self.seats = s\n\n    def assign_seats(self, wanted_seats: list[str], name: str) -> None:\n        for seat in wanted_seats:\n            if seat in self.seats:\n                available: bool = self.seats[seat]\n                if available:\n                    print(f\"{name} bought seat {seat} to see {self.artist}!\")\n                    self.seats[seat] = False\n                else: \n                   print(f\"Seat {seat} is unavailable :(\")\n\nlenovo_seats: dict[str, bool] = {\"K1\": True, \"K2\": True, \"K3\": False}\nshow: Concert = Concert(a = \"Travisty\", s = lenovo_seats)\nshow.assign_seats(wanted_seats = [\"K2\", \"K3\"], name = \"Kay\")"
+  },
+  {
+    "id": "qz03_linkedlist",
+    "source": "\"\"\"A messy linked list...\"\"\"\n\nfrom __future__ import annotations\n\n# Node class definition included for reference!\nclass Node:\n    value: int\n    next: Node | None\n\n    def __init__(self, val: int, next: Node | None):\n        self.value = val\n        self.next = next\n\n    def __str__(self) -> str:\n        rest: str\n        if self.next is None:\n            rest = \"None\"\n        else:\n            rest = str(self.next)\n        return f\"{self.value} -> {rest}\"\n\nknight: Node = Node(3, None)\nbishop: Node = Node(2, knight)\nrook: Node = Node(1, bishop)\nprint(rook)\ncastle: Node = Node(0, bishop)\nprint(castle)"
   }
 ]

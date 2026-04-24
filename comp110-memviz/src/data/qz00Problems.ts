@@ -655,6 +655,220 @@ print(my_castle)
 `,
   },
   {
+    id: "qz01_count",
+    title: "Conditionals: count (return inside if)",
+    prompt: "Early return from inside an if skips the unreachable print. What prints?",
+    group: "Conditionals",
+    source: `def count(x: str) -> str:
+    """Practice conditionals."""
+    y: int = len(x)
+    if y % 4 == 1:
+        y = y * 2
+    y = y - 6
+    print(y)
+    return(x[y])
+    print(x[y])
+
+count(x="Hello")\n`,
+  },
+  {
+    id: "qz01_xyz",
+    title: "Conditionals: xyz (string repetition)",
+    prompt: "String gets multiplied by int (repetition). Two separate if-checks.",
+    group: "Conditionals",
+    source: `def xyz(x: int, y: str) -> str:
+    """Practice conditionals."""
+    z: str = str(x)
+    if len(y) > 1:
+        y = y * x
+    else:
+        y = "no"
+    if x > 0:
+        print(z)
+    return y
+
+xyz(x=2, y="yo")\n`,
+  },
+  {
+    id: "qz01_g",
+    title: "Conditionals (elif): g (divide by zero branch)",
+    prompt: "elif branch fires when b<10; division of ints yields a float.",
+    group: "Conditionals (elif)",
+    source: `def g(a: int, b: int) -> None:
+    """Practice conditionals."""
+    if a > b:
+        print(a-b)
+    elif b < 10:
+        print(b/a)
+    else:
+        print(a+b)
+    print(b)
+
+g(a=2,b=6)\n`,
+  },
+  {
+    id: "qz01_factorial",
+    title: "Recursion: factorial(3)",
+    prompt: "Recursive factorial with early-exit for n<=1.",
+    group: "Recursion",
+    source: `"""Recursion practice!"""
+
+def factorial(num: int) -> int:
+    """Calculate the factorial of num."""
+    if num <= 0:
+        return 1
+    elif num == 1:
+        return 1
+    else:
+        return num * factorial(num=num - 1)
+
+def main() -> None:
+    """The main function."""
+    print(factorial(num=3))
+
+main()\n`,
+  },
+  {
+    id: "qz01_palindrome",
+    title: "Recursion: is_palindrome",
+    prompt: "Recurse on both ends of the string; terminates at midpoint.",
+    group: "Recursion",
+    source: `"""Recursion practice with palindromes."""
+
+def is_palindrome(word: str, index: int) -> bool:
+    """Returns True if word is a palindrome and False otherwise."""
+    if index >= int(len(word) / 2):
+        return True
+    elif word[index] == word[len(word) - (index + 1)]:
+        return is_palindrome(word=word, index=index + 1)
+    else:
+        return False
+
+def main() -> None:
+    """The main function."""
+    print(is_palindrome(word="noon", index=0))
+    print(is_palindrome(word="110", index=0))
+
+main()\n`,
+  },
+  {
+    id: "qz02_count",
+    title: "Dictionaries: count occurrences",
+    prompt: "Build a dict of occurrence counts using `in` to check key presence.",
+    group: "Dictionaries",
+    source: `def count(xs: list[int]) -> dict[int, int]:
+    counts: dict[int, int] = {}
+    for x in xs:
+        if x in counts:
+            counts[x] += 1
+        else:
+            counts[x] = 1
+    return counts
+
+numbers: list[int] = [1, 1, 0]
+print(count(numbers))\n`,
+  },
+  {
+    id: "qz03_dogcat",
+    title: "OOP: Dog & Cat (speak / birthday)",
+    prompt: "Two class definitions + instances. birthday() increments and returns the new age.",
+    group: "OOP",
+    source: `class Dog:
+   name: str
+   age: int
+   
+   def __init__(self, n: str, a:int):
+       self.name = n
+       self.age = a
+       
+   def speak(self) -> None: 
+       print(self.name + " says woof!")
+       
+   def birthday(self) -> int:
+       self.age += 1 
+       return self.age
+       
+class Cat:
+   name: str
+   age: int
+   
+   def __init__(self, n: str, a:int):
+       self.name = n
+       self.age = a
+       
+   def speak(self) -> None: 
+       print(self.name + " says meow!")
+       
+   def birthday(self) -> int:
+       self.age += 1 
+       return self.age
+   
+rory: Dog = Dog(n = "Rory", a = 4)
+print(rory.birthday())
+miso: Cat = Cat("Miso", 2)
+miso.speak()\n`,
+  },
+  {
+    id: "qz03_concert",
+    title: "OOP: Concert (dict[str,bool] seats + assign_seats)",
+    prompt: "Method with nested conditionals; iterates through a list and mutates a dict.",
+    group: "OOP",
+    source: `class Concert:
+    artist: str
+    seats: dict[str, bool]
+
+    def __init__(self, a: str, s: dict[str, bool]):
+        self.artist = a
+        self.seats = s
+
+    def assign_seats(self, wanted_seats: list[str], name: str) -> None:
+        for seat in wanted_seats:
+            if seat in self.seats:
+                available: bool = self.seats[seat]
+                if available:
+                    print(f"{name} bought seat {seat} to see {self.artist}!")
+                    self.seats[seat] = False
+                else: 
+                   print(f"Seat {seat} is unavailable :(")
+
+lenovo_seats: dict[str, bool] = {"K1": True, "K2": True, "K3": False}
+show: Concert = Concert(a = "Travisty", s = lenovo_seats)
+show.assign_seats(wanted_seats = ["K2", "K3"], name = "Kay")\n`,
+  },
+  {
+    id: "qz03_linkedlist",
+    title: "OOP: messy linked list (Node | None + is None)",
+    prompt: "Recursive __str__ via `Node | None` union type and `is None` check.",
+    group: "OOP \u2014 magic methods",
+    source: `"""A messy linked list..."""
+
+from __future__ import annotations
+
+# Node class definition included for reference!
+class Node:
+    value: int
+    next: Node | None
+
+    def __init__(self, val: int, next: Node | None):
+        self.value = val
+        self.next = next
+
+    def __str__(self) -> str:
+        rest: str
+        if self.next is None:
+            rest = "None"
+        else:
+            rest = str(self.next)
+        return f"{self.value} -> {rest}"
+
+knight: Node = Node(3, None)
+bishop: Node = Node(2, knight)
+rook: Node = Node(1, bishop)
+print(rook)
+castle: Node = Node(0, bishop)
+print(castle)\n`,
+  },
+  {
     id: "blank",
     title: "Write your own",
     prompt: "Type any Python using supported features (def/class/return/call/assign/if/while/for/list/dict/+=/in). Press Run and step through.",

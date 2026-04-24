@@ -103,6 +103,14 @@ class Parser {
     if (t.kind === 'KEYWORD' && t.value === 'while') return this.parseWhile()
     if (t.kind === 'KEYWORD' && t.value === 'for') return this.parseFor()
     if (t.kind === 'KEYWORD' && t.value === 'return') return this.parseReturn()
+    // Import statements are parsed and silently ignored — they don't affect
+    // the memory diagram since all supported names are built in.
+    if (
+      (t.kind === 'KEYWORD' && t.value === 'import') ||
+      (t.kind === 'KEYWORD' && t.value === 'from')
+    ) {
+      return this.parseImportSkip()
+    }
     // Bare typed declaration with no value: `a: list[int]`. We handle that
     // via parseAssign(true) when the next-next token is ASSIGN. Otherwise
     // fall through.
@@ -200,6 +208,21 @@ class Parser {
     // too, not just postfix).
     this.pos = startPos
     return this.parseExprStmt()
+  }
+
+  // Consume an import/from-import line and return a no-op expression stmt.
+  // We don't model imports — every name the memory diagram cares about is
+  // already a builtin or defined in the program.
+  private parseImportSkip(): Stmt {
+    const firstTok = this.consume() // 'import' or 'from'
+    while (!this.match('NEWLINE') && !this.match('EOF')) this.consume()
+    if (this.match('NEWLINE')) this.consume()
+    // Return a dummy expression statement that does nothing at runtime.
+    return {
+      kind: 'exprStmt',
+      expr: { kind: 'name', name: 'None', line: firstTok.line },
+      line: firstTok.line,
+    }
   }
 
   private parseWhile(): WhileStmt {
@@ -328,12 +351,23 @@ class Parser {
     return { kind: 'if', branches, elseBody, line: ifTok.line }
   }
 
-  private parseAssign(typed: boolean): AssignStmt {
+  private parseAssign(typed: boolean): Stmt {
     const nameTok = this.expect('NAME')
     let typeAnnotation: TypeAnnotation | null = null
     if (typed) {
       this.expect('COLON')
       typeAnnotation = this.parseTypeAnnotation()
+      // Bare type hint with no value — `x: int` as a forward declaration.
+      // Python accepts this as a no-op at runtime. We return a dummy
+      // expression statement so parsing succeeds.
+      if (this.match('NEWLINE')) {
+        this.consume()
+        return {
+          kind: 'exprStmt',
+          expr: { kind: 'name', name: 'None', line: nameTok.line },
+          line: nameTok.line,
+        }
+      }
     }
     this.expect('ASSIGN')
     const value = this.parseExpr()
@@ -344,7 +378,7 @@ class Parser {
       typeAnnotation,
       value,
       line: nameTok.line,
-    }
+    } satisfies AssignStmt
   }
 
   private parseFuncDef(): FunctionDef {
@@ -414,8 +448,17 @@ class Parser {
   }
 
   private parseTypeAnnotation(): string {
-    // Accept simple types (int/str/None) plus parametric ones: list[int],
-    // dict[str, int]. The annotation is retained as a flat string.
+    // Accept simple types, parametric ones (list[int], dict[str, int]),
+    // and Python 3.10+ union types (Node | None). Retained as a flat string.
+    let result = this.parseSimpleType()
+    while (this.match('OP', '|')) {
+      this.consume()
+      result += ' | ' + this.parseSimpleType()
+    }
+    return result
+  }
+
+  private parseSimpleType(): string {
     const t = this.peek()
     if (t.kind === 'NAME') {
       this.consume()
@@ -518,6 +561,21 @@ class Parser {
       const tok = this.consume() // in
       const right = this.parseAdd()
       return { kind: 'cmp', op: 'not in', left, right, line: tok.line } satisfies CompareOp
+    }
+    // `x is y` and `x is not y` — identity comparison. At the v0 educational
+    // level there's no distinction from `==` for immutable values, and for
+    // refs both forms compare id — so we fold `is` into '==' and `is not`
+    // into '!=' for evaluation. The semantic label we preserve in the op
+    // string for narration could say "is" but simpler to normalize.
+    if (this.match('KEYWORD', 'is')) {
+      const tok = this.consume()
+      if (this.match('KEYWORD', 'not')) {
+        this.consume()
+        const right = this.parseAdd()
+        return { kind: 'cmp', op: '!=', left, right, line: tok.line } satisfies CompareOp
+      }
+      const right = this.parseAdd()
+      return { kind: 'cmp', op: '==', left, right, line: tok.line } satisfies CompareOp
     }
     return left
   }

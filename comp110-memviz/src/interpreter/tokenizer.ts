@@ -37,8 +37,9 @@ export type Token = {
 const KEYWORDS = new Set([
   'def', 'return', 'None', 'True', 'False',
   'class', 'if', 'elif', 'else',
-  'and', 'or', 'not', 'in',
+  'and', 'or', 'not', 'in', 'is',
   'while', 'for',
+  'import', 'from', 'as',
 ])
 
 export class TokenError extends Error {
@@ -245,6 +246,9 @@ export function tokenize(src: string): Token[] {
       if (c === '=') { emit('ASSIGN', c, lineNum, i); i++; continue }
       if (c === '<' || c === '>') { emit('CMP', c, lineNum, i); i++; continue }
       if ('+-*/%'.includes(c)) { emit('OP', c, lineNum, i); i++; continue }
+      // Pipe is only used in union type annotations (v3 extension);
+      // tokenize as OP and let parseTypeAnnotation interpret it.
+      if (c === '|') { emit('OP', c, lineNum, i); i++; continue }
 
       throw new TokenError(`unexpected character ${JSON.stringify(c)}`, lineNum, i)
     }
