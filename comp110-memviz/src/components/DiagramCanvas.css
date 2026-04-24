@@ -308,3 +308,16 @@
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+/* Mobile responsive: on narrow screens the 3-column grid becomes a single
+   column stack. Fixed height is lifted to auto so the page can scroll. */
+@media (max-width: 720px) {
+  .diagram {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .col {
+    min-height: 180px;
+    max-height: 320px;
+  }
+}

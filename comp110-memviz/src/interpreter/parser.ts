@@ -191,6 +191,20 @@ class Parser {
         line: lhs.line,
       } satisfies IndexAssignStmt
     }
+    // slice ASSIGN expr  →  SliceAssign (xs[:] = other, xs[1:3] = ys, etc.)
+    if (lhs.kind === 'slice' && this.match('ASSIGN')) {
+      this.consume()
+      const value = this.parseExpr()
+      this.expect('NEWLINE')
+      return {
+        kind: 'sliceAssign',
+        target: lhs.target,
+        start: lhs.start,
+        stop: lhs.stop,
+        value,
+        line: lhs.line,
+      }
+    }
     // index AUG expr  →  desugar to IndexAssign with BinaryOp(index_read, op, expr)
     if (lhs.kind === 'index' && this.match('AUG')) {
       const augTok = this.consume()

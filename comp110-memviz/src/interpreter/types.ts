@@ -118,10 +118,22 @@ export type Stmt =
   | AssignStmt
   | AttrAssignStmt
   | IndexAssignStmt
+  | SliceAssignStmt
   | IfStmt
   | WhileStmt
   | ForStmt
   | ClassDef
+
+// `target[start:stop] = value` — in-place replace of a list's elements
+// with the new iterable's contents. `xs[:] = other` is the common form.
+export type SliceAssignStmt = {
+  kind: 'sliceAssign'
+  target: Expr
+  start: Expr | null
+  stop: Expr | null
+  value: Expr
+  line: number
+}
 
 export type ForStmt = {
   kind: 'for'

@@ -1377,6 +1377,82 @@ function execStmt(state: State, stmt: Stmt) {
       addClassDef(state, stmt)
       return
     }
+    case 'sliceAssign': {
+      const targetVal = evalExpr(state, stmt.target)
+      if (targetVal.kind !== 'ref') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: slice-assign requires a list target`,
+          stmt.line,
+        )
+      }
+      const obj = state.heap.find((h) => h.id === targetVal.id)
+      if (!obj || obj.kind !== 'list') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: slice-assign only supports lists`,
+          stmt.line,
+        )
+      }
+      const newVal = evalExpr(state, stmt.value)
+      if (newVal.kind !== 'ref') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: right of slice-assign must be a list`,
+          stmt.line,
+        )
+      }
+      const srcList = state.heap.find((h) => h.id === newVal.id)
+      if (!srcList || srcList.kind !== 'list') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: right of slice-assign must be a list`,
+          stmt.line,
+        )
+      }
+      // Compute slice bounds on the target list.
+      const len = listLength(obj)
+      const pyIdx = (e: Expr | null, def: number): number => {
+        if (e === null) return def
+        const v = evalExpr(state, e)
+        if (v.kind !== 'int') throw new RuntimeErrorSignal(`slice indices must be int`, stmt.line)
+        let i = v.v
+        if (i < 0) i += len
+        if (i < 0) i = 0
+        if (i > len) i = len
+        return i
+      }
+      const start = pyIdx(stmt.start, 0)
+      const stop = pyIdx(stmt.stop, len)
+      // Collect indexes being replaced; retire those slots, then collect the
+      // surviving (unchanged) values outside the slice, plus the new values
+      // from the source list. Rebuild the list's slots array.
+      const before: Value[] = []
+      for (let i = 0; i < start; i++) {
+        const v = listGet(obj, i)
+        if (v !== undefined) before.push(v)
+      }
+      const after: Value[] = []
+      for (let i = stop; i < len; i++) {
+        const v = listGet(obj, i)
+        if (v !== undefined) after.push(v)
+      }
+      const srcLen = listLength(srcList)
+      const middle: Value[] = []
+      for (let i = 0; i < srcLen; i++) {
+        const v = listGet(srcList, i)
+        if (v !== undefined) middle.push(cloneValue(v))
+      }
+      // Retire every slot then re-append in the new order.
+      for (const s of obj.slots) s.retired = true
+      const merged = [...before, ...middle, ...after]
+      merged.forEach((v, i) => obj.slots.push({ index: i, value: v, retired: false }))
+      push(
+        state,
+        snap(
+          state,
+          stmt.line,
+          `Slice-assigned list ID:${obj.id}[${start}:${stop}] with ${srcLen} element(s). Old slots retired.`,
+        ),
+      )
+      return
+    }
   }
 }
 

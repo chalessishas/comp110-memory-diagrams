@@ -546,6 +546,50 @@ print(d)
   })
 })
 
+describe('evaluator — slice assignment + performance', () => {
+  it('xs[:] = other replaces in place (same list id)', () => {
+    const src = `xs: list[int] = [1, 2, 3]
+ys: list[int] = xs
+xs[:] = [9, 8]
+print(xs)
+print(ys)
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    // Both variables still point to the same list object, which now holds
+    // [9, 8] — this is the distinctive behaviour students learn about
+    // aliasing + in-place replacement.
+    expect(last.output).toEqual(['[9, 8]', '[9, 8]'])
+  })
+
+  it('xs[1:3] = [99] partial replace', () => {
+    const src = `xs: list[int] = [1, 2, 3, 4, 5]
+xs[1:3] = [99]
+print(xs)
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['[1, 99, 4, 5]'])
+  })
+
+  it('100-iteration while loop completes quickly', () => {
+    const src = `total: int = 0
+i: int = 0
+while i < 100:
+    total += i
+    i += 1
+print(total)
+`
+    const t0 = performance.now()
+    const snapshots = run(src)
+    const dt = performance.now() - t0
+    expect(snapshots.at(-1)!.output).toEqual(['4950'])
+    // Guard against catastrophic regression — plenty of headroom on any
+    // dev machine. COMP110 practice problems stay well under this budget.
+    expect(dt).toBeLessThan(500)
+    expect(snapshots.length).toBeGreaterThan(200)
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1
