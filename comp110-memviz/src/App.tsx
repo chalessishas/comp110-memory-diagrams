@@ -58,12 +58,17 @@ function App() {
   const currentProblem = QZ00_PROBLEMS.find((p) => p.id === problemId)
 
   return (
-    <div className={`app${embed ? ' embed' : ''}`}>
+    <div
+      className={`app${embed ? ' embed' : ''}`}
+      data-memviz-version="2"
+    >
       {!embed && (
         <header className="site-header">
           <div className="brand">
             <span className="brand-name">COMP110 Memory Diagrams</span>
-            <span className="brand-tag">Interactive memory diagrams — v0 ruleset</span>
+            <span className="brand-tag">
+              v0 ruleset — V2: colored step timeline, auto speed, stronger step labels
+            </span>
           </div>
           <nav className="site-nav">
             <a href="https://comp110-26s.github.io/" target="_blank" rel="noreferrer">Course site ↗</a>
