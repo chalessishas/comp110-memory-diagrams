@@ -29,7 +29,7 @@ export function DiagramCanvas({ snapshot }: Props) {
   return (
     <div className="diagram">
       <section className="col stack">
-        <header className="col-title">Function Call Stack</header>
+        <header className="col-title">Stack</header>
         <div className="frames">
           {/* COMP110 convention: Globals is drawn at the TOP (first written);
               each new call frame is added below it in chronological order. */}
@@ -55,7 +55,7 @@ export function DiagramCanvas({ snapshot }: Props) {
       </section>
 
       <section className="col output">
-        <header className="col-title">Printed Output</header>
+        <header className="col-title">Output</header>
         <div className="output-lines">
           {snapshot.output.length === 0 && <p className="empty">(nothing printed yet)</p>}
           {snapshot.output.map((line, i) => (
