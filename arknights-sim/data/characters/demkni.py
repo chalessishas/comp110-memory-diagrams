@@ -4,15 +4,16 @@ S1 "Brilliant Concept": sp_cost=4, initial_sp=0, instant, AUTO_ATTACK, AUTO
   (heals all allies in range; party-wide heal not modeled — stub).
 S2 "Calcification": sp_cost=50, initial_sp=25, duration=28s, AUTO_TIME, MANUAL
   (DEF+% + heals allies in range on attack; multi-target heal + DEF buff coupling — stub).
-S3 "The Last Stand": sp_cost=60, initial_sp=20, duration=15s, AUTO_TIME, MANUAL
-  (ATK+80% + invincibility for 15s; invincibility status not modeled — stub).
+S3 "The Last Stand": sp_cost=60, initial_sp=20, duration=15s. ATK+80%.
+  Invincibility not modeled.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.demkni import make_demkni as _base_stats
 
 DEFENDER_RANGE = RangeShape(tiles=((0, 0),))
@@ -24,7 +25,24 @@ _S2_TAG = "demkni_s2_calcification"
 _S2_DURATION = 28.0
 
 _S3_TAG = "demkni_s3_last_stand"
+_S3_ATK_RATIO = 0.80
+_S3_BUFF_TAG = "demkni_s3_atk"
 _S3_DURATION = 15.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    world.log(f"Saria S3 — ATK+{_S3_ATK_RATIO:.0%}/{_S3_DURATION}s (invincibility not modeled)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_demkni(slot: str = "S3") -> UnitState:

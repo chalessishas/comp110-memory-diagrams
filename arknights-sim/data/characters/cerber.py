@@ -2,14 +2,16 @@
 
 S1 "Really Cold Axe": sp_cost=7, initial_sp=0, instant (2-charge burst, stub).
 S2 "Really Hot Knives": sp_cost=44, initial_sp=16, 36s (interval ×0.4 + DEF-target, stub).
-S3 "Really Heavy Spear": sp_cost=80, initial_sp=47, 57s (ATK+160%+dmg-type swap, stub).
+S3 "Really Heavy Spear": sp_cost=80, initial_sp=47, 57s. ATK+160%.
+  Physical dmg-type swap during skill not modeled (attack_type is static).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.cerber import make_cerber as _base_stats
 
 CASTER_RANGE = RangeShape(tiles=tuple(
@@ -20,7 +22,24 @@ _S1_TAG = "cerber_s1_cold_axe"
 _S2_TAG = "cerber_s2_hot_knives"
 _S2_DURATION = 36.0
 _S3_TAG = "cerber_s3_heavy_spear"
+_S3_ATK_RATIO = 1.60
+_S3_BUFF_TAG = "cerber_s3_atk"
 _S3_DURATION = 57.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_BUFF_TAG,
+    ))
+    world.log(f"Ceobe S3 — ATK+{_S3_ATK_RATIO:.0%}/{_S3_DURATION}s (phys swap not modeled)")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S3_BUFF_TAG]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_cerber(slot: str = "S3") -> UnitState:

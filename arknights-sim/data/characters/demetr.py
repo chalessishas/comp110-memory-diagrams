@@ -4,15 +4,16 @@ S1 "Don's Ease": sp_cost=3, initial_sp=0, instant, AUTO_ATTACK, AUTO
   (next attack hits twice at 250% ATK — double-hit stub).
 S2 "Consigliere's Schemes": sp_cost=22, initial_sp=14, duration=22s, AUTO_TIME, MANUAL
   (range expands, ASPD+80, 3-target 200% ATK, talent-stack slow — stub).
-S3 "Settling Old Scores": sp_cost=35, initial_sp=27, duration=30s, AUTO_TIME, MANUAL
-  (ATK+170%, ASPD+50, 50% bonus proc, survive-lethal mechanic — stub).
+S3 "Settling Old Scores": sp_cost=35, initial_sp=27, duration=30s. ATK+170%, ASPD+50.
+  Survive-lethal mechanic and 50% bonus proc not modeled.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.demetr import make_demetr as _base_stats
 
 GUARD_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -24,7 +25,31 @@ _S2_TAG = "demetr_s2_consiglieres_schemes"
 _S2_DURATION = 22.0
 
 _S3_TAG = "demetr_s3_settling_old_scores"
+_S3_ATK_RATIO = 1.70
+_S3_ASPD_FLAT = 50.0
+_S3_ATK_BUFF_TAG = "demetr_s3_atk"
+_S3_ASPD_BUFF_TAG = "demetr_s3_aspd"
 _S3_DURATION = 30.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF_TAG,
+    ))
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+        value=_S3_ASPD_FLAT, source_tag=_S3_ASPD_BUFF_TAG,
+    ))
+    world.log(f"Bellone S3 — ATK+{_S3_ATK_RATIO:.0%} ASPD+{_S3_ASPD_FLAT:.0f}/{_S3_DURATION}s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs
+                     if b.source_tag not in (_S3_ATK_BUFF_TAG, _S3_ASPD_BUFF_TAG)]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
 
 
 def make_demetr(slot: str = "S3") -> UnitState:
