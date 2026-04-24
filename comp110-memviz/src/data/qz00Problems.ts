@@ -12,28 +12,6 @@ export type Problem = {
 
 export const QZ00_PROBLEMS: Problem[] = [
   {
-    id: 'blank',
-    title: '✍️ Write your own',
-    prompt:
-      'Type any Python code that uses v0 features: function defs, return, calls, variable assignment, print, str/len/int/float. Then press Run and step through.',
-    source: `# Write your Python code here.
-# The memory-diagram viewer supports:
-#   - def / return / function calls
-#   - variable assignment:  a: int = 3  then later  a = a + 1
-#   - print, len, int, str, float
-#   - arithmetic + string indexing
-#
-# Example — delete and replace with your own:
-
-def double(n: int) -> int:
-    return n * 2
-
-x: int = 7
-y: int = double(n=x)
-print(y)
-`,
-  },
-  {
     id: 'basic_howdy',
     title: 'Basic 00 — Howdy Partner',
     prompt:
@@ -225,6 +203,19 @@ def main(word: str) -> None:
     print("The hidden character is: " + extract_character(word=word, index=shift_position(index=get_starting_point(word=word))))
 
 main(word="mystery")
+`,
+  },
+  {
+    id: 'blank',
+    title: 'Write your own',
+    prompt:
+      'Type any Python code that uses v0 features (def, return, function calls, variable assignment, print, len, int, str, float, arithmetic, string indexing). Press Run and step through.',
+    source: `def double(n: int) -> int:
+    return n * 2
+
+x: int = 7
+y: int = double(n=x)
+print(y)
 `,
   },
 ]

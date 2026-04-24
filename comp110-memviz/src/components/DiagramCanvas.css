@@ -1,11 +1,14 @@
 .diagram {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 0.9fr;
+  /* Fixed column widths so columns don't reflow as content changes step-to-step.
+     Each column holds its own scrollable overflow zone, so the outer canvas
+     stays the same size no matter how many frames / heap objects accumulate. */
+  grid-template-columns: minmax(300px, 1.4fr) minmax(220px, 1fr) minmax(200px, 0.9fr);
   gap: 12px;
   padding: 16px;
   background: #f7fafc;
   border-radius: 8px;
-  min-height: 440px;
+  height: 560px; /* fixed — never grows/shrinks with step */
   font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
   font-size: 13px;
 }
@@ -25,6 +28,7 @@
   border: 1px solid #cbd5e0;
   border-radius: 6px;
   overflow: hidden;
+  min-height: 0; /* required so child scroll zones actually scroll inside */
 }
 
 .col-title {
@@ -46,6 +50,8 @@
   justify-content: flex-start;
   gap: 8px;
   padding: 10px;
+  flex: 1 1 0;
+  min-height: 0; /* paired with flex:1 — without this the content pushes out */
   overflow-y: auto;
 }
 
@@ -55,6 +61,9 @@
   background: #ffffff;
   padding: 6px 8px;
   box-shadow: 1px 1px 0 #2d3748;
+  width: 100%; /* every frame fills the column width regardless of content */
+  flex-shrink: 0; /* don't squeeze older frames when new ones are added */
+  box-sizing: border-box;
 }
 
 .frame.globals {
@@ -161,6 +170,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -173,6 +184,9 @@
   flex-wrap: wrap;
   gap: 8px;
   box-shadow: 1px 1px 0 #2d3748;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .heap-id {
@@ -197,6 +211,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
 }
 
