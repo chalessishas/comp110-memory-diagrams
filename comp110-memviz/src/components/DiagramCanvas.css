@@ -77,30 +77,24 @@
   box-shadow: 2px 2px 0 #d69e2e;
 }
 
-/* Retired frame = function already returned. Per v0 rules the frame
-   stays visible with a strike-through so students can trace history. */
+/* Retired frame = function already returned. The frame stays visible as
+   a historical record with a dashed border + subdued coloring, but its
+   contents are NOT struck through — per v0 rules, only values that were
+   *replaced* by a newer state get crossed out. A frame's params and RV
+   are each assigned once, so they read normally, just dimmed. */
 .frame.retired {
   background: #f7fafc;
   border-color: #cbd5e0;
   border-style: dashed;
   box-shadow: 1px 1px 0 #cbd5e0;
-  opacity: 0.75;
 }
 
-.frame.retired .frame-name,
+.frame.retired .frame-name {
+  color: #4a5568;
+}
+
 .frame.retired .rv {
-  text-decoration: line-through;
-  text-decoration-color: #718096;
-  color: #718096;
-}
-
-/* A retired frame also strikes through its parameter bindings — per v0 rules
-   the whole frame is crossed out on the diagram once the function returns. */
-.frame.retired .binding .name,
-.frame.retired .binding .value {
-  text-decoration: line-through;
-  text-decoration-color: #a0aec0;
-  color: #718096;
+  color: #4a5568;
 }
 
 .frame-header {
