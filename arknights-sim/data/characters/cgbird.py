@@ -1,7 +1,7 @@
 """夜莺 (Nightingale / Cgbird) — 6★ Medic (Multi-target archetype).
 
-S1 "治疗强化·γ型" (shared): sp_cost=30, initial_sp=20, duration=30s, MANUAL, AUTO_TIME.
-  ATK (heal power) +90%.
+S1 "治疗强化·γ型" (shared): sp_cost=32, initial_sp=20, duration=30s, MANUAL, AUTO_TIME.
+  ATK (heal power) +70%.
 
 S2 "法术护盾": ammo-based, ATK×90% + RES+20 for 5s (complex — not modeled).
 
@@ -21,7 +21,7 @@ MEDIC_RANGE = RangeShape(tiles=((1, 0), (2, 0), (3, 0), (1, -1), (1, 1)))
 
 # --- S1 ---
 _S1_TAG = "cgbird_s1_heal_up"
-_S1_ATK_RATIO = 0.90
+_S1_ATK_RATIO = 0.70
 _S1_BUFF_TAG = "cgbird_s1_atk"
 _S1_DURATION = 30.0
 
@@ -57,9 +57,7 @@ def make_cgbird(slot: str = "S1") -> UnitState:
 
     if slot == "S1":
         op.skill = SkillComponent(
-            name="Heal Up γ",
-            slot="S1",
-            sp_cost=30,
+            name="Heal Up γ", slot="S1", sp_cost=32,
             initial_sp=20,
             duration=_S1_DURATION,
             sp_gain_mode=SPGainMode.AUTO_TIME,
@@ -84,7 +82,7 @@ def make_cgbird(slot: str = "S1") -> UnitState:
             name="Sanctum",
             slot="S3",
             sp_cost=120,
-            initial_sp=115,
+            initial_sp=110,
             duration=_S3_DURATION,
             sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.MANUAL,

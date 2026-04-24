@@ -1,7 +1,7 @@
-"""Nightingale (Cgbird) S1 "Heal Up γ" — 30s MANUAL, ATK (heal power) +90%.
+"""Nightingale (Cgbird) S1 "Heal Up γ" — 30s MANUAL, ATK (heal power) +70%.
 
 Tests cover:
-  - S1 config (name, sp_cost=30, initial_sp=20, duration=30s, MANUAL)
+  - S1 config (name, sp_cost=32, initial_sp=20, duration=30s, MANUAL)
   - ATK (heal) buff applied on trigger
   - ATK buff cleared after skill ends
   - S2 regression (slot/name)
@@ -36,7 +36,7 @@ def test_cgbird_s1_config():
     sk = op.skill
     assert sk is not None and sk.slot == "S1"
     assert sk.name == "Heal Up γ"
-    assert sk.sp_cost == 30
+    assert sk.sp_cost == 32
     assert sk.initial_sp == 20
     assert sk.duration == _S1_DURATION
     assert sk.behavior_tag == _S1_TAG

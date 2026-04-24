@@ -2,15 +2,16 @@
 
 S1 "Flash Shield": sp_cost=18, initial_sp=10, duration=3.5s, AUTO_TIME, MANUAL
   (Stun all ahead for 3.5s, max 4 uses/deploy; limited-use stun — stub).
-S2 "Shield Bash": sp_cost=40, initial_sp=15, duration=6s, AUTO_TIME, MANUAL
-  (170% ATK to all blocked + Stun 6s + ASPD+200 + talent×1.4; multi-target + stun combo — stub).
+S2 "Shield Bash": sp_cost=40, initial_sp=15, duration=6s, AUTO_TIME, MANUAL.
+  ASPD+200. Multi-target damage, stun, and talent multiplier not modeled.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.blitz import make_blitz as _base_stats
 
 DEFENDER_RANGE = RangeShape(tiles=((0, 0),))
@@ -19,7 +20,21 @@ _S1_TAG = "blitz_s1_flash_shield"
 _S1_DURATION = 3.5
 
 _S2_TAG = "blitz_s2_shield_bash"
+_S2_ASPD_BONUS = 200.0
+_S2_BUFF_TAG = "blitz_s2_aspd"
 _S2_DURATION = 6.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+                              value=_S2_ASPD_BONUS, source_tag=_S2_BUFF_TAG))
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def make_blitz(slot: str = "S2") -> UnitState:

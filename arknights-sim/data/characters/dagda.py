@@ -2,15 +2,16 @@
 
 S1 "Counter Technique": sp_cost=4, initial_sp=0, instant, AUTO_DEFENSIVE, AUTO
   (on physical hit taken: reduce damage 50% + next attack 180% ATK; reactive proc not modeled — stub).
-S2 "Search and Destroy": sp_cost=34, initial_sp=15, duration=15s, AUTO_TIME, MANUAL
-  (ATK+28% + double-hit + gang-spirit proc rate; double-hit not modeled — stub).
+S2 "Search and Destroy": sp_cost=34, initial_sp=15, duration=15s, AUTO_TIME, MANUAL.
+  ATK+28%. Double-hit and gang-spirit proc rate not modeled.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.dagda import make_dagda as _base_stats
 
 GUARD_RANGE = RangeShape(tiles=((0, 0), (1, 0)))
@@ -19,7 +20,21 @@ _S1_TAG = "dagda_s1_counter_technique"
 _S1_DURATION = 0.0
 
 _S2_TAG = "dagda_s2_search_and_destroy"
+_S2_ATK_RATIO = 0.28
+_S2_BUFF_TAG = "dagda_s2_atk"
 _S2_DURATION = 15.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                              value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG))
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def make_dagda(slot: str = "S2") -> UnitState:
