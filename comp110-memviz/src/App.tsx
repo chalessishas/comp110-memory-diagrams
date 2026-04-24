@@ -191,7 +191,7 @@ function App() {
         <footer className="site-footer">
           <span>
             Built for <a href="https://comp110-26s.github.io/" target="_blank" rel="noreferrer">UNC COMP110</a>.
-            Implements the v0 memory diagram rules. <a href="https://github.com/chalessishas/T-DBDD" target="_blank" rel="noreferrer">Source</a>.
+            Implements the v0 memory diagram rules. <a href="https://github.com/chalessishas/comp110-memory-diagrams" target="_blank" rel="noreferrer">Source</a>.
           </span>
         </footer>
       )}
