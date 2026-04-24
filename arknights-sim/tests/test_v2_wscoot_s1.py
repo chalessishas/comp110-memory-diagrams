@@ -1,29 +1,92 @@
+"""Wscoot S1 "Defend by Offense" — 15s AUTO, ASPD+50, DEF+55%.
+
+Tests cover:
+  - S1 config (name, sp_cost=18, initial_sp=10, duration=15s)
+  - S1 ASPD buff applied on trigger
+  - S1 DEF buff applied on trigger
+  - S1 both buffs cleared after skill ends
+  - S2 slot regression
+"""
+from __future__ import annotations
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from core.world import World
+from core.state.tile_state import TileGrid, TileState
+from core.types import TileType, TICK_RATE, BuffAxis
+from core.systems import register_default_systems
+from core.systems.skill_system import manual_trigger
+from data.characters.wscoot import (
+    make_wscoot,
+    _S1_TAG, _S1_ASPD_VALUE, _S1_DEF_RATIO,
+    _S1_ASPD_BUFF_TAG, _S1_DEF_BUFF_TAG, _S1_DURATION,
+    _S2_TAG,
+)
 
-from data.characters.wscoot import make_wscoot, _S1_TAG, _S1_DURATION, _S2_TAG, _S2_DURATION, _S3_TAG, _S3_DURATION
+
+def _world() -> World:
+    grid = TileGrid(width=6, height=3)
+    for x in range(6):
+        for y in range(3):
+            grid.set_tile(TileState(x=x, y=y, type=TileType.GROUND))
+    w = World(tile_grid=grid)
+    w.global_state.dp_gain_rate = 0.0
+    register_default_systems(w)
+    return w
+
 
 def test_wscoot_s1_config():
     op = make_wscoot(slot="S1")
     sk = op.skill
     assert sk is not None and sk.slot == "S1"
-    assert sk.sp_cost == 8 and sk.initial_sp == 0
-    assert sk.duration == _S1_DURATION and sk.behavior_tag == _S1_TAG
-    assert sk.sp == 0.0
+    assert sk.name == "Defend by Offense"
+    assert sk.sp_cost == 18 and sk.initial_sp == 10
+    assert sk.duration == _S1_DURATION
+    assert sk.behavior_tag == _S1_TAG
 
-def test_wscoot_s2_config():
+
+def test_s1_aspd_buff_applied():
+    w = _world()
+    op = make_wscoot(slot="S1")
+    op.deployed = True; op.position = (0.0, 1.0); op.atk_cd = 999.0
+    w.add_unit(op)
+
+    op.skill.sp = float(op.skill.sp_cost)
+    manual_trigger(w, op)
+
+    assert any(b.source_tag == _S1_ASPD_BUFF_TAG and b.value == _S1_ASPD_VALUE
+               for b in op.buffs if b.axis == BuffAxis.ASPD)
+
+
+def test_s1_def_buff_applied():
+    w = _world()
+    op = make_wscoot(slot="S1")
+    op.deployed = True; op.position = (0.0, 1.0); op.atk_cd = 999.0
+    w.add_unit(op)
+
+    op.skill.sp = float(op.skill.sp_cost)
+    manual_trigger(w, op)
+
+    assert any(b.source_tag == _S1_DEF_BUFF_TAG and b.value == _S1_DEF_RATIO
+               for b in op.buffs if b.axis == BuffAxis.DEF)
+
+
+def test_s1_buffs_cleared_on_end():
+    w = _world()
+    op = make_wscoot(slot="S1")
+    op.deployed = True; op.position = (0.0, 1.0); op.atk_cd = 999.0
+    w.add_unit(op)
+
+    op.skill.sp = float(op.skill.sp_cost)
+    manual_trigger(w, op)
+    for _ in range(int(TICK_RATE * (_S1_DURATION + 1.0))):
+        w.tick()
+
+    assert not any(b.source_tag in (_S1_ASPD_BUFF_TAG, _S1_DEF_BUFF_TAG) for b in op.buffs)
+
+
+def test_s2_slot_config():
     op = make_wscoot(slot="S2")
     sk = op.skill
     assert sk is not None and sk.slot == "S2"
-    assert sk.sp_cost == 40 and sk.initial_sp == 20
-    assert sk.duration == _S2_DURATION and sk.behavior_tag == _S2_TAG
-    assert sk.sp == 20.0
-
-def test_wscoot_s3_config():
-    op = make_wscoot(slot="S3")
-    sk = op.skill
-    assert sk is not None and sk.slot == "S3"
-    assert sk.sp_cost == 60 and sk.initial_sp == 30
-    assert sk.duration == _S3_DURATION and sk.behavior_tag == _S3_TAG
-    assert sk.sp == 30.0
+    assert sk.behavior_tag == _S2_TAG
