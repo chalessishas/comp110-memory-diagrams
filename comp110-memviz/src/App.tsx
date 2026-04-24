@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import { CodeEditor } from './components/CodeEditor'
 import { DiagramCanvas } from './components/DiagramCanvas'
@@ -75,9 +76,38 @@ function App() {
             <label>
               Problem:{' '}
               <select value={problemId} onChange={(e) => onSelectProblem(e.target.value)}>
-                {QZ00_PROBLEMS.map((p) => (
-                  <option key={p.id} value={p.id}>{p.title}</option>
-                ))}
+                {(() => {
+                  // Render problems grouped by `group`, preserving array order.
+                  const out: ReactElement[] = []
+                  let currentGroup: string | undefined = undefined
+                  let groupItems: ReactElement[] = []
+                  const flush = () => {
+                    if (groupItems.length === 0) return
+                    if (currentGroup) {
+                      out.push(
+                        <optgroup key={`g-${currentGroup}-${out.length}`} label={currentGroup}>
+                          {groupItems}
+                        </optgroup>,
+                      )
+                    } else {
+                      out.push(...groupItems)
+                    }
+                    groupItems = []
+                  }
+                  for (const p of QZ00_PROBLEMS) {
+                    if (p.group !== currentGroup) {
+                      flush()
+                      currentGroup = p.group
+                    }
+                    groupItems.push(
+                      <option key={p.id} value={p.id}>
+                        {p.title}
+                      </option>,
+                    )
+                  }
+                  flush()
+                  return out
+                })()}
               </select>
             </label>
             <button type="button" className="run-btn" onClick={onRun}>▶ Run</button>

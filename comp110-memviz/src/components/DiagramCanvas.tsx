@@ -139,6 +139,26 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
       </div>
     )
   }
+  if (obj.kind === 'dict') {
+    return (
+      <div className="heap-obj dict">
+        <div className="heap-obj-header">
+          <span className="heap-id">ID:{obj.id}</span>
+          <span className="heap-label">dict</span>
+        </div>
+        <div className="bindings dict-entries">
+          {obj.entries.length === 0 && <div className="binding empty-binding">(empty)</div>}
+          {obj.entries.map((e, i) => (
+            <div key={i} className={`binding${e.retired ? ' retired' : ''}`}>
+              <span className="name">{formatDictKey(e.name)}</span>
+              <span className="eq">:</span>
+              <span className="value">{formatValueSimple(e.value)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
   // instance
   return (
     <div className="heap-obj instance">
@@ -173,6 +193,18 @@ function formatValue(v: Value, heap: HeapObject[]): string {
       return `→ ID:${v.id}`
     }
   }
+}
+
+// Dict keys are stored as stringified values prefixed with a type tag.
+function formatDictKey(tagged: string): string {
+  const tag = tagged[0]
+  const rest = tagged.slice(2)
+  if (tag === 'S') return `'${rest}'`
+  if (tag === 'I' || tag === 'F') return rest
+  if (tag === 'B') return rest === '1' ? 'True' : 'False'
+  if (tag === 'N') return 'None'
+  if (tag === 'R') return `→ ID:${rest}`
+  return tagged
 }
 
 function formatValueSimple(v: Value): string {

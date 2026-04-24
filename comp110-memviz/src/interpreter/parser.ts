@@ -11,9 +11,11 @@ import type {
   CallExpr,
   ClassDef,
   CompareOp,
+  DictLit,
   Expr,
   ExprStmt,
   FStringLit,
+  ForStmt,
   FunctionDef,
   IfStmt,
   IndexAssignStmt,
@@ -99,6 +101,7 @@ class Parser {
     if (t.kind === 'KEYWORD' && t.value === 'class') return this.parseClassDef()
     if (t.kind === 'KEYWORD' && t.value === 'if') return this.parseIf()
     if (t.kind === 'KEYWORD' && t.value === 'while') return this.parseWhile()
+    if (t.kind === 'KEYWORD' && t.value === 'for') return this.parseFor()
     if (t.kind === 'KEYWORD' && t.value === 'return') return this.parseReturn()
     // Bare typed declaration with no value: `a: list[int]`. We handle that
     // via parseAssign(true) when the next-next token is ASSIGN. Otherwise
@@ -213,6 +216,24 @@ class Parser {
     }
     if (this.match('DEDENT')) this.consume()
     return { kind: 'while', condition, body, line: wTok.line }
+  }
+
+  private parseFor(): ForStmt {
+    const fTok = this.expect('KEYWORD', 'for')
+    const tNameTok = this.expect('NAME')
+    this.expect('KEYWORD', 'in')
+    const iter = this.parseExpr()
+    this.expect('COLON')
+    this.expect('NEWLINE')
+    this.expect('INDENT')
+    this.skipNewlines()
+    const body: Stmt[] = []
+    while (!this.match('DEDENT') && !this.match('EOF')) {
+      body.push(this.parseStmt())
+      this.skipNewlines()
+    }
+    if (this.match('DEDENT')) this.consume()
+    return { kind: 'for', target: tNameTok.value, iter, body, line: fTok.line }
   }
 
   private parseClassDef(): ClassDef {
@@ -486,6 +507,18 @@ class Parser {
         line: tok.line,
       } satisfies CompareOp
     }
+    // `x in y` and `x not in y` membership tests
+    if (this.match('KEYWORD', 'in')) {
+      const tok = this.consume()
+      const right = this.parseAdd()
+      return { kind: 'cmp', op: 'in', left, right, line: tok.line } satisfies CompareOp
+    }
+    if (this.match('KEYWORD', 'not') && this.peek(1)?.kind === 'KEYWORD' && this.peek(1)?.value === 'in') {
+      this.consume() // not
+      const tok = this.consume() // in
+      const right = this.parseAdd()
+      return { kind: 'cmp', op: 'not in', left, right, line: tok.line } satisfies CompareOp
+    }
     return left
   }
 
@@ -653,6 +686,26 @@ class Parser {
       }
       this.expect('RBRACKET')
       return { kind: 'listLit', elements, line: t.line } satisfies ListLit
+    }
+    if (t.kind === 'LBRACE') {
+      this.consume()
+      const entries: DictLit['entries'] = []
+      if (!this.match('RBRACE')) {
+        const k = this.parseExpr()
+        this.expect('COLON')
+        const v = this.parseExpr()
+        entries.push({ key: k, value: v })
+        while (this.match('COMMA')) {
+          this.consume()
+          if (this.match('RBRACE')) break
+          const k2 = this.parseExpr()
+          this.expect('COLON')
+          const v2 = this.parseExpr()
+          entries.push({ key: k2, value: v2 })
+        }
+      }
+      this.expect('RBRACE')
+      return { kind: 'dictLit', entries, line: t.line } satisfies DictLit
     }
     throw new ParseError(`unexpected token '${t.value}'`, t.line)
   }

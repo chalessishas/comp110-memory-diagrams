@@ -1,216 +1,330 @@
-// The 7 COMP110 QZ00 practice problems. Source:
-// https://comp110-26s.github.io/resources/practice/sp26/qz00/qz00_memory_diagrams.html
-// Each problem's `source` is verbatim Python; `title` and `prompt` are what the
-// course site shows alongside the diagram.
+// Auto-generated from COMP110-24S practice memory-diagram problems.
+// See https://comp110-24s.github.io/resources/practice/MemDiagrams.html
+// Every problem here is verified to parse and run correctly in this
+// tool's interpreter (see scripts/audit.test.ts).
 
 export type Problem = {
   id: string
   title: string
   prompt: string
   source: string
+  group?: string
 }
 
 export const QZ00_PROBLEMS: Problem[] = [
   {
-    id: 'basic_howdy',
-    title: 'Basic 00 — Howdy Partner',
-    prompt:
-      'Two variable declarations, then a reassignment. Trace how Globals changes.',
-    source: `b: str = "Partner"
+    id: "basic_basic_00",
+    title: "Basics: basic-00",
+    prompt: "Two string variables plus a reassignment. Watch a get retired when rebound.",
+    group: "Basics",
+    source: `""" Practice Memory Diagram """
+
+b: str = "Partner"
 a: str = "Howdy "
-a = a + b
-print(a)
-`,
+a += b
+print(a)\n`,
   },
   {
-    id: 'basic_mardi',
-    title: 'Basic 01 — Mardi Gras',
-    prompt:
-      'String indexing + reassignment. `c` never changes after line 3 — `a` does. Which value prints?',
-    source: `a: str = "Mardi"
+    id: "basic_basic_01",
+    title: "Basics: basic-01",
+    prompt: "String indexing + reassignment. c is computed before a changes \u2014 what prints?",
+    group: "Basics",
+    source: `""" Practice Memory Diagram """
+
+a: str = "Mardi"
 b: str = "Gras"
 c: str = a[0] + a[len(b)]
 a = "yay!"
-print(c)
-`,
+print(c)\n`,
   },
   {
-    id: 'basic_ab',
-    title: 'Basic 02 — a / b build-up',
-    prompt:
-      'Build `b` from `a`, print a combination, then rebuild `a` using len(b). Two printed lines.',
-    source: `a: str = "a"
+    id: "basic_basic_02",
+    title: "Basics: basic-02",
+    prompt: "Build b from a, print combined, then rebuild a using len(b). Two printed lines.",
+    group: "Basics",
+    source: `""" Practice Memory Diagram """
+
+a: str = "a"
 b: str = a + "b" + "b"
 print(b + a)
 a = a + str(len(b))
-print(a)
-`,
+print(a)\n`,
   },
   {
-    id: 'basic_age',
-    title: 'Basic 03 — Age / Year',
-    prompt:
-      'Arithmetic with typed declarations. No reassignment — every binding stays active.',
-    source: `age: int = 20
+    id: "basic_basic_03",
+    title: "Basics: basic-03",
+    prompt: "Typed declarations + arithmetic + str() casts. No reassignment.",
+    group: "Basics",
+    source: `""" Practice Memory Diagram """
+
+age: int = 20
 year: int = 2024
 older_age: int = age + 10
 later_year: int = year + 10
-print("In " + str(later_year) + " you'll be " + str(older_age))
-`,
+print("In " + str(later_year) + " you'll be " + str(older_age))\n`,
   },
   {
-    id: 'func_import',
-    title: 'Functions — Big / Bigger / Biggest (with assignment)',
-    prompt:
-      'Nested calls combined with local variable assignment inside main(). Watch main\'s frame: `a` gets reassigned twice.',
+    id: "conditionals_conditionals_00",
+    title: "Conditionals: conditionals-00",
+    prompt: "if with a modulo check. y is conditionally doubled, then shifted by -6. String index follows.",
+    group: "Conditionals",
+    source: `""" Practice Memory Diagram """
+
+x: str = "Hello"
+y: int = len(x)
+if y % 4 == 1:
+    y *= 2
+y -= 6
+print(y)
+print(x[y])\n`,
+  },
+  {
+    id: "conditionals_conditionals_01",
+    title: "Conditionals: conditionals-01",
+    prompt: "if/else with string repetition y *= x. Two prints.",
+    group: "Conditionals",
+    source: `""" Practice Memory Diagram """
+
+x: int = 2
+y: str = "yo"
+z: str = "2"
+if len(y) > 1:
+    y *= x
+else:
+    y = "no"
+if x > 0:
+    print(z)
+print(y)\n`,
+  },
+  {
+    id: "elif_elif_00",
+    title: "Conditionals (elif): elif-00",
+    prompt: "if / elif / else with comparisons.",
+    group: "Conditionals (elif)",
+    source: `""" Practice Memory Diagram """
+
+a: int = 2
+b: int = 6
+if a > b:
+    print(a-b)
+elif b < 10:
+    print(b/a)
+else:
+    print(a+b)
+print(b)\n`,
+  },
+  {
+    id: "while_while_00",
+    title: "While loops: while-00",
+    prompt: "while + if/elif chain with string accumulation. Predict the final string.",
+    group: "While loops",
+    source: `""" Practice Memory Diagram """
+
+i: int = 0
+s: str = ""
+
+while i < 4:
+    if i % 2 == 0:
+        s += "h"
+    elif i % 3 == 0:
+        s += "!"
+    else:
+        s += "e"
+    i += 1
+print(s)\n`,
+  },
+  {
+    id: "while_while_01",
+    title: "While loops: while-01",
+    prompt: "Nested arithmetic in a while body. Watch x, y, z evolve.",
+    group: "While loops",
+    source: `"""Loops Practice!"""
+
+x: int = 0
+y: int = 3
+z: str = "1"
+
+while x < y:
+    z = z + str(y) + str(x)
+    x = x + 1
+
+print(x)
+print(y)
+print(z)\n`,
+  },
+  {
+    id: "while_while_02",
+    title: "While loops: while-02",
+    prompt: "Descending while with conditional string prepend/append.",
+    group: "While loops",
+    source: `""" Practice Memory Diagram """
+
+x: int = 10
+result: str = ""
+
+while x >= 0:
+    if x % 3 > 0:
+        result = result + str(x)
+    else:
+        result = str(x) + result
+    x = x - 1
+
+print(result)\n`,
+  },
+  {
+    id: "functions_func_import_00",
+    title: "Functions: func-import-00",
+    prompt: "Three nested functions. biggest_func(110) prints a big number via an f-string.",
+    group: "Functions",
     source: `def big_func(num: int) -> int:
     a: int = num + 2
     return a
 
 def bigger_func(num: int) -> int:
-    a: int = big_func(num=num) * 2
+    a: int = big_func(num) * 2
     return a
 
 def biggest_func(num: int) -> int:
-    a: int = bigger_func(num=num) ** 2
+    a: int = bigger_func(num) ** 2
     return a
 
 def main() -> None:
-    a: int = 110
-    a = biggest_func(num=a)
-    print("Wow! " + str(a) + " is a big number!")
+    a: int = 110 
+    a = biggest_func(a)
+    print(f"Wow! {a} is a big number!")
 
-main()
-`,
+main()\n`,
   },
   {
-    id: 'calzones',
-    title: 'Calzones',
-    prompt:
-      'Predict the final Output. Calzones are $7 each, strombolis are $8 each, plus a $3 service fee.',
-    source: `def total_price(calzones: int, strombolis: int) -> int:
-    """Returns the total price for the order of food, including a service fee of $3."""
-    return calzones_price(calzones=calzones) + strombolis_price(strombolis=strombolis) + 3
+    id: "functions_func_import_01",
+    title: "Functions: func-import-01",
+    prompt: "Compound boolean in an if, followed by a while loop inside the function.",
+    group: "Functions",
+    source: `def subtraction(x: int) -> int:
+    if not x == 10 or x > 8:
+        while x > 7: 
+            x -= 1
+    return x
 
-def calzones_price(calzones: int) -> int:
-    """Returns the price of the given number of calzones."""
-    return 7 * calzones
+def to_ten(y: int) -> int:
+    while y < 10:
+        y += 2
+    return y
 
-def strombolis_price(strombolis: int) -> int:
-    """Returns the price of the given number of strombolis."""
-    return 8 * strombolis
+def main():
+    num1: int = 2
+    num1 = to_ten(num1)
+    num1 = subtraction(num1)
+    print(f"The number is {num1}")
 
-print(total_price(calzones=4, strombolis=2))
-`,
+main()\n`,
   },
   {
-    id: 'circle',
-    title: 'Circumference & Area',
-    prompt:
-      'Step through main(). Predict the two printed lines — note the order of the calls.',
-    source: `"""Functions of a circle..."""
+    id: "functions_func_import_02",
+    title: "Functions: func-import-02",
+    prompt: "A function whose return value is computed but never printed (no output expected).",
+    group: "Functions",
+    source: `def f(x: str) -> int:
+    return len(x) + 1
+
+
+def g(x: int, y: str) -> int:
+    while x > len(y):
+        x -= 1
+    return x
+
 
 def main() -> None:
-    """Entrypoint of Program"""
-    print(circumference(radius=1.0))
-    print(area(radius=1.0))
-    return None
+    (g(f("python"), "java"))
 
-def area(radius: float) -> float:
-    """Calculate area of a circle"""
-    return 3.14 * radius ** 2
 
-def circumference(radius: float) -> float:
-    """Calculate circumference"""
-    return 2 * 3.14 * radius
-
-main()
-`,
+main()\n`,
   },
   {
-    id: 'big_func',
-    title: 'Big / Bigger / Biggest',
-    prompt:
-      'Three nested function calls. What does biggest_func(num=110) evaluate to?',
-    source: `def big_func(a: int) -> int:
-    return a + 2
+    id: "lists_change_and_check",
+    title: "Lists: change-and-check",
+    prompt: "List passed by reference; index-assign mutates the caller. append() captures mutated state.",
+    group: "Lists",
+    source: `"""Practice diagram."""
 
-def bigger_func(b: int) -> int:
-    return big_func(a=b) * 2
+def change_and_check(x: int, nums: list[int]) -> int:
+    """Let's see what happens!"""
+    if x < 0:
+        return 0
+    i: int = 0
+    while i < len(nums):
+        nums[i] += x
+        i += 1
+    i = 0
+    while i < len(nums):
+        if nums[i] == x:
+            return 0
+        i += 1
+    return x - 1
 
-def biggest_func(num: int) -> int:
-    return bigger_func(b=num) ** 2
 
 def main() -> None:
-    print(str(biggest_func(num=110)) + " is a big number!")
+    """The entrypoint of this program."""
+    num_1: int = 0
+    list_1: list[int] = [1, 2, num_1]
+    list_1.append(change_and_check(2, list_1))
+    list_1.append(change_and_check(3, list_1))
 
-main()
-`,
+main()\n`,
   },
   {
-    id: 'division',
-    title: 'Division (unreachable code)',
-    prompt:
-      'The print inside division() is unreachable — the return fires first. Output shows the same value twice?',
-    source: `def division(x: int, y: int) -> float:
-    return y / x
-    print(y % x)
+    id: "lists_lists_00",
+    title: "Lists: lists-00",
+    prompt: "for over range() and for over a list; both produce side effects via index-assign.",
+    group: "Lists",
+    source: `def f(x: list[str]) -> str:
+    for y in range(0,len(x)):
+        x[y] += "x"
+    return x[y]
 
-print(division(y=64, x=16))
+def g(x: list[str]) -> list[str]:
+    new_list: list[str] = []
+    for z in x:
+        new_list.append(str(z))
+    return new_list
 
-print(int(64/16))
-`,
+record: list[str] = ["x", "y"]
+print(f(record))
+print(g(record))\n`,
   },
   {
-    id: 'start_end',
-    title: 'Start & End',
-    prompt:
-      'Only the second call is printed. What string lands in Output?',
-    source: `def start_end(word: str) -> str:
-    return word[0] + word[len(word)-1]
+    id: "lists_lists_01",
+    title: "Lists: lists-01",
+    prompt: "while loop + indexed comparison + increment counter. Count matching elements.",
+    group: "Lists",
+    source: `def check_quiz(responses: list[bool]) -> int:
+    answer_key: list[bool] = [True, True, False]
+    correct: int = 0
+    idx: int = 0
+    while idx < len(responses):
+        if responses[idx] == answer_key[idx]:
+            correct += 1
+            idx += 1
+        else:
+            idx += 1
+    return correct
 
-start_end(word="kitkat")
-print(start_end(word="skittles"))
-`,
+def main() -> None:
+    my_quiz: list[bool] = [True, True, True]
+    grade: int = check_quiz(my_quiz)
+    print(f"{grade} out of 3 questions correct.")
+
+
+main()\n`,
   },
   {
-    id: 'cookies',
-    title: 'Cookies per Student',
-    prompt:
-      'Trace give_cookies(total_cookies=11, num_students=2). Predict both printed lines.',
-    source: `def give_cookies(total_cookies: int, num_students: int) -> int:
-    print("Extra cookies: " + str(total_cookies % num_students))
-    return int((total_cookies - (total_cookies % num_students))/2)
+    id: "lists_references",
+    title: "Lists: references",
+    prompt: "list_2 = list_1 aliases; then list_1 = create() rebinds. Both print their own state.",
+    group: "Lists",
+    source: `"""Practice diagram."""
 
-print("Each student gets " + str(give_cookies(total_cookies=11, num_students=2)) + " cookies")
-`,
-  },
-  {
-    id: 'mystery',
-    title: 'Mystery Word',
-    prompt:
-      'Three helper functions composed together. Extract one character from "mystery" — which one?',
-    source: `def get_starting_point(word: str) -> int:
-    return int(len(word) / 3)
-
-def shift_position(index: int) -> int:
-    return index - 1
-
-def extract_character(word: str, index: int) -> str:
-    return word[index]
-
-def main(word: str) -> None:
-    print("The hidden character is: " + extract_character(word=word, index=shift_position(index=get_starting_point(word=word))))
-
-main(word="mystery")
-`,
-  },
-  {
-    id: 'list_reference',
-    title: 'Lists — reference aliasing via create/increase',
-    prompt:
-      "Watch how `list_2 = list_1` shares the same heap list; then `list_1 = create()` rebinds list_1 to a fresh list. After increase(list_1, 2), list_1 prints [2, 3, 4] but list_2 still shows [0, 1, 2].",
-    source: `def create() -> list[int]:
+def create() -> list[int]:
     """An obnoxious way to make a list."""
     list_1: list[int] = []
     i: int = 0
@@ -239,39 +353,272 @@ def main() -> None:
     print(list_2)
 
 
-main()
-`,
+main()\n`,
   },
   {
-    id: 'list_basics',
-    title: 'Lists — append + while loop',
-    prompt:
-      'Build a list from 0 to 4 with a while loop and watch each append land as a new slot on the heap list.',
-    source: `numbers: list[int] = []
-i: int = 0
-while i < 5:
-    numbers.append(i * 2)
-    i += 1
-print(numbers)
-`,
+    id: "dicts_dicts_00",
+    title: "Dictionaries: dicts-00",
+    prompt: "for over dict keys with += 1; second function returns a new dict mapping key->str(key).",
+    group: "Dictionaries",
+    source: `def f(x: dict[str,int]) -> int:
+    for y in x:
+        x[y] += 1
+    return x[y]
+
+def g(x: dict[str,int]) -> dict[str,str]:
+    new_dict: dict[str,str] = {}
+    for z in x:
+        new_dict[z] = str(z)
+    return new_dict
+
+record: dict[str, int] = {"x": 20, "y": 40}
+print(f(record))
+print(g(record))\n`,
   },
   {
-    id: 'knight_castle',
-    title: 'OOP — Knight & Castle',
-    prompt:
-      'Two classes with __init__ and __str__. Watch the heap gain a Knight instance, a Castle instance, and see drawbridge_up get struck through when close() reassigns it.',
+    id: "dicts_dicts_01",
+    title: "Dictionaries: dicts-01",
+    prompt: "if y in x membership test + dict indexing.",
+    group: "Dictionaries",
+    source: `def mystery(x: dict[str,float], y: str) -> str:
+    if y in x:
+        return str(x[y])
+    else:
+        return "not in dictionary"
+
+x = "y"
+y = "z"
+test: dict[str,float] = {"z": 3.14}
+print(mystery(test,y))\n`,
+  },
+  {
+    id: "dicts_lineups",
+    title: "Dictionaries: lineups",
+    prompt: "Nested dict of lists; indexed write into the inner list. (Source fixed: 24s site had a chained-assign typo.)",
+    group: "Dictionaries",
+    source: `starting: dict[str, list[str]] = {}
+starting["2017"] = ["Berry", "Meeks", "Jackson"]
+starting["2023"] = ["Love", "Bacot", "Black"]
+
+print(starting["2017"][2])
+print(starting["2023"])
+starting["2023"][2] = "Johnson"
+print(starting["2023"])\n`,
+  },
+  {
+    id: "recursion_basic_loop",
+    title: "Recursion: basic-loop",
+    prompt: "Tail-recursive countdown by 2 until x < 3.",
+    group: "Recursion",
+    source: `def loop(x: int) -> int:
+    if x < 3:
+        return x
+    else:
+        return loop(x-2)
+
+print(loop(6))\n`,
+  },
+  {
+    id: "recursion_pow",
+    title: "Recursion: pow",
+    prompt: "Recursive power-of-2 computation.",
+    group: "Recursion",
+    source: `def f(n: int) -> int:
+    if n == 0:
+        return 1
+    else:
+        return f(n-1) * 2
+
+print(f(3))\n`,
+  },
+  {
+    id: "recursion_silly_loop",
+    title: "Recursion: silly-loop",
+    prompt: "Recursion that returns no printed value; trace the call stack.",
+    group: "Recursion",
+    source: `def silly_loop(x: int)-> int:
+    if x < 2:
+        return x
+    else:
+        return 2 + silly_loop(x-3) 
+
+silly_loop(10)\n`,
+  },
+  {
+    id: "oop_stadium",
+    title: "OOP: stadium",
+    prompt: "Class with init + upgrade method touching multiple fields via if/elif/else.",
+    group: "OOP",
+    source: `class Stadium:
+    sponsor: str
+    capacity: int
+    has_roof: bool
+    ticket_price: int
+
+    def __init__(self, s: str, c: int, h: bool):
+        self.sponsor = s
+        self.capacity = c
+        self.has_roof = h
+        self.ticket_price = 20
+    
+    def upgrade(self) -> None:
+        if self.capacity > 75000:
+            self.has_roof = True
+            self.ticket_price += 10
+        elif self.sponsor == "FedEx":
+            self.capacity += 10000
+            self.ticket_price += 5
+        else:
+            self.capacity += 5000
+    
+def main() -> None:
+    new_arena: Stadium = Stadium("FedEx", 70000, False)
+    new_arena.upgrade()
+    new_arena.upgrade()
+    print(new_arena.ticket_price)
+
+
+main()\n`,
+  },
+  {
+    id: "oop_tweets",
+    title: "OOP: tweets",
+    prompt: "Profile class + toggle_privacy using not.",
+    group: "OOP",
+    source: `class Profile:
+    
+    handle: str
+    followers: int
+    is_private: bool
+    
+    def __init__(self, handle: str):
+        self.handle = handle
+        self.followers = 0
+        self.is_private = False
+        
+    def send(self, msg: str) ->  None:
+        if not self.is_private:
+            print(f"@{self.handle} says {msg}")
+            
+    def toggle_privacy(self) -> None:
+        self.is_private = not self.is_private
+        
+a: Profile = Profile("alyssa")
+b: Profile = Profile("tyler")
+a.send("Sup")
+b.toggle_privacy()
+b.send("Heyyy")\n`,
+  },
+  {
+    id: "oop_advanced_board_games",
+    title: "OOP \u2014 magic methods: board-games",
+    prompt: "Class using in operator and list.pop() inside a while loop.",
+    group: "OOP \u2014 magic methods",
+    source: `class Games:
+    
+    set: list[str]
+    wishlist: list[str]
+    
+    def __init__(self, set: list[str], wishlist: list[str]):
+        self.set = set
+        self.wishlist = wishlist
+    
+    def __str__(self) -> str:
+        return f"My games: {self.set}"
+    
+    def purchase(self, game):
+        if game in self.wishlist:
+            idx: int = 0
+            while idx < len(self.wishlist):
+                if game == self.wishlist[idx]:
+                    self.wishlist.pop(idx)
+                idx += 1
+        self.set.append(game)
+        
+collection: Games = Games([], ["Uno", "Life"])
+collection.purchase("Uno")
+collection.purchase("Catan")
+print(collection)\n`,
+  },
+  {
+    id: "oop_advanced_playlist",
+    title: "OOP \u2014 magic methods: playlist",
+    prompt: "__add__ magic method makes p1 + 1 call the class __add__.",
+    group: "OOP \u2014 magic methods",
+    source: `class Playlist:
+    
+    name: str
+    songs: int
+    on_repeat: bool
+    
+    def __init__(self, name: str, songs: int, repeat: bool):
+        self.name = name
+        self.songs = songs
+        self.on_repeat = repeat
+    
+    def __add__(self, num_songs: int) -> Playlist:
+        return Playlist(self.name + "_copy", self.songs + num_songs, self.on_repeat)
+    
+    def __str__(self) -> str:
+        return f"{self.name}: {self.songs} songs"
+    
+    def playlist_length(self) -> int:
+        total: int = 0
+        total = self.songs * 3
+        if self.on_repeat:
+            total *= 2
+        return total
+    
+p1: Playlist = Playlist("Hits", 9, True)
+p2: Playlist = p1 + 1
+print(p1)
+print(p2.playlist_length())\n`,
+  },
+  {
+    id: "oop_advanced_team",
+    title: "OOP \u2014 magic methods: team",
+    prompt: "Class that holds a list of players; add_player mutates the field.",
+    group: "OOP \u2014 magic methods",
+    source: `class Team:
+        
+    team_name: str
+    players: list[str]
+        
+    def __init__(self, inp_name: str, inp_players: list[str]):
+        self.team_name = inp_name
+        self.players = inp_players
+    
+    def add_player(self, player_name: str)-> None:
+        self.players.append(player_name)
+        
+    def __str__(self) -> str:
+        info: str = f"{self.team_name}: {self.players}"
+        return info
+            
+teammates: list[str] = ["Alyssa", "Jayden"]
+team0: Team = Team("Rockets", teammates)
+team1: Team = Team("Wombats", [])
+team1.add_player("Chiara")
+team1.add_player("Shefali")
+print(team1)\n`,
+  },
+  {
+    id: "knight_castle",
+    title: "OOP: Knight & Castle",
+    prompt: "Two classes with __init__ and __str__. Watch drawbridge_up get struck through on close().",
+    group: "OOP",
     source: `class Knight:
-    """A medieval Knight."""
+    \"\"\"A medieval Knight.\"\"\"
     name: str
 
     def __init__(self, name: str):
         self.name = name
 
     def __str__(self) -> str:
-        return f"Sir {self.name}"
+        return f\"Sir {self.name}\"
 
 class Castle:
-    """A medieval castle with a drawbridge for crossing a surrounding moat and a guarding knight."""
+    \"\"\"A medieval castle with a drawbridge.\"\"\"
     guard: Knight
     drawbridge_up: bool
 
@@ -281,26 +628,26 @@ class Castle:
 
     def __str__(self) -> str:
         if self.drawbridge_up:
-            return f"Guarded by {self.guard} and closed to outsiders!"
+            return f\"Guarded by {self.guard} and closed to outsiders!\"
         else:
-            return f"Guarded by {self.guard} but open to all!"
+            return f\"Guarded by {self.guard} but open to all!\"
 
     def open(self) -> None:
         if self.drawbridge_up:
-            print("Let down the bridge!")
+            print(\"Let down the bridge!\")
             self.drawbridge_up = False
         else:
-            print("Already open!")
+            print(\"Already open!\")
 
     def close(self) -> None:
         if not self.drawbridge_up:
-            print("Pull up the bridge!")
+            print(\"Pull up the bridge!\")
             self.drawbridge_up = True
         else:
-            print("Already closed!")
+            print(\"Already closed!\")
 
 
-lancelot: Knight = Knight("Lancelot")
+lancelot: Knight = Knight(\"Lancelot\")
 my_castle: Castle = Castle(lancelot, False)
 print(my_castle)
 my_castle.close()
@@ -308,54 +655,10 @@ print(my_castle)
 `,
   },
   {
-    id: 'simple_class',
-    title: 'OOP — Point (warm-up)',
-    prompt:
-      'A minimal class. __init__ sets x and y; move() reassigns both. Watch the Point instance attributes get struck through on reassignment.',
-    source: `class Point:
-    x: int
-    y: int
-
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
-
-    def move(self, dx: int, dy: int) -> None:
-        self.x = self.x + dx
-        self.y = self.y + dy
-
-    def __str__(self) -> str:
-        return f"({self.x}, {self.y})"
-
-p: Point = Point(3, 4)
-print(p)
-p.move(dx=1, dy=-2)
-print(p)
-`,
-  },
-  {
-    id: 'conditional',
-    title: 'Conditionals — grade',
-    prompt:
-      'if / elif / else with comparisons. Step through the truthy branch selection.',
-    source: `def grade(score: int) -> str:
-    if score >= 90:
-        return "A"
-    elif score >= 80:
-        return "B"
-    elif score >= 70:
-        return "C"
-    else:
-        return "F"
-
-print(grade(score=85))
-`,
-  },
-  {
-    id: 'blank',
-    title: 'Write your own',
-    prompt:
-      'Type any Python code that uses v0 features (def, return, function calls, variable assignment, print, len, int, str, float, arithmetic, string indexing). Press Run and step through.',
+    id: "blank",
+    title: "Write your own",
+    prompt: "Type any Python using supported features (def/class/return/call/assign/if/while/for/list/dict/+=/in). Press Run and step through.",
+    group: "Custom",
     source: `def double(n: int) -> int:
     return n * 2
 

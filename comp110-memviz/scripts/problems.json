@@ -1,0 +1,114 @@
+[
+  {
+    "id": "basic/basic-00",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nb: str = \"Partner\"\na: str = \"Howdy \"\na += b\nprint(a)"
+  },
+  {
+    "id": "basic/basic-01",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\na: str = \"Mardi\"\nb: str = \"Gras\"\nc: str = a[0] + a[len(b)]\na = \"yay!\"\nprint(c)"
+  },
+  {
+    "id": "basic/basic-02",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\na: str = \"a\"\nb: str = a + \"b\" + \"b\"\nprint(b + a)\na = a + str(len(b))\nprint(a)"
+  },
+  {
+    "id": "basic/basic-03",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nage: int = 20\nyear: int = 2024\nolder_age: int = age + 10\nlater_year: int = year + 10\nprint(\"In \" + str(later_year) + \" you'll be \" + str(older_age))"
+  },
+  {
+    "id": "conditionals/conditionals-00",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nx: str = \"Hello\"\ny: int = len(x)\nif y % 4 == 1:\n    y *= 2\ny -= 6\nprint(y)\nprint(x[y])"
+  },
+  {
+    "id": "conditionals/conditionals-01",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nx: int = 2\ny: str = \"yo\"\nz: str = \"2\"\nif len(y) > 1:\n    y *= x\nelse:\n    y = \"no\"\nif x > 0:\n    print(z)\nprint(y)"
+  },
+  {
+    "id": "dicts/dicts-00",
+    "source": "def f(x: dict[str,int]) -> int:\n    for y in x:\n        x[y] += 1\n    return x[y]\n\ndef g(x: dict[str,int]) -> dict[str,str]:\n    new_dict: dict[str,str] = {}\n    for z in x:\n        new_dict[z] = str(z)\n    return new_dict\n\nrecord: dict[str, int] = {\"x\": 20, \"y\": 40}\nprint(f(record))\nprint(g(record))"
+  },
+  {
+    "id": "dicts/dicts-01",
+    "source": "def mystery(x: dict[str,float], y: str) -> str:\n    if y in x:\n        return str(x[y])\n    else:\n        return \"not in dictionary\"\n\nx = \"y\"\ny = \"z\"\ntest: dict[str,float] = {\"z\": 3.14}\nprint(mystery(test,y))"
+  },
+  {
+    "id": "dicts/lineups",
+    "source": "starting: dict[str, list[str]] = {}\nstarting[\"2017\"] = [\"Berry\", \"Meeks\", \"Jackson\"]\nstarting[\"2023\"] = [\"Love\", \"Bacot\", \"Black\"]\n\nprint(starting[\"2017\"][2])\nprint(starting[\"2023\"])\nstarting[\"2023\"][2] = \"Johnson\"\nprint(starting[\"2023\"])"
+  },
+  {
+    "id": "elif/elif-00",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\na: int = 2\nb: int = 6\nif a > b:\n    print(a-b)\nelif b < 10:\n    print(b/a)\nelse:\n    print(a+b)\nprint(b)"
+  },
+  {
+    "id": "functions/func-import-00",
+    "source": "def big_func(num: int) -> int:\n    a: int = num + 2\n    return a\n\ndef bigger_func(num: int) -> int:\n    a: int = big_func(num) * 2\n    return a\n\ndef biggest_func(num: int) -> int:\n    a: int = bigger_func(num) ** 2\n    return a\n\ndef main() -> None:\n    a: int = 110 \n    a = biggest_func(a)\n    print(f\"Wow! {a} is a big number!\")\n\nmain()"
+  },
+  {
+    "id": "functions/func-import-01",
+    "source": "def subtraction(x: int) -> int:\n    if not x == 10 or x > 8:\n        while x > 7: \n            x -= 1\n    return x\n\ndef to_ten(y: int) -> int:\n    while y < 10:\n        y += 2\n    return y\n\ndef main():\n    num1: int = 2\n    num1 = to_ten(num1)\n    num1 = subtraction(num1)\n    print(f\"The number is {num1}\")\n\nmain()"
+  },
+  {
+    "id": "functions/func-import-02",
+    "source": "def f(x: str) -> int:\n    return len(x) + 1\n\n\ndef g(x: int, y: str) -> int:\n    while x > len(y):\n        x -= 1\n    return x\n\n\ndef main() -> None:\n    (g(f(\"python\"), \"java\"))\n\n\nmain()"
+  },
+  {
+    "id": "lists/change-and-check",
+    "source": "\"\"\"Practice diagram.\"\"\"\n\ndef change_and_check(x: int, nums: list[int]) -> int:\n    \"\"\"Let's see what happens!\"\"\"\n    if x < 0:\n        return 0\n    i: int = 0\n    while i < len(nums):\n        nums[i] += x\n        i += 1\n    i = 0\n    while i < len(nums):\n        if nums[i] == x:\n            return 0\n        i += 1\n    return x - 1\n\n\ndef main() -> None:\n    \"\"\"The entrypoint of this program.\"\"\"\n    num_1: int = 0\n    list_1: list[int] = [1, 2, num_1]\n    list_1.append(change_and_check(2, list_1))\n    list_1.append(change_and_check(3, list_1))\n\nmain()"
+  },
+  {
+    "id": "lists/lists-00",
+    "source": "def f(x: list[str]) -> str:\n    for y in range(0,len(x)):\n        x[y] += \"x\"\n    return x[y]\n\ndef g(x: list[str]) -> list[str]:\n    new_list: list[str] = []\n    for z in x:\n        new_list.append(str(z))\n    return new_list\n\nrecord: list[str] = [\"x\", \"y\"]\nprint(f(record))\nprint(g(record))"
+  },
+  {
+    "id": "lists/lists-01",
+    "source": "def check_quiz(responses: list[bool]) -> int:\n    answer_key: list[bool] = [True, True, False]\n    correct: int = 0\n    idx: int = 0\n    while idx < len(responses):\n        if responses[idx] == answer_key[idx]:\n            correct += 1\n            idx += 1\n        else:\n            idx += 1\n    return correct\n\ndef main() -> None:\n    my_quiz: list[bool] = [True, True, True]\n    grade: int = check_quiz(my_quiz)\n    print(f\"{grade} out of 3 questions correct.\")\n\n\nmain()"
+  },
+  {
+    "id": "lists/references",
+    "source": "\"\"\"Practice diagram.\"\"\"\n\ndef create() -> list[int]:\n    \"\"\"An obnoxious way to make a list.\"\"\"\n    list_1: list[int] = []\n    i: int = 0\n    while i < 3:\n        list_1.append(i)\n        i += 1\n    return list_1\n\n\ndef increase(a_list: list[int], x: int) -> None:\n    \"\"\"Lets pump it up!\"\"\"\n    i: int = 0\n    while i < len(a_list):\n        a_list[i] += x\n        i += 1\n    return None\n\n\ndef main() -> None:\n    \"\"\"Entrypoint of the program.\"\"\"\n    list_1: list[int] = create()\n    list_2: list[int] = list_1\n    list_1 = create()\n    increase(list_1, 2)\n    print(list_1)\n    print(list_2)\n\n\nmain()"
+  },
+  {
+    "id": "oop-advanced/board-games",
+    "source": "class Games:\n    \n    set: list[str]\n    wishlist: list[str]\n    \n    def __init__(self, set: list[str], wishlist: list[str]):\n        self.set = set\n        self.wishlist = wishlist\n    \n    def __str__(self) -> str:\n        return f\"My games: {self.set}\"\n    \n    def purchase(self, game):\n        if game in self.wishlist:\n            idx: int = 0\n            while idx < len(self.wishlist):\n                if game == self.wishlist[idx]:\n                    self.wishlist.pop(idx)\n                idx += 1\n        self.set.append(game)\n        \ncollection: Games = Games([], [\"Uno\", \"Life\"])\ncollection.purchase(\"Uno\")\ncollection.purchase(\"Catan\")\nprint(collection)"
+  },
+  {
+    "id": "oop-advanced/playlist",
+    "source": "class Playlist:\n    \n    name: str\n    songs: int\n    on_repeat: bool\n    \n    def __init__(self, name: str, songs: int, repeat: bool):\n        self.name = name\n        self.songs = songs\n        self.on_repeat = repeat\n    \n    def __add__(self, num_songs: int) -> Playlist:\n        return Playlist(self.name + \"_copy\", self.songs + num_songs, self.on_repeat)\n    \n    def __str__(self) -> str:\n        return f\"{self.name}: {self.songs} songs\"\n    \n    def playlist_length(self) -> int:\n        total: int = 0\n        total = self.songs * 3\n        if self.on_repeat:\n            total *= 2\n        return total\n    \np1: Playlist = Playlist(\"Hits\", 9, True)\np2: Playlist = p1 + 1\nprint(p1)\nprint(p2.playlist_length())"
+  },
+  {
+    "id": "oop-advanced/team",
+    "source": "class Team:\n        \n    team_name: str\n    players: list[str]\n        \n    def __init__(self, inp_name: str, inp_players: list[str]):\n        self.team_name = inp_name\n        self.players = inp_players\n    \n    def add_player(self, player_name: str)-> None:\n        self.players.append(player_name)\n        \n    def __str__(self) -> str:\n        info: str = f\"{self.team_name}: {self.players}\"\n        return info\n            \nteammates: list[str] = [\"Alyssa\", \"Jayden\"]\nteam0: Team = Team(\"Rockets\", teammates)\nteam1: Team = Team(\"Wombats\", [])\nteam1.add_player(\"Chiara\")\nteam1.add_player(\"Shefali\")\nprint(team1)"
+  },
+  {
+    "id": "oop/stadium",
+    "source": "class Stadium:\n    sponsor: str\n    capacity: int\n    has_roof: bool\n    ticket_price: int\n\n    def __init__(self, s: str, c: int, h: bool):\n        self.sponsor = s\n        self.capacity = c\n        self.has_roof = h\n        self.ticket_price = 20\n    \n    def upgrade(self) -> None:\n        if self.capacity > 75000:\n            self.has_roof = True\n            self.ticket_price += 10\n        elif self.sponsor == \"FedEx\":\n            self.capacity += 10000\n            self.ticket_price += 5\n        else:\n            self.capacity += 5000\n    \ndef main() -> None:\n    new_arena: Stadium = Stadium(\"FedEx\", 70000, False)\n    new_arena.upgrade()\n    new_arena.upgrade()\n    print(new_arena.ticket_price)\n\n\nmain()"
+  },
+  {
+    "id": "oop/tweets",
+    "source": "class Profile:\n    \n    handle: str\n    followers: int\n    is_private: bool\n    \n    def __init__(self, handle: str):\n        self.handle = handle\n        self.followers = 0\n        self.is_private = False\n        \n    def send(self, msg: str) ->  None:\n        if not self.is_private:\n            print(f\"@{self.handle} says {msg}\")\n            \n    def toggle_privacy(self) -> None:\n        self.is_private = not self.is_private\n        \na: Profile = Profile(\"alyssa\")\nb: Profile = Profile(\"tyler\")\na.send(\"Sup\")\nb.toggle_privacy()\nb.send(\"Heyyy\")"
+  },
+  {
+    "id": "recursion/basic-loop",
+    "source": "def loop(x: int) -> int:\n    if x < 3:\n        return x\n    else:\n        return loop(x-2)\n\nprint(loop(6))"
+  },
+  {
+    "id": "recursion/pow",
+    "source": "def f(n: int) -> int:\n    if n == 0:\n        return 1\n    else:\n        return f(n-1) * 2\n\nprint(f(3))"
+  },
+  {
+    "id": "recursion/silly-loop",
+    "source": "def silly_loop(x: int)-> int:\n    if x < 2:\n        return x\n    else:\n        return 2 + silly_loop(x-3) \n\nsilly_loop(10)"
+  },
+  {
+    "id": "while/while-00",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\ni: int = 0\ns: str = \"\"\n\nwhile i < 4:\n    if i % 2 == 0:\n        s += \"h\"\n    elif i % 3 == 0:\n        s += \"!\"\n    else:\n        s += \"e\"\n    i += 1\nprint(s)"
+  },
+  {
+    "id": "while/while-01",
+    "source": "\"\"\"Loops Practice!\"\"\"\n\nx: int = 0\ny: int = 3\nz: str = \"1\"\n\nwhile x < y:\n    z = z + str(y) + str(x)\n    x = x + 1\n\nprint(x)\nprint(y)\nprint(z)"
+  },
+  {
+    "id": "while/while-02",
+    "source": "\"\"\" Practice Memory Diagram \"\"\"\n\nx: int = 10\nresult: str = \"\"\n\nwhile x >= 0:\n    if x % 3 > 0:\n        result = result + str(x)\n    else:\n        result = str(x) + result\n    x = x - 1\n\nprint(result)"
+  }
+]

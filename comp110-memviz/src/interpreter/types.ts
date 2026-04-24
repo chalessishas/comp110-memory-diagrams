@@ -9,7 +9,7 @@ export type Value =
   | { kind: 'none' }
   | { kind: 'ref'; id: number } // reference to a heap object
 
-export type HeapObject = HeapFunction | HeapClass | HeapInstance | HeapList
+export type HeapObject = HeapFunction | HeapClass | HeapInstance | HeapList | HeapDict
 
 export type HeapFunction = {
   id: number
@@ -55,6 +55,15 @@ export type HeapList = {
   // Element type annotation for display, e.g. "int" / "str" / "Point".
   elementType: TypeAnnotation
   slots: HeapListSlot[]
+}
+
+// A dict stores its entries as an append-only Binding[] keyed by stringified
+// key. Writing to an existing key retires the prior entry + pushes a new one,
+// so the strike-through rendering matches variable / attr / list-slot rules.
+export type HeapDict = {
+  id: number
+  kind: 'dict'
+  entries: Binding[] // name = key (stringified), value = Value
 }
 
 // Per the v0 ruleset, variable assignments and function returns don't erase
@@ -112,7 +121,16 @@ export type Stmt =
   | IndexAssignStmt
   | IfStmt
   | WhileStmt
+  | ForStmt
   | ClassDef
+
+export type ForStmt = {
+  kind: 'for'
+  target: string // simple name in v2; `for x in iter:`
+  iter: Expr
+  body: Stmt[]
+  line: number
+}
 
 export type AssignStmt = {
   kind: 'assign'
@@ -192,6 +210,7 @@ export type Expr =
   | FStringLit
   | BoolLit
   | ListLit
+  | DictLit
   | NameRef
   | BinaryOp
   | CompareOp
@@ -203,6 +222,11 @@ export type Expr =
   | AttrExpr
 
 export type ListLit = { kind: 'listLit'; elements: Expr[]; line: number }
+export type DictLit = {
+  kind: 'dictLit'
+  entries: { key: Expr; value: Expr }[]
+  line: number
+}
 
 export type NumLit = { kind: 'num'; v: number; isFloat: boolean; line: number }
 export type StrLit = { kind: 'str'; v: string; line: number }
@@ -216,7 +240,7 @@ export type BoolLit = { kind: 'bool'; v: boolean; line: number }
 export type NameRef = { kind: 'name'; name: string; line: number }
 export type CompareOp = {
   kind: 'cmp'
-  op: '==' | '!=' | '<' | '>' | '<=' | '>='
+  op: '==' | '!=' | '<' | '>' | '<=' | '>=' | 'in' | 'not in'
   left: Expr
   right: Expr
   line: number

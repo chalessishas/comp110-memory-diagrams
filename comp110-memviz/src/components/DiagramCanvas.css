@@ -210,6 +210,19 @@
   font-weight: 600;
 }
 
+.heap-obj.dict {
+  background: #e6fffa; /* light teal — dict objects */
+  border-color: #0987a0;
+  box-shadow: 1px 1px 0 #0987a0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.dict-entries .binding .name {
+  color: #086f83;
+  font-weight: 600;
+}
+
 .heap-obj-header {
   display: flex;
   flex-wrap: wrap;

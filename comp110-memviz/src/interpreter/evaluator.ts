@@ -19,6 +19,7 @@ import type {
   Expr,
   FunctionDef,
   Frame,
+  HeapDict,
   HeapInstance,
   HeapList,
   HeapObject,
@@ -121,6 +122,17 @@ function cloneHeapObject(h: HeapObject): HeapObject {
       })),
     }
   }
+  if (h.kind === 'dict') {
+    return {
+      id: h.id,
+      kind: 'dict',
+      entries: h.entries.map((e) => ({
+        name: e.name,
+        value: cloneValue(e.value),
+        retired: e.retired,
+      })),
+    }
+  }
   return { ...h }
 }
 
@@ -154,6 +166,95 @@ function listAppend(lst: HeapList, value: Value) {
   lst.slots.push({ index: listLength(lst), value, retired: false })
 }
 
+function listPop(lst: HeapList, index: number): Value | undefined {
+  // Pop removes the element at `index` and shifts all higher indexes down by
+  // one. We model this by retiring the popped slot and rewriting every slot
+  // whose index > index to index-1. We lose the visual "shift" but preserve
+  // Python's observable semantics for subsequent reads.
+  const len = listLength(lst)
+  if (index < 0 || index >= len) return undefined
+  const popped = listGet(lst, index)
+  // Retire all current entries and re-append in new order (skipping popped slot)
+  const current: Value[] = []
+  for (let i = 0; i < len; i++) {
+    if (i !== index) {
+      const v = listGet(lst, i)
+      if (v !== undefined) current.push(v)
+    }
+  }
+  // Retire everything
+  for (const s of lst.slots) s.retired = true
+  // Re-append the surviving values in order
+  current.forEach((v, i) => {
+    lst.slots.push({ index: i, value: v, retired: false })
+  })
+  return popped
+}
+
+// ----- Dict helpers -----------------------------------------------------
+
+function dictKey(v: Value): string {
+  if (v.kind === 'str') return 'S:' + v.v
+  if (v.kind === 'int') return 'I:' + v.v
+  if (v.kind === 'float') return 'F:' + v.v
+  if (v.kind === 'bool') return 'B:' + (v.v ? '1' : '0')
+  if (v.kind === 'none') return 'N'
+  if (v.kind === 'ref') return 'R:' + v.id
+  return '?'
+}
+
+function dictHas(d: HeapDict, key: Value): boolean {
+  const k = dictKey(key)
+  for (let i = d.entries.length - 1; i >= 0; i--) {
+    const e = d.entries[i]
+    if (!e.retired && e.name === k) return true
+  }
+  return false
+}
+
+function dictGet(d: HeapDict, key: Value): Value | undefined {
+  const k = dictKey(key)
+  for (let i = d.entries.length - 1; i >= 0; i--) {
+    const e = d.entries[i]
+    if (!e.retired && e.name === k) return e.value
+  }
+  return undefined
+}
+
+function dictSet(d: HeapDict, key: Value, value: Value) {
+  const k = dictKey(key)
+  for (const e of d.entries) {
+    if (!e.retired && e.name === k) e.retired = true
+  }
+  d.entries.push({ name: k, value, retired: false })
+}
+
+// Returns keys in Python insertion order. When a key is reassigned, the
+// retired old entry sits where it was first inserted; the new active entry
+// appears later in the entries array, but Python keeps the key at its
+// ORIGINAL insertion position. So we dedupe by first-occurrence index.
+function dictKeys(d: HeapDict): Value[] {
+  const parse = (k: string): Value => {
+    if (k === 'N') return { kind: 'none' }
+    const tag = k[0], rest = k.slice(2)
+    if (tag === 'S') return { kind: 'str', v: rest }
+    if (tag === 'I') return { kind: 'int', v: Number(rest) }
+    if (tag === 'F') return { kind: 'float', v: Number(rest) }
+    if (tag === 'B') return { kind: 'bool', v: rest === '1' }
+    if (tag === 'R') return { kind: 'ref', id: Number(rest) }
+    return { kind: 'str', v: rest }
+  }
+  const firstIdx = new Map<string, number>()
+  d.entries.forEach((e, i) => {
+    if (!firstIdx.has(e.name)) firstIdx.set(e.name, i)
+  })
+  const hasActive = (k: string) => d.entries.some((e) => !e.retired && e.name === k)
+  const ordered = [...firstIdx.entries()]
+    .filter(([k]) => hasActive(k))
+    .sort((a, b) => a[1] - b[1])
+  return ordered.map(([k]) => parse(k))
+}
+
 function snap(state: State, currentLine: number, narration: string, error: string | null = null): Snapshot {
   return {
     step: state.snapshots.length,
@@ -170,7 +271,7 @@ function push(state: State, snapshot: Snapshot) {
   state.snapshots.push(snapshot)
 }
 
-const BUILTINS = new Set(['print', 'len', 'int', 'str', 'float'])
+const BUILTINS = new Set(['print', 'len', 'int', 'str', 'float', 'range'])
 
 // The active frame is the topmost non-retired frame. Retired frames stay in
 // the stack for visualization but aren't the "current" execution context.
@@ -238,6 +339,7 @@ function valueToDisplay(v: Value, state: State): string {
     if (!obj) return `ID:${v.id}`
     if (obj.kind === 'instance') return `ID:${v.id} (${obj.className})`
     if (obj.kind === 'list') return `ID:${v.id} (list)`
+    if (obj.kind === 'dict') return `ID:${v.id} (dict)`
     return `ID:${v.id} (${obj.name})`
   }
   return '?'
@@ -255,6 +357,19 @@ function listRepr(lst: HeapList, state: State): string {
     else items.push(valueToDisplay(v, state))
   }
   return '[' + items.join(', ') + ']'
+}
+
+// Python-style dict repr, preserving insertion order.
+function dictRepr(d: HeapDict, state: State): string {
+  const keys = dictKeys(d)
+  const parts: string[] = []
+  for (const k of keys) {
+    const v = dictGet(d, k)!
+    const kStr = k.kind === 'str' ? `'${k.v}'` : valueToDisplay(k, state)
+    const vStr = v.kind === 'str' ? `'${v.v}'` : valueToDisplay(v, state)
+    parts.push(`${kStr}: ${vStr}`)
+  }
+  return '{' + parts.join(', ') + '}'
 }
 
 function evalExpr(state: State, expr: Expr): Value {
@@ -276,6 +391,10 @@ function evalExpr(state: State, expr: Expr): Value {
     case 'cmp': {
       const l = evalExpr(state, expr.left)
       const r = evalExpr(state, expr.right)
+      if (expr.op === 'in' || expr.op === 'not in') {
+        const inside = containsValue(state, r, l, expr.line)
+        return { kind: 'bool', v: expr.op === 'in' ? inside : !inside }
+      }
       return { kind: 'bool', v: compareValues(l, r, expr.op, expr.line) }
     }
     case 'boolOp': {
@@ -339,14 +458,14 @@ function evalExpr(state: State, expr: Expr): Value {
     case 'index': {
       const target = evalExpr(state, expr.target)
       const idx = evalExpr(state, expr.index)
-      if (idx.kind !== 'int') {
-        throw new RuntimeErrorSignal(
-          `TypeError on line ${expr.line}: index must be int`,
-          expr.line,
-        )
-      }
-      // String indexing (v0).
+      // String indexing (v0) — idx must be int.
       if (target.kind === 'str') {
+        if (idx.kind !== 'int') {
+          throw new RuntimeErrorSignal(
+            `TypeError on line ${expr.line}: string index must be int`,
+            expr.line,
+          )
+        }
         const i = idx.v < 0 ? target.v.length + idx.v : idx.v
         if (i < 0 || i >= target.v.length) {
           throw new RuntimeErrorSignal(
@@ -356,10 +475,16 @@ function evalExpr(state: State, expr: Expr): Value {
         }
         return { kind: 'str', v: target.v[i] }
       }
-      // List indexing (v2).
       if (target.kind === 'ref') {
         const obj = state.heap.find((h) => h.id === target.id)
+        // List indexing (v2).
         if (obj && obj.kind === 'list') {
+          if (idx.kind !== 'int') {
+            throw new RuntimeErrorSignal(
+              `TypeError on line ${expr.line}: list index must be int`,
+              expr.line,
+            )
+          }
           const len = listLength(obj)
           const i = idx.v < 0 ? len + idx.v : idx.v
           if (i < 0 || i >= len) {
@@ -372,6 +497,17 @@ function evalExpr(state: State, expr: Expr): Value {
           if (v === undefined) {
             throw new RuntimeErrorSignal(
               `IndexError on line ${expr.line}: list slot ${i} missing`,
+              expr.line,
+            )
+          }
+          return v
+        }
+        // Dict indexing (v3). Keys can be any hashable value.
+        if (obj && obj.kind === 'dict') {
+          const v = dictGet(obj, idx)
+          if (v === undefined) {
+            throw new RuntimeErrorSignal(
+              `KeyError on line ${expr.line}: ${valueToDisplay(idx, state)}`,
               expr.line,
             )
           }
@@ -406,7 +542,64 @@ function evalExpr(state: State, expr: Expr): Value {
       )
       return { kind: 'ref', id }
     }
+    case 'dictLit': {
+      const id = state.nextHeapId++
+      const d: HeapDict = { id, kind: 'dict', entries: [] }
+      state.heap.push(d)
+      for (const entry of expr.entries) {
+        const k = evalExpr(state, entry.key)
+        const v = evalExpr(state, entry.value)
+        dictSet(d, k, v)
+      }
+      push(
+        state,
+        snap(
+          state,
+          expr.line,
+          `Created dict ID:${id} with ${expr.entries.length} initial entry(ies).`,
+        ),
+      )
+      return { kind: 'ref', id }
+    }
   }
+}
+
+// Python-style `x in y`: list → element equality; dict → key presence; str → substring.
+function containsValue(state: State, container: Value, needle: Value, line: number): boolean {
+  if (container.kind === 'str') {
+    if (needle.kind !== 'str') {
+      throw new RuntimeErrorSignal(`TypeError on line ${line}: 'in <str>' needs string needle`, line)
+    }
+    return container.v.includes(needle.v)
+  }
+  if (container.kind === 'ref') {
+    const obj = state.heap.find((h) => h.id === container.id)
+    if (obj && obj.kind === 'list') {
+      const len = listLength(obj)
+      for (let i = 0; i < len; i++) {
+        const v = listGet(obj, i)
+        if (v !== undefined && valuesEqual(v, needle)) return true
+      }
+      return false
+    }
+    if (obj && obj.kind === 'dict') {
+      return dictHas(obj, needle)
+    }
+  }
+  throw new RuntimeErrorSignal(`TypeError on line ${line}: 'in' not supported for ${container.kind}`, line)
+}
+
+function valuesEqual(a: Value, b: Value): boolean {
+  if (a.kind !== b.kind) {
+    // int/float cross-equality
+    if ((a.kind === 'int' || a.kind === 'float') && (b.kind === 'int' || b.kind === 'float')) {
+      return a.v === b.v
+    }
+    return false
+  }
+  if (a.kind === 'none') return true
+  if (a.kind === 'ref' && b.kind === 'ref') return a.id === b.id
+  return (a as { v: unknown }).v === (b as { v: unknown }).v
 }
 
 function compareValues(l: Value, r: Value, op: string, line: number): boolean {
@@ -461,9 +654,35 @@ function evalBinop(state: State, expr: Expr & { kind: 'binop' }): Value {
   const l = evalExpr(state, expr.left)
   const r = evalExpr(state, expr.right)
 
+  // Instance + X: dispatch to the class's __add__ method (Python magic method).
+  if (expr.op === '+' && l.kind === 'ref') {
+    const obj = state.heap.find((h) => h.id === l.id)
+    if (obj && obj.kind === 'instance') {
+      const cls = state.classDefs.get(obj.className)
+      const add = cls?.methods.find((m) => m.name === '__add__')
+      if (cls && add) {
+        return callUserFunction(
+          state,
+          add,
+          [{ name: null, value: r }],
+          expr.line,
+          l,
+          `${cls.name}.__add__`,
+        )
+      }
+    }
+  }
+
   // String concatenation.
   if (expr.op === '+' && l.kind === 'str' && r.kind === 'str') {
     return { kind: 'str', v: l.v + r.v }
+  }
+  // String repetition: "yo" * 2 or 2 * "yo" → "yoyo"
+  if (expr.op === '*' && l.kind === 'str' && r.kind === 'int') {
+    return { kind: 'str', v: l.v.repeat(Math.max(0, r.v)) }
+  }
+  if (expr.op === '*' && l.kind === 'int' && r.kind === 'str') {
+    return { kind: 'str', v: r.v.repeat(Math.max(0, l.v)) }
   }
   if (l.kind !== 'int' && l.kind !== 'float') {
     throw new RuntimeErrorSignal(`TypeError on line ${expr.line}: left of '${expr.op}' is ${l.kind}`, expr.line)
@@ -510,7 +729,7 @@ function evalCall(state: State, expr: CallExpr): Value {
       )
     }
     const obj = state.heap.find((h) => h.id === selfVal.id)
-    // List methods — v2 supports .append(value).
+    // List methods — v2/v3 supports .append(value), .pop(index?).
     if (obj && obj.kind === 'list') {
       if (expr.callee === 'append') {
         if (expr.args.length !== 1) {
@@ -531,8 +750,30 @@ function evalCall(state: State, expr: CallExpr): Value {
         )
         return { kind: 'none' }
       }
+      if (expr.callee === 'pop') {
+        const len = listLength(obj)
+        let idx = len - 1
+        if (expr.args.length === 1) {
+          const v = evalExpr(state, expr.args[0].value)
+          if (v.kind !== 'int') throw new RuntimeErrorSignal(`list.pop needs int`, expr.line)
+          idx = v.v < 0 ? len + v.v : v.v
+        }
+        if (idx < 0 || idx >= len) {
+          throw new RuntimeErrorSignal(`IndexError on line ${expr.line}: pop index ${idx} out of range`, expr.line)
+        }
+        const popped = listPop(obj, idx)
+        push(
+          state,
+          snap(
+            state,
+            expr.line,
+            `list ID:${obj.id}.pop(${idx}) removed ${valueToDisplay(popped ?? { kind: 'none' }, state)} (subsequent indexes shifted; old slots struck through).`,
+          ),
+        )
+        return popped ?? { kind: 'none' }
+      }
       throw new RuntimeErrorSignal(
-        `AttributeError on line ${expr.line}: 'list' has no method '${expr.callee}' (v2 only supports append)`,
+        `AttributeError on line ${expr.line}: 'list' has no method '${expr.callee}'`,
         expr.line,
       )
     }
@@ -758,6 +999,7 @@ function toStr(state: State, v: Value, callLine: number): string {
   if (v.kind === 'ref') {
     const obj = state.heap.find((h) => h.id === v.id)
     if (obj && obj.kind === 'list') return listRepr(obj, state)
+    if (obj && obj.kind === 'dict') return dictRepr(obj, state)
     if (obj && obj.kind === 'instance') {
       const cls = state.classDefs.get(obj.className)
       const dunder = cls?.methods.find((m) => m.name === '__str__')
@@ -835,6 +1077,33 @@ function applyBuiltin(
     case 'str': {
       if (values.length !== 1) throw new RuntimeErrorSignal(`str() takes 1 arg`, expr.line)
       return { kind: 'str', v: toStr(state, values[0], expr.line) }
+    }
+    case 'range': {
+      // range(stop), range(start, stop), range(start, stop, step)
+      let start = 0, stop = 0, step = 1
+      if (values.length === 1) {
+        if (values[0].kind !== 'int') throw new RuntimeErrorSignal(`range() needs int`, expr.line)
+        stop = values[0].v
+      } else if (values.length === 2) {
+        if (values[0].kind !== 'int' || values[1].kind !== 'int') throw new RuntimeErrorSignal(`range() needs ints`, expr.line)
+        start = values[0].v; stop = values[1].v
+      } else if (values.length === 3) {
+        if (values[0].kind !== 'int' || values[1].kind !== 'int' || values[2].kind !== 'int') throw new RuntimeErrorSignal(`range() needs ints`, expr.line)
+        start = values[0].v; stop = values[1].v; step = values[2].v
+        if (step === 0) throw new RuntimeErrorSignal(`range() step must not be 0`, expr.line)
+      } else {
+        throw new RuntimeErrorSignal(`range() takes 1-3 args`, expr.line)
+      }
+      const id = state.nextHeapId++
+      const lst: HeapList = { id, kind: 'list', elementType: 'int', slots: [] }
+      state.heap.push(lst)
+      let i = start
+      const cond = (x: number) => (step > 0 ? x < stop : x > stop)
+      while (cond(i)) {
+        listAppend(lst, { kind: 'int', v: i })
+        i += step
+      }
+      return { kind: 'ref', id }
     }
   }
   throw new RuntimeErrorSignal(`unknown built-in '${name}'`, expr.line)
@@ -933,6 +1202,52 @@ function execStmt(state: State, stmt: Stmt) {
         stmt.line,
       )
     }
+    case 'for': {
+      const iterVal = evalExpr(state, stmt.iter)
+      let items: Value[] = []
+      if (iterVal.kind === 'ref') {
+        const obj = state.heap.find((h) => h.id === iterVal.id)
+        if (obj && obj.kind === 'list') {
+          const len = listLength(obj)
+          for (let i = 0; i < len; i++) {
+            const v = listGet(obj, i)
+            if (v !== undefined) items.push(v)
+          }
+        } else if (obj && obj.kind === 'dict') {
+          // Iterating a dict yields its keys (Python convention).
+          items = dictKeys(obj)
+        } else {
+          throw new RuntimeErrorSignal(
+            `TypeError on line ${stmt.line}: cannot iterate this object`,
+            stmt.line,
+          )
+        }
+      } else if (iterVal.kind === 'str') {
+        for (const ch of iterVal.v) items.push({ kind: 'str', v: ch })
+      } else {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: cannot iterate ${iterVal.kind}`,
+          stmt.line,
+        )
+      }
+      let loopIter = 0
+      for (const item of items) {
+        loopIter++
+        const frame = currentFrame(state)
+        setBinding(frame, stmt.target, item)
+        push(
+          state,
+          snap(
+            state,
+            stmt.line,
+            `for loop iteration ${loopIter}: ${stmt.target} = ${valueToDisplay(item, state)}.`,
+          ),
+        )
+        for (const s of stmt.body) execStmt(state, s)
+      }
+      push(state, snap(state, stmt.line, `for loop finished (${loopIter} iteration${loopIter === 1 ? '' : 's'}).`))
+      return
+    }
     case 'indexAssign': {
       const targetVal = evalExpr(state, stmt.target)
       if (targetVal.kind !== 'ref') {
@@ -942,38 +1257,51 @@ function execStmt(state: State, stmt: Stmt) {
         )
       }
       const obj = state.heap.find((h) => h.id === targetVal.id)
-      if (!obj || obj.kind !== 'list') {
-        throw new RuntimeErrorSignal(
-          `TypeError on line ${stmt.line}: index-assign only supported on lists`,
-          stmt.line,
-        )
-      }
       const idxVal = evalExpr(state, stmt.index)
-      if (idxVal.kind !== 'int') {
-        throw new RuntimeErrorSignal(
-          `TypeError on line ${stmt.line}: list index must be int`,
-          stmt.line,
-        )
-      }
-      const len = listLength(obj)
-      const i = idxVal.v < 0 ? len + idxVal.v : idxVal.v
-      if (i < 0 || i >= len) {
-        throw new RuntimeErrorSignal(
-          `IndexError on line ${stmt.line}: list index ${idxVal.v} out of range (len=${len})`,
-          stmt.line,
-        )
-      }
       const newVal = evalExpr(state, stmt.value)
-      listSet(obj, i, newVal)
-      push(
-        state,
-        snap(
+      if (obj && obj.kind === 'list') {
+        if (idxVal.kind !== 'int') {
+          throw new RuntimeErrorSignal(
+            `TypeError on line ${stmt.line}: list index must be int`,
+            stmt.line,
+          )
+        }
+        const len = listLength(obj)
+        const i = idxVal.v < 0 ? len + idxVal.v : idxVal.v
+        if (i < 0 || i >= len) {
+          throw new RuntimeErrorSignal(
+            `IndexError on line ${stmt.line}: list index ${idxVal.v} out of range (len=${len})`,
+            stmt.line,
+          )
+        }
+        listSet(obj, i, newVal)
+        push(
           state,
-          stmt.line,
-          `Reassigned list ID:${obj.id}[${i}] = ${valueToDisplay(newVal, state)} (old value struck through).`,
-        ),
+          snap(
+            state,
+            stmt.line,
+            `Reassigned list ID:${obj.id}[${i}] = ${valueToDisplay(newVal, state)} (old value struck through).`,
+          ),
+        )
+        return
+      }
+      if (obj && obj.kind === 'dict') {
+        const had = dictHas(obj, idxVal)
+        dictSet(obj, idxVal, newVal)
+        push(
+          state,
+          snap(
+            state,
+            stmt.line,
+            `${had ? 'Reassigned' : 'Set'} dict ID:${obj.id}[${valueToDisplay(idxVal, state)}] = ${valueToDisplay(newVal, state)}${had ? ' (old value struck through)' : ''}.`,
+          ),
+        )
+        return
+      }
+      throw new RuntimeErrorSignal(
+        `TypeError on line ${stmt.line}: index-assign only supported on lists and dicts`,
+        stmt.line,
       )
-      return
     }
     case 'classDef': {
       addClassDef(state, stmt)

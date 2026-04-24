@@ -337,6 +337,87 @@ print(numbers)
   })
 })
 
+describe('evaluator — for + range (v3)', () => {
+  const src = `total: int = 0
+for i in range(1, 5):
+    total += i
+print(total)
+`
+  const last = run(src).at(-1)!
+  it('sums 1+2+3+4 = 10 via for/range', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['10'])
+  })
+})
+
+describe('evaluator — dict (v3)', () => {
+  const src = `d: dict[str, int] = {"a": 1, "b": 2}
+d["a"] = 99
+d["c"] = 3
+print(d)
+`
+  const last = run(src).at(-1)!
+  it('prints updated dict in insertion order', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(["{'a': 99, 'b': 2, 'c': 3}"])
+  })
+  it('retired entry for key "a" stays on heap', () => {
+    const d = last.heap.find((h) => h.kind === 'dict')
+    expect(d && d.kind === 'dict').toBe(true)
+    if (d && d.kind === 'dict') {
+      const aEntries = d.entries.filter((e) => e.name === 'S:a')
+      expect(aEntries).toHaveLength(2)
+      expect(aEntries[0].retired).toBe(true)
+      expect(aEntries[1].retired).toBe(false)
+    }
+  })
+})
+
+describe('evaluator — `in` operator (v3)', () => {
+  it('returns True when key in dict, False otherwise', () => {
+    const src1 = `d: dict[str, int] = {"a": 1}\nprint("a" in d)\nprint("b" in d)\n`
+    const last = run(src1).at(-1)!
+    expect(last.output).toEqual(['True', 'False'])
+  })
+  it('returns True when item in list', () => {
+    const src2 = `lst: list[int] = [1, 2, 3]\nprint(2 in lst)\nprint(4 in lst)\nprint(4 not in lst)\n`
+    const last = run(src2).at(-1)!
+    expect(last.output).toEqual(['True', 'False', 'True'])
+  })
+})
+
+describe('evaluator — __add__ magic method (v3)', () => {
+  const src = `class Counter:
+    n: int
+
+    def __init__(self, n: int):
+        self.n = n
+
+    def __add__(self, x: int) -> Counter:
+        return Counter(self.n + x)
+
+    def __str__(self) -> str:
+        return f"Counter({self.n})"
+
+c: Counter = Counter(5)
+d: Counter = c + 10
+print(c)
+print(d)
+`
+  const last = run(src).at(-1)!
+  it('instance + int invokes __add__ returning a new instance', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['Counter(5)', 'Counter(15)'])
+  })
+})
+
+describe('evaluator — str * int repetition (v3)', () => {
+  const last = run(`print("ab" * 3)\n`).at(-1)!
+  it('repeats the string', () => {
+    expect(last.output).toEqual(['ababab'])
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1

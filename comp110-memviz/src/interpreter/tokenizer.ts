@@ -18,6 +18,8 @@ export type TokenKind =
   | 'RPAREN'
   | 'LBRACKET'
   | 'RBRACKET'
+  | 'LBRACE'
+  | 'RBRACE'
   | 'COLON'
   | 'COMMA'
   | 'DOT'
@@ -35,8 +37,8 @@ export type Token = {
 const KEYWORDS = new Set([
   'def', 'return', 'None', 'True', 'False',
   'class', 'if', 'elif', 'else',
-  'and', 'or', 'not',
-  'while',
+  'and', 'or', 'not', 'in',
+  'while', 'for',
 ])
 
 export class TokenError extends Error {
@@ -235,6 +237,8 @@ export function tokenize(src: string): Token[] {
       if (c === ')') { emit('RPAREN', c, lineNum, i); i++; continue }
       if (c === '[') { emit('LBRACKET', c, lineNum, i); i++; continue }
       if (c === ']') { emit('RBRACKET', c, lineNum, i); i++; continue }
+      if (c === '{') { emit('LBRACE', c, lineNum, i); i++; continue }
+      if (c === '}') { emit('RBRACE', c, lineNum, i); i++; continue }
       if (c === ':') { emit('COLON', c, lineNum, i); i++; continue }
       if (c === ',') { emit('COMMA', c, lineNum, i); i++; continue }
       if (c === '.') { emit('DOT', c, lineNum, i); i++; continue }
