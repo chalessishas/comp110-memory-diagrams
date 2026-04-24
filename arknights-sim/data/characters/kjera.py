@@ -1,16 +1,40 @@
-"""Kjera (char) — 4★ Caster (Core).
+"""Kjera (char) — 4★ Caster (Core) (char_350_surtr2).
 
 S1: sp_cost=10, initial_sp=0, instant, AUTO_TIME, AUTO (stub).
-S2: sp_cost=30, initial_sp=15, duration=15s, AUTO_TIME, MANUAL (stub).
+S2 "ATK Enhancement γ" (skcom_atk_up[3]): sp_cost=30, initial_sp=15, duration=30s, AUTO_TIME, MANUAL.
+  ATK+100%.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
-from core.types import AttackType, Profession, RoleArchetype, SkillTrigger, SPGainMode
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.types import (
+    AttackType, BuffAxis, BuffStack, Profession,
+    RoleArchetype, SkillTrigger, SPGainMode,
+)
+from core.systems.skill_system import register_skill
 from data.characters.generated.kjera import make_kjera as _base_stats
 
 CAST_RANGE = RangeShape(tiles=tuple((dx, dy) for dx in range(0, 3) for dy in range(-1, 2)))
-_S1_TAG = "kjera_s1"; _S1_DURATION = 0.0
-_S2_TAG = "kjera_s2"; _S2_DURATION = 15.0
+
+_S1_TAG = "kjera_s1"
+_S1_DURATION = 0.0
+
+_S2_TAG = "kjera_s2_atk_enhance"
+_S2_ATK_RATIO = 1.00
+_S2_ATK_BUFF_TAG = "kjera_s2_atk"
+_S2_DURATION = 30.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                              value=_S2_ATK_RATIO, source_tag=_S2_ATK_BUFF_TAG))
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_ATK_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
+
 
 def make_kjera(slot: str = "S2") -> UnitState:
     op = _base_stats()
@@ -20,13 +44,17 @@ def make_kjera(slot: str = "S2") -> UnitState:
     op.attack_type = AttackType.ARTS
     op.range_shape = CAST_RANGE
     if slot == "S1":
-        op.skill = SkillComponent(name="Kjera S1", slot="S1", sp_cost=10, initial_sp=0,
+        op.skill = SkillComponent(
+            name="Kjera S1", slot="S1", sp_cost=10, initial_sp=0,
             duration=_S1_DURATION, sp_gain_mode=SPGainMode.AUTO_TIME,
-            trigger=SkillTrigger.AUTO, requires_target=True, behavior_tag=_S1_TAG)
+            trigger=SkillTrigger.AUTO, requires_target=True, behavior_tag=_S1_TAG,
+        )
     elif slot == "S2":
-        op.skill = SkillComponent(name="Kjera S2", slot="S2", sp_cost=30, initial_sp=15,
+        op.skill = SkillComponent(
+            name="ATK Enhancement γ", slot="S2", sp_cost=30, initial_sp=15,
             duration=_S2_DURATION, sp_gain_mode=SPGainMode.AUTO_TIME,
-            trigger=SkillTrigger.MANUAL, requires_target=False, behavior_tag=_S2_TAG)
+            trigger=SkillTrigger.MANUAL, requires_target=False, behavior_tag=_S2_TAG,
+        )
     if op.skill:
         op.skill.sp = float(op.skill.initial_sp)
     return op
