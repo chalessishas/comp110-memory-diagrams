@@ -146,7 +146,7 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     return (
       <div className="heap-obj function">
         <span className="heap-id">ID:{obj.id}</span>
-        <span className="heap-label">function lines {obj.lineStart}–{obj.lineEnd}</span>
+        <span className="heap-label">fn lines {obj.lineStart}–{obj.lineEnd}</span>
         <span className="heap-name">{obj.name}</span>
       </div>
     )
@@ -163,11 +163,12 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
   if (obj.kind === 'list') {
     // Group slots by index; only active index groups remain.
     const slotGroups = groupByIndex(obj.slots)
+    const elemType = inferListType(obj.slots)
     return (
       <div className="heap-obj list">
         <div className="heap-obj-header">
           <span className="heap-id">ID:{obj.id}</span>
-          <span className="heap-label">list</span>
+          <span className="heap-label">list{elemType ? `[${elemType}]` : ''}</span>
         </div>
         <div className="bindings list-slots">
           {slotGroups.length === 0 && <div className="binding empty-binding">(empty)</div>}
@@ -187,11 +188,12 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
   if (obj.kind === 'dict') {
     // Group by stringified key (the binding's `name` field).
     const entryGroups = groupByName(obj.entries)
+    const types = inferDictTypes(obj.entries)
     return (
       <div className="heap-obj dict">
         <div className="heap-obj-header">
           <span className="heap-id">ID:{obj.id}</span>
-          <span className="heap-label">dict</span>
+          <span className="heap-label">dict{types ? `[${types}]` : ''}</span>
         </div>
         <div className="bindings dict-entries">
           {entryGroups.length === 0 && <div className="binding empty-binding">(empty)</div>}
@@ -262,6 +264,55 @@ function formatValue(v: Value, heap: HeapObject[]): string {
       if (!h) return `→ ID:${v.id} (missing)`
       return `→ ID:${v.id}`
     }
+  }
+}
+
+// Infer a `list[T]` element type from active slot values. Returns '' if
+// empty or heterogeneous; callers then omit the brackets and show just `list`.
+function inferListType(slots: { value: Value; retired: boolean }[]): string {
+  const active = slots.filter((s) => !s.retired)
+  if (active.length === 0) return ''
+  const first = kindName(active[0].value)
+  for (const s of active) {
+    if (kindName(s.value) !== first) return ''
+  }
+  return first
+}
+
+// Infer `dict[K, V]` from active entries. Same rules.
+function inferDictTypes(entries: { name: string; value: Value; retired: boolean }[]): string {
+  const active = entries.filter((e) => !e.retired)
+  if (active.length === 0) return ''
+  const firstKey = dictKeyTag(active[0].name)
+  const firstVal = kindName(active[0].value)
+  for (const e of active) {
+    if (dictKeyTag(e.name) !== firstKey) return ''
+    if (kindName(e.value) !== firstVal) return ''
+  }
+  return `${firstKey}, ${firstVal}`
+}
+
+function kindName(v: Value): string {
+  switch (v.kind) {
+    case 'int': return 'int'
+    case 'float': return 'float'
+    case 'str': return 'str'
+    case 'bool': return 'bool'
+    case 'none': return 'None'
+    case 'ref': return 'ref'
+  }
+}
+
+function dictKeyTag(tagged: string): string {
+  const tag = tagged[0]
+  switch (tag) {
+    case 'S': return 'str'
+    case 'I': return 'int'
+    case 'F': return 'float'
+    case 'B': return 'bool'
+    case 'N': return 'None'
+    case 'R': return 'ref'
+    default: return 'str'
   }
 }
 
