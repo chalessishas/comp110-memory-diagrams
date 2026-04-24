@@ -1,15 +1,17 @@
 """Virtuosa (塑心) — 6★ Limited Supporter.
 
 S1 "Golden Ecstasy": sp_cost=6, initial_sp=12, instant (2-charge Necrosis burst, stub).
-S2 "Requiem Mass": sp_cost=30, initial_sp=14, 20s (ASPD+45 + multi-target, stub).
+S2 "Requiem Mass": sp_cost=30, initial_sp=14, 20s, MANUAL, AUTO_TIME.
+  ASPD+45. Multi-target attack component not modeled.
 S3 "Liberal Tango": sp_cost=60, initial_sp=32, 34s (cross-ally conditional ATK/DEF/HP buff, stub).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.cello import make_cello as _base_stats
 
 CASTER_RANGE = RangeShape(tiles=tuple(
@@ -17,10 +19,26 @@ CASTER_RANGE = RangeShape(tiles=tuple(
 ))
 
 _S1_TAG = "cello_s1_golden_ecstasy"
+
 _S2_TAG = "cello_s2_requiem_mass"
+_S2_ASPD_BONUS = 45.0
+_S2_BUFF_TAG = "cello_s2_aspd"
 _S2_DURATION = 20.0
+
 _S3_TAG = "cello_s3_liberal_tango"
 _S3_DURATION = 34.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(axis=BuffAxis.ASPD, stack=BuffStack.FLAT,
+                              value=_S2_ASPD_BONUS, source_tag=_S2_BUFF_TAG))
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def make_cello(slot: str = "S3") -> UnitState:
