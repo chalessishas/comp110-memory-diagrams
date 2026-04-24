@@ -139,16 +139,25 @@
 .binding .eq { color: #a0aec0; }
 .binding .value { color: #1a202c; }
 
-/* Retired binding = a value was reassigned. Per COMP110 hand-drawn convention
-   the student strikes through the entire old line (name, `=`, and value) and
-   writes the new binding on a fresh line below. Mirror that: stroke all three
-   grid cells, not just the value. */
-.binding.retired .name,
-.binding.retired .eq,
-.binding.retired .value {
+/* COMP110 hand-drawn convention: when a value is reassigned, the student
+   strikes through the OLD value in place and writes the NEW value right
+   next to it on the same row — they don't start a new row for the same
+   name. We render each name/index/key exactly once per row; the value cell
+   is composed of one or more `.chunk` spans side-by-side: retired chunks
+   are struck-through, the final active chunk is normal text. */
+.chunk {
+  margin-right: 6px;
+}
+.chunk:last-child {
+  margin-right: 0;
+}
+.chunk.retired {
   text-decoration: line-through;
   text-decoration-color: #718096;
   color: #a0aec0;
+}
+.chunk.active {
+  color: #1a202c;
 }
 
 .empty-binding {

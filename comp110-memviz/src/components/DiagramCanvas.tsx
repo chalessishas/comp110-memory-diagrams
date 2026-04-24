@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Frame, HeapObject, Snapshot, Value } from '../interpreter/types'
 import './DiagramCanvas.css'
 
@@ -88,16 +89,56 @@ function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]
         {frame.bindings.length === 0 && (
           <div className="binding empty-binding">(empty)</div>
         )}
-        {frame.bindings.map((b, i) => (
-          <div key={i} className={`binding${b.retired ? ' retired' : ''}`}>
-            <span className="name">{b.name}</span>
+        {groupByName(frame.bindings).map((g, i) => (
+          <div key={i} className="binding">
+            <span className="name">{g.name}</span>
             <span className="eq">=</span>
-            <span className="value">{formatValue(b.value, heap)}</span>
+            <span className="value">
+              {renderHistory(g.items.map((b) => ({ retired: b.retired, text: formatValue(b.value, heap) })))}
+            </span>
           </div>
         ))}
       </div>
     </div>
   )
+}
+
+// Group an append-only Binding[] by name, preserving first-seen order.
+// Every group holds the full history; renderHistory then emits chunks for
+// each retired entry plus the final active entry — all on the same row.
+function groupByName<T extends { name: string; retired: boolean }>(arr: T[]): { name: string; items: T[] }[] {
+  const firstIdx = new Map<string, number>()
+  arr.forEach((b, i) => {
+    if (!firstIdx.has(b.name)) firstIdx.set(b.name, i)
+  })
+  const groups = new Map<string, T[]>()
+  for (const b of arr) {
+    const existing = groups.get(b.name)
+    if (existing) existing.push(b)
+    else groups.set(b.name, [b])
+  }
+  return [...firstIdx.entries()]
+    .sort((a, b) => a[1] - b[1])
+    .map(([name]) => ({ name, items: groups.get(name)! }))
+    // Drop groups with no active entry (e.g. a list slot after pop removed
+    // the last one). They no longer "exist" in Python semantics.
+    .filter((g) => g.items.some((b) => !b.retired))
+}
+
+// Given a chronological list of versions for one slot, render them inline:
+// each retired version gets a struck-through chunk, then the one active
+// version appears as normal text at the end. Whitespace between chunks is
+// a single space so visually they read as "old new".
+function renderHistory(versions: { retired: boolean; text: string }[]): ReactNode {
+  return versions.map((v, i) => (
+    <span
+      key={i}
+      className={v.retired ? 'chunk retired' : 'chunk active'}
+    >
+      {v.text}
+      {i < versions.length - 1 ? ' ' : ''}
+    </span>
+  ))
 }
 
 function HeapObjectView({ obj }: { obj: HeapObject }) {
@@ -120,6 +161,8 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     )
   }
   if (obj.kind === 'list') {
+    // Group slots by index; only active index groups remain.
+    const slotGroups = groupByIndex(obj.slots)
     return (
       <div className="heap-obj list">
         <div className="heap-obj-header">
@@ -127,12 +170,14 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
           <span className="heap-label">list</span>
         </div>
         <div className="bindings list-slots">
-          {obj.slots.length === 0 && <div className="binding empty-binding">(empty)</div>}
-          {obj.slots.map((s, i) => (
-            <div key={i} className={`binding${s.retired ? ' retired' : ''}`}>
-              <span className="name">[{s.index}]</span>
+          {slotGroups.length === 0 && <div className="binding empty-binding">(empty)</div>}
+          {slotGroups.map((g, i) => (
+            <div key={i} className="binding">
+              <span className="name">[{g.index}]</span>
               <span className="eq">=</span>
-              <span className="value">{formatValueSimple(s.value)}</span>
+              <span className="value">
+                {renderHistory(g.items.map((s) => ({ retired: s.retired, text: formatValueSimple(s.value) })))}
+              </span>
             </div>
           ))}
         </div>
@@ -140,6 +185,8 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     )
   }
   if (obj.kind === 'dict') {
+    // Group by stringified key (the binding's `name` field).
+    const entryGroups = groupByName(obj.entries)
     return (
       <div className="heap-obj dict">
         <div className="heap-obj-header">
@@ -147,12 +194,14 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
           <span className="heap-label">dict</span>
         </div>
         <div className="bindings dict-entries">
-          {obj.entries.length === 0 && <div className="binding empty-binding">(empty)</div>}
-          {obj.entries.map((e, i) => (
-            <div key={i} className={`binding${e.retired ? ' retired' : ''}`}>
-              <span className="name">{formatDictKey(e.name)}</span>
+          {entryGroups.length === 0 && <div className="binding empty-binding">(empty)</div>}
+          {entryGroups.map((g, i) => (
+            <div key={i} className="binding">
+              <span className="name">{formatDictKey(g.name)}</span>
               <span className="eq">:</span>
-              <span className="value">{formatValueSimple(e.value)}</span>
+              <span className="value">
+                {renderHistory(g.items.map((e) => ({ retired: e.retired, text: formatValueSimple(e.value) })))}
+              </span>
             </div>
           ))}
         </div>
@@ -160,6 +209,7 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     )
   }
   // instance
+  const attrGroups = groupByName(obj.attrs)
   return (
     <div className="heap-obj instance">
       <div className="heap-obj-header">
@@ -167,17 +217,37 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
         <span className="heap-label">instance of {obj.className}</span>
       </div>
       <div className="bindings instance-attrs">
-        {obj.attrs.length === 0 && <div className="binding empty-binding">(no attrs)</div>}
-        {obj.attrs.map((b, i) => (
-          <div key={i} className={`binding${b.retired ? ' retired' : ''}`}>
-            <span className="name">{b.name}</span>
+        {attrGroups.length === 0 && <div className="binding empty-binding">(no attrs)</div>}
+        {attrGroups.map((g, i) => (
+          <div key={i} className="binding">
+            <span className="name">{g.name}</span>
             <span className="eq">=</span>
-            <span className="value">{formatValueSimple(b.value)}</span>
+            <span className="value">
+              {renderHistory(g.items.map((b) => ({ retired: b.retired, text: formatValueSimple(b.value) })))}
+            </span>
           </div>
         ))}
       </div>
     </div>
   )
+}
+
+// Same as groupByName but keyed by numeric `index` (used for list slots).
+function groupByIndex<T extends { index: number; retired: boolean }>(arr: T[]): { index: number; items: T[] }[] {
+  const firstIdx = new Map<number, number>()
+  arr.forEach((s, i) => {
+    if (!firstIdx.has(s.index)) firstIdx.set(s.index, i)
+  })
+  const groups = new Map<number, T[]>()
+  for (const s of arr) {
+    const existing = groups.get(s.index)
+    if (existing) existing.push(s)
+    else groups.set(s.index, [s])
+  }
+  return [...firstIdx.entries()]
+    .sort((a, b) => a[1] - b[1])
+    .map(([index]) => ({ index, items: groups.get(index)! }))
+    .filter((g) => g.items.some((s) => !s.retired))
 }
 
 function formatValue(v: Value, heap: HeapObject[]): string {
