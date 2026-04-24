@@ -1,0 +1,132 @@
+.fb-tab {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  background: #1e7084;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  letter-spacing: 0.2px;
+}
+
+.fb-tab:hover,
+.fb-tab:focus-visible {
+  background: #185869;
+  outline: none;
+}
+
+.fb-panel {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  width: 280px;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e0;
+  border-radius: 8px;
+  padding: 14px 14px 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  font-family: 'Cabin', sans-serif;
+  z-index: 100;
+}
+
+.fb-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #a0aec0;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 6px;
+}
+
+.fb-close:hover,
+.fb-close:focus-visible {
+  color: #4a5568;
+  outline: none;
+}
+
+.fb-q {
+  margin: 0 0 10px;
+  font-size: 14px;
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.fb-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.fb-btns button {
+  flex: 1;
+  background: #1e7084;
+  color: #ffffff;
+  border: none;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.fb-btns button.fb-skip {
+  background: #edf2f7;
+  color: #4a5568;
+}
+
+.fb-btns button:hover,
+.fb-btns button:focus-visible {
+  opacity: 0.92;
+  outline: none;
+}
+
+.fb-panel textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 6px 8px;
+  font-family: 'Cabin', sans-serif;
+  font-size: 13px;
+  color: #2d3748;
+  border: 1px solid #cbd5e0;
+  border-radius: 4px;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 58px;
+}
+
+.fb-panel textarea:focus {
+  outline: 2px solid #1e7084;
+  outline-offset: -1px;
+  border-color: #1e7084;
+}
+
+.fb-thanks {
+  margin: 0;
+  font-size: 14px;
+  color: #2c7a7b;
+  font-weight: 700;
+}
+
+@media (max-width: 720px) {
+  .fb-panel {
+    right: 8px;
+    bottom: 8px;
+    width: calc(100vw - 16px);
+    max-width: 300px;
+  }
+  .fb-tab {
+    right: 8px;
+    bottom: 8px;
+  }
+}

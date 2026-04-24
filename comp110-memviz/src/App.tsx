@@ -2,6 +2,7 @@ import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import { CodeEditor } from './components/CodeEditor'
 import { DiagramCanvas } from './components/DiagramCanvas'
+import { FeedbackButton } from './components/FeedbackButton'
 import { StepControl } from './components/StepControl'
 import { Timeline } from './components/Timeline'
 import { QZ00_PROBLEMS } from './data/qz00Problems'
@@ -194,6 +195,8 @@ function App() {
           </span>
         </footer>
       )}
+
+      <FeedbackButton hidden={embed} />
     </div>
   )
 }

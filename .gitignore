@@ -13,6 +13,7 @@ ai-vtuber/
 .superpowers/
 *.png
 *.jpg
+!comp110-memviz/public/og.png
 
 # Misc
 node_modules/
