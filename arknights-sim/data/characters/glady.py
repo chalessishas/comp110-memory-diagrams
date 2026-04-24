@@ -1,4 +1,4 @@
-"""Gladiia (歌蕾蒂娅) — 6★ Guard (Lord).
+"""Gladiia (歌蕾蒂娅) — 6★ Specialist (Hookmaster).
 
 S1: sp_cost=5, initial_sp=0, instant, AUTO_ATTACK, AUTO (stub).
 S2: sp_cost=50, initial_sp=25, duration=20s, AUTO_TIME, MANUAL (stub).
@@ -29,8 +29,8 @@ _S3_DURATION = 30.0
 def make_glady(slot: str = "S3") -> UnitState:
     op = _base_stats()
     op.name = "Gladiia"
-    op.archetype = RoleArchetype.GUARD_LORD
-    op.profession = Profession.GUARD
+    op.archetype = RoleArchetype.SPEC_HOOKMASTER
+    op.profession = Profession.SPECIALIST
     op.attack_type = AttackType.PHYSICAL
     op.range_shape = GUARD_RANGE
     if slot == "S1":
