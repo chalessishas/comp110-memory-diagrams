@@ -30,8 +30,8 @@ export function DiagramCanvas({ snapshot }: Props) {
       <section className="col stack">
         <header className="col-title">Function Call Stack</header>
         <div className="frames">
-          {/* Stack grows upward visually — newest non-globals on top, Globals
-              pinned at the bottom via CSS column-reverse. */}
+          {/* COMP110 convention: Globals is drawn at the TOP (first written);
+              each new call frame is added below it in chronological order. */}
           {snapshot.stack.map((frame, idx) => (
             <FrameView
               key={idx}

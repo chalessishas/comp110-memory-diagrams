@@ -41,7 +41,8 @@
 
 .frames {
   display: flex;
-  flex-direction: column-reverse; /* Globals stays at visual bottom */
+  flex-direction: column; /* Globals on top; newer call frames stack below it,
+                             matching COMP110's hand-drawn convention */
   justify-content: flex-start;
   gap: 8px;
   padding: 10px;

@@ -433,6 +433,23 @@ function execStmt(state: State, stmt: Stmt) {
       evalExpr(state, stmt.expr)
       return
     }
+    case 'assign': {
+      const v = evalExpr(state, stmt.value)
+      const frame = currentFrame(state)
+      // setBinding retires any existing active binding with this name and
+      // pushes a new one — exactly the v0 rule for reassignment.
+      setBinding(frame, stmt.target, v)
+      const isRebind = frame.bindings.some(
+        (b) => b.retired && b.name === stmt.target,
+      )
+      const verb = stmt.typeAnnotation !== null
+        ? `Declared ${stmt.target}: ${stmt.typeAnnotation}`
+        : isRebind
+          ? `Reassigned ${stmt.target} (old value struck through)`
+          : `Assigned ${stmt.target}`
+      push(state, snap(state, stmt.line, `${verb} = ${valueToDisplay(v, state)}.`))
+      return
+    }
   }
 }
 

@@ -66,6 +66,15 @@ export type Stmt =
   | FunctionDef
   | ReturnStmt
   | ExprStmt
+  | AssignStmt
+
+export type AssignStmt = {
+  kind: 'assign'
+  target: string // simple names only in v0
+  typeAnnotation: TypeAnnotation | null // present on first declaration: `a: int = 3`
+  value: Expr
+  line: number
+}
 
 export type FunctionDef = {
   kind: 'funcDef'

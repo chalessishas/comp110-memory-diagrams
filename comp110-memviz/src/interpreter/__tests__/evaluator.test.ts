@@ -111,6 +111,48 @@ print(start_end(word="skittles"))
   })
 })
 
+describe('evaluator — variable assignment (Basic 00)', () => {
+  const src = `b: str = "Partner"
+a: str = "Howdy "
+a = a + b
+print(a)
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('prints "Howdy Partner"', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['Howdy Partner'])
+  })
+
+  it('retires the old `a` binding after reassignment (strike-through rule)', () => {
+    const g = last.stack[0].bindings
+    const aBindings = g.filter((b) => b.name === 'a')
+    expect(aBindings).toHaveLength(2)
+    expect(aBindings[0].retired).toBe(true) // old "Howdy "
+    expect(aBindings[0].value).toEqual({ kind: 'str', v: 'Howdy ' })
+    expect(aBindings[1].retired).toBe(false) // new "Howdy Partner"
+    expect(aBindings[1].value).toEqual({ kind: 'str', v: 'Howdy Partner' })
+  })
+})
+
+describe('evaluator — Basic 01 Mardi Gras', () => {
+  const src = `a: str = "Mardi"
+b: str = "Gras"
+c: str = a[0] + a[len(b)]
+a = "yay!"
+print(c)
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('prints "Mi" — c is locked in before a is reassigned', () => {
+    expect(last.error).toBeNull()
+    // c = a[0] + a[len(b)] = "M" + a[4] = "M" + "i" = "Mi"
+    expect(last.output).toEqual(['Mi'])
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1

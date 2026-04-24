@@ -12,6 +12,100 @@ export type Problem = {
 
 export const QZ00_PROBLEMS: Problem[] = [
   {
+    id: 'blank',
+    title: '✍️ Write your own',
+    prompt:
+      'Type any Python code that uses v0 features: function defs, return, calls, variable assignment, print, str/len/int/float. Then press Run and step through.',
+    source: `# Write your Python code here.
+# The memory-diagram viewer supports:
+#   - def / return / function calls
+#   - variable assignment:  a: int = 3  then later  a = a + 1
+#   - print, len, int, str, float
+#   - arithmetic + string indexing
+#
+# Example — delete and replace with your own:
+
+def double(n: int) -> int:
+    return n * 2
+
+x: int = 7
+y: int = double(n=x)
+print(y)
+`,
+  },
+  {
+    id: 'basic_howdy',
+    title: 'Basic 00 — Howdy Partner',
+    prompt:
+      'Two variable declarations, then a reassignment. Trace how Globals changes.',
+    source: `b: str = "Partner"
+a: str = "Howdy "
+a = a + b
+print(a)
+`,
+  },
+  {
+    id: 'basic_mardi',
+    title: 'Basic 01 — Mardi Gras',
+    prompt:
+      'String indexing + reassignment. `c` never changes after line 3 — `a` does. Which value prints?',
+    source: `a: str = "Mardi"
+b: str = "Gras"
+c: str = a[0] + a[len(b)]
+a = "yay!"
+print(c)
+`,
+  },
+  {
+    id: 'basic_ab',
+    title: 'Basic 02 — a / b build-up',
+    prompt:
+      'Build `b` from `a`, print a combination, then rebuild `a` using len(b). Two printed lines.',
+    source: `a: str = "a"
+b: str = a + "b" + "b"
+print(b + a)
+a = a + str(len(b))
+print(a)
+`,
+  },
+  {
+    id: 'basic_age',
+    title: 'Basic 03 — Age / Year',
+    prompt:
+      'Arithmetic with typed declarations. No reassignment — every binding stays active.',
+    source: `age: int = 20
+year: int = 2024
+older_age: int = age + 10
+later_year: int = year + 10
+print("In " + str(later_year) + " you'll be " + str(older_age))
+`,
+  },
+  {
+    id: 'func_import',
+    title: 'Functions — Big / Bigger / Biggest (with assignment)',
+    prompt:
+      'Nested calls combined with local variable assignment inside main(). Watch main\'s frame: `a` gets reassigned twice.',
+    source: `def big_func(num: int) -> int:
+    a: int = num + 2
+    return a
+
+def bigger_func(num: int) -> int:
+    a: int = big_func(num=num) * 2
+    return a
+
+def biggest_func(num: int) -> int:
+    a: int = bigger_func(num=num) ** 2
+    return a
+
+def main() -> None:
+    a: int = 110
+    a = biggest_func(num=a)
+    print("Wow! " + str(a) + " is a big number!")
+
+main()
+`,
+  },
+  {
     id: 'calzones',
     title: 'Calzones',
     prompt:

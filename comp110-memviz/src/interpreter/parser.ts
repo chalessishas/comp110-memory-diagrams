@@ -2,6 +2,7 @@
 // Produces an AST matching types.ts. Throws ParseError with a line number.
 
 import type {
+  AssignStmt,
   BinaryOp,
   CallExpr,
   Expr,
@@ -15,6 +16,7 @@ import type {
   ReturnStmt,
   Stmt,
   StrLit,
+  TypeAnnotation,
   UnaryOp,
 } from './types'
 import { tokenize, type Token } from './tokenizer'
@@ -83,7 +85,34 @@ class Parser {
     const t = this.peek()
     if (t.kind === 'KEYWORD' && t.value === 'def') return this.parseFuncDef()
     if (t.kind === 'KEYWORD' && t.value === 'return') return this.parseReturn()
+    // Assignment: NAME '=' expr  OR  NAME ':' TYPE '=' expr. We peek ahead to
+    // distinguish from an expression statement starting with a name (like a
+    // function call `foo(...)`), since those don't have an ASSIGN in that slot.
+    if (t.kind === 'NAME') {
+      const n1 = this.peek(1)
+      if (n1?.kind === 'ASSIGN') return this.parseAssign(false)
+      if (n1?.kind === 'COLON') return this.parseAssign(true)
+    }
     return this.parseExprStmt()
+  }
+
+  private parseAssign(typed: boolean): AssignStmt {
+    const nameTok = this.expect('NAME')
+    let typeAnnotation: TypeAnnotation | null = null
+    if (typed) {
+      this.expect('COLON')
+      typeAnnotation = this.parseTypeAnnotation()
+    }
+    this.expect('ASSIGN')
+    const value = this.parseExpr()
+    this.expect('NEWLINE')
+    return {
+      kind: 'assign',
+      target: nameTok.value,
+      typeAnnotation,
+      value,
+      line: nameTok.line,
+    }
   }
 
   private parseFuncDef(): FunctionDef {
