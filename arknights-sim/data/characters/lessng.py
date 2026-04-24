@@ -1,21 +1,50 @@
 """Lessing (止颂) — 6★ Guard (Lord).
 
 S1 "Power Strike γ": sp_cost=3, initial_sp=0, instant, AUTO_ATTACK, AUTO (stub).
-  Next attack 225% ATK single-hit multiplier.
+  Next attack 225% ATK single-hit multiplier. Not modeled.
 S2 "Clash of the Faithful": sp_cost=0, initial_sp=0, duration=21s, ON_DEPLOY, AUTO (stub).
   ATK+35%, 2-hit combo attacks. Double-hit not modeled.
-S3 "Oathbreaker": sp_cost=45, initial_sp=25, duration=20s, AUTO_TIME, MANUAL (stub).
-  MaxHP+80%, attacks deal 180% ATK to blocked targets.
+S3 "Oathbreaker": sp_cost=45, initial_sp=25, duration=20s, AUTO_TIME, MANUAL.
+  MaxHP+80%, attacks deal 180% ATK to blocked targets (modeled as ATK+80%; blocked-only not modeled).
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
-from core.types import AttackType, Profession, RoleArchetype, SkillTrigger, SPGainMode
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
+from core.types import (
+    AttackType, BuffAxis, BuffStack, Profession,
+    RoleArchetype, SkillTrigger, SPGainMode,
+)
+from core.systems.skill_system import register_skill
 from data.characters.generated.lessng import make_lessng as _base_stats
 
 LORD_RANGE = RangeShape(tiles=tuple((dx, dy) for dx in range(0, 3) for dy in range(-1, 2)))
+
 _S1_TAG = "lessng_s1"; _S1_DURATION = 0.0
 _S2_TAG = "lessng_s2"; _S2_DURATION = 21.0
-_S3_TAG = "lessng_s3"; _S3_DURATION = 20.0
+
+# --- S3 ---
+_S3_TAG = "lessng_s3_oathbreaker"
+_S3_ATK_RATIO = 0.80
+_S3_HP_RATIO  = 0.80
+_S3_ATK_BUFF  = "lessng_s3_atk"
+_S3_HP_BUFF   = "lessng_s3_hp"
+_S3_DURATION  = 20.0
+
+
+def _s3_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(axis=BuffAxis.MAX_HP, stack=BuffStack.RATIO,
+                              value=_S3_HP_RATIO, source_tag=_S3_HP_BUFF))
+    carrier.buffs.append(Buff(axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+                              value=_S3_ATK_RATIO, source_tag=_S3_ATK_BUFF))
+    world.log(f"Lessing S3 — MaxHP+{_S3_HP_RATIO:.0%}, ATK+{_S3_ATK_RATIO:.0%}/{_S3_DURATION}s")
+
+
+def _s3_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs
+                     if b.source_tag not in (_S3_ATK_BUFF, _S3_HP_BUFF)]
+
+
+register_skill(_S3_TAG, on_start=_s3_on_start, on_end=_s3_on_end)
+
 
 def make_lessng(slot: str = "S3") -> UnitState:
     op = _base_stats()
@@ -25,7 +54,7 @@ def make_lessng(slot: str = "S3") -> UnitState:
     op.attack_type = AttackType.PHYSICAL
     op.range_shape = LORD_RANGE
     if slot == "S1":
-        op.skill = SkillComponent(name="Lessing S1", slot="S1", sp_cost=3, initial_sp=0,
+        op.skill = SkillComponent(name="Power Strike γ", slot="S1", sp_cost=3, initial_sp=0,
             duration=_S1_DURATION, sp_gain_mode=SPGainMode.AUTO_ATTACK,
             trigger=SkillTrigger.AUTO, requires_target=True, behavior_tag=_S1_TAG)
     elif slot == "S2":
