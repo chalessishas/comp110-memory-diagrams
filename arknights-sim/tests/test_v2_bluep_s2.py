@@ -1,7 +1,7 @@
-"""BluP (Blue Poison) S2 "Venom Spray" — 30s MANUAL, ATK+50%.
+"""BluP (Blue Poison) S2 "Venom Spray" — 26s MANUAL, ATK+30%.
 
 Tests cover:
-  - S2 config (name, sp_cost=40, initial_sp=25, duration=30s, MANUAL)
+  - S2 config (name, sp_cost=50, initial_sp=20, duration=26s, MANUAL)
   - ATK buff applied on trigger
   - ATK buff cleared after skill ends
   - S1 slot regression
@@ -36,8 +36,8 @@ def test_bluep_s2_config():
     sk = op.skill
     assert sk is not None and sk.slot == "S2"
     assert sk.name == "Venom Spray"
-    assert sk.sp_cost == 40
-    assert sk.initial_sp == 25
+    assert sk.sp_cost == 50
+    assert sk.initial_sp == 20
     assert sk.duration == _S2_DURATION
     assert sk.behavior_tag == _S2_TAG
 
