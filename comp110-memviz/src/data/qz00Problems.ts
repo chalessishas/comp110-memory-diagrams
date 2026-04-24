@@ -206,6 +206,56 @@ main(word="mystery")
 `,
   },
   {
+    id: 'list_reference',
+    title: 'Lists — reference aliasing via create/increase',
+    prompt:
+      "Watch how `list_2 = list_1` shares the same heap list; then `list_1 = create()` rebinds list_1 to a fresh list. After increase(list_1, 2), list_1 prints [2, 3, 4] but list_2 still shows [0, 1, 2].",
+    source: `def create() -> list[int]:
+    """An obnoxious way to make a list."""
+    list_1: list[int] = []
+    i: int = 0
+    while i < 3:
+        list_1.append(i)
+        i += 1
+    return list_1
+
+
+def increase(a_list: list[int], x: int) -> None:
+    """Lets pump it up!"""
+    i: int = 0
+    while i < len(a_list):
+        a_list[i] += x
+        i += 1
+    return None
+
+
+def main() -> None:
+    """Entrypoint of the program."""
+    list_1: list[int] = create()
+    list_2: list[int] = list_1
+    list_1 = create()
+    increase(list_1, 2)
+    print(list_1)
+    print(list_2)
+
+
+main()
+`,
+  },
+  {
+    id: 'list_basics',
+    title: 'Lists — append + while loop',
+    prompt:
+      'Build a list from 0 to 4 with a while loop and watch each append land as a new slot on the heap list.',
+    source: `numbers: list[int] = []
+i: int = 0
+while i < 5:
+    numbers.append(i * 2)
+    i += 1
+print(numbers)
+`,
+  },
+  {
     id: 'knight_castle',
     title: 'OOP — Knight & Castle',
     prompt:

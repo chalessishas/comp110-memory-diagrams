@@ -16,7 +16,9 @@ import type {
   FStringLit,
   FunctionDef,
   IfStmt,
+  IndexAssignStmt,
   IndexExpr,
+  ListLit,
   NameRef,
   NotOp,
   NumLit,
@@ -27,6 +29,7 @@ import type {
   StrLit,
   TypeAnnotation,
   UnaryOp,
+  WhileStmt,
 } from './types'
 import { tokenize, type Token } from './tokenizer'
 
@@ -95,20 +98,47 @@ class Parser {
     if (t.kind === 'KEYWORD' && t.value === 'def') return this.parseFuncDef()
     if (t.kind === 'KEYWORD' && t.value === 'class') return this.parseClassDef()
     if (t.kind === 'KEYWORD' && t.value === 'if') return this.parseIf()
+    if (t.kind === 'KEYWORD' && t.value === 'while') return this.parseWhile()
     if (t.kind === 'KEYWORD' && t.value === 'return') return this.parseReturn()
-    // Assignment: NAME '=' expr  OR  NAME ':' TYPE '=' expr. We peek ahead to
-    // distinguish from an expression statement starting with a name.
+    // Bare typed declaration with no value: `a: list[int]`. We handle that
+    // via parseAssign(true) when the next-next token is ASSIGN. Otherwise
+    // fall through.
     if (t.kind === 'NAME') {
       const n1 = this.peek(1)
-      if (n1?.kind === 'ASSIGN') return this.parseAssign(false)
       if (n1?.kind === 'COLON') return this.parseAssign(true)
     }
-    // Attribute assignment `target.attr = expr` — we parse the postfix target
-    // (which may be `self`, `self.x`, a name, or a call result), then if the
-    // next token is ASSIGN we finalize it as an AttrAssignStmt; otherwise it
-    // was an expression statement (e.g. a method call we already parsed).
+    // For everything else we parse a postfix expression (covers NameRef,
+    // AttrExpr, IndexExpr, CallExpr) and then classify based on what follows.
     const startPos = this.pos
     const lhs = this.parsePostfix()
+    // simple-name '=' expr  → AssignStmt (declaration done earlier)
+    if (lhs.kind === 'name' && this.match('ASSIGN')) {
+      this.consume()
+      const value = this.parseExpr()
+      this.expect('NEWLINE')
+      return {
+        kind: 'assign',
+        target: lhs.name,
+        typeAnnotation: null,
+        value,
+        line: lhs.line,
+      } satisfies AssignStmt
+    }
+    // simple-name AUG expr  →  desugar to AssignStmt with NameRef + BinaryOp
+    if (lhs.kind === 'name' && this.match('AUG')) {
+      const augTok = this.consume()
+      const rhs = this.parseExpr()
+      this.expect('NEWLINE')
+      const op = augTok.value.slice(0, -1) as '+' | '-' | '*' | '/'
+      return {
+        kind: 'assign',
+        target: lhs.name,
+        typeAnnotation: null,
+        value: { kind: 'binop', op, left: lhs, right: rhs, line: augTok.line } satisfies BinaryOp,
+        line: lhs.line,
+      } satisfies AssignStmt
+    }
+    // attr ASSIGN expr  →  AttrAssign
     if (lhs.kind === 'attr' && this.match('ASSIGN')) {
       this.consume()
       const value = this.parseExpr()
@@ -121,11 +151,68 @@ class Parser {
         line: lhs.line,
       } satisfies AttrAssignStmt
     }
-    // Otherwise it's an expression statement. Back up so parseExprStmt can
-    // parse from scratch (it re-reads the full precedence chain, not just
-    // postfix).
+    // attr AUG expr  →  desugar to AttrAssign with BinaryOp(attr_read, op, expr)
+    if (lhs.kind === 'attr' && this.match('AUG')) {
+      const augTok = this.consume()
+      const rhs = this.parseExpr()
+      this.expect('NEWLINE')
+      const op = augTok.value.slice(0, -1) as '+' | '-' | '*' | '/'
+      return {
+        kind: 'attrAssign',
+        target: lhs.target,
+        attr: lhs.name,
+        value: { kind: 'binop', op, left: lhs, right: rhs, line: augTok.line } satisfies BinaryOp,
+        line: lhs.line,
+      } satisfies AttrAssignStmt
+    }
+    // index ASSIGN expr  →  IndexAssign
+    if (lhs.kind === 'index' && this.match('ASSIGN')) {
+      this.consume()
+      const value = this.parseExpr()
+      this.expect('NEWLINE')
+      return {
+        kind: 'indexAssign',
+        target: lhs.target,
+        index: lhs.index,
+        value,
+        line: lhs.line,
+      } satisfies IndexAssignStmt
+    }
+    // index AUG expr  →  desugar to IndexAssign with BinaryOp(index_read, op, expr)
+    if (lhs.kind === 'index' && this.match('AUG')) {
+      const augTok = this.consume()
+      const rhs = this.parseExpr()
+      this.expect('NEWLINE')
+      const op = augTok.value.slice(0, -1) as '+' | '-' | '*' | '/'
+      return {
+        kind: 'indexAssign',
+        target: lhs.target,
+        index: lhs.index,
+        value: { kind: 'binop', op, left: lhs, right: rhs, line: augTok.line } satisfies BinaryOp,
+        line: lhs.line,
+      } satisfies IndexAssignStmt
+    }
+    // Fall through: expression statement. Back up so parseExprStmt sees the
+    // full expression from the first token (it needs the low-precedence layers
+    // too, not just postfix).
     this.pos = startPos
     return this.parseExprStmt()
+  }
+
+  private parseWhile(): WhileStmt {
+    const wTok = this.expect('KEYWORD', 'while')
+    const condition = this.parseExpr()
+    this.expect('COLON')
+    this.expect('NEWLINE')
+    this.expect('INDENT')
+    this.skipNewlines()
+    const body: Stmt[] = []
+    while (!this.match('DEDENT') && !this.match('EOF')) {
+      body.push(this.parseStmt())
+      this.skipNewlines()
+    }
+    if (this.match('DEDENT')) this.consume()
+    return { kind: 'while', condition, body, line: wTok.line }
   }
 
   private parseClassDef(): ClassDef {
@@ -306,9 +393,25 @@ class Parser {
   }
 
   private parseTypeAnnotation(): string {
-    // v0 only uses simple type names (int, float, str, None, bool). Accept any NAME or KEYWORD 'None'.
+    // Accept simple types (int/str/None) plus parametric ones: list[int],
+    // dict[str, int]. The annotation is retained as a flat string.
     const t = this.peek()
-    if (t.kind === 'NAME') { this.consume(); return t.value }
+    if (t.kind === 'NAME') {
+      this.consume()
+      let result = t.value
+      if (this.match('LBRACKET')) {
+        this.consume()
+        result += '['
+        result += this.parseTypeAnnotation()
+        while (this.match('COMMA')) {
+          this.consume()
+          result += ', ' + this.parseTypeAnnotation()
+        }
+        this.expect('RBRACKET')
+        result += ']'
+      }
+      return result
+    }
     if (t.kind === 'KEYWORD' && (t.value === 'None' || t.value === 'True' || t.value === 'False')) {
       this.consume()
       return t.value
@@ -535,6 +638,21 @@ class Parser {
       const inner = this.parseExpr()
       this.expect('RPAREN')
       return inner
+    }
+    if (t.kind === 'LBRACKET') {
+      this.consume()
+      const elements: Expr[] = []
+      if (!this.match('RBRACKET')) {
+        elements.push(this.parseExpr())
+        while (this.match('COMMA')) {
+          this.consume()
+          // Allow trailing comma: `[1, 2,]`
+          if (this.match('RBRACKET')) break
+          elements.push(this.parseExpr())
+        }
+      }
+      this.expect('RBRACKET')
+      return { kind: 'listLit', elements, line: t.line } satisfies ListLit
     }
     throw new ParseError(`unexpected token '${t.value}'`, t.line)
   }

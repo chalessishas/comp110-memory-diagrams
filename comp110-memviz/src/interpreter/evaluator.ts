@@ -20,6 +20,7 @@ import type {
   FunctionDef,
   Frame,
   HeapInstance,
+  HeapList,
   HeapObject,
   Program,
   Snapshot,
@@ -108,7 +109,49 @@ function cloneHeapObject(h: HeapObject): HeapObject {
   if (h.kind === 'class') {
     return { ...h, methodNames: [...h.methodNames] }
   }
+  if (h.kind === 'list') {
+    return {
+      id: h.id,
+      kind: 'list',
+      elementType: h.elementType,
+      slots: h.slots.map((s) => ({
+        index: s.index,
+        value: cloneValue(s.value),
+        retired: s.retired,
+      })),
+    }
+  }
   return { ...h }
+}
+
+// ----- List helpers (v2) ------------------------------------------------
+
+function listLength(lst: HeapList): number {
+  // Distinct non-retired slot indexes = current logical length.
+  const seen = new Set<number>()
+  for (const s of lst.slots) {
+    if (!s.retired) seen.add(s.index)
+  }
+  return seen.size
+}
+
+function listGet(lst: HeapList, index: number): Value | undefined {
+  for (let i = lst.slots.length - 1; i >= 0; i--) {
+    const s = lst.slots[i]
+    if (!s.retired && s.index === index) return s.value
+  }
+  return undefined
+}
+
+function listSet(lst: HeapList, index: number, value: Value) {
+  for (const s of lst.slots) {
+    if (!s.retired && s.index === index) s.retired = true
+  }
+  lst.slots.push({ index, value, retired: false })
+}
+
+function listAppend(lst: HeapList, value: Value) {
+  lst.slots.push({ index: listLength(lst), value, retired: false })
 }
 
 function snap(state: State, currentLine: number, narration: string, error: string | null = null): Snapshot {
@@ -194,9 +237,24 @@ function valueToDisplay(v: Value, state: State): string {
     const obj = state.heap.find((h) => h.id === v.id)
     if (!obj) return `ID:${v.id}`
     if (obj.kind === 'instance') return `ID:${v.id} (${obj.className})`
+    if (obj.kind === 'list') return `ID:${v.id} (list)`
     return `ID:${v.id} (${obj.name})`
   }
   return '?'
+}
+
+// Python-style list repr. Used by print(list) and f-string interpolation of
+// lists. Strings are quoted, other values use valueToDisplay.
+function listRepr(lst: HeapList, state: State): string {
+  const len = listLength(lst)
+  const items: string[] = []
+  for (let i = 0; i < len; i++) {
+    const v = listGet(lst, i)
+    if (v === undefined) { items.push('?'); continue }
+    if (v.kind === 'str') items.push(`'${v.v}'`)
+    else items.push(valueToDisplay(v, state))
+  }
+  return '[' + items.join(', ') + ']'
 }
 
 function evalExpr(state: State, expr: Expr): Value {
@@ -281,26 +339,72 @@ function evalExpr(state: State, expr: Expr): Value {
     case 'index': {
       const target = evalExpr(state, expr.target)
       const idx = evalExpr(state, expr.index)
-      if (target.kind !== 'str') {
-        throw new RuntimeErrorSignal(
-          `TypeError on line ${expr.line}: only strings support indexing in v0`,
-          expr.line,
-        )
-      }
       if (idx.kind !== 'int') {
         throw new RuntimeErrorSignal(
-          `TypeError on line ${expr.line}: string index must be int`,
+          `TypeError on line ${expr.line}: index must be int`,
           expr.line,
         )
       }
-      const i = idx.v < 0 ? target.v.length + idx.v : idx.v
-      if (i < 0 || i >= target.v.length) {
-        throw new RuntimeErrorSignal(
-          `IndexError on line ${expr.line}: string index ${idx.v} out of range`,
-          expr.line,
-        )
+      // String indexing (v0).
+      if (target.kind === 'str') {
+        const i = idx.v < 0 ? target.v.length + idx.v : idx.v
+        if (i < 0 || i >= target.v.length) {
+          throw new RuntimeErrorSignal(
+            `IndexError on line ${expr.line}: string index ${idx.v} out of range`,
+            expr.line,
+          )
+        }
+        return { kind: 'str', v: target.v[i] }
       }
-      return { kind: 'str', v: target.v[i] }
+      // List indexing (v2).
+      if (target.kind === 'ref') {
+        const obj = state.heap.find((h) => h.id === target.id)
+        if (obj && obj.kind === 'list') {
+          const len = listLength(obj)
+          const i = idx.v < 0 ? len + idx.v : idx.v
+          if (i < 0 || i >= len) {
+            throw new RuntimeErrorSignal(
+              `IndexError on line ${expr.line}: list index ${idx.v} out of range (len=${len})`,
+              expr.line,
+            )
+          }
+          const v = listGet(obj, i)
+          if (v === undefined) {
+            throw new RuntimeErrorSignal(
+              `IndexError on line ${expr.line}: list slot ${i} missing`,
+              expr.line,
+            )
+          }
+          return v
+        }
+      }
+      throw new RuntimeErrorSignal(
+        `TypeError on line ${expr.line}: cannot index ${target.kind}`,
+        expr.line,
+      )
+    }
+    case 'listLit': {
+      const id = state.nextHeapId++
+      const lst: HeapList = {
+        id,
+        kind: 'list',
+        elementType: 'Any',
+        slots: [],
+      }
+      state.heap.push(lst)
+      for (const el of expr.elements) {
+        const v = evalExpr(state, el)
+        listAppend(lst, v)
+      }
+      push(
+        state,
+        snap(
+          state,
+          expr.line,
+          `Created list ID:${id} with ${expr.elements.length} initial element(s).`,
+        ),
+      )
+      return { kind: 'ref', id }
     }
   }
 }
@@ -406,6 +510,32 @@ function evalCall(state: State, expr: CallExpr): Value {
       )
     }
     const obj = state.heap.find((h) => h.id === selfVal.id)
+    // List methods — v2 supports .append(value).
+    if (obj && obj.kind === 'list') {
+      if (expr.callee === 'append') {
+        if (expr.args.length !== 1) {
+          throw new RuntimeErrorSignal(
+            `Function Call Error on Line ${expr.line}: list.append takes exactly 1 arg`,
+            expr.line,
+          )
+        }
+        const v = evalExpr(state, expr.args[0].value)
+        listAppend(obj, v)
+        push(
+          state,
+          snap(
+            state,
+            expr.line,
+            `Appended ${valueToDisplay(v, state)} to list ID:${obj.id} (now length ${listLength(obj)}).`,
+          ),
+        )
+        return { kind: 'none' }
+      }
+      throw new RuntimeErrorSignal(
+        `AttributeError on line ${expr.line}: 'list' has no method '${expr.callee}' (v2 only supports append)`,
+        expr.line,
+      )
+    }
     if (!obj || obj.kind !== 'instance') {
       throw new RuntimeErrorSignal(
         `AttributeError on line ${expr.line}: '.${expr.callee}' on non-instance`,
@@ -627,6 +757,7 @@ function callUserFunction(
 function toStr(state: State, v: Value, callLine: number): string {
   if (v.kind === 'ref') {
     const obj = state.heap.find((h) => h.id === v.id)
+    if (obj && obj.kind === 'list') return listRepr(obj, state)
     if (obj && obj.kind === 'instance') {
       const cls = state.classDefs.get(obj.className)
       const dunder = cls?.methods.find((m) => m.name === '__str__')
@@ -661,13 +792,22 @@ function applyBuiltin(
       return { kind: 'none' }
     }
     case 'len': {
-      if (values.length !== 1 || values[0].kind !== 'str') {
+      if (values.length !== 1) {
         throw new RuntimeErrorSignal(
-          `Function Call Error on Line ${expr.line}: len() expects one string argument`,
+          `Function Call Error on Line ${expr.line}: len() expects one argument`,
           expr.line,
         )
       }
-      return { kind: 'int', v: values[0].v.length }
+      const arg = values[0]
+      if (arg.kind === 'str') return { kind: 'int', v: arg.v.length }
+      if (arg.kind === 'ref') {
+        const obj = state.heap.find((h) => h.id === arg.id)
+        if (obj && obj.kind === 'list') return { kind: 'int', v: listLength(obj) }
+      }
+      throw new RuntimeErrorSignal(
+        `Function Call Error on Line ${expr.line}: len() supports string or list`,
+        expr.line,
+      )
     }
     case 'int': {
       if (values.length !== 1) throw new RuntimeErrorSignal(`int() takes 1 arg`, expr.line)
@@ -774,6 +914,65 @@ function execStmt(state: State, stmt: Stmt) {
       } else {
         push(state, snap(state, stmt.line, `All conditions false — skipping if on line ${stmt.line}.`))
       }
+      return
+    }
+    case 'while': {
+      const MAX_ITERS = 10000
+      let iter = 0
+      while (iter++ < MAX_ITERS) {
+        const cond = evalExpr(state, stmt.condition)
+        if (!truthy(cond)) {
+          push(state, snap(state, stmt.line, `while condition false — exiting loop on line ${stmt.line}.`))
+          return
+        }
+        push(state, snap(state, stmt.line, `while condition true — iteration ${iter} enters body.`))
+        for (const s of stmt.body) execStmt(state, s)
+      }
+      throw new RuntimeErrorSignal(
+        `RuntimeError on line ${stmt.line}: while loop exceeded ${MAX_ITERS} iterations (suspected infinite loop)`,
+        stmt.line,
+      )
+    }
+    case 'indexAssign': {
+      const targetVal = evalExpr(state, stmt.target)
+      if (targetVal.kind !== 'ref') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: cannot index-assign on non-object`,
+          stmt.line,
+        )
+      }
+      const obj = state.heap.find((h) => h.id === targetVal.id)
+      if (!obj || obj.kind !== 'list') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: index-assign only supported on lists`,
+          stmt.line,
+        )
+      }
+      const idxVal = evalExpr(state, stmt.index)
+      if (idxVal.kind !== 'int') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: list index must be int`,
+          stmt.line,
+        )
+      }
+      const len = listLength(obj)
+      const i = idxVal.v < 0 ? len + idxVal.v : idxVal.v
+      if (i < 0 || i >= len) {
+        throw new RuntimeErrorSignal(
+          `IndexError on line ${stmt.line}: list index ${idxVal.v} out of range (len=${len})`,
+          stmt.line,
+        )
+      }
+      const newVal = evalExpr(state, stmt.value)
+      listSet(obj, i, newVal)
+      push(
+        state,
+        snap(
+          state,
+          stmt.line,
+          `Reassigned list ID:${obj.id}[${i}] = ${valueToDisplay(newVal, state)} (old value struck through).`,
+        ),
+      )
       return
     }
     case 'classDef': {

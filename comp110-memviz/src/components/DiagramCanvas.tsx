@@ -119,6 +119,26 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
       </div>
     )
   }
+  if (obj.kind === 'list') {
+    return (
+      <div className="heap-obj list">
+        <div className="heap-obj-header">
+          <span className="heap-id">ID:{obj.id}</span>
+          <span className="heap-label">list</span>
+        </div>
+        <div className="bindings list-slots">
+          {obj.slots.length === 0 && <div className="binding empty-binding">(empty)</div>}
+          {obj.slots.map((s, i) => (
+            <div key={i} className={`binding${s.retired ? ' retired' : ''}`}>
+              <span className="name">[{s.index}]</span>
+              <span className="eq">=</span>
+              <span className="value">{formatValueSimple(s.value)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
   // instance
   return (
     <div className="heap-obj instance">

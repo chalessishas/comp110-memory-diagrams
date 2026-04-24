@@ -197,6 +197,19 @@
   gap: 4px;
 }
 
+.heap-obj.list {
+  background: #faf5ff; /* light purple — list objects */
+  border-color: #6b46c1;
+  box-shadow: 1px 1px 0 #6b46c1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list-slots .binding .name {
+  color: #553c9a;
+  font-weight: 600;
+}
+
 .heap-obj-header {
   display: flex;
   flex-wrap: wrap;

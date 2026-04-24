@@ -13,6 +13,7 @@ export type TokenKind =
   | 'KEYWORD'
   | 'OP' // + - * / // % **
   | 'CMP' // == != < > <= >=
+  | 'AUG' // += -= *= /=  (augmented assignment)
   | 'LPAREN'
   | 'RPAREN'
   | 'LBRACKET'
@@ -35,6 +36,7 @@ const KEYWORDS = new Set([
   'def', 'return', 'None', 'True', 'False',
   'class', 'if', 'elif', 'else',
   'and', 'or', 'not',
+  'while',
 ])
 
 export class TokenError extends Error {
@@ -223,6 +225,9 @@ export function tokenize(src: string): Token[] {
       if (two === '**' || two === '//') { emit('OP', two, lineNum, i); i += 2; continue }
       if (two === '==' || two === '!=' || two === '<=' || two === '>=') {
         emit('CMP', two, lineNum, i); i += 2; continue
+      }
+      if (two === '+=' || two === '-=' || two === '*=' || two === '/=') {
+        emit('AUG', two, lineNum, i); i += 2; continue
       }
 
       // Single-character operators / punctuation

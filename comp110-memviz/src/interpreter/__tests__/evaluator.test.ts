@@ -247,6 +247,96 @@ c.shut()
   })
 })
 
+describe('evaluator — list + while + += (v2)', () => {
+  const src = `def create() -> list[int]:
+    list_1: list[int] = []
+    i: int = 0
+    while i < 3:
+        list_1.append(i)
+        i += 1
+    return list_1
+
+def increase(a_list: list[int], x: int) -> None:
+    i: int = 0
+    while i < len(a_list):
+        a_list[i] += x
+        i += 1
+    return None
+
+def main() -> None:
+    list_1: list[int] = create()
+    list_2: list[int] = list_1
+    list_1 = create()
+    increase(list_1, 2)
+    print(list_1)
+    print(list_2)
+
+main()
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('runs with no error', () => {
+    expect(last.error).toBeNull()
+  })
+
+  it('prints [2, 3, 4] then [0, 1, 2] (reference aliasing preserved)', () => {
+    expect(last.output).toEqual(['[2, 3, 4]', '[0, 1, 2]'])
+  })
+
+  it('heap contains two distinct list objects', () => {
+    const lists = last.heap.filter((h) => h.kind === 'list')
+    expect(lists.length).toBe(2)
+  })
+
+  it('increase-mutated list shows strikethrough on old slot values', () => {
+    const lists = last.heap.filter((h) => h.kind === 'list')
+    // The list that was mutated via a_list[i] += 2 should have retired slots
+    // for each of its three indexes (old values crossed out).
+    const mutated = lists.find((l) => l.kind === 'list' && l.slots.some((s) => s.retired))
+    expect(mutated && mutated.kind === 'list').toBe(true)
+    if (mutated && mutated.kind === 'list') {
+      // Three retired slots (0→2, 1→3, 2→4), three active slots.
+      const retired = mutated.slots.filter((s) => s.retired)
+      const active = mutated.slots.filter((s) => !s.retired)
+      expect(retired).toHaveLength(3)
+      expect(active).toHaveLength(3)
+      expect(active.map((s) => s.value)).toEqual([
+        { kind: 'int', v: 2 },
+        { kind: 'int', v: 3 },
+        { kind: 'int', v: 4 },
+      ])
+    }
+  })
+})
+
+describe('evaluator — list.append grows length', () => {
+  const src = `numbers: list[int] = []
+i: int = 0
+while i < 5:
+    numbers.append(i * 2)
+    i += 1
+print(numbers)
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('prints [0, 2, 4, 6, 8]', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['[0, 2, 4, 6, 8]'])
+  })
+
+  it('has one list heap object with 5 active slots, no retired', () => {
+    const lists = last.heap.filter((h) => h.kind === 'list')
+    expect(lists).toHaveLength(1)
+    const lst = lists[0]
+    if (lst.kind === 'list') {
+      expect(lst.slots).toHaveLength(5)
+      expect(lst.slots.every((s) => !s.retired)).toBe(true)
+    }
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1

@@ -9,7 +9,7 @@ export type Value =
   | { kind: 'none' }
   | { kind: 'ref'; id: number } // reference to a heap object
 
-export type HeapObject = HeapFunction | HeapClass | HeapInstance
+export type HeapObject = HeapFunction | HeapClass | HeapInstance | HeapList
 
 export type HeapFunction = {
   id: number
@@ -37,6 +37,24 @@ export type HeapInstance = {
   className: string
   classId: number
   attrs: Binding[]
+}
+
+// A list stores its slots as an append-only history. Each slot tracks the
+// index at creation; if that slot is later overwritten (lst[i] = v), the
+// prior entry stays retired for strikethrough. Appends add a new slot at
+// the next index. In v2 we don't support removal so indexes never shift.
+export type HeapListSlot = {
+  index: number
+  value: Value
+  retired: boolean
+}
+
+export type HeapList = {
+  id: number
+  kind: 'list'
+  // Element type annotation for display, e.g. "int" / "str" / "Point".
+  elementType: TypeAnnotation
+  slots: HeapListSlot[]
 }
 
 // Per the v0 ruleset, variable assignments and function returns don't erase
@@ -91,7 +109,9 @@ export type Stmt =
   | ExprStmt
   | AssignStmt
   | AttrAssignStmt
+  | IndexAssignStmt
   | IfStmt
+  | WhileStmt
   | ClassDef
 
 export type AssignStmt = {
@@ -114,6 +134,22 @@ export type IfStmt = {
   kind: 'if'
   branches: { condition: Expr; body: Stmt[] }[] // if + any elifs
   elseBody: Stmt[] | null
+  line: number
+}
+
+export type WhileStmt = {
+  kind: 'while'
+  condition: Expr
+  body: Stmt[]
+  line: number
+}
+
+// `target[index] = value` — writes to a list slot (v2 supports lists only).
+export type IndexAssignStmt = {
+  kind: 'indexAssign'
+  target: Expr
+  index: Expr
+  value: Expr
   line: number
 }
 
@@ -155,6 +191,7 @@ export type Expr =
   | StrLit
   | FStringLit
   | BoolLit
+  | ListLit
   | NameRef
   | BinaryOp
   | CompareOp
@@ -164,6 +201,8 @@ export type Expr =
   | CallExpr
   | IndexExpr
   | AttrExpr
+
+export type ListLit = { kind: 'listLit'; elements: Expr[]; line: number }
 
 export type NumLit = { kind: 'num'; v: number; isFloat: boolean; line: number }
 export type StrLit = { kind: 'str'; v: string; line: number }
