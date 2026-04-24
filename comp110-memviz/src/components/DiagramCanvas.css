@@ -139,16 +139,16 @@
 .binding .eq { color: #a0aec0; }
 .binding .value { color: #1a202c; }
 
-/* Retired binding = value was reassigned. Old line stays visible,
-   struck-through, so the student can see the history of the variable. */
+/* Retired binding = a value was reassigned. Per COMP110 hand-drawn convention
+   the student strikes through the entire old line (name, `=`, and value) and
+   writes the new binding on a fresh line below. Mirror that: stroke all three
+   grid cells, not just the value. */
 .binding.retired .name,
+.binding.retired .eq,
 .binding.retired .value {
   text-decoration: line-through;
-  text-decoration-color: #a0aec0;
+  text-decoration-color: #718096;
   color: #a0aec0;
-}
-.binding.retired .eq {
-  color: #cbd5e0;
 }
 
 .empty-binding {
