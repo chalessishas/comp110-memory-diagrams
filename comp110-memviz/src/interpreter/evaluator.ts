@@ -986,7 +986,7 @@ function callUserFunction(
     snap(
       state,
       newFrame.returnAddress ?? fn.lineEnd,
-      `Return from ${displayName} with RV = ${valueToDisplay(rv, state)}. Frame retired (struck through). Jumping back to line ${newFrame.returnAddress}.`,
+      `Return from ${displayName} with RV = ${valueToDisplay(rv, state)}. Frame retained (dimmed, dashed border) as a historical record. Jumping back to line ${newFrame.returnAddress}.`,
     ),
   )
   return rv

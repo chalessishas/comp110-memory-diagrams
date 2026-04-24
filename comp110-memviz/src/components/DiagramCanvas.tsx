@@ -76,29 +76,45 @@ function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]
   ]
     .filter(Boolean)
     .join(' ')
+  // Match the COMP110 solution layout: the frame name goes on top, and the
+  // body is two columns — RA/RV stacked on the left, bindings stacked on
+  // the right. Globals has no RA/RV, so its bindings get the full width.
+  const hasRARV = frame.returnAddress !== null || frame.returnValue !== null
+  const bindingGroups = groupByName(frame.bindings)
+  const bindingsBlock = (
+    <div className="bindings">
+      {bindingGroups.length === 0 && (
+        <div className="binding empty-binding">(empty)</div>
+      )}
+      {bindingGroups.map((g, i) => (
+        <div key={i} className="binding">
+          <span className="name">{g.name}</span>
+          <span className="eq">=</span>
+          <span className="value">
+            {renderHistory(g.items.map((b) => ({ retired: b.retired, text: formatValue(b.value, heap) })))}
+          </span>
+        </div>
+      ))}
+    </div>
+  )
   return (
     <div className={cls}>
       <div className="frame-header">
         <span className="frame-name">{frame.name}</span>
-        {frame.returnAddress !== null && <span className="ra">RA: {frame.returnAddress}</span>}
-        {frame.returnValue !== null && (
-          <span className="rv">RV: {formatValue(frame.returnValue, heap)}</span>
-        )}
       </div>
-      <div className="bindings">
-        {frame.bindings.length === 0 && (
-          <div className="binding empty-binding">(empty)</div>
-        )}
-        {groupByName(frame.bindings).map((g, i) => (
-          <div key={i} className="binding">
-            <span className="name">{g.name}</span>
-            <span className="eq">=</span>
-            <span className="value">
-              {renderHistory(g.items.map((b) => ({ retired: b.retired, text: formatValue(b.value, heap) })))}
-            </span>
+      {hasRARV ? (
+        <div className="frame-body">
+          <div className="ra-rv">
+            {frame.returnAddress !== null && <div className="ra">RA: {frame.returnAddress}</div>}
+            {frame.returnValue !== null && (
+              <div className="rv">RV: {formatValue(frame.returnValue, heap)}</div>
+            )}
           </div>
-        ))}
-      </div>
+          {bindingsBlock}
+        </div>
+      ) : (
+        bindingsBlock
+      )}
     </div>
   )
 }

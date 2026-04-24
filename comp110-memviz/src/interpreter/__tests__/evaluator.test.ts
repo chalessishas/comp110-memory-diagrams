@@ -418,6 +418,61 @@ describe('evaluator — str * int repetition (v3)', () => {
   })
 })
 
+describe('evaluator — is / is not + union types + bare type hints (v3.1)', () => {
+  it('is/is not behaves like ==/!= for None checks', () => {
+    const src = `x: int = 0
+y = None
+if y is None:
+    print("y is None")
+if x is not None:
+    print("x is not None")
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['y is None', 'x is not None'])
+  })
+
+  it('union type annotations `A | B` are accepted on params and decls', () => {
+    const src = `class Box:
+    val: int | None
+
+    def __init__(self, v: int | None):
+        self.val = v
+
+b: Box = Box(5)
+print(b.val)
+c: Box = Box(None)
+print(c.val)
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['5', 'None'])
+  })
+
+  it('bare type hint `rest: str` with no assignment is a no-op', () => {
+    const src = `def f() -> str:
+    rest: str
+    rest = "hello"
+    return rest
+
+print(f())
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['hello'])
+  })
+
+  it('`from __future__ import annotations` is silently ignored', () => {
+    const src = `from __future__ import annotations
+x: int = 42
+print(x)
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['42'])
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1

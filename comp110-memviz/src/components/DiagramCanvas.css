@@ -107,6 +107,31 @@
   margin-bottom: 4px;
 }
 
+/* COMP110 convention: inside a function/method frame, RA/RV stack on the
+   left and bindings on the right. Globals has no RA/RV so it skips this
+   layout and just renders bindings directly. */
+.frame-body {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.ra-rv {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: #4a5568;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.ra-rv .rv {
+  color: #2c7a7b;
+  font-weight: 600;
+  font-size: 11px;
+}
+
 .frame-name {
   font-weight: 700;
   color: #1a202c;
