@@ -159,10 +159,11 @@ function renderHistory(versions: { retired: boolean; text: string }[]): ReactNod
 
 function HeapObjectView({ obj }: { obj: HeapObject }) {
   if (obj.kind === 'function') {
+    // COMP110 typeset solution convention: `fn X-Y` without the word "lines".
     return (
       <div className="heap-obj function">
         <span className="heap-id">ID:{obj.id}</span>
-        <span className="heap-label">fn lines {obj.lineStart}–{obj.lineEnd}</span>
+        <span className="heap-label">fn {obj.lineStart}–{obj.lineEnd}</span>
         <span className="heap-name">{obj.name}</span>
       </div>
     )

@@ -116,7 +116,7 @@ class Parser {
     // fall through.
     if (t.kind === 'NAME') {
       const n1 = this.peek(1)
-      if (n1?.kind === 'COLON') return this.parseAssign(true)
+      if (n1?.kind === 'COLON') return this.parseTypedDecl()
     }
     // For everything else we parse a postfix expression (covers NameRef,
     // AttrExpr, IndexExpr, CallExpr) and then classify based on what follows.
@@ -351,22 +351,22 @@ class Parser {
     return { kind: 'if', branches, elseBody, line: ifTok.line }
   }
 
-  private parseAssign(typed: boolean): Stmt {
+  // Parses a typed declaration — the caller has verified that the next
+  // tokens are `NAME COLON ...`. Handles three shapes:
+  //   1) NAME : TYPE = expr         → regular AssignStmt with typeAnnotation
+  //   2) NAME : TYPE                → bare type hint (Python forward decl);
+  //                                    returned as a no-op exprStmt
+  // (Untyped NAME = expr is handled in parseStmt via parsePostfix + ASSIGN.)
+  private parseTypedDecl(): Stmt {
     const nameTok = this.expect('NAME')
-    let typeAnnotation: TypeAnnotation | null = null
-    if (typed) {
-      this.expect('COLON')
-      typeAnnotation = this.parseTypeAnnotation()
-      // Bare type hint with no value — `x: int` as a forward declaration.
-      // Python accepts this as a no-op at runtime. We return a dummy
-      // expression statement so parsing succeeds.
-      if (this.match('NEWLINE')) {
-        this.consume()
-        return {
-          kind: 'exprStmt',
-          expr: { kind: 'name', name: 'None', line: nameTok.line },
-          line: nameTok.line,
-        }
+    this.expect('COLON')
+    const typeAnnotation = this.parseTypeAnnotation()
+    if (this.match('NEWLINE')) {
+      this.consume()
+      return {
+        kind: 'exprStmt',
+        expr: { kind: 'name', name: 'None', line: nameTok.line },
+        line: nameTok.line,
       }
     }
     this.expect('ASSIGN')

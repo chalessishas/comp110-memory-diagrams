@@ -35,7 +35,6 @@ export type HeapInstance = {
   id: number
   kind: 'instance'
   className: string
-  classId: number
   attrs: Binding[]
 }
 

@@ -98,7 +98,6 @@ function cloneHeapObject(h: HeapObject): HeapObject {
       id: h.id,
       kind: 'instance',
       className: h.className,
-      classId: h.classId,
       // Deep-clone attrs so retired flags at the time of the snapshot are frozen.
       attrs: h.attrs.map((b) => ({
         name: b.name,
@@ -847,7 +846,6 @@ function instantiateClass(
     id,
     kind: 'instance',
     className: cls.name,
-    classId: id, // not strictly the class's id — we look up by name, this field is for future
     attrs: [],
   }
   state.heap.push(instance)
