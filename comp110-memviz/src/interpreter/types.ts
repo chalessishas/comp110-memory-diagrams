@@ -5,15 +5,38 @@ export type Value =
   | { kind: 'int'; v: number }
   | { kind: 'float'; v: number }
   | { kind: 'str'; v: string }
+  | { kind: 'bool'; v: boolean }
   | { kind: 'none' }
   | { kind: 'ref'; id: number } // reference to a heap object
 
-export type HeapObject = {
+export type HeapObject = HeapFunction | HeapClass | HeapInstance
+
+export type HeapFunction = {
   id: number
   kind: 'function'
   name: string
   lineStart: number
   lineEnd: number
+}
+
+export type HeapClass = {
+  id: number
+  kind: 'class'
+  name: string
+  lineStart: number
+  lineEnd: number
+  methodNames: string[] // for display in the heap column
+}
+
+// An instance stores its attributes as a Binding[] so attribute
+// reassignment produces the same strike-through rendering students see
+// for local-variable rebinding.
+export type HeapInstance = {
+  id: number
+  kind: 'instance'
+  className: string
+  classId: number
+  attrs: Binding[]
 }
 
 // Per the v0 ruleset, variable assignments and function returns don't erase
@@ -67,6 +90,9 @@ export type Stmt =
   | ReturnStmt
   | ExprStmt
   | AssignStmt
+  | AttrAssignStmt
+  | IfStmt
+  | ClassDef
 
 export type AssignStmt = {
   kind: 'assign'
@@ -74,6 +100,32 @@ export type AssignStmt = {
   typeAnnotation: TypeAnnotation | null // present on first declaration: `a: int = 3`
   value: Expr
   line: number
+}
+
+export type AttrAssignStmt = {
+  kind: 'attrAssign'
+  target: Expr // the object whose attribute is being written (usually `self` or a name)
+  attr: string
+  value: Expr
+  line: number
+}
+
+export type IfStmt = {
+  kind: 'if'
+  branches: { condition: Expr; body: Stmt[] }[] // if + any elifs
+  elseBody: Stmt[] | null
+  line: number
+}
+
+export type ClassDef = {
+  kind: 'classDef'
+  name: string
+  // Bare field declarations inside the class body: `name: str`. v0.1 treats
+  // these as documentation only — the actual value lives on the instance.
+  fieldDecls: { name: string; type: TypeAnnotation }[]
+  methods: FunctionDef[]
+  lineStart: number
+  lineEnd: number
 }
 
 export type FunctionDef = {
@@ -101,15 +153,44 @@ export type ExprStmt = {
 export type Expr =
   | NumLit
   | StrLit
+  | FStringLit
+  | BoolLit
   | NameRef
   | BinaryOp
+  | CompareOp
+  | BoolOp
+  | NotOp
   | UnaryOp
   | CallExpr
   | IndexExpr
+  | AttrExpr
 
 export type NumLit = { kind: 'num'; v: number; isFloat: boolean; line: number }
 export type StrLit = { kind: 'str'; v: string; line: number }
+export type FStringLit = {
+  kind: 'fstr'
+  // A sequence of alternating literal chunks and interpolated expressions.
+  parts: ({ kind: 'lit'; v: string } | { kind: 'interp'; expr: Expr })[]
+  line: number
+}
+export type BoolLit = { kind: 'bool'; v: boolean; line: number }
 export type NameRef = { kind: 'name'; name: string; line: number }
+export type CompareOp = {
+  kind: 'cmp'
+  op: '==' | '!=' | '<' | '>' | '<=' | '>='
+  left: Expr
+  right: Expr
+  line: number
+}
+export type BoolOp = {
+  kind: 'boolOp'
+  op: 'and' | 'or'
+  left: Expr
+  right: Expr
+  line: number
+}
+export type NotOp = { kind: 'not'; operand: Expr; line: number }
+export type AttrExpr = { kind: 'attr'; target: Expr; name: string; line: number }
 export type BinaryOp = {
   kind: 'binop'
   op: '+' | '-' | '*' | '/' | '//' | '%' | '**'
@@ -120,7 +201,10 @@ export type BinaryOp = {
 export type UnaryOp = { kind: 'unop'; op: '-' | '+'; operand: Expr; line: number }
 export type CallExpr = {
   kind: 'call'
-  callee: string // simple names only in v0
+  callee: string // simple name (for bare `foo(...)`) or method name (for `obj.foo(...)`)
+  // When present, this is a method call — look up `callee` on the object this
+  // expression evaluates to, and pass the object as the first arg (self).
+  methodOf?: Expr
   args: { name: string | null; value: Expr }[] // name=null → positional
   line: number
 }

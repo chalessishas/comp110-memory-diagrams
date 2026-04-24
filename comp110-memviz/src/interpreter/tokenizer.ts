@@ -9,14 +9,17 @@ export type TokenKind =
   | 'NAME'
   | 'NUMBER'
   | 'STRING'
+  | 'FSTRING' // value is a JSON-encoded list of parts: [{kind:'lit'|'interp', v|src}]
   | 'KEYWORD'
-  | 'OP'
+  | 'OP' // + - * / // % **
+  | 'CMP' // == != < > <= >=
   | 'LPAREN'
   | 'RPAREN'
   | 'LBRACKET'
   | 'RBRACKET'
   | 'COLON'
   | 'COMMA'
+  | 'DOT'
   | 'ARROW'
   | 'ASSIGN'
   | 'EOF'
@@ -28,7 +31,11 @@ export type Token = {
   col: number
 }
 
-const KEYWORDS = new Set(['def', 'return', 'None', 'True', 'False'])
+const KEYWORDS = new Set([
+  'def', 'return', 'None', 'True', 'False',
+  'class', 'if', 'elif', 'else',
+  'and', 'or', 'not',
+])
 
 export class TokenError extends Error {
   line: number
@@ -84,6 +91,50 @@ export function tokenize(src: string): Token[] {
 
       if (c === '#') break // rest-of-line comment
       if (c === ' ' || c === '\t') { i++; continue }
+
+      // f-string: `f"..."` or `f'...'` with `{expr}` interpolation. We lex it
+      // into a FSTRING token whose value is JSON-encoded parts.
+      if (
+        (c === 'f' || c === 'F') &&
+        (line[i + 1] === '"' || line[i + 1] === "'")
+      ) {
+        const quote = line[i + 1]
+        const parts: ({ kind: 'lit'; v: string } | { kind: 'interp'; src: string })[] = []
+        let j = i + 2
+        let buf = ''
+        while (j < line.length && line[j] !== quote) {
+          if (line[j] === '{' && line[j + 1] === '{') { buf += '{'; j += 2; continue }
+          if (line[j] === '}' && line[j + 1] === '}') { buf += '}'; j += 2; continue }
+          if (line[j] === '{') {
+            if (buf.length) { parts.push({ kind: 'lit', v: buf }); buf = '' }
+            j++
+            const start = j
+            let depth = 1
+            while (j < line.length && depth > 0) {
+              if (line[j] === '{') depth++
+              else if (line[j] === '}') depth--
+              if (depth > 0) j++
+            }
+            if (depth !== 0) throw new TokenError('unterminated { in f-string', lineNum, i)
+            parts.push({ kind: 'interp', src: line.slice(start, j) })
+            j++ // consume the '}'
+            continue
+          }
+          if (line[j] === '\\' && j + 1 < line.length) {
+            const esc = line[j + 1]
+            buf += esc === 'n' ? '\n' : esc === 't' ? '\t' : esc
+            j += 2
+            continue
+          }
+          buf += line[j]
+          j++
+        }
+        if (j >= line.length) throw new TokenError('unterminated f-string', lineNum, i)
+        if (buf.length) parts.push({ kind: 'lit', v: buf })
+        emit('FSTRING', JSON.stringify(parts), lineNum, i)
+        i = j + 1
+        continue
+      }
 
       // Strings: '...' or "..." (no escapes in v0 beyond \n, \t, \\, \", \')
       if (c === '"' || c === "'") {
@@ -170,6 +221,9 @@ export function tokenize(src: string): Token[] {
       const two = line.slice(i, i + 2)
       if (two === '->') { emit('ARROW', two, lineNum, i); i += 2; continue }
       if (two === '**' || two === '//') { emit('OP', two, lineNum, i); i += 2; continue }
+      if (two === '==' || two === '!=' || two === '<=' || two === '>=') {
+        emit('CMP', two, lineNum, i); i += 2; continue
+      }
 
       // Single-character operators / punctuation
       if (c === '(') { emit('LPAREN', c, lineNum, i); i++; continue }
@@ -178,7 +232,9 @@ export function tokenize(src: string): Token[] {
       if (c === ']') { emit('RBRACKET', c, lineNum, i); i++; continue }
       if (c === ':') { emit('COLON', c, lineNum, i); i++; continue }
       if (c === ',') { emit('COMMA', c, lineNum, i); i++; continue }
+      if (c === '.') { emit('DOT', c, lineNum, i); i++; continue }
       if (c === '=') { emit('ASSIGN', c, lineNum, i); i++; continue }
+      if (c === '<' || c === '>') { emit('CMP', c, lineNum, i); i++; continue }
       if ('+-*/%'.includes(c)) { emit('OP', c, lineNum, i); i++; continue }
 
       throw new TokenError(`unexpected character ${JSON.stringify(c)}`, lineNum, i)

@@ -189,6 +189,36 @@
   box-sizing: border-box;
 }
 
+.heap-obj.class {
+  background: #ebf4ff; /* light blue — class objects */
+  border-color: #2b6cb0;
+  box-shadow: 1px 1px 0 #2b6cb0;
+}
+
+.heap-obj.instance {
+  background: #fef5e7; /* light amber — instance objects */
+  border-color: #b7791f;
+  box-shadow: 1px 1px 0 #b7791f;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.heap-obj-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed #b7791f;
+}
+
+.instance-attrs {
+  padding-top: 2px;
+}
+
+.instance-attrs .binding .name {
+  color: #744210;
+}
+
 .heap-id {
   font-weight: 700;
   color: #22543d;

@@ -3,13 +3,22 @@
 
 import type {
   AssignStmt,
+  AttrAssignStmt,
+  AttrExpr,
   BinaryOp,
+  BoolLit,
+  BoolOp,
   CallExpr,
+  ClassDef,
+  CompareOp,
   Expr,
   ExprStmt,
+  FStringLit,
   FunctionDef,
+  IfStmt,
   IndexExpr,
   NameRef,
+  NotOp,
   NumLit,
   Param,
   Program,
@@ -84,16 +93,131 @@ class Parser {
   private parseStmt(): Stmt {
     const t = this.peek()
     if (t.kind === 'KEYWORD' && t.value === 'def') return this.parseFuncDef()
+    if (t.kind === 'KEYWORD' && t.value === 'class') return this.parseClassDef()
+    if (t.kind === 'KEYWORD' && t.value === 'if') return this.parseIf()
     if (t.kind === 'KEYWORD' && t.value === 'return') return this.parseReturn()
     // Assignment: NAME '=' expr  OR  NAME ':' TYPE '=' expr. We peek ahead to
-    // distinguish from an expression statement starting with a name (like a
-    // function call `foo(...)`), since those don't have an ASSIGN in that slot.
+    // distinguish from an expression statement starting with a name.
     if (t.kind === 'NAME') {
       const n1 = this.peek(1)
       if (n1?.kind === 'ASSIGN') return this.parseAssign(false)
       if (n1?.kind === 'COLON') return this.parseAssign(true)
     }
+    // Attribute assignment `target.attr = expr` — we parse the postfix target
+    // (which may be `self`, `self.x`, a name, or a call result), then if the
+    // next token is ASSIGN we finalize it as an AttrAssignStmt; otherwise it
+    // was an expression statement (e.g. a method call we already parsed).
+    const startPos = this.pos
+    const lhs = this.parsePostfix()
+    if (lhs.kind === 'attr' && this.match('ASSIGN')) {
+      this.consume()
+      const value = this.parseExpr()
+      this.expect('NEWLINE')
+      return {
+        kind: 'attrAssign',
+        target: lhs.target,
+        attr: lhs.name,
+        value,
+        line: lhs.line,
+      } satisfies AttrAssignStmt
+    }
+    // Otherwise it's an expression statement. Back up so parseExprStmt can
+    // parse from scratch (it re-reads the full precedence chain, not just
+    // postfix).
+    this.pos = startPos
     return this.parseExprStmt()
+  }
+
+  private parseClassDef(): ClassDef {
+    const classTok = this.expect('KEYWORD', 'class')
+    const lineStart = classTok.line
+    const nameTok = this.expect('NAME')
+    this.expect('COLON')
+    this.expect('NEWLINE')
+    this.expect('INDENT')
+    this.skipNewlines()
+
+    // Optional docstring
+    if (this.match('STRING')) {
+      this.consume()
+      if (this.match('NEWLINE')) this.consume()
+      this.skipNewlines()
+    }
+
+    const fieldDecls: { name: string; type: TypeAnnotation }[] = []
+    const methods: FunctionDef[] = []
+    while (!this.match('DEDENT') && !this.match('EOF')) {
+      if (this.match('KEYWORD', 'def')) {
+        methods.push(this.parseFuncDef())
+      } else if (this.peek().kind === 'NAME' && this.peek(1)?.kind === 'COLON') {
+        // Bare field declaration: `name: str` — no default value allowed in v1.
+        const fnameTok = this.expect('NAME')
+        this.expect('COLON')
+        const type = this.parseTypeAnnotation()
+        this.expect('NEWLINE')
+        fieldDecls.push({ name: fnameTok.value, type })
+      } else {
+        throw new ParseError(
+          `unexpected '${this.peek().value}' in class body (expected field decl or 'def')`,
+          this.peek().line,
+        )
+      }
+      this.skipNewlines()
+    }
+    const dedent = this.peek()
+    if (this.match('DEDENT')) this.consume()
+    const lineEnd = dedent ? Math.max(lineStart, dedent.line - 1) : lineStart
+    return { kind: 'classDef', name: nameTok.value, fieldDecls, methods, lineStart, lineEnd }
+  }
+
+  private parseIf(): IfStmt {
+    const ifTok = this.expect('KEYWORD', 'if')
+    const branches: IfStmt['branches'] = []
+    const firstCond = this.parseExpr()
+    this.expect('COLON')
+    this.expect('NEWLINE')
+    this.expect('INDENT')
+    this.skipNewlines()
+    const firstBody: Stmt[] = []
+    while (!this.match('DEDENT') && !this.match('EOF')) {
+      firstBody.push(this.parseStmt())
+      this.skipNewlines()
+    }
+    if (this.match('DEDENT')) this.consume()
+    branches.push({ condition: firstCond, body: firstBody })
+
+    while (this.match('KEYWORD', 'elif')) {
+      this.consume()
+      const cond = this.parseExpr()
+      this.expect('COLON')
+      this.expect('NEWLINE')
+      this.expect('INDENT')
+      this.skipNewlines()
+      const body: Stmt[] = []
+      while (!this.match('DEDENT') && !this.match('EOF')) {
+        body.push(this.parseStmt())
+        this.skipNewlines()
+      }
+      if (this.match('DEDENT')) this.consume()
+      branches.push({ condition: cond, body })
+    }
+
+    let elseBody: Stmt[] | null = null
+    if (this.match('KEYWORD', 'else')) {
+      this.consume()
+      this.expect('COLON')
+      this.expect('NEWLINE')
+      this.expect('INDENT')
+      this.skipNewlines()
+      elseBody = []
+      while (!this.match('DEDENT') && !this.match('EOF')) {
+        elseBody.push(this.parseStmt())
+        this.skipNewlines()
+      }
+      if (this.match('DEDENT')) this.consume()
+    }
+
+    return { kind: 'if', branches, elseBody, line: ifTok.line }
   }
 
   private parseAssign(typed: boolean): AssignStmt {
@@ -129,8 +253,12 @@ class Parser {
       }
     }
     this.expect('RPAREN')
-    this.expect('ARROW')
-    const returnType = this.parseTypeAnnotation()
+    // Return type annotation `-> Type` is optional (e.g. __init__ omits it).
+    let returnType: TypeAnnotation = 'None'
+    if (this.match('ARROW')) {
+      this.consume()
+      returnType = this.parseTypeAnnotation()
+    }
     this.expect('COLON')
     this.expect('NEWLINE')
     this.expect('INDENT')
@@ -167,7 +295,12 @@ class Parser {
 
   private parseParam(): Param {
     const nameTok = this.expect('NAME')
-    this.expect('COLON')
+    // In v1 method definitions, `self` omits the type annotation. Other params
+    // should normally have `: type` but we accept untyped ones for forgiveness.
+    if (!this.match('COLON')) {
+      return { name: nameTok.value, type: nameTok.value === 'self' ? 'Self' : 'Any' }
+    }
+    this.consume() // COLON
     const type = this.parseTypeAnnotation()
     return { name: nameTok.value, type }
   }
@@ -202,9 +335,55 @@ class Parser {
   }
 
   // Expressions (precedence climbing) --------------------------------
+  // Python precedence (low → high): or → and → not → comparisons → + - → * / // % → unary → ** → postfix → primary
 
   private parseExpr(): Expr {
-    return this.parseAdd()
+    return this.parseOr()
+  }
+
+  private parseOr(): Expr {
+    let left = this.parseAnd()
+    while (this.match('KEYWORD', 'or')) {
+      const tok = this.consume()
+      const right = this.parseAnd()
+      left = { kind: 'boolOp', op: 'or', left, right, line: tok.line } satisfies BoolOp
+    }
+    return left
+  }
+
+  private parseAnd(): Expr {
+    let left = this.parseNot()
+    while (this.match('KEYWORD', 'and')) {
+      const tok = this.consume()
+      const right = this.parseNot()
+      left = { kind: 'boolOp', op: 'and', left, right, line: tok.line } satisfies BoolOp
+    }
+    return left
+  }
+
+  private parseNot(): Expr {
+    if (this.match('KEYWORD', 'not')) {
+      const tok = this.consume()
+      const operand = this.parseNot()
+      return { kind: 'not', operand, line: tok.line } satisfies NotOp
+    }
+    return this.parseCompare()
+  }
+
+  private parseCompare(): Expr {
+    const left = this.parseAdd()
+    if (this.match('CMP')) {
+      const tok = this.consume()
+      const right = this.parseAdd()
+      return {
+        kind: 'cmp',
+        op: tok.value as CompareOp['op'],
+        left,
+        right,
+        line: tok.line,
+      } satisfies CompareOp
+    }
+    return left
   }
 
   private parseAdd(): Expr {
@@ -253,12 +432,22 @@ class Parser {
 
   private parsePostfix(): Expr {
     let expr = this.parsePrimary()
-    while (this.match('LPAREN') || this.match('LBRACKET')) {
-      if (this.match('LPAREN')) {
-        // Call — the callee must be a bare name in v0.
-        if (expr.kind !== 'name') {
-          throw new ParseError('only simple names may be called', expr.line)
-        }
+    while (this.match('LPAREN') || this.match('LBRACKET') || this.match('DOT')) {
+      if (this.match('DOT')) {
+        this.consume()
+        const nameTok = this.expect('NAME')
+        expr = {
+          kind: 'attr',
+          target: expr,
+          name: nameTok.value,
+          line: expr.line,
+        } satisfies AttrExpr
+      } else if (this.match('LPAREN')) {
+        // A call. Two forms:
+        //   (a) bare name: `foo(...)`                 → callee = name
+        //   (b) attribute: `obj.meth(...)`            → callee is an attr expr
+        // We keep CallExpr.callee as a string for the common case but stash
+        // the full attr target in `methodOf` for the method case.
         this.consume()
         const args: CallExpr['args'] = []
         if (!this.match('RPAREN')) {
@@ -269,7 +458,19 @@ class Parser {
           }
         }
         this.expect('RPAREN')
-        expr = { kind: 'call', callee: expr.name, args, line: expr.line } satisfies CallExpr
+        if (expr.kind === 'name') {
+          expr = { kind: 'call', callee: expr.name, args, line: expr.line } satisfies CallExpr
+        } else if (expr.kind === 'attr') {
+          expr = {
+            kind: 'call',
+            callee: expr.name, // method name
+            methodOf: expr.target,
+            args,
+            line: expr.line,
+          } satisfies CallExpr
+        } else {
+          throw new ParseError('only names or attributes may be called', expr.line)
+        }
       } else {
         this.consume() // LBRACKET
         const index = this.parseExpr()
@@ -302,14 +503,32 @@ class Parser {
       this.consume()
       return { kind: 'str', v: t.value, line: t.line } satisfies StrLit
     }
+    if (t.kind === 'FSTRING') {
+      this.consume()
+      const raw = JSON.parse(t.value) as ({ kind: 'lit'; v: string } | { kind: 'interp'; src: string })[]
+      // Parse each interpolated expression by running the tokenizer + parser
+      // recursively on the embedded source. The outer expression's line number
+      // is preserved so error messages still point at the right line.
+      const parts: FStringLit['parts'] = raw.map((p) => {
+        if (p.kind === 'lit') return { kind: 'lit', v: p.v }
+        const subTokens = tokenize(p.src + '\n')
+        const subParser = new Parser(subTokens)
+        const expr = subParser.parseExpr()
+        return { kind: 'interp', expr }
+      })
+      return { kind: 'fstr', parts, line: t.line } satisfies FStringLit
+    }
     if (t.kind === 'NAME') {
       this.consume()
       return { kind: 'name', name: t.value, line: t.line } satisfies NameRef
     }
-    // None / True / False are tokenized as KEYWORDs but behave as literal names.
-    if (t.kind === 'KEYWORD' && (t.value === 'None' || t.value === 'True' || t.value === 'False')) {
+    if (t.kind === 'KEYWORD' && t.value === 'None') {
       this.consume()
-      return { kind: 'name', name: t.value, line: t.line } satisfies NameRef
+      return { kind: 'name', name: 'None', line: t.line } satisfies NameRef
+    }
+    if (t.kind === 'KEYWORD' && (t.value === 'True' || t.value === 'False')) {
+      this.consume()
+      return { kind: 'bool', v: t.value === 'True', line: t.line } satisfies BoolLit
     }
     if (t.kind === 'LPAREN') {
       this.consume()

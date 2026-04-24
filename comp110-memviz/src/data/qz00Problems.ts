@@ -206,6 +206,102 @@ main(word="mystery")
 `,
   },
   {
+    id: 'knight_castle',
+    title: 'OOP — Knight & Castle',
+    prompt:
+      'Two classes with __init__ and __str__. Watch the heap gain a Knight instance, a Castle instance, and see drawbridge_up get struck through when close() reassigns it.',
+    source: `class Knight:
+    """A medieval Knight."""
+    name: str
+
+    def __init__(self, name: str):
+        self.name = name
+
+    def __str__(self) -> str:
+        return f"Sir {self.name}"
+
+class Castle:
+    """A medieval castle with a drawbridge for crossing a surrounding moat and a guarding knight."""
+    guard: Knight
+    drawbridge_up: bool
+
+    def __init__(self, guard: Knight, bridge_up: bool):
+        self.guard = guard
+        self.drawbridge_up = bridge_up
+
+    def __str__(self) -> str:
+        if self.drawbridge_up:
+            return f"Guarded by {self.guard} and closed to outsiders!"
+        else:
+            return f"Guarded by {self.guard} but open to all!"
+
+    def open(self) -> None:
+        if self.drawbridge_up:
+            print("Let down the bridge!")
+            self.drawbridge_up = False
+        else:
+            print("Already open!")
+
+    def close(self) -> None:
+        if not self.drawbridge_up:
+            print("Pull up the bridge!")
+            self.drawbridge_up = True
+        else:
+            print("Already closed!")
+
+
+lancelot: Knight = Knight("Lancelot")
+my_castle: Castle = Castle(lancelot, False)
+print(my_castle)
+my_castle.close()
+print(my_castle)
+`,
+  },
+  {
+    id: 'simple_class',
+    title: 'OOP — Point (warm-up)',
+    prompt:
+      'A minimal class. __init__ sets x and y; move() reassigns both. Watch the Point instance attributes get struck through on reassignment.',
+    source: `class Point:
+    x: int
+    y: int
+
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def move(self, dx: int, dy: int) -> None:
+        self.x = self.x + dx
+        self.y = self.y + dy
+
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+p: Point = Point(3, 4)
+print(p)
+p.move(dx=1, dy=-2)
+print(p)
+`,
+  },
+  {
+    id: 'conditional',
+    title: 'Conditionals — grade',
+    prompt:
+      'if / elif / else with comparisons. Step through the truthy branch selection.',
+    source: `def grade(score: int) -> str:
+    if score >= 90:
+        return "A"
+    elif score >= 80:
+        return "B"
+    elif score >= 70:
+        return "C"
+    else:
+        return "F"
+
+print(grade(score=85))
+`,
+  },
+  {
     id: 'blank',
     title: 'Write your own',
     prompt:

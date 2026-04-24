@@ -101,11 +101,41 @@ function FrameView({ frame, heap, isActive }: { frame: Frame; heap: HeapObject[]
 }
 
 function HeapObjectView({ obj }: { obj: HeapObject }) {
+  if (obj.kind === 'function') {
+    return (
+      <div className="heap-obj function">
+        <span className="heap-id">ID:{obj.id}</span>
+        <span className="heap-label">Fn Lines {obj.lineStart}–{obj.lineEnd}</span>
+        <span className="heap-name">({obj.name})</span>
+      </div>
+    )
+  }
+  if (obj.kind === 'class') {
+    return (
+      <div className="heap-obj class">
+        <span className="heap-id">ID:{obj.id}</span>
+        <span className="heap-label">class {obj.name}</span>
+        <span className="heap-name">methods: {obj.methodNames.join(', ') || '(none)'}</span>
+      </div>
+    )
+  }
+  // instance
   return (
-    <div className="heap-obj">
-      <span className="heap-id">ID:{obj.id}</span>
-      <span className="heap-label">Fn Lines {obj.lineStart}–{obj.lineEnd}</span>
-      <span className="heap-name">({obj.name})</span>
+    <div className="heap-obj instance">
+      <div className="heap-obj-header">
+        <span className="heap-id">ID:{obj.id}</span>
+        <span className="heap-label">instance of {obj.className}</span>
+      </div>
+      <div className="bindings instance-attrs">
+        {obj.attrs.length === 0 && <div className="binding empty-binding">(no attrs)</div>}
+        {obj.attrs.map((b, i) => (
+          <div key={i} className={`binding${b.retired ? ' retired' : ''}`}>
+            <span className="name">{b.name}</span>
+            <span className="eq">=</span>
+            <span className="value">{formatValueSimple(b.value)}</span>
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
@@ -115,10 +145,23 @@ function formatValue(v: Value, heap: HeapObject[]): string {
     case 'int': return String(v.v)
     case 'float': return Number.isInteger(v.v) ? `${v.v}.0` : String(v.v)
     case 'str': return JSON.stringify(v.v)
+    case 'bool': return v.v ? 'True' : 'False'
     case 'none': return 'None'
     case 'ref': {
       const h = heap.find((x) => x.id === v.id)
-      return h ? `→ ID:${v.id}` : `→ ID:${v.id} (missing)`
+      if (!h) return `→ ID:${v.id} (missing)`
+      return `→ ID:${v.id}`
     }
+  }
+}
+
+function formatValueSimple(v: Value): string {
+  switch (v.kind) {
+    case 'int': return String(v.v)
+    case 'float': return Number.isInteger(v.v) ? `${v.v}.0` : String(v.v)
+    case 'str': return JSON.stringify(v.v)
+    case 'bool': return v.v ? 'True' : 'False'
+    case 'none': return 'None'
+    case 'ref': return `→ ID:${v.id}`
   }
 }

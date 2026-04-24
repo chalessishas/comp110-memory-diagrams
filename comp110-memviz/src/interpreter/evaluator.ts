@@ -15,9 +15,11 @@
 import type {
   Binding,
   CallExpr,
+  ClassDef,
   Expr,
   FunctionDef,
   Frame,
+  HeapInstance,
   HeapObject,
   Program,
   Snapshot,
@@ -47,6 +49,7 @@ type State = {
   output: string[]
   nextHeapId: number
   funcDefs: Map<string, FunctionDef>
+  classDefs: Map<string, ClassDef>
   snapshots: Snapshot[]
 }
 
@@ -87,13 +90,34 @@ function lookupBinding(frame: Frame, name: string): Value | undefined {
   return undefined
 }
 
+function cloneHeapObject(h: HeapObject): HeapObject {
+  if (h.kind === 'instance') {
+    return {
+      id: h.id,
+      kind: 'instance',
+      className: h.className,
+      classId: h.classId,
+      // Deep-clone attrs so retired flags at the time of the snapshot are frozen.
+      attrs: h.attrs.map((b) => ({
+        name: b.name,
+        value: cloneValue(b.value),
+        retired: b.retired,
+      })),
+    }
+  }
+  if (h.kind === 'class') {
+    return { ...h, methodNames: [...h.methodNames] }
+  }
+  return { ...h }
+}
+
 function snap(state: State, currentLine: number, narration: string, error: string | null = null): Snapshot {
   return {
     step: state.snapshots.length,
     currentLine,
     narration,
     stack: state.stack.map(cloneFrame),
-    heap: state.heap.map((h) => ({ ...h })),
+    heap: state.heap.map(cloneHeapObject),
     output: [...state.output],
     error,
   }
@@ -121,8 +145,6 @@ function globalsFrame(state: State): Frame {
 function resolveName(state: State, name: string, line: number): Value {
   // Literal keywords that read as names.
   if (name === 'None') return { kind: 'none' }
-  if (name === 'True') return { kind: 'int', v: 1 }
-  if (name === 'False') return { kind: 'int', v: 0 }
 
   const cur = currentFrame(state)
   const local = lookupBinding(cur, name)
@@ -138,14 +160,41 @@ function resolveName(state: State, name: string, line: number): Value {
   throw new RuntimeErrorSignal(`NameError on line ${line}: name '${name}' is not defined`, line)
 }
 
+// Python-like truthiness. v1 truthiness rules: None/False/0/""/0.0 → false.
+function truthy(v: Value): boolean {
+  if (v.kind === 'none') return false
+  if (v.kind === 'bool') return v.v
+  if (v.kind === 'int' || v.kind === 'float') return v.v !== 0
+  if (v.kind === 'str') return v.v.length > 0
+  return true // refs are always truthy
+}
+
+function lookupAttr(inst: HeapInstance, attr: string): Value | undefined {
+  for (let i = inst.attrs.length - 1; i >= 0; i--) {
+    const b = inst.attrs[i]
+    if (!b.retired && b.name === attr) return b.value
+  }
+  return undefined
+}
+
+function setAttr(inst: HeapInstance, attr: string, value: Value) {
+  for (const b of inst.attrs) {
+    if (!b.retired && b.name === attr) b.retired = true
+  }
+  inst.attrs.push({ name: attr, value, retired: false })
+}
+
 function valueToDisplay(v: Value, state: State): string {
   if (v.kind === 'int') return String(v.v)
   if (v.kind === 'float') return Number.isInteger(v.v) ? `${v.v}.0` : String(v.v)
   if (v.kind === 'str') return v.v
+  if (v.kind === 'bool') return v.v ? 'True' : 'False'
   if (v.kind === 'none') return 'None'
   if (v.kind === 'ref') {
     const obj = state.heap.find((h) => h.id === v.id)
-    return obj ? `ID:${v.id} (${obj.name})` : `ID:${v.id}`
+    if (!obj) return `ID:${v.id}`
+    if (obj.kind === 'instance') return `ID:${v.id} (${obj.className})`
+    return `ID:${v.id} (${obj.name})`
   }
   return '?'
 }
@@ -156,6 +205,62 @@ function evalExpr(state: State, expr: Expr): Value {
       return expr.isFloat ? { kind: 'float', v: expr.v } : { kind: 'int', v: expr.v }
     case 'str':
       return { kind: 'str', v: expr.v }
+    case 'bool':
+      return { kind: 'bool', v: expr.v }
+    case 'fstr': {
+      let out = ''
+      for (const p of expr.parts) {
+        if (p.kind === 'lit') out += p.v
+        else out += toStr(state, evalExpr(state, p.expr), expr.line)
+      }
+      return { kind: 'str', v: out }
+    }
+    case 'cmp': {
+      const l = evalExpr(state, expr.left)
+      const r = evalExpr(state, expr.right)
+      return { kind: 'bool', v: compareValues(l, r, expr.op, expr.line) }
+    }
+    case 'boolOp': {
+      const l = evalExpr(state, expr.left)
+      // Python short-circuit: returns the last-evaluated value, not a bool.
+      // For simplicity in v1 we return a bool because that matches student
+      // intuition in if-conditions.
+      if (expr.op === 'and') {
+        if (!truthy(l)) return { kind: 'bool', v: false }
+        return { kind: 'bool', v: truthy(evalExpr(state, expr.right)) }
+      } else {
+        if (truthy(l)) return { kind: 'bool', v: true }
+        return { kind: 'bool', v: truthy(evalExpr(state, expr.right)) }
+      }
+    }
+    case 'not': {
+      const v = evalExpr(state, expr.operand)
+      return { kind: 'bool', v: !truthy(v) }
+    }
+    case 'attr': {
+      const target = evalExpr(state, expr.target)
+      if (target.kind !== 'ref') {
+        throw new RuntimeErrorSignal(
+          `AttributeError on line ${expr.line}: cannot read '.${expr.name}' on non-object`,
+          expr.line,
+        )
+      }
+      const obj = state.heap.find((h) => h.id === target.id)
+      if (!obj || obj.kind !== 'instance') {
+        throw new RuntimeErrorSignal(
+          `AttributeError on line ${expr.line}: '${expr.name}' on non-instance`,
+          expr.line,
+        )
+      }
+      const v = lookupAttr(obj, expr.name)
+      if (v === undefined) {
+        throw new RuntimeErrorSignal(
+          `AttributeError on line ${expr.line}: '${obj.className}' object has no attribute '${expr.name}'`,
+          expr.line,
+        )
+      }
+      return v
+    }
     case 'name':
       return resolveName(state, expr.name, expr.line)
     case 'unop': {
@@ -198,6 +303,54 @@ function evalExpr(state: State, expr: Expr): Value {
       return { kind: 'str', v: target.v[i] }
     }
   }
+}
+
+function compareValues(l: Value, r: Value, op: string, line: number): boolean {
+  // Normalize booleans to 0/1 for numeric comparisons so `True == 1` behaves
+  // the way Python does.
+  const toNum = (v: Value): number | null => {
+    if (v.kind === 'int' || v.kind === 'float') return v.v
+    if (v.kind === 'bool') return v.v ? 1 : 0
+    return null
+  }
+  if (l.kind === 'none' || r.kind === 'none') {
+    // Only == / != make sense; both must be none for equality.
+    if (op === '==') return l.kind === 'none' && r.kind === 'none'
+    if (op === '!=') return !(l.kind === 'none' && r.kind === 'none')
+    throw new RuntimeErrorSignal(`TypeError on line ${line}: cannot ${op} with None`, line)
+  }
+  if (l.kind === 'str' && r.kind === 'str') {
+    switch (op) {
+      case '==': return l.v === r.v
+      case '!=': return l.v !== r.v
+      case '<': return l.v < r.v
+      case '>': return l.v > r.v
+      case '<=': return l.v <= r.v
+      case '>=': return l.v >= r.v
+    }
+  }
+  if (l.kind === 'ref' && r.kind === 'ref') {
+    if (op === '==') return l.id === r.id
+    if (op === '!=') return l.id !== r.id
+    throw new RuntimeErrorSignal(`TypeError on line ${line}: cannot ${op} objects`, line)
+  }
+  const ln = toNum(l)
+  const rn = toNum(r)
+  if (ln === null || rn === null) {
+    throw new RuntimeErrorSignal(
+      `TypeError on line ${line}: cannot ${op} ${l.kind} and ${r.kind}`,
+      line,
+    )
+  }
+  switch (op) {
+    case '==': return ln === rn
+    case '!=': return ln !== rn
+    case '<': return ln < rn
+    case '>': return ln > rn
+    case '<=': return ln <= rn
+    case '>=': return ln >= rn
+  }
+  throw new RuntimeErrorSignal(`unknown comparison '${op}'`, line)
 }
 
 function evalBinop(state: State, expr: Expr & { kind: 'binop' }): Value {
@@ -243,6 +396,40 @@ function evalBinop(state: State, expr: Expr & { kind: 'binop' }): Value {
 }
 
 function evalCall(state: State, expr: CallExpr): Value {
+  // 1) Method call: `obj.method(args)` → self = obj, look up method on obj's class.
+  if (expr.methodOf) {
+    const selfVal = evalExpr(state, expr.methodOf)
+    if (selfVal.kind !== 'ref') {
+      throw new RuntimeErrorSignal(
+        `TypeError on line ${expr.line}: '.${expr.callee}' on non-object`,
+        expr.line,
+      )
+    }
+    const obj = state.heap.find((h) => h.id === selfVal.id)
+    if (!obj || obj.kind !== 'instance') {
+      throw new RuntimeErrorSignal(
+        `AttributeError on line ${expr.line}: '.${expr.callee}' on non-instance`,
+        expr.line,
+      )
+    }
+    const cls = state.classDefs.get(obj.className)
+    if (!cls) {
+      throw new RuntimeErrorSignal(
+        `NameError on line ${expr.line}: class '${obj.className}' not defined`,
+        expr.line,
+      )
+    }
+    const method = cls.methods.find((m) => m.name === expr.callee)
+    if (!method) {
+      throw new RuntimeErrorSignal(
+        `AttributeError on line ${expr.line}: '${obj.className}' has no method '${expr.callee}'`,
+        expr.line,
+      )
+    }
+    const argValues = expr.args.map((a) => ({ name: a.name, value: evalExpr(state, a.value) }))
+    return callUserFunction(state, method, argValues, expr.line, selfVal, `${obj.className}.${expr.callee}`)
+  }
+
   // Evaluate args left-to-right.
   const argValues = expr.args.map((a) => ({ name: a.name, value: evalExpr(state, a.value) }))
 
@@ -251,7 +438,7 @@ function evalCall(state: State, expr: CallExpr): Value {
     return applyBuiltin(state, expr, argValues)
   }
 
-  // User function — look up heap object via name resolution in current frame.
+  // Resolve the name in current/global frame.
   const ref = resolveName(state, expr.callee, expr.line)
   if (ref.kind !== 'ref') {
     throw new RuntimeErrorSignal(
@@ -259,19 +446,91 @@ function evalCall(state: State, expr: CallExpr): Value {
       expr.line,
     )
   }
+
+  // 2) Class instantiation: callee is a class name.
+  const cls = state.classDefs.get(expr.callee)
+  if (cls) {
+    return instantiateClass(state, cls, argValues, expr.line)
+  }
+
+  // 3) Regular user function call.
   const fn = state.funcDefs.get(expr.callee)
   if (!fn) {
     throw new RuntimeErrorSignal(
-      `NameError on line ${expr.line}: function '${expr.callee}' not defined`,
+      `NameError on line ${expr.line}: '${expr.callee}' not callable`,
       expr.line,
     )
   }
+  return callUserFunction(state, fn, argValues, expr.line, null, expr.callee)
+}
 
-  // Bind arguments to parameters. v0 accepts both positional and kwarg.
-  if (argValues.length !== fn.params.length) {
+// Create an instance on the heap, invoke __init__ (if any), return the ref.
+function instantiateClass(
+  state: State,
+  cls: ClassDef,
+  argValues: { name: string | null; value: Value }[],
+  line: number,
+): Value {
+  const id = state.nextHeapId++
+  const instance: HeapInstance = {
+    id,
+    kind: 'instance',
+    className: cls.name,
+    classId: id, // not strictly the class's id — we look up by name, this field is for future
+    attrs: [],
+  }
+  state.heap.push(instance)
+  const selfRef: Value = { kind: 'ref', id }
+  push(
+    state,
+    snap(
+      state,
+      line,
+      `Instantiated ${cls.name}. New heap instance ID:${id} created (empty attrs).`,
+    ),
+  )
+  const init = cls.methods.find((m) => m.name === '__init__')
+  if (init) {
+    callUserFunction(state, init, argValues, line, selfRef, `${cls.name}.__init__`)
+  } else if (argValues.length > 0) {
     throw new RuntimeErrorSignal(
-      `Function Call Error on Line ${expr.line}: ${expr.callee} expects ${fn.params.length} arg(s), got ${argValues.length}`,
-      expr.line,
+      `Function Call Error on Line ${line}: ${cls.name}() takes no arguments (no __init__ defined)`,
+      line,
+    )
+  }
+  return selfRef
+}
+
+// Push a frame, bind params, run the body, retire the frame, return RV.
+// selfValue is injected as the first parameter when present (method calls).
+function callUserFunction(
+  state: State,
+  fn: FunctionDef,
+  argValues: { name: string | null; value: Value }[],
+  callLine: number,
+  selfValue: Value | null,
+  displayName: string,
+): Value {
+  // When selfValue is provided, the method's first declared param is `self`
+  // and it is filled from selfValue rather than argValues.
+  const params = fn.params
+  let paramsToFill = params
+  const preBindings: Binding[] = []
+  if (selfValue) {
+    if (params.length === 0 || params[0].name !== 'self') {
+      throw new RuntimeErrorSignal(
+        `SyntaxError on line ${callLine}: method '${fn.name}' must declare 'self' as its first parameter`,
+        callLine,
+      )
+    }
+    preBindings.push({ name: 'self', value: selfValue, retired: false })
+    paramsToFill = params.slice(1)
+  }
+
+  if (argValues.length !== paramsToFill.length) {
+    throw new RuntimeErrorSignal(
+      `Function Call Error on Line ${callLine}: ${displayName} expects ${paramsToFill.length} arg(s), got ${argValues.length}`,
+      callLine,
     )
   }
   const paramValues: Record<string, Value> = {}
@@ -279,63 +538,68 @@ function evalCall(state: State, expr: CallExpr): Value {
   for (let i = 0; i < argValues.length; i++) {
     const { name, value } = argValues[i]
     if (name !== null) {
-      const p = fn.params.find((p) => p.name === name)
+      const p = paramsToFill.find((p) => p.name === name)
       if (!p) {
         throw new RuntimeErrorSignal(
-          `Function Call Error on Line ${expr.line}: unknown keyword '${name}' for ${expr.callee}`,
-          expr.line,
+          `Function Call Error on Line ${callLine}: unknown keyword '${name}' for ${displayName}`,
+          callLine,
         )
       }
       if (used.has(name)) {
         throw new RuntimeErrorSignal(
-          `Function Call Error on Line ${expr.line}: duplicate keyword '${name}'`,
-          expr.line,
+          `Function Call Error on Line ${callLine}: duplicate keyword '${name}'`,
+          callLine,
         )
       }
       used.add(name)
       paramValues[name] = value
     } else {
-      const p = fn.params[i]
+      const p = paramsToFill[i]
       if (!p || used.has(p.name)) {
         throw new RuntimeErrorSignal(
-          `Function Call Error on Line ${expr.line}: too many positional args for ${expr.callee}`,
-          expr.line,
+          `Function Call Error on Line ${callLine}: too many positional args for ${displayName}`,
+          callLine,
         )
       }
       used.add(p.name)
       paramValues[p.name] = value
     }
   }
-  for (const p of fn.params) {
+  for (const p of paramsToFill) {
     if (!(p.name in paramValues)) {
       throw new RuntimeErrorSignal(
-        `Function Call Error on Line ${expr.line}: missing argument '${p.name}' for ${expr.callee}`,
-        expr.line,
+        `Function Call Error on Line ${callLine}: missing argument '${p.name}' for ${displayName}`,
+        callLine,
       )
     }
   }
 
-  // Build bindings in declaration order so the diagram shows params top-to-bottom
-  // matching the def.
-  const bindings: Binding[] = fn.params.map((p) => ({
-    name: p.name,
-    value: paramValues[p.name],
-    retired: false,
-  }))
+  const bindings: Binding[] = [
+    ...preBindings,
+    ...paramsToFill.map((p) => ({ name: p.name, value: paramValues[p.name], retired: false })),
+  ]
 
-  // Push the new frame and snapshot the entry.
   const newFrame: Frame = {
-    name: expr.callee,
-    returnAddress: expr.line,
+    name: displayName,
+    returnAddress: callLine,
     returnValue: null,
     bindings,
     retired: false,
   }
   state.stack.push(newFrame)
-  const argsList = fn.params.map((p) => `${p.name}=${valueToDisplay(paramValues[p.name], state)}`).join(', ')
-  push(state, snap(state, fn.lineStart, `Call ${expr.callee}(${argsList}). New frame pushed; jumping to line ${fn.lineStart}.`))
+  const argsList = paramsToFill
+    .map((p) => `${p.name}=${valueToDisplay(paramValues[p.name], state)}`)
+    .join(', ')
+  const selfDesc = selfValue ? `self=${valueToDisplay(selfValue, state)}${argsList ? ', ' : ''}` : ''
+  push(
+    state,
+    snap(
+      state,
+      fn.lineStart,
+      `Call ${displayName}(${selfDesc}${argsList}). New frame pushed; jumping to line ${fn.lineStart}.`,
+    ),
+  )
 
-  // Execute the body.
   let rv: Value = { kind: 'none' }
   try {
     for (const stmt of fn.body) execStmt(state, stmt)
@@ -344,9 +608,6 @@ function evalCall(state: State, expr: CallExpr): Value {
     else throw e
   }
 
-  // Record the RV on the frame, mark the frame retired (strike-through), then
-  // snapshot. The frame stays in the stack for visualization — the next
-  // activeFrame lookup will skip it.
   newFrame.returnValue = rv
   newFrame.retired = true
   push(
@@ -354,10 +615,29 @@ function evalCall(state: State, expr: CallExpr): Value {
     snap(
       state,
       newFrame.returnAddress ?? fn.lineEnd,
-      `Return from ${expr.callee} with RV = ${valueToDisplay(rv, state)}. Frame retired (struck through). Jumping back to line ${newFrame.returnAddress}.`,
+      `Return from ${displayName} with RV = ${valueToDisplay(rv, state)}. Frame retired (struck through). Jumping back to line ${newFrame.returnAddress}.`,
     ),
   )
   return rv
+}
+
+// Convert any Value into a displayable string, invoking __str__ on instances
+// when the class defines one. This mirrors Python's str(obj) behavior and is
+// what print, str(), and f-string interpolation all route through.
+function toStr(state: State, v: Value, callLine: number): string {
+  if (v.kind === 'ref') {
+    const obj = state.heap.find((h) => h.id === v.id)
+    if (obj && obj.kind === 'instance') {
+      const cls = state.classDefs.get(obj.className)
+      const dunder = cls?.methods.find((m) => m.name === '__str__')
+      if (cls && dunder) {
+        const result = callUserFunction(state, dunder, [], callLine, v, `${cls.name}.__str__`)
+        if (result.kind === 'str') return result.v
+        return valueToDisplay(result, state)
+      }
+    }
+  }
+  return valueToDisplay(v, state)
 }
 
 function applyBuiltin(
@@ -375,7 +655,7 @@ function applyBuiltin(
           expr.line,
         )
       }
-      const line = valueToDisplay(values[0], state)
+      const line = toStr(state, values[0], expr.line)
       state.output.push(line)
       push(state, snap(state, expr.line, `Printed '${line}' to Output.`))
       return { kind: 'none' }
@@ -414,7 +694,7 @@ function applyBuiltin(
     }
     case 'str': {
       if (values.length !== 1) throw new RuntimeErrorSignal(`str() takes 1 arg`, expr.line)
-      return { kind: 'str', v: valueToDisplay(values[0], state) }
+      return { kind: 'str', v: toStr(state, values[0], expr.line) }
     }
   }
   throw new RuntimeErrorSignal(`unknown built-in '${name}'`, expr.line)
@@ -450,7 +730,80 @@ function execStmt(state: State, stmt: Stmt) {
       push(state, snap(state, stmt.line, `${verb} = ${valueToDisplay(v, state)}.`))
       return
     }
+    case 'attrAssign': {
+      const targetVal = evalExpr(state, stmt.target)
+      if (targetVal.kind !== 'ref') {
+        throw new RuntimeErrorSignal(
+          `TypeError on line ${stmt.line}: cannot assign attribute on non-object`,
+          stmt.line,
+        )
+      }
+      const obj = state.heap.find((h) => h.id === targetVal.id)
+      if (!obj || obj.kind !== 'instance') {
+        throw new RuntimeErrorSignal(
+          `AttributeError on line ${stmt.line}: assignment on non-instance`,
+          stmt.line,
+        )
+      }
+      const v = evalExpr(state, stmt.value)
+      const hadPrior = obj.attrs.some((b) => !b.retired && b.name === stmt.attr)
+      setAttr(obj, stmt.attr, v)
+      const verb = hadPrior ? 'Reassigned' : 'Set'
+      push(
+        state,
+        snap(
+          state,
+          stmt.line,
+          `${verb} ${obj.className} ID:${obj.id}.${stmt.attr} = ${valueToDisplay(v, state)}${hadPrior ? ' (old value struck through)' : ''}.`,
+        ),
+      )
+      return
+    }
+    case 'if': {
+      for (const br of stmt.branches) {
+        const cond = evalExpr(state, br.condition)
+        if (truthy(cond)) {
+          push(state, snap(state, stmt.line, `Condition true — entering if/elif branch on line ${stmt.line}.`))
+          for (const s of br.body) execStmt(state, s)
+          return
+        }
+      }
+      if (stmt.elseBody) {
+        push(state, snap(state, stmt.line, `All conditions false — entering else branch on line ${stmt.line}.`))
+        for (const s of stmt.elseBody) execStmt(state, s)
+      } else {
+        push(state, snap(state, stmt.line, `All conditions false — skipping if on line ${stmt.line}.`))
+      }
+      return
+    }
+    case 'classDef': {
+      addClassDef(state, stmt)
+      return
+    }
   }
+}
+
+function addClassDef(state: State, cls: ClassDef) {
+  state.classDefs.set(cls.name, cls)
+  const id = state.nextHeapId++
+  state.heap.push({
+    id,
+    kind: 'class',
+    name: cls.name,
+    lineStart: cls.lineStart,
+    lineEnd: cls.lineEnd,
+    methodNames: cls.methods.map((m) => m.name),
+  })
+  const frame = currentFrame(state)
+  setBinding(frame, cls.name, { kind: 'ref', id })
+  push(
+    state,
+    snap(
+      state,
+      cls.lineStart,
+      `Defined class '${cls.name}' (lines ${cls.lineStart}-${cls.lineEnd}) with methods [${cls.methods.map((m) => m.name).join(', ')}]. Heap ID:${id} created; '${cls.name}' bound in current frame.`,
+    ),
+  )
 }
 
 function addFuncDef(state: State, fn: FunctionDef) {
@@ -490,6 +843,7 @@ export function evaluate(program: Program): Snapshot[] {
     output: [],
     nextHeapId: 0,
     funcDefs: new Map(),
+    classDefs: new Map(),
     snapshots: [],
   }
 

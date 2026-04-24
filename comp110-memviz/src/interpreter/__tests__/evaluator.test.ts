@@ -30,7 +30,8 @@ describe('evaluator — calzones QZ00 example', () => {
 
   it('creates 3 heap objects for the 3 function defs', () => {
     expect(last.heap).toHaveLength(3)
-    expect(last.heap.map((h) => h.name)).toEqual(['total_price', 'calzones_price', 'strombolis_price'])
+    const names = last.heap.map((h) => (h.kind === 'function' ? h.name : ''))
+    expect(names).toEqual(['total_price', 'calzones_price', 'strombolis_price'])
     expect(last.heap.map((h) => h.id)).toEqual([0, 1, 2])
   })
 
@@ -150,6 +151,99 @@ print(c)
     expect(last.error).toBeNull()
     // c = a[0] + a[len(b)] = "M" + a[4] = "M" + "i" = "Mi"
     expect(last.output).toEqual(['Mi'])
+  })
+})
+
+describe('evaluator — if/elif/else', () => {
+  const src = `def grade(score: int) -> str:
+    if score >= 90:
+        return "A"
+    elif score >= 80:
+        return "B"
+    elif score >= 70:
+        return "C"
+    else:
+        return "F"
+
+print(grade(score=85))
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('picks the elif branch for 85 and prints "B"', () => {
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['B'])
+  })
+})
+
+describe('evaluator — class instantiation + __str__ + f-string', () => {
+  const src = `class Point:
+    x: int
+    y: int
+
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def __str__(self) -> str:
+        return f"({self.x}, {self.y})"
+
+p: Point = Point(3, 4)
+print(p)
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+
+  it('creates one class + one instance on the heap', () => {
+    expect(last.error).toBeNull()
+    const kinds = last.heap.map((h) => h.kind).sort()
+    expect(kinds).toEqual(['class', 'instance'])
+  })
+
+  it('prints the f-string "(3, 4)"', () => {
+    expect(last.output).toEqual(['(3, 4)'])
+  })
+
+  it('instance attrs x and y are both active (not retired)', () => {
+    const inst = last.heap.find((h) => h.kind === 'instance')
+    expect(inst && inst.kind === 'instance').toBe(true)
+    if (inst && inst.kind === 'instance') {
+      const x = inst.attrs.find((a) => a.name === 'x' && !a.retired)
+      const y = inst.attrs.find((a) => a.name === 'y' && !a.retired)
+      expect(x?.value).toEqual({ kind: 'int', v: 3 })
+      expect(y?.value).toEqual({ kind: 'int', v: 4 })
+    }
+  })
+})
+
+describe('evaluator — attribute reassignment strikes through old value', () => {
+  const src = `class Castle:
+    open: bool
+
+    def __init__(self, open: bool):
+        self.open = open
+
+    def shut(self) -> None:
+        self.open = False
+
+c: Castle = Castle(True)
+c.shut()
+`
+  const snapshots = run(src)
+  const last = snapshots[snapshots.length - 1]
+  const inst = last.heap.find((h) => h.kind === 'instance')
+
+  it('has two `open` attr bindings — old True retired, new False active', () => {
+    expect(last.error).toBeNull()
+    expect(inst && inst.kind === 'instance').toBe(true)
+    if (inst && inst.kind === 'instance') {
+      const openBindings = inst.attrs.filter((a) => a.name === 'open')
+      expect(openBindings).toHaveLength(2)
+      expect(openBindings[0].retired).toBe(true)
+      expect(openBindings[0].value).toEqual({ kind: 'bool', v: true })
+      expect(openBindings[1].retired).toBe(false)
+      expect(openBindings[1].value).toEqual({ kind: 'bool', v: false })
+    }
   })
 })
 
