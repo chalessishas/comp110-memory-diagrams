@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
+import { CanvasView } from './components/CanvasView'
 import { CodeEditor } from './components/CodeEditor'
 import { DiagramCanvas } from './components/DiagramCanvas'
 import { FeedbackButton } from './components/FeedbackButton'
@@ -26,6 +27,8 @@ function isEmbed(): boolean {
 // narration. Slider lets them override.
 const DEFAULT_AUTO_SPEED_MS = 700
 
+type ViewMode = 'list' | 'canvas'
+
 function App() {
   const embed = useMemo(() => isEmbed(), [])
   const [problemId, setProblemId] = useState(QZ00_PROBLEMS[0].id)
@@ -33,6 +36,9 @@ function App() {
   const [result, setResult] = useState<RunResult>({ kind: 'idle' })
   const [step, setStep] = useState(0)
   const [autoSpeedMs, setAutoSpeedMs] = useState(DEFAULT_AUTO_SPEED_MS)
+  // Default = list (the v0-faithful rendering students need for quizzes).
+  // Canvas mode is the explorer view: drag, fold, see arrows.
+  const [viewMode, setViewMode] = useState<ViewMode>('list')
 
   const onRun = () => {
     setStep(0)
@@ -134,7 +140,33 @@ function App() {
         </section>
 
         <section className="right">
-          <DiagramCanvas snapshot={snapshot} />
+          <div className="view-toggle" role="tablist" aria-label="Diagram view mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'list'}
+              className={viewMode === 'list' ? 'view-tab active' : 'view-tab'}
+              onClick={() => setViewMode('list')}
+              title="COMP110 v0 list rendering — matches the quiz answer format"
+            >
+              List
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === 'canvas'}
+              className={viewMode === 'canvas' ? 'view-tab active' : 'view-tab'}
+              onClick={() => setViewMode('canvas')}
+              title="Free-form canvas — drag nodes, fold sections, follow ref arrows"
+            >
+              Canvas
+            </button>
+          </div>
+          {viewMode === 'list' ? (
+            <DiagramCanvas snapshot={snapshot} />
+          ) : (
+            <CanvasView snapshot={snapshot} />
+          )}
           {result.kind === 'ok' && snapshot && (
             <div className="narration">
               <span className="step-label">Step {step + 1} / {total}:</span>{' '}

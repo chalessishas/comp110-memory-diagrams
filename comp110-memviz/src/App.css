@@ -187,6 +187,36 @@ body {
   text-align: right;
 }
 
+/* View toggle (List ↔ Canvas) ------------------------------------- */
+
+.view-toggle {
+  display: inline-flex;
+  align-self: flex-start;
+  background: #ffffff;
+  border: 1px solid var(--comp110-gray-300);
+  border-radius: 6px;
+  padding: 2px;
+  gap: 2px;
+  font-family: 'Cabin', sans-serif;
+}
+.view-tab {
+  padding: 5px 14px;
+  border: none;
+  background: transparent;
+  color: var(--comp110-gray-700);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+.view-tab:hover { background: var(--comp110-gray-50); }
+.view-tab.active {
+  background: var(--comp110-teal);
+  color: #ffffff;
+}
+
 /* Footer ----------------------------------------------------------- */
 
 .site-footer {
