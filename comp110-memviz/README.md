@@ -1,73 +1,55 @@
-# React + TypeScript + Vite
+# COMP110 Memory Diagrams
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interactive Python memory-diagram visualizer for UNC COMP110, implementing the v0 ruleset used in the course.
 
-Currently, two official plugins are available:
+**Live:** https://comp110-mem-diag.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Pick a practice problem, press Run, and step through the execution. Each snapshot renders the three-column diagram students draw by hand on quizzes:
 
-## React Compiler
+- **Stack** — call frames with RA (return address), RV (return value), and bindings; retired frames stay visible as historical context
+- **Heap** — typed objects with IDs (functions, classes, instances, lists, dicts)
+- **Output** — what `print` wrote
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+When a value is reassigned the old value is struck through in place, matching the COMP110 grading convention.
 
-## Expanding the ESLint configuration
+## Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- 39 curated practice problems across Basics, Conditionals, While loops, Functions, Lists, Dictionaries, Recursion, OOP, and OOP magic methods — sourced from the COMP110-24S practice page and verified to run
+- Write-your-own Python sandbox (`Problem: Write your own`)
+- Event-colored step timeline (declare / assign / call / return / print / control) — click any dot to jump
+- Keyboard shortcuts for prev / next / auto-play / reset; per-button `<kbd>` chips show them inline
+- Adjustable auto-play speed slider (200 – 2000 ms per step)
+- Current-step line highlight in the editor, synced to the active snapshot
+- `?embed=1` URL param strips header / footer / problem picker for iframe embedding; CSP allows `comp110-26s.github.io` and `*.unc.edu` as frame parents
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Supported Python
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+`def`, `class` (single inheritance), `return`, `if / elif / else`, `while`, `for`, `list`, `dict`, `+=`, `in`, `len()`, function calls, method calls, attribute access, and the `int / float / str / bool / None` base types. Runs in a tree-walking interpreter — not CPython — so only the v0 subset parses. `super()`, generators, decorators, comprehensions, exceptions, imports, and standard-library calls are intentionally out of scope.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Local development
+
+```bash
+npm install
+npm run dev        # Vite dev server at http://localhost:5173
+npm run build      # type-check + bundle into dist/
+npm test           # run vitest suites
+npm run typecheck  # tsc --noEmit
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Architecture
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Three files do most of the work:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- [`src/interpreter/evaluator.ts`](src/interpreter/evaluator.ts) — tree-walking interpreter; emits one `Snapshot` per observable state change
+- [`src/components/DiagramCanvas.tsx`](src/components/DiagramCanvas.tsx) — renders a snapshot into the Stack / Heap / Output view
+- [`src/App.tsx`](src/App.tsx) — state glue, problem picker, step controls, timeline, speed slider
+
+The data model lives in [`src/interpreter/types.ts`](src/interpreter/types.ts). `Snapshot.event` classifies each step into one of seven categories (`declare | assign | call | return | print | control | meta`) which drives timeline dot colors.
+
+## Credits
+
+Built for [UNC COMP110](https://comp110-26s.github.io/). Implements the v0 memory-diagram rules from the course's [Rules PDF](https://comp110-26s.github.io/static/slides/memory_diagrams_v0.pdf), authored by the COMP110 teaching team.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
