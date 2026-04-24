@@ -146,8 +146,8 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     return (
       <div className="heap-obj function">
         <span className="heap-id">ID:{obj.id}</span>
-        <span className="heap-label">Fn Lines {obj.lineStart}–{obj.lineEnd}</span>
-        <span className="heap-name">({obj.name})</span>
+        <span className="heap-label">function lines {obj.lineStart}–{obj.lineEnd}</span>
+        <span className="heap-name">{obj.name}</span>
       </div>
     )
   }
@@ -155,8 +155,8 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     return (
       <div className="heap-obj class">
         <span className="heap-id">ID:{obj.id}</span>
-        <span className="heap-label">class {obj.name}</span>
-        <span className="heap-name">methods: {obj.methodNames.join(', ') || '(none)'}</span>
+        <span className="heap-label">class lines {obj.lineStart}–{obj.lineEnd}</span>
+        <span className="heap-name">{obj.name}</span>
       </div>
     )
   }
@@ -214,7 +214,7 @@ function HeapObjectView({ obj }: { obj: HeapObject }) {
     <div className="heap-obj instance">
       <div className="heap-obj-header">
         <span className="heap-id">ID:{obj.id}</span>
-        <span className="heap-label">instance of {obj.className}</span>
+        <span className="heap-label">{obj.className}</span>
       </div>
       <div className="bindings instance-attrs">
         {attrGroups.length === 0 && <div className="binding empty-binding">(no attrs)</div>}

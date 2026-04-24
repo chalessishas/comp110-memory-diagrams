@@ -667,7 +667,7 @@ function evalBinop(state: State, expr: Expr & { kind: 'binop' }): Value {
           [{ name: null, value: r }],
           expr.line,
           l,
-          `${cls.name}.__add__`,
+          `${cls.name}#__add__`,
         )
       }
     }
@@ -798,7 +798,7 @@ function evalCall(state: State, expr: CallExpr): Value {
       )
     }
     const argValues = expr.args.map((a) => ({ name: a.name, value: evalExpr(state, a.value) }))
-    return callUserFunction(state, method, argValues, expr.line, selfVal, `${obj.className}.${expr.callee}`)
+    return callUserFunction(state, method, argValues, expr.line, selfVal, `${obj.className}#${expr.callee}`)
   }
 
   // Evaluate args left-to-right.
@@ -862,7 +862,7 @@ function instantiateClass(
   )
   const init = cls.methods.find((m) => m.name === '__init__')
   if (init) {
-    callUserFunction(state, init, argValues, line, selfRef, `${cls.name}.__init__`)
+    callUserFunction(state, init, argValues, line, selfRef, `${cls.name}#__init__`)
   } else if (argValues.length > 0) {
     throw new RuntimeErrorSignal(
       `Function Call Error on Line ${line}: ${cls.name}() takes no arguments (no __init__ defined)`,
@@ -1004,7 +1004,7 @@ function toStr(state: State, v: Value, callLine: number): string {
       const cls = state.classDefs.get(obj.className)
       const dunder = cls?.methods.find((m) => m.name === '__str__')
       if (cls && dunder) {
-        const result = callUserFunction(state, dunder, [], callLine, v, `${cls.name}.__str__`)
+        const result = callUserFunction(state, dunder, [], callLine, v, `${cls.name}#__str__`)
         if (result.kind === 'str') return result.v
         return valueToDisplay(result, state)
       }
