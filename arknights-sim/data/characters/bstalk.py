@@ -1,8 +1,8 @@
-"""Beanstalk (赤豆) — 4★ Vanguard (Pioneer).
+"""Beanstalk (赤豆) — 4★ Vanguard (Tactician).
 
-S1 "Sentinel Command": sp_cost=30, initial_sp=15, duration=0s (DP generation, stub).
+S1 "Sentinel Command": sp_cost=34, initial_sp=11, duration=0s (DP generation, stub).
 
-S2 "'Everyone Together!'": sp_cost=40, initial_sp=20, duration=15s (complex rally, stub).
+S2 "'Everyone Together!'": sp_cost=44, initial_sp=14, duration=15s (complex rally, stub).
 """
 from __future__ import annotations
 from core.state.unit_state import UnitState, SkillComponent, RangeShape
@@ -28,19 +28,19 @@ _S2_DURATION = 15.0
 def make_bstalk(slot: str = "S1") -> UnitState:
     op = _base_stats()
     op.name = "Bstalk"
-    op.archetype = RoleArchetype.VAN_PIONEER
+    op.archetype = RoleArchetype.VAN_TACTICIAN
     op.profession = Profession.VANGUARD
     op.attack_type = AttackType.PHYSICAL
     op.range_shape = SNIPER_RANGE
     if slot == "S1":
         op.skill = SkillComponent(
-            name="Sentinel Command", slot="S1", sp_cost=30, initial_sp=15,
+            name="Sentinel Command", slot="S1", sp_cost=34, initial_sp=11,
             duration=_S1_DURATION, sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.MANUAL, requires_target=False, behavior_tag=_S1_TAG,
         )
     elif slot == "S2":
         op.skill = SkillComponent(
-            name="'Everyone Together!'", slot="S2", sp_cost=40, initial_sp=20,
+            name="'Everyone Together!'", slot="S2", sp_cost=44, initial_sp=14,
             duration=_S2_DURATION, sp_gain_mode=SPGainMode.AUTO_TIME,
             trigger=SkillTrigger.MANUAL, requires_target=False, behavior_tag=_S2_TAG,
         )

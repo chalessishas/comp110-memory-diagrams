@@ -1,8 +1,8 @@
 """Bobb (Bobbing) S1/S2 — both stub skills.
 
 Tests cover:
-  - S1 config (name, sp_cost=10, initial_sp=0)
-  - S2 slot regression
+  - S1 config (name, sp_cost=13, initial_sp=0)
+  - S2 slot regression (sp_cost=27, initial_sp=10)
 """
 from __future__ import annotations
 import sys, os
@@ -16,7 +16,7 @@ def test_bobb_s1_config():
     sk = op.skill
     assert sk is not None and sk.slot == "S1"
     assert sk.name == "Nonpeaceful Negotiation"
-    assert sk.sp_cost == 10
+    assert sk.sp_cost == 13
     assert sk.initial_sp == 0
     assert sk.duration == _S1_DURATION
     assert sk.behavior_tag == _S1_TAG
@@ -27,4 +27,6 @@ def test_s2_slot_config():
     sk = op.skill
     assert sk is not None and sk.slot == "S2"
     assert sk.name == "'You Shall Not Pass'"
+    assert sk.sp_cost == 27
+    assert sk.initial_sp == 10
     assert sk.behavior_tag == _S2_TAG
