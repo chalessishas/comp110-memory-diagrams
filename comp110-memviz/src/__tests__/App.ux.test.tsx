@@ -28,14 +28,14 @@ describe('App UX — embed mode', () => {
   it('normal mode renders the site header and footer', () => {
     setUrlQuery('')
     render(<App />)
-    expect(screen.getByText('COMP110 MemViz')).toBeDefined()
+    expect(screen.getByText('COMP110 Memory Diagrams')).toBeDefined()
     expect(screen.getByText(/Built for/)).toBeDefined()
   })
 
   it('?embed=1 hides the site header and footer', () => {
     setUrlQuery('embed=1')
     render(<App />)
-    expect(screen.queryByText('COMP110 MemViz')).toBeNull()
+    expect(screen.queryByText('COMP110 Memory Diagrams')).toBeNull()
     expect(screen.queryByText(/Built for/)).toBeNull()
     // The Run button + select are still present so the iframe is usable.
     expect(screen.getByRole('button', { name: /Run/ })).toBeDefined()

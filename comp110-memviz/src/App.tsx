@@ -54,7 +54,7 @@ function App() {
       {!embed && (
         <header className="site-header">
           <div className="brand">
-            <span className="brand-name">COMP110 MemViz</span>
+            <span className="brand-name">COMP110 Memory Diagrams</span>
             <span className="brand-tag">Interactive memory diagrams — v0 ruleset</span>
           </div>
           <nav className="site-nav">
