@@ -2,15 +2,16 @@
 
 S1 "Precise Shooting": sp_cost=4, initial_sp=0, instant, AUTO_ATTACK, AUTO
   (next attack → 200% ATK; single-hit power-shot not modeled — stub).
-S2 "Flexible Camouflage": sp_cost=0, initial_sp=0, duration=20s, ON_DEPLOY, AUTO
-  (on-deploy ATK+70% + Camouflage; passive deploy-trigger + status not modeled — stub).
+S2 "Flexible Camouflage": sp_cost=0, initial_sp=0, duration=20s, ON_DEPLOY, AUTO.
+  ATK+70%. Camouflage (untargetable) status not modeled.
 """
 from __future__ import annotations
-from core.state.unit_state import UnitState, SkillComponent, RangeShape
+from core.state.unit_state import UnitState, SkillComponent, Buff, RangeShape
 from core.types import (
-    AttackType, Profession,
+    AttackType, BuffAxis, BuffStack, Profession,
     RoleArchetype, SkillTrigger, SPGainMode,
 )
+from core.systems.skill_system import register_skill
 from data.characters.generated.aprl import make_aprl as _base_stats
 
 SNIPER_RANGE = RangeShape(tiles=(
@@ -23,7 +24,24 @@ _S1_TAG = "aprl_s1_precise_shooting"
 _S1_DURATION = 0.0
 
 _S2_TAG = "aprl_s2_flexible_camouflage"
+_S2_ATK_RATIO = 0.70
+_S2_BUFF_TAG = "aprl_s2_atk"
 _S2_DURATION = 20.0
+
+
+def _s2_on_start(world, carrier: UnitState) -> None:
+    carrier.buffs.append(Buff(
+        axis=BuffAxis.ATK, stack=BuffStack.RATIO,
+        value=_S2_ATK_RATIO, source_tag=_S2_BUFF_TAG,
+    ))
+    world.log(f"April S2 — ATK+{_S2_ATK_RATIO:.0%}/{_S2_DURATION}s (camouflage not modeled)")
+
+
+def _s2_on_end(world, carrier: UnitState) -> None:
+    carrier.buffs = [b for b in carrier.buffs if b.source_tag != _S2_BUFF_TAG]
+
+
+register_skill(_S2_TAG, on_start=_s2_on_start, on_end=_s2_on_end)
 
 
 def make_aprl(slot: str = "S2") -> UnitState:
