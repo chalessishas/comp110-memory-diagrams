@@ -218,7 +218,9 @@ export type Expr =
   | UnaryOp
   | CallExpr
   | IndexExpr
+  | SliceExpr
   | AttrExpr
+  | TernaryExpr
 
 export type ListLit = { kind: 'listLit'; elements: Expr[]; line: number }
 export type DictLit = {
@@ -274,5 +276,23 @@ export type IndexExpr = {
   kind: 'index'
   target: Expr
   index: Expr
+  line: number
+}
+
+// String / list slicing: `s[a:b]` or `s[:b]` or `s[a:]` or `s[:]`.
+export type SliceExpr = {
+  kind: 'slice'
+  target: Expr
+  start: Expr | null
+  stop: Expr | null
+  line: number
+}
+
+// Ternary: `x if cond else y`. Python conditional expression.
+export type TernaryExpr = {
+  kind: 'ternary'
+  consequent: Expr
+  condition: Expr
+  alternative: Expr
   line: number
 }

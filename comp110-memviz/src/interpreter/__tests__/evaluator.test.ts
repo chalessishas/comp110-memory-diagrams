@@ -473,6 +473,79 @@ print(x)
   })
 })
 
+describe('evaluator — Python extras (v3.2)', () => {
+  it('list * int produces a new repeated list', () => {
+    const src = `zeros: list[int] = [0] * 3
+print(zeros)
+`
+    const last = run(src).at(-1)!
+    expect(last.error).toBeNull()
+    expect(last.output).toEqual(['[0, 0, 0]'])
+  })
+  it('int * list also works (reversed operands)', () => {
+    const src = `xs: list[int] = 3 * [7]
+print(xs)
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['[7, 7, 7]'])
+  })
+  it('string slicing [a:b] / [:b] / [a:] / [:]', () => {
+    const src = `s: str = "abcdef"
+print(s[1:4])
+print(s[:3])
+print(s[3:])
+print(s[:])
+print(s[-2:])
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['bcd', 'abc', 'def', 'abcdef', 'ef'])
+  })
+  it('list slicing returns a new list', () => {
+    const src = `xs: list[int] = [10, 20, 30, 40]
+ys: list[int] = xs[1:3]
+print(ys)
+ys[0] = 99
+print(xs)
+print(ys)
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['[20, 30]', '[10, 20, 30, 40]', '[99, 30]'])
+  })
+  it('ternary x if cond else y', () => {
+    const src = `def sign(n: int) -> str:
+    return "pos" if n > 0 else "neg"
+
+print(sign(5))
+print(sign(-2))
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['pos', 'neg'])
+  })
+  it('chained comparison 1 < x < 10', () => {
+    const src = `x: int = 5
+if 1 < x < 10:
+    print("in range")
+if 0 <= x <= 4:
+    print("no")
+else:
+    print("out")
+`
+    const last = run(src).at(-1)!
+    expect(last.output).toEqual(['in range', 'out'])
+  })
+  it('dict key True / 1 collide (Python hash equivalence)', () => {
+    const src = `d: dict[int, str] = {}
+d[True] = "bool"
+d[1] = "int"
+print(d)
+`
+    const last = run(src).at(-1)!
+    // After d[True]="bool" the key is stored as int 1; then d[1]="int"
+    // retires the prior entry and the active value is "int".
+    expect(last.output).toEqual(["{1: 'int'}"])
+  })
+})
+
 describe('evaluator — arity mismatch', () => {
   const src = `def f(x: int) -> int:
     return x + 1

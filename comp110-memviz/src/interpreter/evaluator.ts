@@ -165,6 +165,26 @@ function listAppend(lst: HeapList, value: Value) {
   lst.slots.push({ index: listLength(lst), value, retired: false })
 }
 
+function repeatList(state: State, src: HeapList, times: number): Value {
+  const id = state.nextHeapId++
+  const count = Math.max(0, times)
+  const srcLen = listLength(src)
+  const newList: HeapList = {
+    id,
+    kind: 'list',
+    elementType: src.elementType,
+    slots: [],
+  }
+  for (let r = 0; r < count; r++) {
+    for (let i = 0; i < srcLen; i++) {
+      const v = listGet(src, i)
+      if (v !== undefined) listAppend(newList, cloneValue(v))
+    }
+  }
+  state.heap.push(newList)
+  return { kind: 'ref', id }
+}
+
 function listPop(lst: HeapList, index: number): Value | undefined {
   // Pop removes the element at `index` and shifts all higher indexes down by
   // one. We model this by retiring the popped slot and rewriting every slot
@@ -196,7 +216,9 @@ function dictKey(v: Value): string {
   if (v.kind === 'str') return 'S:' + v.v
   if (v.kind === 'int') return 'I:' + v.v
   if (v.kind === 'float') return 'F:' + v.v
-  if (v.kind === 'bool') return 'B:' + (v.v ? '1' : '0')
+  // Python treats bool as a subclass of int: hash(True) == hash(1), so
+  // d[True] and d[1] collide into the same entry. Encode bool as int.
+  if (v.kind === 'bool') return 'I:' + (v.v ? 1 : 0)
   if (v.kind === 'none') return 'N'
   if (v.kind === 'ref') return 'R:' + v.id
   return '?'
@@ -518,6 +540,46 @@ function evalExpr(state: State, expr: Expr): Value {
         expr.line,
       )
     }
+    case 'ternary': {
+      const cond = evalExpr(state, expr.condition)
+      return truthy(cond) ? evalExpr(state, expr.consequent) : evalExpr(state, expr.alternative)
+    }
+    case 'slice': {
+      const target = evalExpr(state, expr.target)
+      const rawStart = expr.start ? evalExpr(state, expr.start) : null
+      const rawStop = expr.stop ? evalExpr(state, expr.stop) : null
+      const pyIdx = (v: Value | null, len: number, defaultV: number): number => {
+        if (v === null) return defaultV
+        if (v.kind !== 'int') throw new RuntimeErrorSignal(`TypeError on line ${expr.line}: slice indices must be int`, expr.line)
+        let i = v.v
+        if (i < 0) i += len
+        if (i < 0) i = 0
+        if (i > len) i = len
+        return i
+      }
+      if (target.kind === 'str') {
+        const start = pyIdx(rawStart, target.v.length, 0)
+        const stop = pyIdx(rawStop, target.v.length, target.v.length)
+        return { kind: 'str', v: target.v.slice(start, stop) }
+      }
+      if (target.kind === 'ref') {
+        const obj = state.heap.find((h) => h.id === target.id)
+        if (obj && obj.kind === 'list') {
+          const len = listLength(obj)
+          const start = pyIdx(rawStart, len, 0)
+          const stop = pyIdx(rawStop, len, len)
+          const id = state.nextHeapId++
+          const out: HeapList = { id, kind: 'list', elementType: obj.elementType, slots: [] }
+          for (let i = start; i < stop; i++) {
+            const v = listGet(obj, i)
+            if (v !== undefined) listAppend(out, cloneValue(v))
+          }
+          state.heap.push(out)
+          return { kind: 'ref', id }
+        }
+      }
+      throw new RuntimeErrorSignal(`TypeError on line ${expr.line}: cannot slice ${target.kind}`, expr.line)
+    }
     case 'listLit': {
       const id = state.nextHeapId++
       const lst: HeapList = {
@@ -682,6 +744,16 @@ function evalBinop(state: State, expr: Expr & { kind: 'binop' }): Value {
   }
   if (expr.op === '*' && l.kind === 'int' && r.kind === 'str') {
     return { kind: 'str', v: r.v.repeat(Math.max(0, l.v)) }
+  }
+  // List repetition: `[0] * 3` → new list `[0, 0, 0]`. A new heap object
+  // is created so the repeated elements are independent of the source.
+  if (expr.op === '*' && l.kind === 'ref' && r.kind === 'int') {
+    const obj = state.heap.find((h) => h.id === l.id)
+    if (obj && obj.kind === 'list') return repeatList(state, obj, r.v)
+  }
+  if (expr.op === '*' && l.kind === 'int' && r.kind === 'ref') {
+    const obj = state.heap.find((h) => h.id === r.id)
+    if (obj && obj.kind === 'list') return repeatList(state, obj, l.v)
   }
   if (l.kind !== 'int' && l.kind !== 'float') {
     throw new RuntimeErrorSignal(`TypeError on line ${expr.line}: left of '${expr.op}' is ${l.kind}`, expr.line)

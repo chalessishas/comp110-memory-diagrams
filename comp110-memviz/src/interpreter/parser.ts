@@ -14,6 +14,8 @@ import type {
   DictLit,
   Expr,
   ExprStmt,
+  SliceExpr,
+  TernaryExpr,
   FStringLit,
   ForStmt,
   FunctionDef,
@@ -505,7 +507,23 @@ class Parser {
   // Python precedence (low → high): or → and → not → comparisons → + - → * / // % → unary → ** → postfix → primary
 
   private parseExpr(): Expr {
-    return this.parseOr()
+    const value = this.parseOr()
+    // Ternary: `value if condition else alternative`. Python's conditional
+    // expression. `if` at expression position means ternary, not statement.
+    if (this.match('KEYWORD', 'if')) {
+      const tok = this.consume()
+      const condition = this.parseOr()
+      this.expect('KEYWORD', 'else')
+      const alternative = this.parseExpr() // right-associative
+      return {
+        kind: 'ternary',
+        consequent: value,
+        condition,
+        alternative,
+        line: tok.line,
+      } satisfies TernaryExpr
+    }
+    return value
   }
 
   private parseOr(): Expr {
@@ -538,46 +556,65 @@ class Parser {
   }
 
   private parseCompare(): Expr {
-    const left = this.parseAdd()
-    if (this.match('CMP')) {
-      const tok = this.consume()
-      const right = this.parseAdd()
-      return {
-        kind: 'cmp',
-        op: tok.value as CompareOp['op'],
-        left,
-        right,
-        line: tok.line,
-      } satisfies CompareOp
-    }
-    // `x in y` and `x not in y` membership tests
-    if (this.match('KEYWORD', 'in')) {
-      const tok = this.consume()
-      const right = this.parseAdd()
-      return { kind: 'cmp', op: 'in', left, right, line: tok.line } satisfies CompareOp
-    }
-    if (this.match('KEYWORD', 'not') && this.peek(1)?.kind === 'KEYWORD' && this.peek(1)?.value === 'in') {
-      this.consume() // not
-      const tok = this.consume() // in
-      const right = this.parseAdd()
-      return { kind: 'cmp', op: 'not in', left, right, line: tok.line } satisfies CompareOp
-    }
-    // `x is y` and `x is not y` — identity comparison. At the v0 educational
-    // level there's no distinction from `==` for immutable values, and for
-    // refs both forms compare id — so we fold `is` into '==' and `is not`
-    // into '!=' for evaluation. The semantic label we preserve in the op
-    // string for narration could say "is" but simpler to normalize.
-    if (this.match('KEYWORD', 'is')) {
-      const tok = this.consume()
-      if (this.match('KEYWORD', 'not')) {
+    // Python supports chained comparisons: `a < b < c` means
+    // `(a < b) and (b < c)`. We collect every (op, right) pair then fold
+    // into an `and` chain. Mixed ops work: `0 <= i < len(xs)` is valid.
+    let left = this.parseAdd()
+    const chain: { op: CompareOp['op']; right: Expr; line: number }[] = []
+    while (true) {
+      if (this.match('CMP')) {
+        const tok = this.consume()
+        chain.push({
+          op: tok.value as CompareOp['op'],
+          right: this.parseAdd(),
+          line: tok.line,
+        })
+      } else if (this.match('KEYWORD', 'in')) {
+        const tok = this.consume()
+        chain.push({ op: 'in', right: this.parseAdd(), line: tok.line })
+      } else if (
+        this.match('KEYWORD', 'not') &&
+        this.peek(1)?.kind === 'KEYWORD' &&
+        this.peek(1)?.value === 'in'
+      ) {
         this.consume()
-        const right = this.parseAdd()
-        return { kind: 'cmp', op: '!=', left, right, line: tok.line } satisfies CompareOp
+        const tok = this.consume()
+        chain.push({ op: 'not in', right: this.parseAdd(), line: tok.line })
+      } else if (this.match('KEYWORD', 'is')) {
+        const tok = this.consume()
+        const negated = this.match('KEYWORD', 'not')
+        if (negated) this.consume()
+        chain.push({
+          op: negated ? '!=' : '==',
+          right: this.parseAdd(),
+          line: tok.line,
+        })
+      } else {
+        break
       }
-      const right = this.parseAdd()
-      return { kind: 'cmp', op: '==', left, right, line: tok.line } satisfies CompareOp
     }
-    return left
+    if (chain.length === 0) return left
+    // Build chain: left OP1 r1 AND r1 OP2 r2 AND ...
+    let prev = left
+    let acc: Expr | null = null
+    for (const c of chain) {
+      const cmp: CompareOp = {
+        kind: 'cmp',
+        op: c.op,
+        left: prev,
+        right: c.right,
+        line: c.line,
+      }
+      acc = acc === null ? cmp : {
+        kind: 'boolOp',
+        op: 'and',
+        left: acc,
+        right: cmp,
+        line: c.line,
+      }
+      prev = c.right
+    }
+    return acc!
   }
 
   private parseAdd(): Expr {
@@ -667,9 +704,28 @@ class Parser {
         }
       } else {
         this.consume() // LBRACKET
-        const index = this.parseExpr()
-        this.expect('RBRACKET')
-        expr = { kind: 'index', target: expr, index, line: expr.line } satisfies IndexExpr
+        // Slice if we see `:` before or after the first expression.
+        // Forms: `[a:b]`, `[:b]`, `[a:]`, `[:]`.
+        if (this.match('COLON')) {
+          // Form `[:b]` or `[:]`
+          this.consume()
+          let stop: Expr | null = null
+          if (!this.match('RBRACKET')) stop = this.parseExpr()
+          this.expect('RBRACKET')
+          expr = { kind: 'slice', target: expr, start: null, stop, line: expr.line } satisfies SliceExpr
+        } else {
+          const first = this.parseExpr()
+          if (this.match('COLON')) {
+            this.consume()
+            let stop: Expr | null = null
+            if (!this.match('RBRACKET')) stop = this.parseExpr()
+            this.expect('RBRACKET')
+            expr = { kind: 'slice', target: expr, start: first, stop, line: expr.line } satisfies SliceExpr
+          } else {
+            this.expect('RBRACKET')
+            expr = { kind: 'index', target: expr, index: first, line: expr.line } satisfies IndexExpr
+          }
+        }
       }
     }
     return expr
