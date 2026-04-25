@@ -1,8 +1,17 @@
-import type { Snapshot, SnapshotEvent } from '../interpreter/types'
+import type { SnapshotEvent } from '../interpreter/types'
 import './Timeline.css'
 
+// Minimal shape Timeline needs — both Python Snapshot and C CSnapshot
+// satisfy this. Keeps the strip language-agnostic so we don't need
+// duplicate timelines per language.
+type TimelineSnapshot = {
+  event: SnapshotEvent
+  narration: string
+  currentLine: number
+}
+
 type Props = {
-  snapshots: Snapshot[]
+  snapshots: TimelineSnapshot[]
   current: number
   onSelect: (step: number) => void
 }

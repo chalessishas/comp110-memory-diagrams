@@ -1,20 +1,31 @@
 import type { ReactElement } from 'react'
 import { useMemo, useState } from 'react'
 import { CanvasView } from './components/CanvasView'
+import { CDiagramCanvas } from './components/CDiagramCanvas'
 import { CodeEditor } from './components/CodeEditor'
 import { DiagramCanvas } from './components/DiagramCanvas'
 import { FeedbackButton } from './components/FeedbackButton'
 import { StepControl } from './components/StepControl'
 import { Timeline } from './components/Timeline'
+import { C_PROBLEMS } from './data/cProblems'
 import { QZ00_PROBLEMS } from './data/qz00Problems'
 import { run } from './interpreter/evaluator'
+import { runC } from './interpreter/c/evaluator'
+import type { CSnapshot } from './interpreter/c/types'
 import type { Snapshot } from './interpreter/types'
 import './App.css'
 
+// One result type per language so the renderer can branch by snapshot
+// shape. Python's heap is rich (functions, classes, lists, dicts,
+// instances); C's heap is byte-addressed cells. They render with
+// different components.
 type RunResult =
   | { kind: 'idle' }
-  | { kind: 'ok'; snapshots: Snapshot[] }
+  | { kind: 'ok'; language: 'python'; snapshots: Snapshot[] }
+  | { kind: 'ok'; language: 'c'; snapshots: CSnapshot[] }
   | { kind: 'error'; message: string }
+
+type Language = 'python' | 'c'
 
 function isEmbed(): boolean {
   if (typeof window === 'undefined') return false
@@ -31,8 +42,13 @@ type ViewMode = 'list' | 'canvas'
 
 function App() {
   const embed = useMemo(() => isEmbed(), [])
+  const [language, setLanguage] = useState<Language>('python')
+  // Each language keeps its own problem id + source so toggling Language
+  // doesn't clobber edits in the other one.
   const [problemId, setProblemId] = useState(QZ00_PROBLEMS[0].id)
   const [source, setSource] = useState(QZ00_PROBLEMS[0].source)
+  const [problemIdC, setProblemIdC] = useState(C_PROBLEMS[0].id)
+  const [sourceC, setSourceC] = useState(C_PROBLEMS[0].source)
   const [result, setResult] = useState<RunResult>({ kind: 'idle' })
   const [step, setStep] = useState(0)
   const [autoSpeedMs, setAutoSpeedMs] = useState(DEFAULT_AUTO_SPEED_MS)
@@ -43,18 +59,36 @@ function App() {
   const onRun = () => {
     setStep(0)
     try {
-      const snapshots = run(source)
-      setResult({ kind: 'ok', snapshots })
+      if (language === 'python') {
+        const snapshots = run(source)
+        setResult({ kind: 'ok', language: 'python', snapshots })
+      } else {
+        const snapshots = runC(sourceC)
+        setResult({ kind: 'ok', language: 'c', snapshots })
+      }
     } catch (e) {
       setResult({ kind: 'error', message: (e as Error).message })
     }
   }
 
   const onSelectProblem = (id: string) => {
-    const p = QZ00_PROBLEMS.find((x) => x.id === id)
-    if (!p) return
-    setProblemId(id)
-    setSource(p.source)
+    if (language === 'python') {
+      const p = QZ00_PROBLEMS.find((x) => x.id === id)
+      if (!p) return
+      setProblemId(id)
+      setSource(p.source)
+    } else {
+      const p = C_PROBLEMS.find((x) => x.id === id)
+      if (!p) return
+      setProblemIdC(id)
+      setSourceC(p.source)
+    }
+    setResult({ kind: 'idle' })
+    setStep(0)
+  }
+
+  const onSelectLanguage = (lang: Language) => {
+    setLanguage(lang)
     setResult({ kind: 'idle' })
     setStep(0)
   }
@@ -62,7 +96,20 @@ function App() {
   const snapshot = result.kind === 'ok' ? result.snapshots[step] ?? null : null
   const total = result.kind === 'ok' ? result.snapshots.length : 0
   const snapshots = result.kind === 'ok' ? result.snapshots : []
-  const currentProblem = QZ00_PROBLEMS.find((p) => p.id === problemId)
+  // Per-language narrowed snapshot — Python and C snapshots are different
+  // shapes (Python heap is rich, C heap is byte-cells) so each renderer
+  // gets a typed `null`-or-self instead of the raw discriminated union.
+  const pySnapshot: Snapshot | null =
+    result.kind === 'ok' && result.language === 'python' ? result.snapshots[step] ?? null : null
+  const cSnapshot: CSnapshot | null =
+    result.kind === 'ok' && result.language === 'c' ? result.snapshots[step] ?? null : null
+  const currentProblem = language === 'python'
+    ? QZ00_PROBLEMS.find((p) => p.id === problemId)
+    : C_PROBLEMS.find((p) => p.id === problemIdC)
+  const currentSource = language === 'python' ? source : sourceC
+  const currentSetSource = language === 'python' ? setSource : setSourceC
+  const currentProblemId = language === 'python' ? problemId : problemIdC
+  const currentProblemList = language === 'python' ? QZ00_PROBLEMS : C_PROBLEMS
 
   return (
     <div
@@ -74,7 +121,7 @@ function App() {
           <div className="brand">
             <span className="brand-name">COMP110 Memory Diagrams</span>
             <span className="brand-tag">
-              v0 ruleset — V2: colored step timeline, auto speed, stronger step labels
+              v0 ruleset · Python + C — colored step timeline, auto speed, stronger step labels
             </span>
           </div>
           <nav className="site-nav">
@@ -92,10 +139,32 @@ function App() {
 
       <main className="workspace">
         <section className="left">
+          <div className="view-toggle lang-toggle" role="tablist" aria-label="Language">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={language === 'python'}
+              className={language === 'python' ? 'view-tab active' : 'view-tab'}
+              onClick={() => onSelectLanguage('python')}
+              title="Python — full v0 ruleset (lists, dicts, classes, references)"
+            >
+              Python
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={language === 'c'}
+              className={language === 'c' ? 'view-tab active' : 'view-tab'}
+              onClick={() => onSelectLanguage('c')}
+              title="C — int/char/printf/control flow/functions (pointers + malloc coming next)"
+            >
+              C
+            </button>
+          </div>
           <div className="problem-bar">
             <label>
               Problem:{' '}
-              <select value={problemId} onChange={(e) => onSelectProblem(e.target.value)}>
+              <select value={currentProblemId} onChange={(e) => onSelectProblem(e.target.value)}>
                 {(() => {
                   const out: ReactElement[] = []
                   let currentGroup: string | undefined = undefined
@@ -113,7 +182,7 @@ function App() {
                     }
                     groupItems = []
                   }
-                  for (const p of QZ00_PROBLEMS) {
+                  for (const p of currentProblemList) {
                     if (p.group !== currentGroup) {
                       flush()
                       currentGroup = p.group
@@ -135,37 +204,47 @@ function App() {
             <p className="prompt">{currentProblem.prompt}</p>
           )}
           <div className="editor-wrap">
-            <CodeEditor value={source} onChange={setSource} highlightedLine={snapshot?.currentLine} />
+            <CodeEditor value={currentSource} onChange={currentSetSource} highlightedLine={snapshot?.currentLine} />
           </div>
         </section>
 
         <section className="right">
-          <div className="view-toggle" role="tablist" aria-label="Diagram view mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={viewMode === 'list'}
-              className={viewMode === 'list' ? 'view-tab active' : 'view-tab'}
-              onClick={() => setViewMode('list')}
-              title="COMP110 v0 list rendering — matches the quiz answer format"
-            >
-              List
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={viewMode === 'canvas'}
-              className={viewMode === 'canvas' ? 'view-tab active' : 'view-tab'}
-              onClick={() => setViewMode('canvas')}
-              title="Free-form canvas — drag nodes, fold sections, follow ref arrows"
-            >
-              Canvas
-            </button>
-          </div>
-          {viewMode === 'list' ? (
-            <DiagramCanvas snapshot={snapshot} />
+          {/* Canvas/List toggle is Python-only — C's MVP renders one
+              diagram style (no ref arrows yet, since pointers/malloc
+              aren't implemented). When pointers land we'll re-enable
+              Canvas mode for C too. */}
+          {language === 'python' && (
+            <div className="view-toggle" role="tablist" aria-label="Diagram view mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={viewMode === 'list'}
+                className={viewMode === 'list' ? 'view-tab active' : 'view-tab'}
+                onClick={() => setViewMode('list')}
+                title="COMP110 v0 list rendering — matches the quiz answer format"
+              >
+                List
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={viewMode === 'canvas'}
+                className={viewMode === 'canvas' ? 'view-tab active' : 'view-tab'}
+                onClick={() => setViewMode('canvas')}
+                title="Free-form canvas — drag nodes, fold sections, follow ref arrows"
+              >
+                Canvas
+              </button>
+            </div>
+          )}
+          {language === 'python' ? (
+            viewMode === 'list' ? (
+              <DiagramCanvas snapshot={pySnapshot} />
+            ) : (
+              <CanvasView snapshot={pySnapshot} />
+            )
           ) : (
-            <CanvasView snapshot={snapshot} />
+            <CDiagramCanvas snapshot={cSnapshot} />
           )}
           {result.kind === 'ok' && snapshot && (
             <div className="narration">
