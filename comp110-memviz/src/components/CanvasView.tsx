@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   ReactFlow,
   Background,
+  BackgroundVariant,
   Controls,
   Handle,
   Position,
@@ -471,9 +472,16 @@ export function CanvasView({ snapshot }: Props) {
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.3}
         maxZoom={2}
+        snapToGrid
+        snapGrid={[16, 16]}
         proOptions={{ hideAttribution: true }}
       >
-        <Background gap={20} size={1} color="#cbd5e0" />
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={16}
+          size={1.6}
+          color="#94a3b8"
+        />
         <Controls showInteractive={false} />
       </ReactFlow>
     </div>
