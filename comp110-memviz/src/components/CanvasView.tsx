@@ -285,6 +285,17 @@ function estimateHeapSize(obj: HeapObject, collapsed: boolean) {
   return { width: NODE_W, height: HEADER_H + rows * ROW_H + NODE_PAD }
 }
 
+// Deterministic HSL color per source-node id. Fixed S/L, hue spread by hash so
+// adjacent nodes get visibly different colors. All edges leaving the same
+// source share this color, so a "group of edges from main" reads as one bundle
+// even when they cross other bundles.
+function colorForSource(id: string): string {
+  let h = 0
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0
+  const hue = Math.abs(h) % 360
+  return `hsl(${hue}, 62%, 42%)`
+}
+
 function activeRefRowIdxs(items: { name?: string; index?: number; value: Value; retired: boolean }[],
                           group: 'name' | 'index'): Set<number> {
   const groups = group === 'name'
@@ -329,19 +340,11 @@ function build(snapshot: Snapshot, collapsed: Record<string, boolean>, toggle: (
     })
     // Frame → heap edges (one per ref-valued binding)
     const groups = groupByName(frame.bindings)
+    const color = colorForSource(id)
     groups.forEach((g, gi) => {
       const latest = g.items[g.items.length - 1]
       if (latest && !latest.retired && latest.value.kind === 'ref') {
-        edges.push({
-          id: `e-${id}-b${gi}-${latest.value.id}`,
-          source: id,
-          sourceHandle: `b-${gi}`,
-          target: `heap-${latest.value.id}`,
-          targetHandle: 't',
-          type: 'smoothstep',
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#1e7084' },
-          style: { stroke: '#1e7084', strokeWidth: 1.5 },
-        })
+        edges.push(makeEdge(id, `b-${gi}`, latest.value.id, color, g.name))
       }
     })
   })
@@ -363,29 +366,26 @@ function build(snapshot: Snapshot, collapsed: Record<string, boolean>, toggle: (
       height: size.height,
     })
     // Heap → heap edges
-    const items: { gi: number; value: Value }[] = []
+    const color = colorForSource(id)
     if (obj.kind === 'instance') {
       groupByName(obj.attrs).forEach((g, gi) => {
         const latest = g.items[g.items.length - 1]
-        if (latest && !latest.retired) items.push({ gi, value: latest.value })
-      })
-      items.forEach(({ gi, value }) => {
-        if (value.kind === 'ref') {
-          edges.push(makeEdge(id, `a-${gi}`, value.id))
+        if (latest && !latest.retired && latest.value.kind === 'ref') {
+          edges.push(makeEdge(id, `a-${gi}`, latest.value.id, color, g.name))
         }
       })
     } else if (obj.kind === 'list') {
       groupByIndex(obj.slots).forEach((g, gi) => {
         const latest = g.items[g.items.length - 1]
         if (latest && !latest.retired && latest.value.kind === 'ref') {
-          edges.push(makeEdge(id, `s-${gi}`, latest.value.id))
+          edges.push(makeEdge(id, `s-${gi}`, latest.value.id, color, `[${g.index}]`))
         }
       })
     } else if (obj.kind === 'dict') {
       groupByName(obj.entries).forEach((g, gi) => {
         const latest = g.items[g.items.length - 1]
         if (latest && !latest.retired && latest.value.kind === 'ref') {
-          edges.push(makeEdge(id, `e-${gi}`, latest.value.id))
+          edges.push(makeEdge(id, `e-${gi}`, latest.value.id, color, g.name))
         }
       })
     }
@@ -394,22 +394,34 @@ function build(snapshot: Snapshot, collapsed: Record<string, boolean>, toggle: (
   return { nodes, edges }
 }
 
-function makeEdge(sourceId: string, sourceHandle: string, heapId: number): Edge {
+function makeEdge(sourceId: string, sourceHandle: string, heapId: number, color: string, label: string): Edge {
   return {
     id: `e-${sourceId}-${sourceHandle}-${heapId}`,
     source: sourceId,
     sourceHandle,
     target: `heap-${heapId}`,
     targetHandle: 't',
-    type: 'smoothstep',
-    markerEnd: { type: MarkerType.ArrowClosed, color: '#805ad5' },
-    style: { stroke: '#805ad5', strokeWidth: 1.5 },
+    // bezier (default) — parallel edges naturally fan out via curvature so they
+    // don't stack into a single visual line the way smoothstep did.
+    type: 'default',
+    markerEnd: { type: MarkerType.ArrowClosed, color, width: 18, height: 18 },
+    style: { stroke: color, strokeWidth: 1.7 },
+    labelShowBg: true,
+    labelBgPadding: [4, 2],
+    labelBgBorderRadius: 3,
+    labelBgStyle: { fill: '#ffffff', fillOpacity: 0.92, stroke: color, strokeWidth: 0.8 },
+    labelStyle: { fontSize: 10, fontWeight: 600, fill: color, fontFamily: 'SFMono-Regular, Menlo, monospace' },
+    label,
+    interactionWidth: 16,
   }
 }
 
 function applyDagre(nodes: Node[], edges: Edge[]): Node[] {
   const g = new dagre.graphlib.Graph()
-  g.setGraph({ rankdir: 'LR', nodesep: 28, ranksep: 80, marginx: 16, marginy: 16 })
+  // Generous spacing — Dagre routes edges through the gaps between nodes,
+  // so cramped layouts produce edges that visually pierce through other
+  // nodes. 60 vertical / 180 horizontal gives bezier edges room to fan.
+  g.setGraph({ rankdir: 'LR', nodesep: 60, ranksep: 180, marginx: 24, marginy: 24 })
   g.setDefaultEdgeLabel(() => ({}))
   nodes.forEach((n) => {
     g.setNode(n.id, { width: n.width ?? NODE_W, height: n.height ?? 60 })
@@ -431,6 +443,9 @@ export function CanvasView({ snapshot }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([])
+  // Hovered node id — used to dim edges not connected to the hovered node so
+  // a single-edge path can be traced visually even in a dense graph.
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   const toggle = useMemo(
     () => (id: string) => setCollapsed((prev) => ({ ...prev, [id]: !prev[id] })),
@@ -452,10 +467,26 @@ export function CanvasView({ snapshot }: Props) {
     setEdges(built.edges)
   }, [snapshot, collapsed, toggle, setNodes, setEdges])
 
+  // Apply hover dimming on top of the base edges. Derived per render — base
+  // edges in useEdgesState stay clean.
+  const displayEdges = useMemo<Edge[]>(() => {
+    if (hoveredId === null) return edges
+    return edges.map((e) => {
+      const adjacent = e.source === hoveredId || e.target === hoveredId
+      return {
+        ...e,
+        style: { ...e.style, opacity: adjacent ? 1 : 0.12 },
+        labelStyle: { ...e.labelStyle, opacity: adjacent ? 1 : 0 },
+        labelBgStyle: { ...e.labelBgStyle, opacity: adjacent ? 1 : 0 },
+        zIndex: adjacent ? 10 : 0,
+      }
+    })
+  }, [edges, hoveredId])
+
   if (!snapshot) {
     return (
       <div className="cv-placeholder">
-        <p>Press <strong>Run</strong> to see the canvas. Drag nodes to rearrange. Click a header to fold.</p>
+        <p>Press <strong>Run</strong> to see the canvas. Drag nodes to rearrange. Click a header to fold. Hover a node to isolate its edges.</p>
       </div>
     )
   }
@@ -464,10 +495,12 @@ export function CanvasView({ snapshot }: Props) {
     <div className="cv-wrap">
       <ReactFlow
         nodes={nodes}
-        edges={edges}
+        edges={displayEdges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onNodeMouseEnter={(_, node) => setHoveredId(node.id)}
+        onNodeMouseLeave={() => setHoveredId(null)}
         fitView
         fitViewOptions={{ padding: 0.15 }}
         minZoom={0.3}
