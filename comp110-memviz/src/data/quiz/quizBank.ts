@@ -1,7 +1,6 @@
-// COMP110 Quiz Practice — knowledge-organized question bank.
-// Sourced from QZ00–QZ04 PDFs. Topic-first, not quiz-first: questions
-// that test the same concept are grouped together so a "function
-// anatomy" drill pulls from QZ00 Q3 and QZ03 Q3 simultaneously.
+// Quiz Practice — knowledge-organized question bank.
+// Topic-first organization: questions that test the same concept are
+// grouped together regardless of which practice set they originated in.
 
 import type { Question } from '../../components/quiz/types'
 
@@ -12,7 +11,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.1',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.1',
     type: 'mcq',
     prompt: 'What is the *type* of the following expression?',
     code: 'int(3.7) + 2',
@@ -28,7 +26,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.2',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.2',
     type: 'mcq',
     prompt: 'What is the *type* of the following expression?',
     code: 'len("woods")',
@@ -44,7 +41,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.3',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.3',
     type: 'mcq',
     prompt: 'What is the result of the following expression?',
     code: 'str(110 + 110)',
@@ -60,7 +56,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.5',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.5',
     type: 'mcq',
     prompt: 'What *value* will the following expression evaluate to?',
     code: 'str(200-3)[1]',
@@ -76,7 +71,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.6',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.6',
     type: 'mcq',
     prompt: 'What is the result of the following expression?',
     code: '"hack" + str(110)',
@@ -91,7 +85,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.7',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.7',
     type: 'mcq',
     prompt: 'What is the result of evaluating the following Python expression?',
     code: '3 ** 2',
@@ -106,7 +99,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.9',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.9',
     type: 'mcq',
     prompt: 'What does this code evaluate to in Python?',
     code: 'int(10.9)',
@@ -122,7 +114,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-1.10',
     topic: 'types-expressions',
-    source: 'QZ00 Q1.10',
     type: 'mcq',
     prompt: 'What does the following expression evaluate to?',
     code: '19 % 10',
@@ -138,7 +129,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.1',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.1',
     type: 'evaluate',
     prompt: 'Given the function below, what does the call evaluate to? Write the resulting value AND its type.',
     code: [
@@ -159,7 +149,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.2',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.2',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: 'int("1" + "2") + float("2" + ".1")',
@@ -171,7 +160,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.3',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.3',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: '4 / 2 + 3 ** 2',
@@ -186,7 +174,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.4',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.4',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: 'int(str(len("123")) + "1")',
@@ -198,7 +185,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.5',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.5',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: '9 // 2 * 2 + 9 % 2',
@@ -210,7 +196,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.6',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.6',
     type: 'evaluate',
     prompt: 'Fully evaluate. If erroneous, answer "Error".',
     code: 'int("1") + "2"',
@@ -223,7 +208,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.7',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.7',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: 'int(str(123)[2]) * 3',
@@ -235,7 +219,6 @@ const TYPES_EXPRESSIONS: Question[] = [
   {
     id: 'te-q00-2.8',
     topic: 'types-expressions',
-    source: 'QZ00 Q2.8',
     type: 'evaluate',
     prompt: 'Fully evaluate. Write the resulting value AND its type.',
     code: '1100 + 10.0',
@@ -251,7 +234,7 @@ const TYPES_EXPRESSIONS: Question[] = [
 // return / parameter / unreachable / etc. Same skill as picking out
 // constructors / attributes / methods in a class definition.
 
-const FUNCTION_ANATOMY_QZ00_CODE = [
+const FUNCTION_ANATOMY_FN_CODE = [
   '"""Some functions!"""',
   '',
   'def perimeter(length: float, width: float) -> float:',
@@ -267,7 +250,7 @@ const FUNCTION_ANATOMY_QZ00_CODE = [
   'print(square_perimeter(side=4.0))',
 ].join('\n')
 
-const FUNCTION_ANATOMY_QZ03_CODE = [
+const FUNCTION_ANATOMY_CLASS_CODE = [
   'class Rectangle:',
   '    width: int',
   '    height: int',
@@ -288,10 +271,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.1',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.1',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where Argument(s) are found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [1, 3, 5, 9, 13],
     answer: [13],
     scoring: 'all-or-nothing',
@@ -299,10 +281,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.2',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.2',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Docstring is found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [1, 3, 4, 9, 10],
     answer: [1, 4, 9],
     scoring: 'per-line',
@@ -310,10 +291,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.3',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.3',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Parameter name is used in an expression.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [3, 5, 8, 10, 13],
     answer: [5],
     alternateAnswers: [[5, 13]],
@@ -322,10 +302,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.4',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.4',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Function signature is found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [3, 4, 8, 11, 13],
     answer: [3, 8],
     scoring: 'per-line',
@@ -333,10 +312,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.5',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.5',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Function call is found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [3, 5, 9, 11, 13],
     answer: [11, 13],
     scoring: 'per-line',
@@ -344,10 +322,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.6',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.6',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Return statement is found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [3, 4, 5, 11, 13],
     answer: [5, 11],
     scoring: 'per-line',
@@ -355,10 +332,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.7',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.7',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where Parameter(s) are found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [3, 4, 8, 10, 13],
     answer: [3, 8],
     scoring: 'per-line',
@@ -366,10 +342,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q00-3.8',
     topic: 'functions-anatomy',
-    source: 'QZ00 Q3.8',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where Unreachable code (will never run) is found.',
-    code: FUNCTION_ANATOMY_QZ00_CODE,
+    code: FUNCTION_ANATOMY_FN_CODE,
     lineOptions: [5, 6, 10, 11],
     answer: [6],
     scoring: 'all-or-nothing',
@@ -378,10 +353,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q03-3.1',
     topic: 'functions-anatomy',
-    source: 'QZ03 Q3.1',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where the Constructor declaration is found.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     lineOptions: [1, 2, 5, 9, 11],
     answer: [5],
     scoring: 'all-or-nothing',
@@ -389,10 +363,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q03-3.2',
     topic: 'functions-anatomy',
-    source: 'QZ03 Q3.2',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where Attribute declaration is found.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     lineOptions: [2, 3, 6, 7, 10],
     answer: [2, 3],
     scoring: 'per-line',
@@ -400,10 +373,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q03-3.3',
     topic: 'functions-anatomy',
-    source: 'QZ03 Q3.3',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where Attribute initialization is found.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     lineOptions: [2, 3, 6, 7, 10],
     answer: [6, 7],
     scoring: 'per-line',
@@ -411,10 +383,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q03-3.4',
     topic: 'functions-anatomy',
-    source: 'QZ03 Q3.4',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Method declaration is found.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     lineOptions: [1, 9, 10, 12, 13],
     answer: [9, 12],
     scoring: 'per-line',
@@ -422,10 +393,9 @@ const FUNCTIONS_ANATOMY: Question[] = [
   {
     id: 'fa-q03-3.5',
     topic: 'functions-anatomy',
-    source: 'QZ03 Q3.5',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) where a Local variable declaration is found.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     lineOptions: [6, 7, 10, 13, 14],
     answer: [13],
     scoring: 'all-or-nothing',
@@ -439,7 +409,6 @@ const FUNCTION_WRITING: Question[] = [
   {
     id: 'fw-q00-4.1',
     topic: 'function-writing',
-    source: 'QZ00 Q4.1',
     type: 'write-code',
     prompt:
       'Write the *signature* for a function called get_info that takes as input a str called phrase and returns the *length* of that str. Explicitly type parameter and return.',
@@ -458,7 +427,6 @@ const FUNCTION_WRITING: Question[] = [
   {
     id: 'fw-q00-4.2',
     topic: 'function-writing',
-    source: 'QZ00 Q4.2',
     type: 'write-code',
     prompt: 'Write a function *call* to the get_info function above with an input value of "yippee".',
     sampleAnswer: 'get_info("yippee")',
@@ -472,7 +440,6 @@ const FUNCTION_WRITING: Question[] = [
   {
     id: 'fw-q00-4.3',
     topic: 'function-writing',
-    source: 'QZ00 Q4.3',
     type: 'write-code',
     prompt:
       'Write the *signature* for a function called get_average that takes two ints called num1 and num2 and returns the average of the two numbers.',
@@ -491,7 +458,6 @@ const CONDITIONALS_BOOLEAN: Question[] = [
   {
     id: 'cb-q01-1.1',
     topic: 'conditionals-boolean',
-    source: 'QZ01 Q1.1',
     type: 'mcq',
     prompt: 'What is the evaluation of the following Python expression?',
     code: 'True and not True',
@@ -504,7 +470,6 @@ const CONDITIONALS_BOOLEAN: Question[] = [
   {
     id: 'cb-q01-1.6',
     topic: 'conditionals-boolean',
-    source: 'QZ01 Q1.6',
     type: 'mcq',
     prompt: 'Which operator has the highest precedence (will be evaluated first) in an expression with these operators?',
     choices: [
@@ -519,7 +484,6 @@ const CONDITIONALS_BOOLEAN: Question[] = [
   {
     id: 'cb-q01-1.9',
     topic: 'conditionals-boolean',
-    source: 'QZ01 Q1.9',
     type: 'mcq',
     prompt: 'The following statement is valid and true in Python.',
     code: '0 = x - x',
@@ -533,7 +497,6 @@ const CONDITIONALS_BOOLEAN: Question[] = [
   {
     id: 'cb-q01-1.11',
     topic: 'conditionals-boolean',
-    source: 'QZ01 Q1.11',
     type: 'mcq',
     prompt: 'What is the evaluation of the following expression?',
     code: 'True or True',
@@ -546,7 +509,6 @@ const CONDITIONALS_BOOLEAN: Question[] = [
   {
     id: 'cb-q01-3.4',
     topic: 'conditionals-boolean',
-    source: 'QZ01 Q3.4',
     type: 'write-code',
     prompt:
       'Rewrite this code to eliminate the nested if and any unreachable code. Behavior must be identical for every input.',
@@ -602,7 +564,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-1.2',
     topic: 'recursion',
-    source: 'QZ01 Q1.2',
     type: 'mcq',
     prompt: 'Consider the following code. What is the problem with it?',
     code: [
@@ -623,7 +584,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-1.4',
     topic: 'recursion',
-    source: 'QZ01 Q1.4',
     type: 'mcq',
     prompt: 'What is the purpose of the *recursive case* in a recursive function?',
     choices: [
@@ -637,7 +597,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-1.10',
     topic: 'recursion',
-    source: 'QZ01 Q1.10',
     type: 'mcq',
     prompt: 'What happens if a recursive function does not have a base case?',
     choices: [
@@ -651,7 +610,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-2.1',
     topic: 'recursion',
-    source: 'QZ01 Q2.1',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) on which the *Edge case* is found.',
     code: RECURSION_SWOOSH_CODE,
@@ -664,7 +622,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-2.2',
     topic: 'recursion',
-    source: 'QZ01 Q2.2',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) on which the *Recursive call* is found.',
     code: RECURSION_SWOOSH_CODE,
@@ -675,7 +632,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-2.3',
     topic: 'recursion',
-    source: 'QZ01 Q2.3',
     type: 'identify-lines',
     prompt: 'Bubble in the line(s) on which the *Base case* is found.',
     code: RECURSION_SWOOSH_CODE,
@@ -687,7 +643,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-3.1',
     topic: 'recursion',
-    source: 'QZ01 Q3.1',
     type: 'write-code',
     prompt: 'Write a function call expression to inquire that evaluates to "Perhaps".',
     code: RECURSION_INQUIRE_CODE,
@@ -701,7 +656,6 @@ const RECURSION: Question[] = [
   {
     id: 'rc-q01-3.3',
     topic: 'recursion',
-    source: 'QZ01 Q3.3',
     type: 'write-code',
     prompt: 'Write a function call expression to inquire that evaluates to "Sure!".',
     code: RECURSION_INQUIRE_CODE,
@@ -725,7 +679,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.1',
     topic: 'looping',
-    source: 'QZ02 Q3.1',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [
@@ -742,7 +695,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.2',
     topic: 'looping',
-    source: 'QZ02 Q3.2',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [LOOPING_PREFACE, '', 'for f in final_four:', '    print(f)'].join('\n'),
@@ -754,7 +706,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.3',
     topic: 'looping',
-    source: 'QZ02 Q3.3',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [LOOPING_PREFACE, '', 'for x in range(0, len(news)):', '    print(x)'].join('\n'),
@@ -766,7 +717,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.4',
     topic: 'looping',
-    source: 'QZ02 Q3.4',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [LOOPING_PREFACE, '', 'for baller in roster:', '    print(baller)'].join('\n'),
@@ -779,7 +729,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.5',
     topic: 'looping',
-    source: 'QZ02 Q3.5',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [LOOPING_PREFACE, '', 'for n in news:', '    print(f"{n}!")'].join('\n'),
@@ -791,7 +740,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.6',
     topic: 'looping',
-    source: 'QZ02 Q3.6',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [
@@ -810,7 +758,6 @@ const LOOPING: Question[] = [
   {
     id: 'lp-q02-3.7',
     topic: 'looping',
-    source: 'QZ02 Q3.7',
     type: 'evaluate',
     prompt: 'What will be printed?',
     code: [LOOPING_PREFACE, '', 'for x in range(1, len(news)):', '    print(news[x])'].join('\n'),
@@ -829,7 +776,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.1',
     topic: 'collections',
-    source: 'QZ02 Q1.1',
     type: 'mcq',
     prompt: 'Which data structures are iterable, such that you can write a `for ... in` loop over their contents?',
     choices: [
@@ -843,7 +789,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.2',
     topic: 'collections',
-    source: 'QZ02 Q1.2',
     type: 'mcq',
     prompt: 'Which data structures support the `len` function to count items?',
     choices: [
@@ -857,7 +802,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.3',
     topic: 'collections',
-    source: 'QZ02 Q1.3',
     type: 'mcq',
     prompt: "Which data structure's *literal syntax* is enclosed within square brackets `[ ]`?",
     choices: [
@@ -871,7 +815,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.4',
     topic: 'collections',
-    source: 'QZ02 Q1.4',
     type: 'mcq',
     prompt: 'Which of the following data structures requires the `.add()` method to add a value?',
     choices: [
@@ -885,7 +828,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.5',
     topic: 'collections',
-    source: 'QZ02 Q1.5',
     type: 'mcq',
     prompt: "If we want to associate students' PIDs with their names, which data structure provides the most efficient lookup?",
     choices: [
@@ -898,7 +840,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.6',
     topic: 'collections',
-    source: 'QZ02 Q1.6',
     type: 'mcq',
     prompt: 'Which structures support subscription notation `[ ]` to access specific values?',
     choices: [
@@ -912,7 +853,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.7',
     topic: 'collections',
-    source: 'QZ02 Q1.7',
     type: 'mcq',
     prompt: 'Which structures can perform quick and efficient lookups (checking if an item or key exists)?',
     choices: [
@@ -927,7 +867,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.10',
     topic: 'collections',
-    source: 'QZ02 Q1.10',
     type: 'mcq',
     prompt: 'Which of these data structures use *key-value pairs* for storing data?',
     choices: [
@@ -940,7 +879,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-1.11',
     topic: 'collections',
-    source: 'QZ02 Q1.11',
     type: 'mcq',
     prompt: 'Which would be most appropriate for storing unique, unordered values?',
     choices: [
@@ -953,7 +891,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-2.1',
     topic: 'collections',
-    source: 'QZ02 Q2.1',
     type: 'write-code',
     prompt: 'Write a line of code to find the length of the fall_items list.',
     code: 'fall_items: list[str] = ["sweater", "leaf", "campfire", "pumpkin"]',
@@ -965,7 +902,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-2.2',
     topic: 'collections',
-    source: 'QZ02 Q2.2',
     type: 'write-code',
     prompt: 'Write a line of code to add the value "pie" to the *end* of the fall_items list.',
     code: 'fall_items: list[str] = ["sweater", "leaf", "campfire", "pumpkin"]',
@@ -980,7 +916,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-2.3',
     topic: 'collections',
-    source: 'QZ02 Q2.3',
     type: 'write-code',
     prompt: 'Write an assignment statement that changes the list element "pumpkin" to "gourd" in the fall_items list.',
     code: 'fall_items: list[str] = ["sweater", "leaf", "campfire", "pumpkin"]',
@@ -992,7 +927,6 @@ const COLLECTIONS: Question[] = [
   {
     id: 'co-q02-2.4',
     topic: 'collections',
-    source: 'QZ02 Q2.4',
     type: 'write-code',
     prompt: 'Write a line of code to remove the element "leaf" from the fall_items list.',
     code: 'fall_items: list[str] = ["sweater", "leaf", "campfire", "pumpkin"]',
@@ -1009,7 +943,6 @@ const FUNCTION_WRITING_FULL: Question[] = [
   {
     id: 'fwf-q02-4',
     topic: 'function-writing-full',
-    source: 'QZ02 Q4',
     type: 'write-code',
     prompt:
       'Write fall_faves: takes a list of strings and returns a dict where each key is a unique string and each value is its count. ' +
@@ -1041,7 +974,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-1.1',
     topic: 'classes',
-    source: 'QZ03 Q1.1',
     type: 'mcq',
     prompt: 'What does it mean to "instantiate" a class?',
     choices: [
@@ -1055,7 +987,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-1.2',
     topic: 'classes',
-    source: 'QZ03 Q1.2',
     type: 'mcq',
     prompt: 'What is the purpose of the __init__ method in a Python class?',
     choices: [
@@ -1069,7 +1000,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-1.3',
     topic: 'classes',
-    source: 'QZ03 Q1.3',
     type: 'mcq',
     prompt: 'Which of the following is True about `self` in Python classes?',
     choices: [
@@ -1083,7 +1013,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q04-1.1',
     topic: 'classes',
-    source: 'QZ04 Q1.1',
     type: 'mcq',
     prompt: 'What is a recursive data structure?',
     choices: [
@@ -1097,7 +1026,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q04-1.2',
     topic: 'classes',
-    source: 'QZ04 Q1.2',
     type: 'mcq',
     prompt: 'In a singly linked list, how many different Node objects can a given node reference?',
     choices: [
@@ -1111,7 +1039,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q04-1.3',
     topic: 'classes',
-    source: 'QZ04 Q1.3',
     type: 'mcq',
     prompt: 'How would we access the literal value of the sally object\'s name attribute outside of the class definition?',
     code: [
@@ -1135,7 +1062,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q04-1.8',
     topic: 'classes',
-    source: 'QZ04 Q1.8',
     type: 'mcq',
     prompt: "Similarly to Python's built-in list data type, linked lists can directly access a value by its index.",
     choices: [
@@ -1148,7 +1074,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-2.3',
     topic: 'classes',
-    source: 'QZ03 Q2.3',
     type: 'mcq',
     prompt: 'A Class declaration establishes a new data *type* in a program.',
     choices: [
@@ -1160,7 +1085,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-2.4',
     topic: 'classes',
-    source: 'QZ03 Q2.4',
     type: 'mcq',
     prompt: "A function call to a Class' name is what leads to __init__ evaluating.",
     choices: [
@@ -1172,7 +1096,6 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-2.6',
     topic: 'classes',
-    source: 'QZ03 Q2.6',
     type: 'mcq',
     prompt: 'Once an object\'s attributes are initialized, their values cannot be changed.',
     choices: [
@@ -1184,10 +1107,9 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-4.1',
     topic: 'classes',
-    source: 'QZ03 Q4.1',
     type: 'write-code',
     prompt: 'Write a line of code to create an *explicitly typed* instance of the Rectangle class called frame with width 5 and height 3.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     sampleAnswer: 'frame: Rectangle = Rectangle(5, 3)',
     validators: [
       { kind: 'regex', pattern: '\\bframe\\s*:\\s*Rectangle', weight: 0.4, label: 'Variable explicitly typed `frame: Rectangle`' },
@@ -1198,10 +1120,9 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-4.2',
     topic: 'classes',
-    source: 'QZ03 Q4.2',
     type: 'write-code',
     prompt: "Write a line of code to change the value of the frame object's width attribute to 4.",
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     sampleAnswer: 'frame.width = 4',
     validators: [
       { kind: 'regex', pattern: 'frame\\.width\\s*=\\s*4\\b', weight: 1, label: 'Reassigns frame.width to 4' },
@@ -1210,10 +1131,9 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-4.3',
     topic: 'classes',
-    source: 'QZ03 Q4.3',
     type: 'write-code',
     prompt: 'Write a line of code to print the perimeter of the frame object using a *method call*.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     sampleAnswer: 'print(frame.perimeter())',
     validators: [
       { kind: 'regex', pattern: 'print\\s*\\(\\s*frame\\.perimeter\\s*\\(\\s*\\)\\s*\\)', weight: 1, label: 'print(frame.perimeter())' },
@@ -1222,11 +1142,10 @@ const CLASSES: Question[] = [
   {
     id: 'cl-q03-4.4',
     topic: 'classes',
-    source: 'QZ03 Q4.4',
     type: 'write-code',
     prompt:
       'Declare an *explicitly typed* variable named cost. Initialize cost to the result of calling the price method on frame with a price per inch of $1.50.',
-    code: FUNCTION_ANATOMY_QZ03_CODE,
+    code: FUNCTION_ANATOMY_CLASS_CODE,
     sampleAnswer: 'cost: float = frame.price(1.50)',
     validators: [
       { kind: 'regex', pattern: '\\bcost\\s*:\\s*float', weight: 0.5, label: 'Variable explicitly typed `cost: float`' },
@@ -1242,7 +1161,6 @@ const CLASS_WRITING: Question[] = [
   {
     id: 'cw-q03-6',
     topic: 'class-writing',
-    source: 'QZ03 Q6',
     type: 'write-code',
     prompt: [
       'Write a class definition for Course with three attributes: name (str), students (int), ta_assigned (bool).',
@@ -1325,7 +1243,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-2.1',
     topic: 'linked-lists',
-    source: 'QZ04 Q2.1',
     type: 'evaluate',
     prompt: 'Print the output.',
     code: [LINKED_LIST_NODE_PREFACE, '', 'print(venus)'].join('\n'),
@@ -1340,7 +1257,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-2.2',
     topic: 'linked-lists',
-    source: 'QZ04 Q2.2',
     type: 'evaluate',
     prompt: 'Print the output.',
     code: [LINKED_LIST_NODE_PREFACE, '', 'print(mars.value)'].join('\n'),
@@ -1352,7 +1268,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-2.3',
     topic: 'linked-lists',
-    source: 'QZ04 Q2.3',
     type: 'evaluate',
     prompt: 'Print the output.',
     code: [LINKED_LIST_NODE_PREFACE, '', 'print(venus.next)'].join('\n'),
@@ -1364,7 +1279,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-2.4',
     topic: 'linked-lists',
-    source: 'QZ04 Q2.4',
     type: 'evaluate',
     prompt: 'Print the output.',
     code: [LINKED_LIST_NODE_PREFACE, '', 'print(venus.next.next)'].join('\n'),
@@ -1376,7 +1290,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-3.1',
     topic: 'linked-lists',
-    source: 'QZ04 Q3.1',
     type: 'write-code',
     prompt: "Write a line of code to create an *explicitly typed* instance of the Author class called brooks with name \"Fred Brooks\" and an empty list for books.",
     code: [
@@ -1399,7 +1312,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-3.2',
     topic: 'linked-lists',
-    source: 'QZ04 Q3.2',
     type: 'write-code',
     prompt: 'Use a method call to add a Book titled "Mythical Man-Month", written 1975, to the brooks object\'s work.',
     sampleAnswer: 'brooks.write_book("Mythical Man-Month", 1975)',
@@ -1412,7 +1324,6 @@ const LINKED_LISTS: Question[] = [
   {
     id: 'll-q04-3.4',
     topic: 'linked-lists',
-    source: 'QZ04 Q3.4',
     type: 'write-code',
     prompt: 'Write a __repr__ magic method for the Book class. Assume it would be added inside the Book class.',
     code: [
@@ -1448,7 +1359,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q00-5',
     topic: 'memory-diagrams',
-    source: 'QZ00 Q5',
     type: 'memory-diagram',
     prompt: 'Trace globals, stack frames, heap, and output for this two-function program.',
     program: [
@@ -1470,7 +1380,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q01-4',
     topic: 'memory-diagrams',
-    source: 'QZ01 Q4',
     type: 'memory-diagram',
     prompt: 'Trace this loop that prints characters in reverse.',
     program: [
@@ -1488,7 +1397,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q01-6',
     topic: 'memory-diagrams',
-    source: 'QZ01 Q6',
     type: 'memory-diagram',
     prompt: 'Trace this recursive function — one printed line.',
     program: [
@@ -1513,7 +1421,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q02-5',
     topic: 'memory-diagrams',
-    source: 'QZ02 Q5',
     type: 'memory-diagram',
     prompt: 'Build a dict by zipping two lists, then assign one more key. What prints?',
     program: [
@@ -1540,7 +1447,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q03-5',
     topic: 'memory-diagrams',
-    source: 'QZ03 Q5',
     type: 'memory-diagram',
     prompt: 'Trace a Person adopting a Pet — both classes, two heap objects, one method call.',
     program: [
@@ -1573,7 +1479,6 @@ const MEMORY_DIAGRAMS: Question[] = [
   {
     id: 'md-q04-4',
     topic: 'memory-diagrams',
-    source: 'QZ04 Q4',
     type: 'memory-diagram',
     prompt: 'Build three Nodes, then mutate `next` to form a cycle d → e and f → d. What prints?',
     program: [

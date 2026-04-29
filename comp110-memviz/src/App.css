@@ -29,6 +29,12 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  /* width:100% is required *alongside* max-width on flex containers —
+     without it, the container's inline-size collapses to max-content
+     and the page width drifts as inner content (code blocks, prompts)
+     changes, so the centered sidebar appears to slide left/right when
+     switching questions. With width:100% it locks to viewport. */
+  width: 100%;
   max-width: 1440px;
   margin: 0 auto;
 }
