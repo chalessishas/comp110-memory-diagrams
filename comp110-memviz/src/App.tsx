@@ -7,6 +7,7 @@ import { DiagramCanvas } from './components/DiagramCanvas'
 import { FeedbackButton } from './components/FeedbackButton'
 import { StepControl } from './components/StepControl'
 import { Timeline } from './components/Timeline'
+import { QuizPractice } from './components/quiz/QuizPractice'
 import { C_PROBLEMS } from './data/cProblems'
 import { QZ00_PROBLEMS } from './data/qz00Problems'
 import { run } from './interpreter/evaluator'
@@ -26,6 +27,7 @@ type RunResult =
   | { kind: 'error'; message: string }
 
 type Language = 'python' | 'c'
+type AppMode = 'tool' | 'quiz'
 
 function isEmbed(): boolean {
   if (typeof window === 'undefined') return false
@@ -42,6 +44,10 @@ type ViewMode = 'list' | 'canvas'
 
 function App() {
   const embed = useMemo(() => isEmbed(), [])
+  // Mode picks between the original memory-diagram tool and the new
+  // knowledge-organized Quiz Practice. Embedded usage forces 'tool' so
+  // existing course-site embeds keep working.
+  const [mode, setMode] = useState<AppMode>('tool')
   const [language, setLanguage] = useState<Language>('python')
   // Each language keeps its own problem id + source so toggling Language
   // doesn't clobber edits in the other one.
@@ -121,8 +127,30 @@ function App() {
           <div className="brand">
             <span className="brand-name">COMP110 Memory Diagrams</span>
             <span className="brand-tag">
-              v0 ruleset · Python + C — colored step timeline, auto speed, stronger step labels
+              {mode === 'tool'
+                ? 'v0 ruleset · Python + C — colored step timeline, auto speed, stronger step labels'
+                : 'Quiz Practice — knowledge-organized drills from QZ00–QZ04'}
             </span>
+          </div>
+          <div className="mode-toggle" role="tablist" aria-label="App mode">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'tool'}
+              className={mode === 'tool' ? 'mode-tab active' : 'mode-tab'}
+              onClick={() => setMode('tool')}
+            >
+              Memory Diagram Tool
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'quiz'}
+              className={mode === 'quiz' ? 'mode-tab active' : 'mode-tab'}
+              onClick={() => setMode('quiz')}
+            >
+              Quiz Practice
+            </button>
           </div>
           <nav className="site-nav">
             <a href="https://comp110-26s.github.io/" target="_blank" rel="noreferrer">Course site ↗</a>
@@ -137,6 +165,9 @@ function App() {
         </header>
       )}
 
+      {mode === 'quiz' && !embed ? (
+        <QuizPractice />
+      ) : (
       <main className="workspace">
         <section className="left">
           <div className="view-toggle lang-toggle" role="tablist" aria-label="Language">
@@ -297,6 +328,7 @@ function App() {
           </div>
         </section>
       </main>
+      )}
 
       {!embed && (
         <footer className="site-footer">

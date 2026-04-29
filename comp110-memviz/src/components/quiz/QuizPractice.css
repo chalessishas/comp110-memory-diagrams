@@ -1,0 +1,580 @@
+/* Quiz Practice — visual styling tries to feel like the printed PDF
+   exam (bubbled MCQs, gutter-numbered code, "Question 1.1" header)
+   while staying inside memviz's mint/teal palette. */
+
+.quiz-practice {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 24px;
+  flex: 1;
+  font-family: 'Cabin', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* --- Topic sidebar ----------------------------------------------- */
+
+.topic-sidebar {
+  background: var(--comp110-gray-50);
+  border: 1px solid var(--comp110-gray-200);
+  border-radius: 8px;
+  padding: 14px;
+  align-self: flex-start;
+  position: sticky;
+  top: 16px;
+}
+
+.topic-sidebar-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--comp110-gray-500);
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+.topic-sidebar ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.topic-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--comp110-gray-700);
+  text-align: left;
+  cursor: pointer;
+  transition: background 100ms, color 100ms, border-color 100ms;
+}
+.topic-row:hover {
+  background: #ffffff;
+  border-color: var(--comp110-gray-200);
+}
+.topic-row.active {
+  background: var(--comp110-mint);
+  color: var(--comp110-teal-dark);
+  border-color: var(--comp110-teal);
+}
+
+.topic-row-label { min-width: 0; flex: 1; }
+
+.topic-row-count {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--comp110-gray-500);
+  font-weight: 700;
+}
+.topic-row.active .topic-row-count { color: var(--comp110-teal-dark); }
+
+/* --- Question pane ------------------------------------------------ */
+
+.question-pane {
+  background: #ffffff;
+  border: 1px solid var(--comp110-gray-200);
+  border-radius: 8px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 480px;
+}
+
+.question-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 2px solid var(--comp110-gray-200);
+  padding-bottom: 10px;
+}
+
+.question-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.question-number {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--comp110-gray-900);
+  letter-spacing: 0.3px;
+}
+
+.question-source {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--comp110-gray-500);
+  background: var(--comp110-gray-50);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.question-progress {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--comp110-gray-500);
+  font-weight: 700;
+}
+
+.question-prompt {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--comp110-gray-900);
+  white-space: pre-wrap;
+}
+
+.question-empty {
+  color: var(--comp110-gray-500);
+  font-style: italic;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+/* --- Code block (with gutter, like printed exam) ----------------- */
+
+.code-block {
+  margin: 0;
+  padding: 12px 0;
+  background: #fbfcfd;
+  border: 1px solid var(--comp110-gray-200);
+  border-radius: 6px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-x: auto;
+}
+
+.code-line {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: baseline;
+}
+
+.code-line-hl {
+  background: rgba(170, 233, 197, 0.45);
+}
+
+.code-gutter {
+  user-select: none;
+  text-align: right;
+  padding-right: 12px;
+  color: var(--comp110-gray-500);
+  font-size: 11.5px;
+  border-right: 1px solid var(--comp110-gray-200);
+}
+
+.code-content {
+  padding-left: 14px;
+  white-space: pre;
+  color: var(--comp110-gray-900);
+}
+
+/* --- Answer area & shared widgets -------------------------------- */
+
+.answer-area { margin-top: 4px; }
+
+/* MCQ */
+
+.mcq {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 580px;
+}
+
+.mcq-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid var(--comp110-gray-200);
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--comp110-gray-900);
+  text-align: left;
+  cursor: pointer;
+  transition: background 100ms, border-color 100ms;
+}
+.mcq-row:hover:not(:disabled) {
+  background: var(--comp110-gray-50);
+  border-color: var(--comp110-gray-300);
+}
+.mcq-row:disabled { cursor: default; }
+
+.mcq-row-selected {
+  border-color: var(--comp110-teal);
+  background: rgba(170, 233, 197, 0.18);
+}
+.mcq-row-correct {
+  border-color: #38a169;
+  background: rgba(56, 161, 105, 0.10);
+}
+.mcq-row-wrong {
+  border-color: var(--comp110-error);
+  background: var(--comp110-error-bg);
+}
+.mcq-row-faded { opacity: 0.55; }
+
+.mcq-bubble {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--comp110-gray-500);
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: #ffffff;
+  transition: background 80ms, border-color 80ms;
+}
+.mcq-bubble.filled {
+  background: var(--comp110-gray-900);
+  border-color: var(--comp110-gray-900);
+}
+.mcq-row-correct .mcq-bubble.filled,
+.mcq-row-correct .mcq-bubble {
+  background: #38a169;
+  border-color: #38a169;
+}
+.mcq-row-wrong .mcq-bubble.filled {
+  background: var(--comp110-error);
+  border-color: var(--comp110-error);
+}
+
+.mcq-label {
+  font-family: inherit;
+  white-space: pre-wrap;
+}
+
+/* Evaluate */
+
+.evaluate {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  max-width: 720px;
+}
+
+.evaluate-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.evaluate-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--comp110-gray-500);
+}
+
+.evaluate-input {
+  padding: 10px 12px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  border: 1px solid var(--comp110-gray-300);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--comp110-gray-900);
+}
+.evaluate-input:focus {
+  outline: 2px solid var(--comp110-teal);
+  outline-offset: -1px;
+  border-color: var(--comp110-teal);
+}
+.evaluate-input:disabled {
+  background: var(--comp110-gray-50);
+  color: var(--comp110-gray-700);
+}
+
+.evaluate-type { max-width: 160px; }
+
+/* Identify lines */
+
+.identify {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.identify-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 6px;
+}
+
+.line-bubble {
+  width: 44px; height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--comp110-gray-300);
+  border-radius: 50%;
+  background: #ffffff;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--comp110-gray-700);
+  cursor: pointer;
+  transition: background 100ms, border-color 100ms, color 100ms;
+}
+.line-bubble:hover:not(:disabled) {
+  border-color: var(--comp110-teal);
+}
+.line-bubble:disabled { cursor: default; }
+.line-bubble-selected {
+  background: var(--comp110-gray-900);
+  border-color: var(--comp110-gray-900);
+  color: #ffffff;
+}
+.line-bubble-correct {
+  background: #38a169;
+  border-color: #38a169;
+  color: #ffffff;
+}
+.line-bubble-missed {
+  background: rgba(56, 161, 105, 0.15);
+  border-color: #38a169;
+  color: #38a169;
+}
+.line-bubble-wrong {
+  background: var(--comp110-error-bg);
+  border-color: var(--comp110-error);
+  color: var(--comp110-error);
+}
+
+/* Write code */
+
+.write-code {
+  border: 1px solid var(--comp110-gray-300);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+/* Memory diagram */
+
+.md-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.md-output-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.md-output-input {
+  padding: 10px 12px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  border: 1px solid var(--comp110-gray-300);
+  border-radius: 6px;
+  resize: vertical;
+  background: #ffffff;
+  color: var(--comp110-gray-900);
+}
+.md-output-input:focus {
+  outline: 2px solid var(--comp110-teal);
+  outline-offset: -1px;
+  border-color: var(--comp110-teal);
+}
+
+.md-reveal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--comp110-gray-300);
+}
+.md-reveal-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.md-expected {
+  margin: 0;
+  padding: 8px 14px;
+  background: var(--comp110-mint);
+  border-radius: 6px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  color: var(--comp110-gray-900);
+  border: 1px solid var(--comp110-teal);
+}
+
+.md-canvas-wrap {
+  border: 1px solid var(--comp110-gray-200);
+  border-radius: 6px;
+  overflow: hidden;
+  /* DiagramCanvas autosizes; constrain so it doesn't dwarf the page. */
+  max-height: 520px;
+  overflow-y: auto;
+}
+
+/* --- Controls ----------------------------------------------------- */
+
+.question-controls {
+  display: flex;
+  gap: 10px;
+  padding-top: 6px;
+  border-top: 1px solid var(--comp110-gray-200);
+  margin-top: 6px;
+}
+
+.quiz-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms, border-color 120ms, color 120ms;
+}
+
+.quiz-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.quiz-btn.primary {
+  border: 1px solid var(--comp110-teal);
+  background: var(--comp110-teal);
+  color: #ffffff;
+}
+.quiz-btn.primary:hover:not(:disabled) { background: var(--comp110-teal-dark); }
+
+.quiz-btn.ghost {
+  border: 1px solid var(--comp110-gray-300);
+  background: #ffffff;
+  color: var(--comp110-gray-700);
+}
+.quiz-btn.ghost:hover:not(:disabled) {
+  background: var(--comp110-gray-50);
+  border-color: var(--comp110-gray-500);
+}
+
+/* --- Result card -------------------------------------------------- */
+
+.result-card {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.result-correct {
+  background: rgba(56, 161, 105, 0.08);
+  border: 1px solid #38a169;
+}
+.result-wrong {
+  background: var(--comp110-error-bg);
+  border: 1px solid var(--comp110-error);
+}
+
+.result-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.result-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  font-weight: 800;
+  font-size: 16px;
+}
+.result-correct .result-icon { background: #38a169; color: #ffffff; }
+.result-wrong .result-icon { background: var(--comp110-error); color: #ffffff; }
+
+.result-score {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--comp110-gray-900);
+}
+
+.result-hint {
+  color: var(--comp110-gray-700);
+  flex: 1;
+  min-width: 0;
+}
+
+.result-partial,
+.result-validators ul {
+  list-style: disc;
+  padding-left: 22px;
+  margin: 0;
+  color: var(--comp110-gray-700);
+}
+
+.result-validators summary,
+.result-sample summary,
+.result-rubric summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--comp110-gray-700);
+  padding: 4px 0;
+}
+
+.result-validators[open] summary,
+.result-sample[open] summary,
+.result-rubric[open] summary {
+  margin-bottom: 6px;
+}
+
+.result-explain {
+  color: var(--comp110-gray-700);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.result-explain code {
+  background: var(--comp110-gray-50);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.rubric-deduction {
+  font-family: 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+  color: var(--comp110-error);
+  font-size: 12px;
+  font-weight: 700;
+  margin-left: 4px;
+}
+
+/* --- Responsive --------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .quiz-practice {
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+  .topic-sidebar {
+    position: static;
+  }
+  .question-pane { padding: 18px; }
+  .evaluate { flex-direction: column; }
+}

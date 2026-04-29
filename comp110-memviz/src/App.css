@@ -44,9 +44,40 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 16px;
   padding: 14px 24px;
   background: linear-gradient(180deg, var(--comp110-mint) 0%, #c7f0d9 100%);
   border-bottom: 3px solid var(--comp110-teal);
+}
+
+/* App-mode toggle (Memory Diagram Tool ↔ Quiz Practice) sits centered
+   in the header so neither mode feels primary. Uses a slightly heavier
+   pill than the per-section view-toggle so it reads as a top-level nav. */
+.mode-toggle {
+  display: inline-flex;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid var(--comp110-teal);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+  font-family: 'Cabin', sans-serif;
+}
+.mode-tab {
+  padding: 7px 16px;
+  border: none;
+  background: transparent;
+  color: var(--comp110-teal-dark);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 100ms, color 100ms;
+}
+.mode-tab:hover { background: rgba(255, 255, 255, 0.55); }
+.mode-tab.active {
+  background: var(--comp110-teal);
+  color: #ffffff;
 }
 
 .brand { display: flex; flex-direction: column; gap: 2px; }
