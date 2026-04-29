@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { python } from '@codemirror/lang-python'
 import { DiagramCanvas } from '../DiagramCanvas'
@@ -36,16 +36,27 @@ const TOPIC_ORDER: Topic[] = [
   'memory-diagrams',
 ]
 
-// --- Helpers ------------------------------------------------------------
+// 'mistakes' is a virtual topic — it's not in TOPIC_ORDER. Selecting it
+// reroutes topicQuestions to the localStorage-backed wrong-answer set
+// instead of filtering QUIZ_BANK by topic.
+type TopicSelection = Topic | 'mistakes'
 
-// Snake_case "QZ00 Q1.1" → display "1.1" — strips the QZ prefix so the
-// quiz feels like a self-contained drill, not a reprint.
-function shortLabel(source: string | undefined, fallbackIdx: number): string {
-  if (!source) return `${fallbackIdx + 1}`
-  const m = /Q(\d+)(?:\.(\d+))?/.exec(source)
-  if (!m) return source
-  return m[2] ? `${m[1]}.${m[2]}` : `${m[1]}`
+const MISTAKES_STORAGE_KEY = 'comp110-quiz-practice-mistakes-v1'
+
+function loadMistakes(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = window.localStorage.getItem(MISTAKES_STORAGE_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed.filter((x): x is string => typeof x === 'string'))
+  } catch {
+    return new Set()
+  }
 }
+
+// --- Helpers ------------------------------------------------------------
 
 // Render code with 1-indexed line numbers, gutter style. Used by the
 // question-card preview.
@@ -468,14 +479,27 @@ type GradeResult = {
 // --- Main component -----------------------------------------------------
 
 export function QuizPractice() {
-  const [topic, setTopic] = useState<Topic>('types-expressions')
+  const [topic, setTopic] = useState<TopicSelection>('types-expressions')
   const [questionIdx, setQuestionIdx] = useState(0)
   // States and submission tracking are keyed by question id so switching
   // topics back and forth doesn't wipe in-progress answers.
   const [states, setStates] = useState<Record<string, QState>>({})
   const [submitted, setSubmitted] = useState<Record<string, GradeResult>>({})
+  // Mistakes set persists across page reloads so the user can build up a
+  // "wrong-answers booklet" over time. Add on wrong submit, drop on
+  // correct re-submit.
+  const [mistakes, setMistakes] = useState<Set<string>>(loadMistakes)
 
-  const topicQuestions = useMemo(() => QUIZ_BANK.filter((q) => q.topic === topic), [topic])
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    window.localStorage.setItem(MISTAKES_STORAGE_KEY, JSON.stringify([...mistakes]))
+  }, [mistakes])
+
+  const topicQuestions = useMemo(() => {
+    if (topic === 'mistakes') return QUIZ_BANK.filter((q) => mistakes.has(q.id))
+    return QUIZ_BANK.filter((q) => q.topic === topic)
+  }, [topic, mistakes])
+
   const counts = useMemo(() => {
     const out: Record<Topic, number> = {} as Record<Topic, number>
     for (const t of TOPIC_ORDER) out[t] = 0
@@ -514,11 +538,17 @@ export function QuizPractice() {
         break
     }
     setSubmitted((prev) => ({ ...prev, [q.id]: g }))
+    setMistakes((prev) => {
+      const next = new Set(prev)
+      if (g.correct) next.delete(q.id)
+      else next.add(q.id)
+      return next
+    })
   }
 
   const handleNext = () => setQuestionIdx((i) => Math.min(i + 1, topicQuestions.length - 1))
   const handlePrev = () => setQuestionIdx((i) => Math.max(i - 1, 0))
-  const handleSwitchTopic = (t: Topic) => {
+  const handleSwitchTopic = (t: TopicSelection) => {
     setTopic(t)
     setQuestionIdx(0)
   }
@@ -528,6 +558,16 @@ export function QuizPractice() {
       <aside className="topic-sidebar">
         <div className="topic-sidebar-title">Topics</div>
         <ul>
+          <li key="mistakes">
+            <button
+              type="button"
+              className={`topic-row topic-row-mistakes${topic === 'mistakes' ? ' active' : ''}`}
+              onClick={() => handleSwitchTopic('mistakes')}
+            >
+              <span className="topic-row-label">★ Mistakes</span>
+              <span className="topic-row-count">{mistakes.size}</span>
+            </button>
+          </li>
           {TOPIC_ORDER.map((t) => {
             const meta = TOPIC_META[t]
             const isActive = t === topic
@@ -556,9 +596,8 @@ export function QuizPractice() {
             <div className="question-header">
               <div className="question-meta">
                 <span className="question-number">
-                  Question {shortLabel(q.source, questionIdx)}
+                  Question {questionIdx + 1}
                 </span>
-                {q.source && <span className="question-source">{q.source}</span>}
               </div>
               <div className="question-progress">
                 {questionIdx + 1} / {topicQuestions.length}
@@ -723,7 +762,11 @@ export function QuizPractice() {
             )}
           </>
         ) : (
-          <div className="question-empty">No questions in this topic yet.</div>
+          <div className="question-empty">
+            {topic === 'mistakes'
+              ? 'No mistakes yet — answer some questions and any you miss will collect here.'
+              : 'No questions in this topic yet.'}
+          </div>
         )}
       </section>
     </div>

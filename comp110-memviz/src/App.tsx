@@ -129,7 +129,7 @@ function App() {
             <span className="brand-tag">
               {mode === 'tool'
                 ? 'v0 ruleset · Python + C — colored step timeline, auto speed, stronger step labels'
-                : 'Quiz Practice — knowledge-organized drills from QZ00–QZ04'}
+                : 'Quiz Practice — knowledge-organized concept drills with self-grading'}
             </span>
           </div>
           <div className="mode-toggle" role="tablist" aria-label="App mode">

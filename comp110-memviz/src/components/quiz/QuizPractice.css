@@ -70,6 +70,26 @@
   border-color: var(--comp110-teal);
 }
 
+/* Mistakes is the only "virtual topic" — visually pinned at the top
+   with a soft amber accent so the user knows it's a separate kind of
+   list (review queue, not a concept). */
+.topic-row-mistakes {
+  background: var(--comp110-warn-bg);
+  border-color: rgba(214, 158, 46, 0.4);
+  color: #744210;
+  margin-bottom: 6px;
+}
+.topic-row-mistakes:hover {
+  background: #fff3c8;
+  border-color: var(--comp110-warn);
+}
+.topic-row-mistakes.active {
+  background: var(--comp110-warn);
+  color: #ffffff;
+  border-color: var(--comp110-warn);
+}
+.topic-row-mistakes.active .topic-row-count { color: #ffffff; }
+
 .topic-row-label { min-width: 0; flex: 1; }
 
 .topic-row-count {
@@ -90,7 +110,11 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  min-height: 480px;
+  /* Pin to viewport (minus header + footer + padding ≈ 220px) so
+     switching between MCQ/Identify/WriteCode doesn't bounce the page.
+     Memory Diagram questions still grow past this after reveal — that's
+     expected since the canvas needs the room. */
+  min-height: calc(100vh - 220px);
 }
 
 .question-header {
